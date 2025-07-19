@@ -16,6 +16,7 @@ See HyprGUI's [releases page](https://github.com/MarkusVolk/hyprgui/releases) fo
 
 ### Arch Linux
 **Currently unavailable**
+
 There are 2 different [AUR](https://aur.archlinux.org) packages available:
 
 - [hyprgui](https://aur.archlinux.org/packages/hyprgui) - Latest release built from source
