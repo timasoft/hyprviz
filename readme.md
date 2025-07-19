@@ -1,8 +1,8 @@
 <div align='center'>
 
-<h2>HyprGUI <img src='https://raw.githubusercontent.com/hyprutils/.github/refs/heads/main/hyprutils_transparent.png'width='18' height='18'></h2>
+<h2>HyprViz</h2>
 
-An unofficial GUI for configuring Hyprland, built with GTK4 and Rust. 🚀🦀<br>
+**Fork** of HyprGUI — an unofficial GUI for configuring Hyprland, built with GTK4 and Rust. 🚀🦀<br>
 Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprland's configuration file. (Rust btw) 🦀
 
 ![Preview](.github/preview.png)
@@ -54,5 +54,3 @@ paru -S <package>
 - [Vaxry](https://github.com/vaxerski) - Hyprland
 - [rust-gtk](https://github.com/gtk-rs/gtk4-rs) - The GTK4 library
 - [Hyprland](https://github.com/hyprwm/Hyprland) - The window manager
-
-<h6 align='center'>Copyright (C) 2025 HyprUtils<h6>
