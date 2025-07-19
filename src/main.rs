@@ -8,7 +8,7 @@ const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 const BACKUP_SUFFIX: &str = "-bak";
 
 fn main() {
-    let app = Application::builder().application_id("hyprgui").build();
+    let app = Application::builder().application_id("hyprviz").build();
 
     app.connect_activate(build_ui);
     app.run();
@@ -57,7 +57,7 @@ fn build_ui(app: &Application) {
         let gui_clone = gui.clone();
         copy_button.connect_clicked(move |_| {
             gui_clone.borrow_mut().custom_info_popup(
-                "Copyright (C) 2024 HyprUtils",
+                "idk what to put here",
                 "This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 as published by the Free Software Foundation, version 2 of

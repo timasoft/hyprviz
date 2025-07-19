@@ -11,16 +11,14 @@ Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprla
 
 ## Installation
 
-### GitHub Releases
-See HyprGUI's [releases page](https://github.com/MarkusVolk/hyprgui/releases) for downloadable binaries.
-
 ### Arch Linux
 **Currently unavailable**
 
 There are 2 different [AUR](https://aur.archlinux.org) packages available:
 
-- [hyprgui](https://aur.archlinux.org/packages/hyprgui) - Latest release built from source
-- [hyprgui-bin](https://aur.archlinux.org/packages/hyprgui-bin) - Latest release in binary form
+- [hyprviz](https://aur.archlinux.org/packages/hyprviz) - Latest release built from source
+- [hyprviz-git](https://aur.archlinux.org/packages/hyprviz-git) - Latest development version built from source
+- [hyprviz-bin](https://aur.archlinux.org/packages/hyprviz-bin) - Latest release in binary form
 
 Install the preferred package with:
 ```bash
@@ -38,12 +36,10 @@ paru -S <package>
 1. Install Rust (preferably `rustup`) through your distro's package or [the official script](https://www.rust-lang.org/tools/install)
 2. Install `git`, `pango` and `gtk4`
 3. Clone this repository:
-`git clone https://github.com/MarkusVolk/hyprgui && cd hyprgui`
+`git clone https://github.com/timasoft/hyprviz.git && cd hyprviz`
 4. Compile the app with `cargo build --release` or run it directly with `cargo run --release`
 
 ## TODO:
-- [x] Implement GUI
-- [x] Implement parser
 - [x] Improve the readme
 - [ ] Improve parser
 - [ ] Improve GUI

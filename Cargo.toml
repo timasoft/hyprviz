@@ -1,7 +1,7 @@
 [package]
-name = "hyprgui"
-version = "0.1.4"
-authors = ["Nyx <nnyyxxxx@protonmail.com>", "Adam Perkowski <adas1per@protonmail.com>"]
+name = "hyprviz"
+version = "0.1.0"
+authors = ["timasoft <tima.klester@yandex.ru>", "Nyx <nnyyxxxx@protonmail.com>", "Adam Perkowski <adas1per@protonmail.com>"]
 license = "GPL-2.0"
 description = "GUI for configuring Hyprland!"
 repository = "https://github.com/MarkusVolk/hyprlandgui.git"
