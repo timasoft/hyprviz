@@ -2056,6 +2056,13 @@ impl ConfigWidget {
                     "Allow Session Lock Restore",
                     "if true, will allow you to restart a lockscreen app in case it crashes (red screen of death)",
                 );
+                Self::add_bool_option(
+                    &container,
+                    &mut options,
+                    "session_lock_xray",
+                    "Session Lock Xray",
+                    "if true, keep rendering workspaces below your lockscreen",
+                );
                 Self::add_color_option(
                     &container,
                     &mut options,
