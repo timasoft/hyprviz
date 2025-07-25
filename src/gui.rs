@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::collections::VecDeque;
 
 fn add_dropdown_option(
     container: &Box,
@@ -3253,10 +3254,10 @@ impl ConfigWidget {
         }
     }
 
-    fn extract_value(&self, config: &HyprlandConfig, _category: &str, name: &str) -> String {
-        let config_str = config.to_string();
+    fn extract_value(&self, config: &HyprlandConfig, category: &str, name: &str) -> String {
+        let config_str = self.transform_config(config.to_string());
         for line in config_str.lines() {
-            if line.trim().starts_with(&format!("{} = ", name)) {
+            if line.trim().starts_with(&format!("{}:{} = ", category, name)) {
                 return line
                     .split('=')
                     .nth(1)
@@ -3266,4 +3267,31 @@ impl ConfigWidget {
         }
         String::new()
     }
+
+    // transform from general{snap{enabled = true}} to general:snap:enabled = true
+    fn transform_config(&self, input: String) -> String {
+        let mut result = Vec::new();
+        let mut path = VecDeque::new();
+
+        for line in input.lines() {
+            let line = line.trim();
+            if line.ends_with('{') {
+                // start of the block
+                let key = line.trim_end_matches('{').trim();
+                path.push_back(key.to_string());
+            } else if line == "}" {
+                // end of the block
+                path.pop_back();
+            } else if line.contains('=') {
+                let mut parts = line.splitn(2, '=');
+                let key = parts.next().unwrap().trim();
+                let value = parts.next().unwrap().trim();
+                let prefix = path.iter().cloned().collect::<Vec<_>>().join(":");
+                let full_key = format!("{}:{}", prefix, key);
+                result.push(format!("{} = {}", full_key, value));
+            }
+        }
+
+        result.join("\n")
+    } 
 }
