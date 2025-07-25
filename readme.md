@@ -40,12 +40,11 @@ paru -S <package>
 4. Compile the app with `cargo build --release` or run it directly with `cargo run --release`
 
 ## TODO:
-- [x] Improve the readme
-- [ ] Improve parser
+- [x] Improve value parser
 - [ ] Improve GUI
 
 ## Credits:
-- [Nyx](https://github.com/MarkusVolk) - Implementing the parser, rest of the GUI, and maintaining the project
+- [Nyx](https://github.com/MarkusVolk) - Implementing the parser, rest of the GUI, and maintaining the hyprgui project
 - [Adam](https://github.com/adamperkowski) - Implementing the base GUI, maintaining the AUR packages and the project alongside Nyx
 - [Vaxry](https://github.com/vaxerski) - Hyprland
 - [rust-gtk](https://github.com/gtk-rs/gtk4-rs) - The GTK4 library
