@@ -41,6 +41,10 @@ paru -S <package>
 
 ## TODO:
 - [x] Improve value parser
+- [ ] Improve colour options
+- [ ] Add bind section
+- [ ] Add windowrule section
+- [ ] Add other config sections from Hyprland
 - [ ] Improve GUI
 
 ## Credits:
