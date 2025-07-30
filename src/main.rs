@@ -23,7 +23,7 @@ fn build_ui(app: &Application) {
     if !config_path_full.exists() {
         gui.borrow_mut().custom_error_popup_critical(
             "File not found",
-            &format!("File not found: ~/{}", CONFIG_PATH),
+            &format!("File not found: ~/{CONFIG_PATH}"),
             true,
         );
     } else {
@@ -32,7 +32,7 @@ fn build_ui(app: &Application) {
             Err(e) => {
                 gui.borrow_mut().custom_error_popup_critical(
                     "Reading failed",
-                    &format!("Failed to read the configuration file: {}", e),
+                    &format!("Failed to read the configuration file: {e}"),
                     true,
                 );
                 String::new()
@@ -98,7 +98,7 @@ fn save_config_file(gui: Rc<RefCell<gui::ConfigGUI>>) {
         Err(e) => {
             gui_ref.custom_error_popup_critical(
                 "Reading failed",
-                &format!("Failed to read the configuration file: {}", e),
+                &format!("Failed to read the configuration file: {e}"),
                 true,
             );
             return;
@@ -113,7 +113,7 @@ fn save_config_file(gui: Rc<RefCell<gui::ConfigGUI>>) {
             if let Err(e) = fs::copy(&path, &backup_path) {
                 gui_ref.custom_error_popup(
                     "Backup failed",
-                    &format!("Failed to create backup: {}", e),
+                    &format!("Failed to create backup: {e}"),
                     true,
                 );
                 return;
@@ -125,11 +125,11 @@ fn save_config_file(gui: Rc<RefCell<gui::ConfigGUI>>) {
         let updated_config_str = parsed_config.to_string();
 
         match fs::write(&path, updated_config_str) {
-            Ok(_) => println!("Configuration saved to: ~/{}", CONFIG_PATH),
+            Ok(_) => println!("Configuration saved to: ~/{CONFIG_PATH}"),
             Err(e) => {
                 gui_ref.custom_error_popup(
                     "Saving failed",
-                    &format!("Failed to save the configuration: {}", e),
+                    &format!("Failed to save the configuration: {e}"),
                     true,
                 );
             }
@@ -161,7 +161,7 @@ fn undo_changes(gui: Rc<RefCell<gui::ConfigGUI>>) {
                     if let Err(e) = fs::remove_file(&backup_path) {
                         gui_ref.custom_error_popup(
                             "Backup Deletion Failed",
-                            &format!("Failed to delete the backup file: {}", e),
+                            &format!("Failed to delete the backup file: {e}"),
                             true,
                         );
                     } else {
@@ -182,7 +182,7 @@ fn undo_changes(gui: Rc<RefCell<gui::ConfigGUI>>) {
             Err(e) => {
                 gui_ref.custom_error_popup(
                     "Undo Failed",
-                    &format!("Failed to restore from backup: {}", e),
+                    &format!("Failed to restore from backup: {e}"),
                     true,
                 );
             }

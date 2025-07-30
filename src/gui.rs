@@ -251,7 +251,7 @@ impl ConfigGUI {
             Err(e) => {
                 self.custom_error_popup(
                     "Loading Failed",
-                    &format!("Failed to read the configuration file: {}", e),
+                    &format!("Failed to read the configuration file: {e}"),
                     false,
                 );
             }
@@ -263,7 +263,7 @@ impl ConfigGUI {
             .changed_options
             .borrow()
             .iter()
-            .map(|((category, name), value)| (format!("{}:{}", category, name), value.clone()))
+            .map(|((category, name), value)| (format!("{category}:{name}"), value.clone()))
             .collect();
 
         match serde_json::to_string_pretty(&config) {
@@ -278,7 +278,7 @@ impl ConfigGUI {
                 Err(e) => {
                     self.custom_error_popup(
                         "Saving Failed",
-                        &format!("Failed to write the configuration file: {}", e),
+                        &format!("Failed to write the configuration file: {e}"),
                         false,
                     );
                 }
@@ -286,7 +286,7 @@ impl ConfigGUI {
             Err(e) => {
                 self.custom_error_popup(
                     "Serialization Failed",
-                    &format!("Failed to serialize the configuration: {}", e),
+                    &format!("Failed to serialize the configuration: {e}"),
                     false,
                 );
             }
@@ -462,7 +462,7 @@ impl ConfigGUI {
                                 );
                             }
                         } else {
-                            config.add_entry(category, &format!("{} = {}", name, formatted_value));
+                            config.add_entry(category, &format!("{name} = {formatted_value}"));
                         }
                     }
                 }
@@ -2826,8 +2826,8 @@ impl ConfigWidget {
             _ => {
                 Self::add_section(
                     &container,
-                    &format!("{} Settings", category),
-                    &format!("Configure {} behavior.", category),
+                    &format!("{category} Settings"),
+                    &format!("Configure {category} behavior."),
                     first_section.clone(),
                 );
             }
@@ -2863,7 +2863,7 @@ impl ConfigWidget {
             desc_label.set_halign(gtk::Align::Start);
         }
 
-        title_label.set_markup(&format!("<b>{}</b>", title));
+        title_label.set_markup(&format!("<b>{title}</b>"));
         section_box.append(&title_label);
 
         desc_label.set_opacity(0.7);
@@ -3233,10 +3233,7 @@ impl ConfigWidget {
     fn extract_value(&self, config: &HyprlandConfig, category: &str, name: &str) -> String {
         let config_str = self.transform_config(config.to_string());
         for line in config_str.lines() {
-            if line
-                .trim()
-                .starts_with(&format!("{}:{} = ", category, name))
-            {
+            if line.trim().starts_with(&format!("{category}:{name} = ")) {
                 return line
                     .split('=')
                     .nth(1)
@@ -3266,8 +3263,8 @@ impl ConfigWidget {
                 let key = parts.next().unwrap().trim();
                 let value = parts.next().unwrap().trim();
                 let prefix = path.iter().cloned().collect::<Vec<_>>().join(":");
-                let full_key = format!("{}:{}", prefix, key);
-                result.push(format!("{} = {}", full_key, value));
+                let full_key = format!("{prefix}:{key}");
+                result.push(format!("{full_key} = {value}"));
             }
         }
 
