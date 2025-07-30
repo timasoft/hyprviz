@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Application, Button};
+use gtk::{Application, Button, prelude::*};
 use hyprparser::parse_config;
 use std::{cell::RefCell, env, fs, path::Path, path::PathBuf, rc::Rc};
 

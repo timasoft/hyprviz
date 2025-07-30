@@ -1,16 +1,17 @@
 use gtk::{
-    gdk, glib, prelude::*, Application, ApplicationWindow, Box, Button, ColorButton, DropDown,
-    Entry, Frame, HeaderBar, Image, Label, MessageDialog, Orientation, Popover, ScrolledWindow,
-    SpinButton, Stack, StackSidebar, StringList, Switch, Widget,
+    AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton,
+    DropDown, Entry, FileDialog, Frame, HeaderBar, Image, Label, Orientation, Popover,
+    ScrolledWindow, SpinButton, Stack, StackSidebar, StringList, Switch, Widget, gdk, glib,
+    prelude::*,
 };
 
 use hyprparser::HyprlandConfig;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::collections::VecDeque;
 
 fn add_dropdown_option(
     container: &Box,
@@ -105,8 +106,8 @@ impl ConfigGUI {
         gear_menu_box.set_margin_start(5);
         gear_menu_box.set_margin_end(5);
 
-        let save_config_button = Button::with_label("Save HyprGUI Config");
-        let load_config_button = Button::with_label("Load HyprGUI Config");
+        let save_config_button = Button::with_label("Save HyprViz Config");
+        let load_config_button = Button::with_label("Load HyprViz Config");
 
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
@@ -175,57 +176,44 @@ impl ConfigGUI {
     }
 
     pub fn setup_config_buttons(gui: Rc<RefCell<ConfigGUI>>) {
-        let gui_clone = Rc::clone(&gui);
-        gui.borrow().load_config_button.connect_clicked(move |_| {
-            let gui = Rc::clone(&gui_clone);
-            glib::MainContext::default().spawn_local(async move {
-                let file_chooser = gtk::FileChooserDialog::new(
-                    Some("Load HyprGUI Config"),
-                    Some(&gui.borrow().window),
-                    gtk::FileChooserAction::Open,
-                    &[
-                        ("Cancel", gtk::ResponseType::Cancel),
-                        ("Open", gtk::ResponseType::Accept),
-                    ],
-                );
+        {
+            let gui_clone = Rc::clone(&gui);
+            gui.borrow().load_config_button.connect_clicked(move |_| {
+                let gui = Rc::clone(&gui_clone);
+                glib::MainContext::default().spawn_local(async move {
+                    let dialog = FileDialog::builder()
+                        .title("Load HyprViz Config")
+                        .accept_label("Open")
+                        .build();
 
-                if file_chooser.run_future().await == gtk::ResponseType::Accept {
-                    if let Some(file) = file_chooser.file() {
+                    if let Ok(file) = dialog.open_future(Some(&gui.borrow().window)).await {
                         if let Some(path) = file.path() {
                             gui.borrow_mut().load_hyprviz_config(&path);
                         }
                     }
-                }
-                file_chooser.close();
+                });
             });
-        });
+        }
 
-        let gui_clone = Rc::clone(&gui);
-        gui.borrow().save_config_button.connect_clicked(move |_| {
-            let gui = Rc::clone(&gui_clone);
-            glib::MainContext::default().spawn_local(async move {
-                let file_chooser = gtk::FileChooserDialog::new(
-                    Some("Save HyprGUI Config"),
-                    Some(&gui.borrow().window),
-                    gtk::FileChooserAction::Save,
-                    &[
-                        ("Cancel", gtk::ResponseType::Cancel),
-                        ("Save", gtk::ResponseType::Accept),
-                    ],
-                );
+        {
+            let gui_clone = Rc::clone(&gui);
+            gui.borrow().save_config_button.connect_clicked(move |_| {
+                let gui = Rc::clone(&gui_clone);
+                glib::MainContext::default().spawn_local(async move {
+                    let dialog = FileDialog::builder()
+                        .title("Save HyprViz Config")
+                        .initial_name("hyprviz_config.json")
+                        .accept_label("Save")
+                        .build();
 
-                file_chooser.set_current_name("hyprviz_config.json");
-
-                if file_chooser.run_future().await == gtk::ResponseType::Accept {
-                    if let Some(file) = file_chooser.file() {
+                    if let Ok(file) = dialog.save_future(Some(&gui.borrow().window)).await {
                         if let Some(path) = file.path() {
                             gui.borrow_mut().save_hyprviz_config(&path);
                         }
                     }
-                }
-                file_chooser.close();
+                });
             });
-        });
+        }
     }
 
     fn load_hyprviz_config(&mut self, path: &PathBuf) {
@@ -249,7 +237,7 @@ impl ConfigGUI {
                     }
                     self.custom_info_popup(
                         "Config Loaded",
-                        "HyprGUI configuration loaded successfully.",
+                        "HyprViz configuration loaded successfully.",
                         false,
                     );
                 } else {
@@ -283,7 +271,7 @@ impl ConfigGUI {
                 Ok(_) => {
                     self.custom_info_popup(
                         "Config Saved",
-                        "HyprGUI configuration saved successfully.",
+                        "HyprViz configuration saved successfully.",
                         false,
                     );
                 }
@@ -313,8 +301,8 @@ impl ConfigGUI {
         } else if let Some(entry) = widget.downcast_ref::<Entry>() {
             entry.set_text(value);
         } else if let Some(switch) = widget.downcast_ref::<Switch>() {
-            switch.set_active(value == "true");
-        } else if let Some(color_button) = widget.downcast_ref::<ColorButton>() {
+            switch.set_active(value == "true" || value == "1");
+        } else if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
             let dummy_config = HyprlandConfig::new();
             if let Some((red, green, blue, alpha)) = dummy_config.parse_color(value) {
                 color_button.set_rgba(&gdk::RGBA::new(red, green, blue, alpha));
@@ -335,51 +323,39 @@ impl ConfigGUI {
     }
 
     pub fn custom_info_popup(&mut self, title: &str, text: &str, modal: bool) {
-        let dialog = MessageDialog::builder()
-            .message_type(gtk::MessageType::Info)
-            .buttons(gtk::ButtonsType::Ok)
-            .title(title)
-            .text(text)
+        let dialog = AlertDialog::builder()
+            .message(title)
+            .detail(text)
+            .buttons(&["OK"][..])
             .modal(modal)
             .build();
-
-        dialog.connect_response(|dialog, _| {
-            dialog.close();
-        });
-
-        dialog.show();
+        dialog.show(None::<&gtk::Window>);
     }
 
     pub fn custom_error_popup(&mut self, title: &str, text: &str, modal: bool) {
-        let dialog = MessageDialog::builder()
-            .message_type(gtk::MessageType::Error)
-            .buttons(gtk::ButtonsType::Ok)
-            .title(title)
-            .text(text)
+        let dialog = AlertDialog::builder()
+            .message(title)
+            .detail(text)
+            .buttons(&["OK"][..])
             .modal(modal)
             .build();
-
-        dialog.connect_response(|dialog, _| {
-            dialog.close();
-        });
-
-        dialog.show();
+        dialog.show(None::<&gtk::Window>);
     }
 
     pub fn custom_error_popup_critical(&mut self, title: &str, text: &str, modal: bool) {
-        let dialog = MessageDialog::builder()
-            .message_type(gtk::MessageType::Error)
-            .buttons(gtk::ButtonsType::Ok)
-            .title(title)
-            .text(text)
+        let dialog = AlertDialog::builder()
+            .message(title)
+            .detail(text)
+            .buttons(&["OK"][..])
             .modal(modal)
             .build();
-
-        dialog.connect_response(|_, _| {
-            std::process::exit(1);
-        });
-
-        dialog.show();
+        dialog.choose(
+            None::<&gtk::Window>,
+            None::<&gio::Cancellable>,
+            move |_res: Result<i32, _>| {
+                std::process::exit(1);
+            },
+        );
     }
 
     pub fn load_config(&mut self, config: &HyprlandConfig) {
@@ -455,7 +431,7 @@ impl ConfigGUI {
             for (name, widget) in &widget.options {
                 if let Some(value) = changes.get(&(category.to_string(), name.to_string())) {
                     let formatted_value =
-                        if let Some(color_button) = widget.downcast_ref::<ColorButton>() {
+                        if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
                             let rgba = color_button.rgba();
                             format!(
                                 "rgba({:02X}{:02X}{:02X}{:02X})",
@@ -762,7 +738,7 @@ impl ConfigWidget {
                     &mut options,
                     "allow_tearing",
                     "Allow Tearing",
-                    "master switch for allowing tearing to occur. See the Hyprland's Tearing page."
+                    "master switch for allowing tearing to occur. See the Hyprland's Tearing page.",
                 );
 
                 Self::add_section(
@@ -3157,7 +3133,7 @@ impl ConfigWidget {
         label_box.append(&label_widget);
         label_box.append(&tooltip_button);
 
-        let color_button = ColorButton::new();
+        let color_button = ColorDialogButton::new(Some(ColorDialog::new()));
         color_button.set_halign(gtk::Align::End);
 
         hbox.append(&label_box);
@@ -3207,14 +3183,14 @@ impl ConfigWidget {
                     let new_value = sw.is_active().to_string();
                     changes.insert((category.clone(), name.clone()), new_value);
                 });
-            } else if let Some(color_button) = widget.downcast_ref::<ColorButton>() {
+            } else if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
                 if let Some((red, green, blue, alpha)) = config.parse_color(&value) {
                     color_button.set_rgba(&gdk::RGBA::new(red, green, blue, alpha));
                 }
                 let category = category.to_string();
                 let name = name.to_string();
                 let changed_options = changed_options.clone();
-                color_button.connect_color_set(move |cb| {
+                color_button.connect_rgba_notify(move |cb| {
                     let mut changes = changed_options.borrow_mut();
                     let new_color = cb.rgba();
                     let new_value = format!(
@@ -3257,7 +3233,10 @@ impl ConfigWidget {
     fn extract_value(&self, config: &HyprlandConfig, category: &str, name: &str) -> String {
         let config_str = self.transform_config(config.to_string());
         for line in config_str.lines() {
-            if line.trim().starts_with(&format!("{}:{} = ", category, name)) {
+            if line
+                .trim()
+                .starts_with(&format!("{}:{} = ", category, name))
+            {
                 return line
                     .split('=')
                     .nth(1)
@@ -3293,5 +3272,5 @@ impl ConfigWidget {
         }
 
         result.join("\n")
-    } 
+    }
 }
