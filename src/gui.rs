@@ -3133,13 +3133,61 @@ impl ConfigWidget {
         label_box.append(&label_widget);
         label_box.append(&tooltip_button);
 
-        let color_button = ColorDialogButton::new(Some(ColorDialog::new()));
+        let color_dialog = ColorDialog::new();
+        color_dialog.set_with_alpha(true);
+        let color_button = ColorDialogButton::new(Some(color_dialog));
         color_button.set_halign(gtk::Align::End);
+
+        let entry = Entry::new();
+        entry.set_max_length(9);
+        entry.set_width_chars(9);
+        entry.set_placeholder_text(Some("#RRGGBBAA"));
+        entry.set_halign(gtk::Align::End);
+
+        {
+            let rgba = color_button.rgba();
+            let r = (rgba.red() * 255.0).round() as u8;
+            let g = (rgba.green() * 255.0).round() as u8;
+            let b = (rgba.blue() * 255.0).round() as u8;
+            let a = (rgba.alpha() * 255.0).round() as u8;
+            let hex = format!("#{r:02X}{g:02X}{b:02X}{a:02X}");
+            entry.set_text(&hex);
+        }
 
         hbox.append(&label_box);
         hbox.append(&color_button);
-
+        hbox.append(&entry);
         container.append(&hbox);
+
+        color_button.connect_rgba_notify(glib::clone!(
+            #[weak]
+            entry,
+            move |btn| {
+                let rgba = btn.rgba();
+                let r = (rgba.red() * 255.0).round() as u8;
+                let g = (rgba.green() * 255.0).round() as u8;
+                let b = (rgba.blue() * 255.0).round() as u8;
+                let a = (rgba.alpha() * 255.0).round() as u8;
+                let hex = format!("#{r:02X}{g:02X}{b:02X}{a:02X}");
+                entry.set_text(&hex);
+            }
+        ));
+
+        entry.connect_changed(glib::clone!(
+            #[weak]                          
+            color_button,
+            #[weak]
+            entry,
+            move |e| {
+                let text = e.text().to_string();
+                if let Ok(color) = gtk::gdk::RGBA::parse(&text) {
+                    color_button.set_rgba(&color);
+                    entry.set_css_classes(&[]);
+                } else {
+                    entry.set_css_classes(&["error"]);
+                }
+            }
+        ));
 
         options.insert(name.to_string(), color_button.upcast());
     }
@@ -3152,7 +3200,7 @@ impl ConfigWidget {
     ) {
         for (name, widget) in &self.options {
             let value = self.extract_value(config, category, name);
-            if let Some(spin_button) = widget.downcast_ref::<gtk::SpinButton>() {
+            if let Some(spin_button) = widget.downcast_ref::<SpinButton>() {
                 let float_value = value.parse::<f64>().unwrap_or(0.0);
                 spin_button.set_value(float_value);
                 let category = category.to_string();
