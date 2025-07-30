@@ -1,6 +1,6 @@
 [package]
 name = "hyprviz"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["timasoft <tima.klester@yandex.ru>", "Nyx <nnyyxxxx@protonmail.com>", "Adam Perkowski <adas1per@protonmail.com>"]
 license = "GPL-2.0"
 description = "GUI for configuring Hyprland!"
@@ -13,10 +13,11 @@ keywords = [
     "config",
 ]
 categories = ["gui"]
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-gtk = { version = "0.9.2", package = "gtk4" }
+gio = "0.21.0"
+gtk = { version = "0.10.0", package = "gtk4", features = ["v4_18"] }
 hyprparser = "0.1.6"
 libc = "0.2"
 serde = { version = "1.0", features = ["derive"] }
