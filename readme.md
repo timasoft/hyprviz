@@ -18,7 +18,7 @@ Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprla
 Install the package with:
 ```bash
 git clone https://aur.archlinux.org/hyprviz-bin.git
-cd <package>
+cd hyprviz-bin
 makepkg -si
 ```
 
