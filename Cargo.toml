@@ -1,6 +1,6 @@
 [package]
 name = "hyprviz"
-version = "0.3.5"
+version = "0.3.6"
 authors = ["timasoft <tima.klester@yandex.ru>", "Nyx <nnyyxxxx@protonmail.com>", "Adam Perkowski <adas1per@protonmail.com>"]
 license = "GPL-2.0"
 description = "GUI for configuring Hyprland!"
@@ -39,6 +39,5 @@ depends = [
 ]
 
 files = [
-    ["hyprviz.desktop", "/usr/share/applications/hyprviz.desktop"],
-    ["LICENSE", "/usr/share/licenses/$pkgname/LICENSE"]
+    ["hyprviz.desktop", "/usr/share/applications/hyprviz.desktop"]
 ]
