@@ -4,7 +4,7 @@ version = "0.3.2"
 authors = ["timasoft <tima.klester@yandex.ru>", "Nyx <nnyyxxxx@protonmail.com>", "Adam Perkowski <adas1per@protonmail.com>"]
 license = "GPL-2.0"
 description = "GUI for configuring Hyprland!"
-repository = "https://github.com/MarkusVolk/hyprlandgui.git"
+repository = "https://github.com/timasoft/hypviz.git"
 readme = "readme.md"
 keywords = [
     "gui",

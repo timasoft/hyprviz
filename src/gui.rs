@@ -3174,7 +3174,7 @@ impl ConfigWidget {
         ));
 
         entry.connect_changed(glib::clone!(
-            #[weak]                          
+            #[weak]
             color_button,
             #[weak]
             entry,
