@@ -2108,7 +2108,7 @@ impl ConfigWidget {
                     &mut options,
                     "lockdead_screen_delay",
                     "Lock Dead Screen Delay",
-                    "delay after which the “lockdead” screen will apear in case a lockscreen app fails to cover all the outputs (5 seconds max)",
+                    "delay after which the “lockdead” screen will appear in case a lockscreen app fails to cover all the outputs (5 seconds max)",
                 );
                 Self::add_bool_option(
                     &container,
