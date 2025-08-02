@@ -23,7 +23,7 @@ jobs:
 
       - name: Generate AUR files
         run: |
-          cargo aur --release --pkgver="${GITHUB_REF#refs/tags/}" \
+          cargo aur \
             && cd target/cargo-aur \
             && makepkg --printsrcinfo > .SRCINFO
 
