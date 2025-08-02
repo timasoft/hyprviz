@@ -1,0 +1,47 @@
+name: 🐧 Publish hyprviz to AUR
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust & cargo-aur
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - run: cargo install cargo-aur
+
+      - name: Generate AUR files
+        run: |
+          cargo aur --release --pkgver="${GITHUB_REF#refs/tags/}" \
+            && cd target/cargo-aur \
+            && makepkg --printsrcinfo > .SRCINFO
+
+      - name: Optional sanity build
+        run: |
+          cd target/cargo-aur \
+          && makepkg --clean --cleanbuild --nodeps
+        continue-on-error: true
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: hyprviz
+          pkgbuild: target/cargo-aur/PKGBUILD
+          commit_username: "${{ secrets.AUR_USERNAME }}"
+          commit_email: "${{ secrets.AUR_EMAIL }}"
+          ssh_private_key: "${{ secrets.AUR_SSH_PRIVATE_KEY }}"
+          commit_message: "Update hyprviz to ${{ github.ref_name }}‑1"
+          updpkgsums: true
+          test: false
+          ssh_keyscan_types: rsa,ecdsa,ed25519
