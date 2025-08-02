@@ -1,12 +1,9 @@
-name: 🐧 Publish hyprviz to AUR
+name: Build and publish AUR on tag
 
 on:
   push:
     tags:
       - 'v*'
-
-permissions:
-  contents: read
 
 jobs:
   build_and_publish:
@@ -14,34 +11,43 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Rust & cargo-aur
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-      - run: cargo install cargo-aur
-
-      - name: Generate AUR files
+      - name: Install dependencies
         run: |
-          cargo aur \
-            && cd target/cargo-aur \
-            && makepkg --printsrcinfo > .SRCINFO
+          sudo apt update
+          sudo apt install -y build-essential
+          sudo apt-get install -y \
+            libpango1.0-dev \
+            libcairo2-dev \
+            libatk1.0-dev \
+            libgtk-4-dev \
+            libsoup2.4-dev
 
-      - name: Optional sanity build
+      - name: Set up dependencies
         run: |
-          cd target/cargo-aur \
-          && makepkg --clean --cleanbuild --nodeps
-        continue-on-error: true
+          export SYSTEM_DEPS_PANGO_NO_PKG_CONFIG="true"
+          export SYSTEM_DEPS_PANGO_LIB="pango-1.0"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo‑aur
+        run: cargo install cargo-aur
+
+      - name: Generate PKGBUILD & .SRCINFO
+        run: |
+          cargo aur
+          cd target/cargo-aur
+          makepkg --printsrcinfo > .SRCINFO
 
       - name: Publish to AUR
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
           pkgname: hyprviz-bin
           pkgbuild: target/cargo-aur/PKGBUILD
-          commit_username: "${{ secrets.AUR_USERNAME }}"
-          commit_email: "${{ secrets.AUR_EMAIL }}"
-          ssh_private_key: "${{ secrets.AUR_SSH_PRIVATE_KEY }}"
-          commit_message: "Update hyprviz to ${{ github.ref_name }}‑1"
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          commit_message: "Update to ${{ github.ref_name }}‑1"
           updpkgsums: true
           test: false
           ssh_keyscan_types: rsa,ecdsa,ed25519
