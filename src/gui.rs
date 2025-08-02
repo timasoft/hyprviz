@@ -231,7 +231,6 @@ impl ConfigGUI {
         }
     }
 
-
     fn load_hyprviz_config(&mut self, path: &PathBuf) {
         match fs::read_to_string(path) {
             Ok(content) => {
