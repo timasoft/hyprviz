@@ -31,7 +31,8 @@ jobs:
             libcairo2-dev \
             libatk1.0-dev \
             libgtk-4-dev \
-            libsoup2.4-dev
+            libsoup2.4-dev \
+            pkg-config
 
       - name: Set up dependencies
         run: |
