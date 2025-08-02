@@ -29,3 +29,16 @@ codegen-units = 1
 panic = "abort"
 strip = true
 opt-level = 3
+
+[package.metadata.aur]
+depends = [
+    "gtk4",
+    "glib2",
+    "desktop-file-utils",
+    "hyprland"
+]
+
+files = [
+    ["hyprviz.desktop", "/usr/share/applications/hyprviz.desktop"],
+    ["LICENSE", "/usr/share/licenses/$pkgname/LICENSE"]
+]
