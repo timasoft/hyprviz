@@ -176,17 +176,25 @@ impl ConfigGUI {
     }
 
     pub fn setup_config_buttons(gui: Rc<RefCell<ConfigGUI>>) {
+        // LOAD CONFIG BUTTON
         {
             let gui_clone = Rc::clone(&gui);
             gui.borrow().load_config_button.connect_clicked(move |_| {
                 let gui = Rc::clone(&gui_clone);
+
+                // Borrow GUI here — it's dropped at the end of this block
+                let window = {
+                    let g = gui.borrow();
+                    g.window.clone()
+                };
+
                 glib::MainContext::default().spawn_local(async move {
                     let dialog = FileDialog::builder()
                         .title("Load HyprViz Config")
                         .accept_label("Open")
                         .build();
 
-                    if let Ok(file) = dialog.open_future(Some(&gui.borrow().window)).await {
+                    if let Ok(file) = dialog.open_future(Some(&window)).await {
                         if let Some(path) = file.path() {
                             gui.borrow_mut().load_hyprviz_config(&path);
                         }
@@ -195,10 +203,17 @@ impl ConfigGUI {
             });
         }
 
+        // SAVE CONFIG BUTTON
         {
             let gui_clone = Rc::clone(&gui);
             gui.borrow().save_config_button.connect_clicked(move |_| {
                 let gui = Rc::clone(&gui_clone);
+
+                let window = {
+                    let g = gui.borrow();
+                    g.window.clone()
+                };
+
                 glib::MainContext::default().spawn_local(async move {
                     let dialog = FileDialog::builder()
                         .title("Save HyprViz Config")
@@ -206,7 +221,7 @@ impl ConfigGUI {
                         .accept_label("Save")
                         .build();
 
-                    if let Ok(file) = dialog.save_future(Some(&gui.borrow().window)).await {
+                    if let Ok(file) = dialog.save_future(Some(&window)).await {
                         if let Some(path) = file.path() {
                             gui.borrow_mut().save_hyprviz_config(&path);
                         }
@@ -215,6 +230,7 @@ impl ConfigGUI {
             });
         }
     }
+
 
     fn load_hyprviz_config(&mut self, path: &PathBuf) {
         match fs::read_to_string(path) {
