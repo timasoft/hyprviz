@@ -38,14 +38,15 @@ paru -S hyprviz-bin
 - [x] Improve value parser
 - [x] Improve colour options
 - [x] Create aur repo
-- [ ] Add default values
+- [x] Add default values
+  - [ ] Fix the issues
 - [ ] Add bind section
 - [ ] Add windowrule section
 - [ ] Add other config sections from Hyprland
 - [ ] Improve GUI
 
 ## Credits:
-- [Nyx](https://github.com/MarkusVolk) - Implementing the parser, rest of the GUI, and maintaining the hyprgui project
+- [Nyx](https://github.com/nnyyxxxx) - Implementing the parser, rest of the GUI, and maintaining the hyprgui project
 - [Adam](https://github.com/adamperkowski) - Implementing the base GUI, maintaining the AUR packages and the project alongside Nyx
 - [Vaxry](https://github.com/vaxerski) - Hyprland
 - [rust-gtk](https://github.com/gtk-rs/gtk4-rs) - The GTK4 library
