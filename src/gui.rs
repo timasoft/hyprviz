@@ -3251,6 +3251,7 @@ impl ConfigWidget {
 
         let title_label = Label::new(Some(title));
         let desc_label = Label::new(Some(description));
+        desc_label.set_wrap(true);
 
         if *first_section.borrow() {
             title_label.set_halign(gtk::Align::Center);
@@ -3659,7 +3660,15 @@ impl ConfigWidget {
                     changes.insert((category.clone(), name.clone()), new_value);
                 });
             } else if let Some(switch) = widget.downcast_ref::<Switch>() {
-                switch.set_active(value == "true");
+                switch.set_active(
+                    [
+                        "true".to_string(),
+                        "1".to_string(),
+                        "on".to_string(),
+                        "yes".to_string(),
+                    ]
+                    .contains(&value),
+                );
                 let category = category.to_string();
                 let name = name.to_string();
                 let changed_options = changed_options.clone();
@@ -3723,6 +3732,17 @@ impl ConfigWidget {
         default: &str,
     ) -> String {
         let config_str = self.transform_config(config.to_string());
+        if category == "layouts" {
+            for line in config_str.lines() {
+                if line.trim().starts_with(&format!("{name} = ")) {
+                    return line
+                        .split('=')
+                        .nth(1)
+                        .map(|s| s.trim().to_string())
+                        .unwrap_or_default();
+                }
+            }
+        }
         for line in config_str.lines() {
             if line.trim().starts_with(&format!("{category}:{name} = ")) {
                 return line
@@ -3741,7 +3761,7 @@ impl ConfigWidget {
         let mut path = VecDeque::new();
 
         for line in input.lines() {
-            let line = line.trim();
+            let line = line.split('#').next().unwrap_or_default().trim();
             if line.ends_with('{') {
                 // start of the block
                 let key = line.trim_end_matches('{').trim();
