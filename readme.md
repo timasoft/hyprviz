@@ -39,7 +39,6 @@ paru -S hyprviz-bin
 - [x] Improve colour options
 - [x] Create aur repo
 - [x] Add default values
-  - [ ] Fix the issues
 - [ ] Add bind section
 - [ ] Add windowrule section
 - [ ] Add other config sections from Hyprland
