@@ -1,8 +1,8 @@
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton,
-    DropDown, Entry, FileDialog, Frame, HeaderBar, Image, Label, Orientation, Popover,
-    ScrolledWindow, SpinButton, Stack, StackSidebar, StringList, Switch, Widget, gdk, glib,
-    prelude::*,
+    DropDown, Entry, FileDialog, Frame, HeaderBar, Image, Justification, Label, Orientation,
+    Popover, ScrolledWindow, SpinButton, Stack, StackSidebar, StringList, Switch, Widget, gdk,
+    glib, prelude::*,
 };
 
 use hyprparser::HyprlandConfig;
@@ -41,6 +41,11 @@ fn add_dropdown_option(
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
+    description_label.set_wrap(true);
+    description_label.set_width_chars(40);
+    description_label.set_max_width_chars(60);
+    description_label.set_justify(Justification::Fill);
+    description_label.set_xalign(0.0);
     description_label.set_margin_top(5);
     description_label.set_margin_bottom(5);
     description_label.set_margin_start(5);
@@ -625,7 +630,7 @@ impl ConfigWidget {
                     &mut options,
                     "layout",
                     "Layout",
-                    "which layout to use.",
+                    "Which layout to use (see the layouts section for information).",
                     &["dwindle", "master"],
                     "dwindle",
                 );
@@ -640,7 +645,7 @@ impl ConfigWidget {
                     &mut options,
                     "gaps_in",
                     "Gaps In",
-                    "gaps between windows, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
+                    "Gaps between windows, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
                     "5",
                 );
                 Self::add_int_option(
@@ -648,15 +653,15 @@ impl ConfigWidget {
                     &mut options,
                     "gaps_out",
                     "Gaps Out",
-                    "gaps between windows and monitor edges, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
+                    "Gaps between windows and monitor edges, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
                     "20",
                 );
                 Self::add_int_option(
                     &container,
                     &mut options,
                     "float_gaps",
-                    "Fload gaps",
-                    "gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20). -1 means default",
+                    "Fload Gaps",
+                    "Gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20).\n-1 means default",
                     "0",
                 );
                 Self::add_int_option(
@@ -664,7 +669,7 @@ impl ConfigWidget {
                     &mut options,
                     "gaps_workspaces",
                     "Gaps Workspaces",
-                    "gaps between workspaces. Stacks with gaps_out.",
+                    "Gaps between workspaces.\nStacks with gaps_out.",
                     "0",
                 );
 
@@ -679,7 +684,7 @@ impl ConfigWidget {
                     &mut options,
                     "border_size",
                     "Border Size",
-                    "size of the border around windows",
+                    "Size of the border around windows",
                     "1",
                 );
                 Self::add_bool_option(
@@ -687,7 +692,7 @@ impl ConfigWidget {
                     &mut options,
                     "no_border_on_floating",
                     "No Border on Floating",
-                    "disable borders for floating windows",
+                    "Disable borders for floating windows",
                     "false",
                 );
                 Self::add_bool_option(
@@ -695,7 +700,7 @@ impl ConfigWidget {
                     &mut options,
                     "resize_on_border",
                     "Resize on Border",
-                    "enables resizing windows by clicking and dragging on borders and gaps",
+                    "Enables resizing windows by clicking and dragging on borders and gaps",
                     "false",
                 );
                 Self::add_int_option(
@@ -703,7 +708,7 @@ impl ConfigWidget {
                     &mut options,
                     "resize_corner",
                     "Resize Corner",
-                    "force floating windows to use a specific corner when being resized (1-4 going clockwise from top left, 0 to disable)",
+                    "Force floating windows to use a specific corner when being resized (1-4 going clockwise from top left, 0 to disable)",
                     "0",
                 );
                 Self::add_int_option(
@@ -711,7 +716,7 @@ impl ConfigWidget {
                     &mut options,
                     "extend_border_grab_area",
                     "Extend Border Grab Area",
-                    "extends the area around the border where you can click and drag on, only used when general:resize_on_border is on.",
+                    "Extends the area around the border where you can click and drag on, only used when general:resize_on_border is on.",
                     "15",
                 );
                 Self::add_bool_option(
@@ -719,7 +724,7 @@ impl ConfigWidget {
                     &mut options,
                     "hover_icon_on_border",
                     "Hover Icon on Border",
-                    "show a cursor icon when hovering over borders, only used when general:resize_on_border is on.",
+                    "Show a cursor icon when hovering over borders, only used when general:resize_on_border is on.",
                     "true",
                 );
 
@@ -734,7 +739,7 @@ impl ConfigWidget {
                     &mut options,
                     "snap:enabled",
                     "Enabled",
-                    "enable snapping for floating windows",
+                    "Enable snapping for floating windows",
                     "false",
                 );
                 Self::add_int_option(
@@ -742,7 +747,7 @@ impl ConfigWidget {
                     &mut options,
                     "snap:window_gap",
                     "Window Gap",
-                    "minimum gap in pixels between windows before snapping",
+                    "Minimum gap in pixels between windows before snapping",
                     "10",
                 );
                 Self::add_int_option(
@@ -750,7 +755,7 @@ impl ConfigWidget {
                     &mut options,
                     "snap:monitor_gap",
                     "Monitor Gap",
-                    "minimum gap in pixels between window and monitor edges before snapping",
+                    "Minimum gap in pixels between window and monitor edges before snapping",
                     "10",
                 );
                 Self::add_bool_option(
@@ -758,7 +763,7 @@ impl ConfigWidget {
                     &mut options,
                     "snap:border_overlap",
                     "Border Overlap",
-                    "if true, windows snap such that only one border’s worth of space is between them",
+                    "If true, windows snap such that only one border’s worth of space is between them",
                     "false",
                 );
                 Self::add_bool_option(
@@ -766,7 +771,7 @@ impl ConfigWidget {
                     &mut options,
                     "snap:respect_gaps",
                     "Respect Gaps",
-                    "if true, snapping will respect gaps between windows(set in general:gaps_in)",
+                    "If true, snapping will respect gaps between windows(set in general:gaps_in)",
                     "false",
                 );
 
@@ -781,7 +786,7 @@ impl ConfigWidget {
                     &mut options,
                     "no_focus_fallback",
                     "No Focus Fallback",
-                    "if true, will not fall back to the next available window when moving focus in a direction where no window was found.",
+                    "If true, will not fall back to the next available window when moving focus in a direction where no window was found.",
                     "false",
                 );
                 Self::add_bool_option(
@@ -789,7 +794,7 @@ impl ConfigWidget {
                     &mut options,
                     "allow_tearing",
                     "Allow Tearing",
-                    "master switch for allowing tearing to occur. See the Hyprland's Tearing page.",
+                    "Master switch for allowing tearing to occur.\nSee the Hyprland's Tearing page.",
                     "false",
                 );
 
@@ -804,7 +809,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.inactive_border",
                     "Inactive Border Color",
-                    "border color for inactive windows",
+                    "Border color for inactive windows",
                     "#444444FF",
                 );
                 Self::add_color_option(
@@ -812,7 +817,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.active_border",
                     "Active Border Color",
-                    "border color for the active window",
+                    "Border color for the active window",
                     "#FFFFFFFF",
                 );
                 Self::add_color_option(
@@ -820,7 +825,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.nogroup_border",
                     "No Group Border Color",
-                    "inactive border color for window that cannot be added to a group (see denywindowfromgroup dispatcher)",
+                    "Inactive border color for window that cannot be added to a group (see denywindowfromgroup dispatcher)",
                     "#FFAAFFFF",
                 );
                 Self::add_color_option(
@@ -828,7 +833,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.nogroup_border_active",
                     "No Group Active Border Color",
-                    "active border color for window that cannot be added to a group",
+                    "Active border color for window that cannot be added to a group",
                     "#FF00FFFF",
                 );
             }
@@ -844,7 +849,7 @@ impl ConfigWidget {
                     &mut options,
                     "rounding",
                     "Rounding",
-                    "rounded corners' radius (in layout px)",
+                    "Rounded corners' radius (in layout px)",
                     "0",
                 );
                 Self::add_int_option(
@@ -852,7 +857,7 @@ impl ConfigWidget {
                     &mut options,
                     "rounding_power",
                     "Rounding Power",
-                    "adjusts the curve used for rounding corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle. [2.0 - 10.0]",
+                    "Adjusts the curve used for rounding corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle.\n[2.0 - 10.0]",
                     "2.0",
                 );
                 Self::add_float_option(
@@ -860,7 +865,7 @@ impl ConfigWidget {
                     &mut options,
                     "active_opacity",
                     "Active Opacity",
-                    "opacity of active windows. [0.0 - 1.0]",
+                    "Opacity of active windows.\n[0.0 - 1.0]",
                     "1.0",
                 );
                 Self::add_float_option(
@@ -868,7 +873,7 @@ impl ConfigWidget {
                     &mut options,
                     "inactive_opacity",
                     "Inactive Opacity",
-                    "opacity of inactive windows. [0.0 - 1.0]",
+                    "Opacity of inactive windows.\n[0.0 - 1.0]",
                     "1.0",
                 );
                 Self::add_float_option(
@@ -876,7 +881,7 @@ impl ConfigWidget {
                     &mut options,
                     "fullscreen_opacity",
                     "Fullscreen Opacity",
-                    "opacity of fullscreen windows. [0.0 - 1.0]",
+                    "Opacity of fullscreen windows.\n[0.0 - 1.0]",
                     "1.0",
                 );
                 Self::add_bool_option(
@@ -884,7 +889,7 @@ impl ConfigWidget {
                     &mut options,
                     "dim_inactive",
                     "Dim Inactive",
-                    "enables dimming of inactive windows",
+                    "Enables dimming of inactive windows",
                     "false",
                 );
                 Self::add_float_option(
@@ -892,7 +897,7 @@ impl ConfigWidget {
                     &mut options,
                     "dim_strength",
                     "Dim Strength",
-                    "how much inactive windows should be dimmed [0.0 - 1.0]",
+                    "How much inactive windows should be dimmed.\n[0.0 - 1.0]",
                     "0.5",
                 );
                 Self::add_float_option(
@@ -900,7 +905,7 @@ impl ConfigWidget {
                     &mut options,
                     "dim_special",
                     "Dim Special",
-                    "how much to dim the rest of the screen by when a special workspace is open. [0.0 - 1.0]",
+                    "How much to dim the rest of the screen by when a special workspace is open.\n[0.0 - 1.0]",
                     "0.2",
                 );
                 Self::add_float_option(
@@ -908,7 +913,7 @@ impl ConfigWidget {
                     &mut options,
                     "dim_around",
                     "Dim Around",
-                    "how much the dimaround window rule should dim by. [0.0 - 1.0]",
+                    "How much the dimaround window rule should dim by.\n[0.0 - 1.0]",
                     "0.4",
                 );
                 Self::add_string_option(
@@ -916,7 +921,7 @@ impl ConfigWidget {
                     &mut options,
                     "screen_shader",
                     "Screen Shader",
-                    "a path to a custom shader to be applied at the end of rendering. See examples/screenShader.frag for an example.",
+                    "A path to a custom shader to be applied at the end of rendering.\nSee examples/screenShader.frag for an example.",
                     "",
                 );
                 Self::add_bool_option(
@@ -924,7 +929,7 @@ impl ConfigWidget {
                     &mut options,
                     "border_part_of_window",
                     "Border Part of Window",
-                    "whether the window border should be a part of the window",
+                    "Whether the window border should be a part of the window",
                     "true",
                 );
 
@@ -971,7 +976,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:new_optimizations",
                     "Blur New Optimizations",
-                    "Whether to enable further optimizations to the blur. Recommended to leave on, as it will massively improve performance.",
+                    "Whether to enable further optimizations to the blur.\nRecommended to leave on, as it will massively improve performance.",
                     "true",
                 );
                 Self::add_bool_option(
@@ -979,7 +984,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:xray",
                     "Blur X-Ray",
-                    "If enabled, floating windows will ignore tiled windows in their blur. Only available if blur_new_optimizations is true. Will reduce overhead on floating blur significantly.",
+                    "If enabled, floating windows will ignore tiled windows in their blur.\nOnly available if blur_new_optimizations is true.\nWill reduce overhead on floating blur significantly.",
                     "false",
                 );
                 Self::add_float_option(
@@ -987,7 +992,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:noise",
                     "Blur Noise",
-                    "How much noise to apply. [0.0 - 1.0]",
+                    "How much noise to apply.\n[0.0 - 1.0]",
                     "0.0117",
                 );
                 Self::add_float_option(
@@ -995,7 +1000,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:contrast",
                     "Blur Contrast",
-                    "Contrast modulation for blur. [0.0 - 2.0]",
+                    "Contrast modulation for blur.\n[0.0 - 2.0]",
                     "0.8916",
                 );
                 Self::add_float_option(
@@ -1003,7 +1008,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:brightness",
                     "Blur Brightness",
-                    "Brightness modulation for blur. [0.0 - 2.0]",
+                    "Brightness modulation for blur.\n[0.0 - 2.0]",
                     "0.8172",
                 );
                 Self::add_float_option(
@@ -1011,7 +1016,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:vibrancy",
                     "Blur Vibrancy",
-                    "Increase saturation of blurred colors. [0.0 - 1.0]",
+                    "Increase saturation of blurred colors.\n[0.0 - 1.0]",
                     "0.1696",
                 );
                 Self::add_float_option(
@@ -1019,7 +1024,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:vibrancy_darkness",
                     "Blur Vibrancy Darkness",
-                    "How strong the effect of vibrancy is on dark areas . [0.0 - 1.0]",
+                    "How strong the effect of vibrancy is on dark areas .\n[0.0 - 1.0]",
                     "0.0",
                 );
                 Self::add_bool_option(
@@ -1035,7 +1040,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:popups",
                     "Blur Popups",
-                    "Whether to blur popups (e.g. right-click menus)",
+                    "Whether to blur popups (e.g.\nright-click menus)",
                     "false",
                 );
                 Self::add_float_option(
@@ -1043,7 +1048,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:popups_ignorealpha",
                     "Blur Popups Ignore Alpha",
-                    "Works like ignorealpha in layer rules. If pixel opacity is below set value, will not blur. [0.0 - 1.0]",
+                    "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]",
                     "0.2",
                 );
                 Self::add_bool_option(
@@ -1051,7 +1056,7 @@ impl ConfigWidget {
                     &mut options,
                     "blur:input_methods",
                     "Input Methods",
-                    "Whether to blur input methods (e.g. fcitx5)",
+                    "Whether to blur input methods (e.g.\nfcitx5)",
                     "false",
                 );
                 Self::add_float_option(
@@ -1059,7 +1064,7 @@ impl ConfigWidget {
                     &mut options,
                     "input_methods_ignorealpha",
                     "Input Methods Ignore Alpha",
-                    "Works like ignorealpha in layer rules. If pixel opacity is below set value, will not blur. [0.0 - 1.0]",
+                    "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]",
                     "0.2",
                 );
 
@@ -1090,7 +1095,7 @@ impl ConfigWidget {
                     &mut options,
                     "shadow:render_power",
                     "Shadow Render Power",
-                    "In what power to render the falloff (more power, the faster the falloff) [1 - 4]",
+                    "In what power to render the falloff (more power, the faster the falloff).\n[1 - 4]",
                     "3",
                 );
                 Self::add_bool_option(
@@ -1114,7 +1119,7 @@ impl ConfigWidget {
                     &mut options,
                     "shadow:color",
                     "Shadow Color",
-                    "Shadow’s color. Alpha dictates shadow’s opacity.",
+                    "Shadow’s color.\nAlpha dictates shadow’s opacity.",
                     "#1A1A1AEE",
                 );
                 Self::add_color_option(
@@ -1122,7 +1127,7 @@ impl ConfigWidget {
                     &mut options,
                     "shadow:color_inactive",
                     "Shadow Color Inactive",
-                    "Inactive shadow color. (if not set, will fall back to color)",
+                    "Inactive shadow color.\n(if not set, will fall back to color)",
                     "",
                 );
                 Self::add_string_option(
@@ -1130,7 +1135,7 @@ impl ConfigWidget {
                     &mut options,
                     "offset",
                     "Shadow Offset",
-                    "Shadow’s rendering offset. [x, y]",
+                    "Shadow’s rendering offset.\n[x, y]",
                     "[0, 0]",
                 );
                 Self::add_float_option(
@@ -1138,7 +1143,7 @@ impl ConfigWidget {
                     &mut options,
                     "shadow:scale",
                     "Shadow Scale",
-                    "Shadow’s scale. [0.0 - 1.0]",
+                    "Shadow’s scale.\n[0.0 - 1.0]",
                     "1.0",
                 );
             }
@@ -1248,7 +1253,7 @@ impl ConfigWidget {
                     &mut options,
                     "resolve_binds_by_sym",
                     "Resolve Binds by Symbol",
-                    "Determines how keybinds act when multiple layouts are used. If false, keybinds will always act as if the first specified layout is active. If true, keybinds specified by symbols are activated when you type the respective symbol with the current layout.",
+                    "Determines how keybinds act when multiple layouts are used.\nIf false, keybinds will always act as if the first specified layout is active.\nIf true, keybinds specified by symbols are activated when you type the respective symbol with the current layout.",
                     "false",
                 );
                 Self::add_int_option(
@@ -1279,7 +1284,7 @@ impl ConfigWidget {
                     &mut options,
                     "sensitivity",
                     "Sensitivity",
-                    "Sets the mouse input sensitivity. Value is clamped to the range -1.0 to 1.0.",
+                    "Sets the mouse input sensitivity.\nValue is clamped to the range -1.0 to 1.0.",
                     "0.0",
                 );
                 Self::add_string_option(
@@ -1287,7 +1292,7 @@ impl ConfigWidget {
                     &mut options,
                     "accel_profile",
                     "Acceleration Profile",
-                    "Sets the cursor acceleration profile. Can be one of adaptive, flat. Can also be custom, see below. Leave empty to use libinput's default mode for your input device.",
+                    "Sets the cursor acceleration profile.\nCan be one of adaptive, flat.\nCan also be custom, see below.\nLeave empty to use libinput's default mode for your input device.",
                     "",
                 );
                 Self::add_bool_option(
@@ -1295,7 +1300,7 @@ impl ConfigWidget {
                     &mut options,
                     "force_no_accel",
                     "Force No Acceleration",
-                    "Force no cursor acceleration. This bypasses most of your pointer settings to get as raw of a signal as possible. Enabling this is not recommended due to potential cursor desynchronization.",
+                    "Force no cursor acceleration.\nThis bypasses most of your pointer settings to get as raw of a signal as possible.\nEnabling this is not recommended due to potential cursor desynchronization.",
                     "false",
                 );
                 Self::add_bool_option(
@@ -1311,7 +1316,7 @@ impl ConfigWidget {
                     &mut options,
                     "scroll_method",
                     "Scroll Method",
-                    "Sets the scroll method. Can be one of 2fg (2 fingers), edge, on_button_down, no_scroll.",
+                    "Sets the scroll method.\nCan be one of 2fg (2 fingers), edge, on_button_down, no_scroll.",
                     "",
                 );
                 Self::add_int_option(
@@ -1319,7 +1324,7 @@ impl ConfigWidget {
                     &mut options,
                     "scroll_button",
                     "Scroll Button",
-                    "Sets the scroll button. Has to be an int, cannot be a string. Check wev if you have any doubts regarding the ID. 0 means default.",
+                    "Sets the scroll button.\nHas to be an int, cannot be a string.\nCheck wev if you have any doubts regarding the ID.\n0 means default.",
                     "0",
                 );
                 Self::add_bool_option(
@@ -1327,7 +1332,7 @@ impl ConfigWidget {
                     &mut options,
                     "scroll_button_lock",
                     "Scroll Button Lock",
-                    "If the scroll button lock is enabled, the button does not need to be held down. Pressing and releasing the button toggles the button lock, which logically holds the button down or releases it. While the button is logically held down, motion events are converted to scroll events.",
+                    "If the scroll button lock is enabled, the button does not need to be held down.\nPressing and releasing the button toggles the button lock, which logically holds the button down or releases it.\nWhile the button is logically held down, motion events are converted to scroll events.",
                     "false",
                 );
                 Self::add_float_option(
@@ -1335,7 +1340,7 @@ impl ConfigWidget {
                     &mut options,
                     "scroll_factor",
                     "Scroll Factor",
-                    "Multiplier added to scroll movement for external mice. Note that there is a separate setting for touchpad scroll_factor.",
+                    "Multiplier added to scroll movement for external mice.\nNote that there is a separate setting for touchpad scroll_factor.",
                     "1.0",
                 );
                 Self::add_bool_option(
@@ -1343,7 +1348,7 @@ impl ConfigWidget {
                     &mut options,
                     "natural_scroll",
                     "Natural Scroll",
-                    "Inverts scrolling direction. When enabled, scrolling moves content directly, rather than manipulating a scrollbar.",
+                    "Inverts scrolling direction.\nWhen enabled, scrolling moves content directly, rather than manipulating a scrollbar.",
                     "false",
                 );
                 Self::add_int_option(
@@ -1351,7 +1356,7 @@ impl ConfigWidget {
                     &mut options,
                     "follow_mouse",
                     "Follow Mouse",
-                    "Specify if and how cursor movement should affect window focus. 0 - Cursor movement will not change focus, 1 - Cursor movement will always change focus to the window under the cursor, 2 - Cursor focus will be detached from keyboard focus, 3 - Cursor focus will be completely separate from keyboard focus. [0/1/2/3]",
+                    "Specify if and how cursor movement should affect window focus.\n0 - Cursor movement will not change focus, 1 - Cursor movement will always change focus to the window under the cursor, 2 - Cursor focus will be detached from keyboard focus, 3 - Cursor focus will be completely separate from keyboard focus.\n[0/1/2/3]",
                     "1",
                 );
                 Self::add_float_option(
@@ -1359,7 +1364,7 @@ impl ConfigWidget {
                     &mut options,
                     "follow_mouse_threshold",
                     "Follow Mouse Threshold",
-                    "The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused. Works only with follow_mouse = 1.",
+                    "The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused.\nWorks only with follow_mouse = 1.",
                     "0.0",
                 );
                 Self::add_string_option(
@@ -1367,7 +1372,7 @@ impl ConfigWidget {
                     &mut options,
                     "scroll_points",
                     "Scroll Points",
-                    "Sets the scroll acceleration profile, when accel_profile is set to custom. Has to be in the form <step> <points>. Leave empty to have a flat scroll curve.",
+                    "Sets the scroll acceleration profile, when accel_profile is set to custom.\nHas to be in the form <step> <points>.\nLeave empty to have a flat scroll curve.",
                     "",
                 );
 
@@ -1382,7 +1387,7 @@ impl ConfigWidget {
                     &mut options,
                     "focus_on_close",
                     "Focus on Close",
-                    "Controls the window focus behavior when a window is closed. 0 - focus will shift to the next window candidate, 1 - focus will shift to the window under the cursor. [0/1]",
+                    "Controls the window focus behavior when a window is closed.\n0 - focus will shift to the next window candidate, 1 - focus will shift to the window under the cursor.\n[0/1]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -1398,7 +1403,7 @@ impl ConfigWidget {
                     &mut options,
                     "float_switch_override_focus",
                     "Float Switch Override Focus",
-                    "If enabled, focus will change to the window under the cursor when changing from tiled-to-floating and vice versa. 0 - disabled, 1 - enabled, 2 - focus will also follow mouse on float-to-float switches. [0/1/2]",
+                    "If enabled, focus will change to the window under the cursor when changing from tiled-to-floating and vice versa.\n0 - disabled, 1 - enabled, 2 - focus will also follow mouse on float-to-float switches.\n[0/1/2]",
                     "1",
                 );
                 Self::add_bool_option(
@@ -1406,7 +1411,7 @@ impl ConfigWidget {
                     &mut options,
                     "special_fallthrough",
                     "Special Fallthrough",
-                    "if enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace.",
+                    "If enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace.",
                     "false",
                 );
 
@@ -1429,7 +1434,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:natural_scroll",
                     "Natural Scroll",
-                    "Inverts scrolling direction. When enabled, scrolling moves content directly, rather than manipulating a scrollbar.",
+                    "Inverts scrolling direction.\nWhen enabled, scrolling moves content directly, rather than manipulating a scrollbar.",
                     "false",
                 );
                 Self::add_float_option(
@@ -1445,7 +1450,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:middle_button_emulation",
                     "Middle Button Emulation",
-                    "Sending LMB and RMB simultaneously will be interpreted as a middle click. This disables any touchpad area that would normally send a middle click based on location. libinput#middle-button-emulation",
+                    "Sending LMB and RMB simultaneously will be interpreted as a middle click.\nThis disables any touchpad area that would normally send a middle click based on location.\nlibinput#middle-button-emulation",
                     "false",
                 );
                 Self::add_string_option(
@@ -1453,7 +1458,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:tap_button_map",
                     "Tap Button Map",
-                    "Sets the tap button mapping for touchpad button emulation. Can be one of lrm (default) or lmr (Left, Middle, Right Buttons). [lrm/lmr]",
+                    "Sets the tap button mapping for touchpad button emulation.\nCan be one of lrm (default) or lmr (Left, Middle, Right Buttons).\n[lrm/lmr]",
                     "lrm",
                 );
                 Self::add_bool_option(
@@ -1461,7 +1466,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:clickfinger_behavior",
                     "Clickfinger Behavior",
-                    "Button presses with 1, 2, or 3 fingers will be mapped to LMB, RMB, and MMB respectively. This disables interpretation of clicks based on location on the touchpad. libinput#clickfinger-behavior",
+                    "Button presses with 1, 2, or 3 fingers will be mapped to LMB, RMB, and MMB respectively.\nThis disables interpretation of clicks based on location on the touchpad.\nlibinput#clickfinger-behavior",
                     "false",
                 );
                 Self::add_bool_option(
@@ -1477,7 +1482,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:drag_lock",
                     "Drag Lock",
-                    "drag_lock	When enabled, lifting the finger off while dragging will not drop the dragged item. 0 -> disabled, 1 -> enabled with timeout, 2 -> enabled sticky. libinput#tap-and-drag [0/1/2]",
+                    "Drag_lock When enabled, lifting the finger off while dragging will not drop the dragged item.\n0 -> disabled,\n1 -> enabled with timeout,\n2 -> enabled sticky.\nlibinput#tap-and-drag.\n[0/1/2]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -1493,7 +1498,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:flip_x",
                     "Flip X",
-                    "inverts the horizontal movement of the touchpad",
+                    "Inverts the horizontal movement of the touchpad",
                     "false",
                 );
                 Self::add_bool_option(
@@ -1501,7 +1506,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:flip_y",
                     "Flip Y",
-                    "inverts the vertical movement of the touchpad",
+                    "Inverts the vertical movement of the touchpad",
                     "false",
                 );
                 Self::add_int_option(
@@ -1509,7 +1514,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchpad:drag_3fg",
                     "Drag 3FG",
-                    "enables three finger drag, 0 -> disabled, 1 -> 3 fingers, 2 -> 4 fingers libinput#drag-3fg [0/1/2]",
+                    "Enables three finger drag,\n0 -> disabled,\n1 -> 3 fingers,\n2 -> 4 fingers libinput#drag-3fg\n[0/1/2]",
                     "0",
                 );
 
@@ -1524,7 +1529,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchdevice:transform",
                     "Transform",
-                    "Transform the input from touchdevices. -1 means it’s unset. 0 -> normal (no transforms)    1 -> 90 degrees    2 -> 180 degrees    3 -> 270 degrees    4 -> flipped    5 -> flipped + 90 degrees    6 -> flipped + 180 degrees    7 -> flipped + 270 degrees",
+                    "Transform the input from touchdevices.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees",
                     "-1",
                 );
                 Self::add_string_option(
@@ -1532,7 +1537,7 @@ impl ConfigWidget {
                     &mut options,
                     "touchdevice:output",
                     "Output",
-                    "The monitor to bind touch devices. The default is auto-detection. To stop auto-detection, use an empty string or the “[[Empty]]” value.",
+                    "The monitor to bind touch devices.\nThe default is auto-detection.\nTo stop auto-detection, use an empty string or the “[[Empty]]” value.",
                     "[[Auto]]",
                 );
                 Self::add_bool_option(
@@ -1555,7 +1560,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:transform",
                     "Transform",
-                    "Transform the input from tablets. -1 means it’s unset. 0 -> normal (no transforms)    1 -> 90 degrees    2 -> 180 degrees    3 -> 270 degrees    4 -> flipped    5 -> flipped + 90 degrees    6 -> flipped + 180 degrees    7 -> flipped + 270 degrees",
+                    "Transform the input from tablets.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees",
                     "-1",
                 );
                 Self::add_string_option(
@@ -1563,7 +1568,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:output",
                     "Output",
-                    "The monitor to bind tablets. Can be current or a monitor name. Leave empty to map across all monitors.",
+                    "The monitor to bind tablets.\nCan be current or a monitor name.\nLeave empty to map across all monitors.",
                     "",
                 );
                 Self::add_string_option(
@@ -1571,7 +1576,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:region_position",
                     "Region Position",
-                    "Position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors. [x, y]",
+                    "Position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors.\n[x, y]",
                     "[0, 0]",
                 );
                 Self::add_bool_option(
@@ -1579,7 +1584,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:absolute_position",
                     "Absolute Position",
-                    "Whether to treat the region_position as an absolute position in monitor layout. Only applies when output is empty.",
+                    "Whether to treat the region_position as an absolute position in monitor layout.\nOnly applies when output is empty.",
                     "false",
                 );
                 Self::add_string_option(
@@ -1587,7 +1592,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:region_size",
                     "Region Size",
-                    "Size of the mapped region. When this variable is set, tablet input will be mapped to the region. [0, 0] or invalid size means unset. [x, y]",
+                    "Size of the mapped region.\nWhen this variable is set, tablet input will be mapped to the region.\n[0, 0] or invalid size means unset.\n[x, y]",
                     "[0, 0]",
                 );
                 Self::add_bool_option(
@@ -1611,7 +1616,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:active_area_size",
                     "Active Area Size",
-                    "Size of tablet’s active area in mm [x, y]",
+                    "Size of tablet’s active area in mm\n[x, y]",
                     "[0, 0]",
                 );
                 Self::add_string_option(
@@ -1619,7 +1624,7 @@ impl ConfigWidget {
                     &mut options,
                     "tablet:active_area_position",
                     "Active Area Position",
-                    "position of the active area in mm [x, y]",
+                    "Position of the active area in mm\n[x, y]",
                     "[0, 0]",
                 );
 
@@ -1634,7 +1639,7 @@ impl ConfigWidget {
                     &mut options,
                     "off_window_axis_events",
                     "Off Window Axis Events",
-                    "Handles axis events around a focused window. 0 - ignores axis events, 1 - sends out-of-bound coordinates, 2 - fakes pointer coordinates to the closest point inside the window, 3 - warps the cursor to the closest point inside the window [0/1/2/3]",
+                    "Handles axis events around a focused window.\n0 - ignores axis events,\n1 - sends out-of-bound coordinates,\n2 - fakes pointer coordinates to the closest point inside the window,\n3 - warps the cursor to the closest point inside the window\n[0/1/2/3]",
                     "1",
                 );
                 Self::add_int_option(
@@ -1642,7 +1647,7 @@ impl ConfigWidget {
                     &mut options,
                     "emulate_discrete_scroll",
                     "Emulate Discrete Scroll",
-                    "Emulates discrete scrolling from high resolution scrolling events. 0 - disables it, 1 - enables handling of non-standard events only, 2 - force enables all scroll wheel events to be handled [0/1/2]",
+                    "Emulates discrete scrolling from high resolution scrolling events.\n0 - disables it,\n1 - enables handling of non-standard events only,\n2 - force enables all scroll wheel events to be handled\n[0/1/2]",
                     "1",
                 );
             }
@@ -1714,7 +1719,7 @@ impl ConfigWidget {
                     &mut options,
                     "workspace_swipe_min_speed_to_force",
                     "Workspace Swipe Min Speed to Force",
-                    "Minimum speed in px per timepoint to force the change ignoring cancel_ratio. Setting to 0 will disable this mechanic.",
+                    "Minimum speed in px per timepoint to force the change ignoring cancel_ratio.\nSetting to 0 will disable this mechanic.",
                     "30",
                 );
                 Self::add_float_option(
@@ -1722,7 +1727,7 @@ impl ConfigWidget {
                     &mut options,
                     "workspace_swipe_cancel_ratio",
                     "Workspace Swipe Cancel Ratio",
-                    "How much the swipe has to proceed in order to commence it. (0.7 -> if > 0.7 * distance, switch, if less, revert) [0.0 - 1.0]",
+                    "How much the swipe has to proceed in order to commence it.\n(0.7 -> if > 0.7 * distance, switch, if less, revert)\n[0.0 - 1.0]",
                     "0.5",
                 );
                 Self::add_bool_option(
@@ -1779,7 +1784,7 @@ impl ConfigWidget {
                     &mut options,
                     "auto_group",
                     "Auto Group",
-                    "Whether new windows will be automatically grouped into the focused unlocked group. Note: if you want to disable auto_group only for specific windows, use the “group barred” window rule instead.",
+                    "Whether new windows will be automatically grouped into the focused unlocked group.\nNote: if you want to disable auto_group only for specific windows, use the “group barred” window rule instead.",
                     "true",
                 );
                 Self::add_bool_option(
@@ -1803,7 +1808,7 @@ impl ConfigWidget {
                     &mut options,
                     "drag_into_group",
                     "Drag Into Group",
-                    "Whether dragging a window into a unlocked group will merge them. 0 - disabled, 1 - enabled, 2 - only when dragging into the groupbar [0/1/2]",
+                    "Whether dragging a window into a unlocked group will merge them.\n0 - disabled,\n1 - enabled,\n2 - only when dragging into the groupbar\n[0/1/2]",
                     "1",
                 );
                 Self::add_bool_option(
@@ -1851,7 +1856,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.border_inactive",
                     "Inactive Border Color",
-                    "inactive (out of focus) group border color",
+                    "Inactive (out of focus) group border color",
                     "#77770066",
                 );
                 Self::add_color_option(
@@ -1859,7 +1864,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.border_locked_active",
                     "Locked Active Border Color",
-                    "active locked group border color",
+                    "Active locked group border color",
                     "#FF550066",
                 );
                 Self::add_color_option(
@@ -1867,7 +1872,7 @@ impl ConfigWidget {
                     &mut options,
                     "col.border_locked_inactive",
                     "Locked Inactive Border Color",
-                    "inactive locked group border color",
+                    "Inactive locked group border color",
                     "#77550066",
                 );
                 Self::add_section(
@@ -1881,7 +1886,7 @@ impl ConfigWidget {
                     &mut options,
                     "groupbar:enabled",
                     "Enabled",
-                    "enables groupbars",
+                    "Enables groupbars",
                     "true",
                 );
                 Self::add_string_option(
@@ -1889,7 +1894,7 @@ impl ConfigWidget {
                     &mut options,
                     "groupbar:font_family",
                     "Font Family",
-                    "font used to display groupbar titles, use misc:font_family if not specified",
+                    "Font used to display groupbar titles, use misc:font_family if not specified",
                     "",
                 );
                 Self::add_int_option(
@@ -1897,7 +1902,7 @@ impl ConfigWidget {
                     &mut options,
                     "groupbar:font_size",
                     "Font Size",
-                    "font size of groupbar title",
+                    "Font size of groupbar title",
                     "8",
                 );
                 Self::add_string_option(
@@ -1905,7 +1910,7 @@ impl ConfigWidget {
                     &mut options,
                     "font_weight_active",
                     "Font Weight Active",
-                    "Font weight of active groupbar title. An integer between 100 and 1000, or one of the following presets: thin    ultralight    light    semilight    book    normal    medium    semibold    bold    ultrabold    heavy    ultraheavy",
+                    "Font weight of active groupbar title.\nAn integer between 100 and 1000, or one of the following presets: thin\nultralight\nlight\nsemilight\nbook\nnormal\nmedium\nsemibold\nbold\nultrabold\nheavy\nultraheavy",
                     "normal",
                 );
                 Self::add_string_option(
@@ -1913,7 +1918,7 @@ impl ConfigWidget {
                     &mut options,
                     "font_weight_inactive",
                     "Font Weight Inactive",
-                    "Font weight of inactive groupbar title. An integer between 100 and 1000, or one of the following presets: thin    ultralight    light    semilight    book    normal    medium    semibold    bold    ultrabold    heavy    ultraheavy",
+                    "Font weight of inactive groupbar title.\nAn integer between 100 and 1000, or one of the following presets: thin\nultralight\nlight\nsemilight\nbook\nnormal\nmedium\nsemibold\nbold\nultrabold\nheavy\nultraheavy",
                     "normal",
                 );
                 Self::add_bool_option(
@@ -2121,7 +2126,7 @@ impl ConfigWidget {
                     &mut options,
                     "disable_hyprland_logo",
                     "Disable Hyprland Logo",
-                    "disables the random Hyprland logo / anime girl background. :(",
+                    "Disables the random Hyprland logo / anime girl background.\n:(",
                     "false",
                 );
                 Self::add_bool_option(
@@ -2129,7 +2134,7 @@ impl ConfigWidget {
                     &mut options,
                     "disable_splash_rendering",
                     "Disable Splash Rendering",
-                    "disables the Hyprland splash rendering. (requires a monitor reload to take effect)",
+                    "Disables the Hyprland splash rendering.\n(requires a monitor reload to take effect)",
                     "false",
                 );
                 Self::add_color_option(
@@ -2161,7 +2166,7 @@ impl ConfigWidget {
                     &mut options,
                     "force_default_wallpaper",
                     "Force Default Wallpaper",
-                    "Enforce any of the 3 default wallpapers. -1 - random, 0 or 1 - disables the anime background, 2 - enables anime background. [-1/0/1/2]",
+                    "Enforce any of the 3 default wallpapers.\n-1 - random, 0 or 1 - disables the anime background, 2 - enables anime background.\n[-1/0/1/2]",
                     "-1",
                 );
                 Self::add_bool_option(
@@ -2169,7 +2174,7 @@ impl ConfigWidget {
                     &mut options,
                     "vfr",
                     "VFR",
-                    "Controls the VFR status of Hyprland. Heavily recommended to leave enabled to conserve resources.",
+                    "Controls the VFR status of Hyprland.\nHeavily recommended to leave enabled to conserve resources.",
                     "true",
                 );
                 Self::add_int_option(
@@ -2177,7 +2182,7 @@ impl ConfigWidget {
                     &mut options,
                     "vrr",
                     "VRR",
-                    "Controls the VRR (Adaptive Sync) of your monitors. 0 - off, 1 - on, 2 - fullscreen only, 3 - fullscreen with video or game content type [0/1/2/3]",
+                    "Controls the VRR (Adaptive Sync) of your monitors.\n0 - off,\n1 - on,\n2 - fullscreen only,\n3 - fullscreen with video or game content type\n[0/1/2/3]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -2201,7 +2206,7 @@ impl ConfigWidget {
                     &mut options,
                     "always_follow_on_dnd",
                     "Always Follow on DnD",
-                    "Will make mouse focus follow the mouse when drag and dropping. Recommended to leave it enabled, especially for people using focus follows mouse at 0.",
+                    "Will make mouse focus follow the mouse when drag and dropping.\nRecommended to leave it enabled, especially for people using focus follows mouse at 0.",
                     "true",
                 );
                 Self::add_bool_option(
@@ -2209,7 +2214,7 @@ impl ConfigWidget {
                     &mut options,
                     "layers_hog_keyboard_focus",
                     "Layers Hog Keyboard Focus",
-                    "If true, will make keyboard-interactive layers keep their focus on mouse move (e.g. wofi, bemenu)",
+                    "If true, will make keyboard-interactive layers keep their focus on mouse move (e.g.\nwofi, bemenu)",
                     "true",
                 );
                 Self::add_bool_option(
@@ -2233,7 +2238,7 @@ impl ConfigWidget {
                     &mut options,
                     "disable_autoreload",
                     "Disable Autoreload",
-                    "If true, the config will not reload automatically on save, and instead needs to be reloaded with hyprctl reload. Might save on battery.",
+                    "If true, the config will not reload automatically on save, and instead needs to be reloaded with hyprctl reload.\nMight save on battery.",
                     "false",
                 );
                 Self::add_bool_option(
@@ -2249,7 +2254,7 @@ impl ConfigWidget {
                     &mut options,
                     "swallow_regex",
                     "Swallow Regex",
-                    "The class regex to be used for windows that should be swallowed (usually, a terminal). To know more about the list of regex which can be used use this cheatsheet.",
+                    "The class regex to be used for windows that should be swallowed (usually, a terminal).\nTo know more about the list of regex which can be used use this cheatsheet.",
                     "",
                 );
                 Self::add_string_option(
@@ -2257,7 +2262,7 @@ impl ConfigWidget {
                     &mut options,
                     "swallow_exception_regex",
                     "Swallow Exception Regex",
-                    "The title regex to be used for windows that should not be swallowed by the windows specified in swallow_regex (e.g. wev). The regex is matched against the parent (e.g. Kitty) window's title on the assumption that it changes to whatever process it's running.",
+                    "The title regex to be used for windows that should not be swallowed by the windows specified in swallow_regex (e.g.\nwev).\nThe regex is matched against the parent (e.g.\nKitty) window's title on the assumption that it changes to whatever process it's running.",
                     "",
                 );
                 Self::add_bool_option(
@@ -2281,7 +2286,7 @@ impl ConfigWidget {
                     &mut options,
                     "allow_session_lock_restore",
                     "Allow Session Lock Restore",
-                    "if true, will allow you to restart a lockscreen app in case it crashes (red screen of death)",
+                    "If true, will allow you to restart a lockscreen app in case it crashes (red screen of death)",
                     "false",
                 );
                 Self::add_bool_option(
@@ -2289,7 +2294,7 @@ impl ConfigWidget {
                     &mut options,
                     "session_lock_xray",
                     "Session Lock Xray",
-                    "if true, keep rendering workspaces below your lockscreen",
+                    "If true, keep rendering workspaces below your lockscreen",
                     "false",
                 );
                 Self::add_color_option(
@@ -2297,7 +2302,7 @@ impl ConfigWidget {
                     &mut options,
                     "background_color",
                     "Background Color",
-                    "change the background color. (requires enabled disable_hyprland_logo)",
+                    "Change the background color.\n(requires enabled disable_hyprland_logo)",
                     "#111111",
                 );
                 Self::add_bool_option(
@@ -2305,7 +2310,7 @@ impl ConfigWidget {
                     &mut options,
                     "close_special_on_empty",
                     "Close Special on Empty",
-                    "close the special workspace if the last window is removed",
+                    "Close the special workspace if the last window is removed",
                     "true",
                 );
                 Self::add_int_option(
@@ -2313,7 +2318,7 @@ impl ConfigWidget {
                     &mut options,
                     "new_window_takes_over_fullscreen",
                     "New Window Takes Over Fullscreen",
-                    "If there is a fullscreen or maximized window, decide whether a new tiled window opened should replace it, stay behind or disable the fullscreen/maximized state. 0 - behind, 1 - takes over, 2 - unfullscreen/unmaxize [0/1/2]",
+                    "If there is a fullscreen or maximized window, decide whether a new tiled window opened should replace it, stay behind or disable the fullscreen/maximized state.\n0 - behind,\n1 - takes over,\n2 - unfullscreen/unmaxize\n[0/1/2]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -2329,7 +2334,7 @@ impl ConfigWidget {
                     &mut options,
                     "initial_workspace_tracking",
                     "Initial Workspace Tracking",
-                    "If enabled, windows will open on the workspace they were invoked on. 0 - disabled, 1 - single-shot, 2 - persistent (all children too) [0/1/2]",
+                    "If enabled, windows will open on the workspace they were invoked on.\n0 - disabled,\n1 - single-shot,\n2 - persistent (all children too)\n[0/1/2]",
                     "1",
                 );
                 Self::add_bool_option(
@@ -2385,7 +2390,7 @@ impl ConfigWidget {
                     &mut options,
                     "anr_missed_pings",
                     "ANR Missed Pings",
-                    "number of missed pings before showing the ANR dialog",
+                    "Number of missed pings before showing the ANR dialog",
                     "1",
                 );
             }
@@ -2441,7 +2446,7 @@ impl ConfigWidget {
                     &mut options,
                     "workspace_center_on",
                     "Workspace Center On",
-                    "Whether switching workspaces should center the cursor on the workspace (0) or on the last active window for that workspace (1). [0/1]",
+                    "Whether switching workspaces should center the cursor on the workspace (0) or on the last active window for that workspace (1).\n[0/1]",
                     "0",
                 );
                 Self::add_int_option(
@@ -2449,7 +2454,7 @@ impl ConfigWidget {
                     &mut options,
                     "focus_preferred_method",
                     "Focus Preferred Method",
-                    "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction. 0 - history (recent have priority), 1 - length (longer shared edges have priority) [0/1]",
+                    "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.\n0 - history (recent have priority),\n1 - length (longer shared edges have priority)\n[0/1]\n(idk why this is int)",
                     "0",
                 );
                 Self::add_bool_option(
@@ -2481,7 +2486,7 @@ impl ConfigWidget {
                     &mut options,
                     "disable_keybind_grabbing",
                     "Disable Keybind Grabbing",
-                    "If enabled, apps that request keybinds to be disabled (e.g. VMs) will not be able to do so.",
+                    "If enabled, apps that request keybinds to be disabled (e.g.\nVMs) will not be able to do so.",
                     "false",
                 );
                 Self::add_bool_option(
@@ -2505,7 +2510,7 @@ impl ConfigWidget {
                     &mut options,
                     "drag_threshold",
                     "Drag Threshold",
-                    "Movement threshold in pixels for window dragging and c/g bind flags. 0 to disable and grab on mousedown.",
+                    "Movement threshold in pixels for window dragging and c/g bind flags.\n0 to disable and grab on mousedown.",
                     "0",
                 );
             }
@@ -2545,7 +2550,7 @@ impl ConfigWidget {
                     &mut options,
                     "create_abstract_socket",
                     "Create Abstract Socket",
-                    "Create the abstract Unix domain socket for XWayland connections. (XWayland restart is required for changes to take effect; Linux only)",
+                    "Create the abstract Unix domain socket for XWayland connections.\n(XWayland restart is required for changes to take effect; Linux only)",
                     "false",
                 );
             }
@@ -2561,7 +2566,7 @@ impl ConfigWidget {
                     &mut options,
                     "nvidia_anti_flicker",
                     "Nvidia Anti Flicker",
-                    "Reduces flickering on nvidia at the cost of possible frame drops on lower-end GPUs. On non-nvidia, this is ignored.",
+                    "Reduces flickering on nvidia at the cost of possible frame drops on lower-end GPUs.\nOn non-nvidia, this is ignored.",
                     "true",
                 );
             }
@@ -2577,7 +2582,7 @@ impl ConfigWidget {
                     &mut options,
                     "direct_scanout",
                     "Direct Scanout",
-                    "Enables direct scanout. Direct scanout attempts to reduce lag when there is only one fullscreen application on a screen (e.g. game). It is also recommended to set this to false if the fullscreen application shows graphical glitches. 0 - off, 1 - on, 2 - auto (on with content type ‘game’) [0/1/2]",
+                    "Enables direct scanout.\nDirect scanout attempts to reduce lag when there is only one fullscreen application on a screen (e.g.\ngame).\nIt is also recommended to set this to false if the fullscreen application shows graphical glitches.\n0 - off,\n1 - on,\n2 - auto (on with content type ‘game’)\n[0/1/2]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -2601,7 +2606,7 @@ impl ConfigWidget {
                     &mut options,
                     "ctm_animation",
                     "CTM Animation",
-                    "Whether to enable a fade animation for CTM changes (hyprsunset). 2 means “auto” which disables them on Nvidia. [0/1/2]",
+                    "Whether to enable a fade animation for CTM changes (hyprsunset).\n2 means “auto” which disables them on Nvidia.\n[0/1/2]",
                     "2",
                 );
                 Self::add_int_option(
@@ -2609,7 +2614,7 @@ impl ConfigWidget {
                     &mut options,
                     "cm_fs_passthrough",
                     "CM FS Passthrough",
-                    "Passthrough color settings for fullscreen apps when possible. 0 - off, 1 - always, 2 - hdr only. [0/1/2]",
+                    "Passthrough color settings for fullscreen apps when possible.\n0 - off, 1 - always, 2 - hdr only.\n[0/1/2]",
                     "2",
                 );
                 Self::add_bool_option(
@@ -2633,7 +2638,7 @@ impl ConfigWidget {
                     &mut options,
                     "cm_auto_hdr",
                     "CM Auto HDR",
-                    "Auto-switch to HDR in fullscreen when needed. 0 - off, 1 - switch to cm, hdr, 2 - switch to cm, hdredid. [0/1/2]",
+                    "Auto-switch to HDR in fullscreen when needed.\n0 - off, 1 - switch to cm, hdr, 2 - switch to cm, hdredid.\n[0/1/2]",
                     "1",
                 );
                 Self::add_bool_option(
@@ -2673,7 +2678,7 @@ impl ConfigWidget {
                     &mut options,
                     "no_hardware_cursors",
                     "No Hardware Cursors",
-                    "Disables hardware cursors. 0 - use hw cursors if possible, 1 - don’t use hw cursors, 2 - auto (disable when tearing). [0/1/2]",
+                    "Disables hardware cursors.\n0 - use hw cursors if possible, 1 - don’t use hw cursors, 2 - auto (disable when tearing).\n[0/1/2]",
                     "2",
                 );
                 Self::add_int_option(
@@ -2681,7 +2686,7 @@ impl ConfigWidget {
                     &mut options,
                     "no_break_fs_vrr",
                     "No Break FS VRR",
-                    "Disables scheduling new frames on cursor movement for fullscreen apps with VRR enabled to avoid framerate spikes (may require no_hardware_cursors = true) 0 - off, 1 - on, 2 - auto (on with content type ‘game’). [0/1/2]",
+                    "Disables scheduling new frames on cursor movement for fullscreen apps with VRR enabled to avoid framerate spikes (may require no_hardware_cursors = true) 0 - off, 1 - on, 2 - auto (on with content type ‘game’).\n[0/1/2]",
                     "2",
                 );
                 Self::add_int_option(
@@ -2689,7 +2694,7 @@ impl ConfigWidget {
                     &mut options,
                     "min_refresh_rate",
                     "Min Refresh Rate",
-                    "Minimum refresh rate for cursor movement when no_break_fs_vrr is active. Set to minimum supported refresh rate or higher.",
+                    "Minimum refresh rate for cursor movement when no_break_fs_vrr is active.\nSet to minimum supported refresh rate or higher.",
                     "24",
                 );
                 Self::add_int_option(
@@ -2705,7 +2710,7 @@ impl ConfigWidget {
                     &mut options,
                     "inactive_timeout",
                     "Inactive Timeout",
-                    "In seconds, after how many seconds of cursor's inactivity to hide it. Set to 0 for never.",
+                    "In seconds, after how many seconds of cursor's inactivity to hide it.\nSet to 0 for never.",
                     "0",
                 );
                 Self::add_bool_option(
@@ -2729,7 +2734,7 @@ impl ConfigWidget {
                     &mut options,
                     "warp_on_change_workspace",
                     "Warp on Change Workspace",
-                    "Move the cursor to the last focused window after changing the workspace. Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option). [0/1/2]",
+                    "Move the cursor to the last focused window after changing the workspace.\n Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option).\n[0/1/2]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -2737,7 +2742,7 @@ impl ConfigWidget {
                     &mut options,
                     "warp_on_toggle_special",
                     "Warp on Toggle Special",
-                    "Move the cursor to the last focused window when toggling a special workspace. Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option). [0/1/2]",
+                    "Move the cursor to the last focused window when toggling a special workspace.\n Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option).\n[0/1/2]",
                     "0",
                 );
                 Self::add_string_option(
@@ -2753,7 +2758,7 @@ impl ConfigWidget {
                     &mut options,
                     "zoom_factor",
                     "Zoom Factor",
-                    "The factor to zoom by around the cursor. Like a magnifying glass.",
+                    "The factor to zoom by around the cursor.\nLike a magnifying glass.",
                     "1.0",
                 );
                 Self::add_bool_option(
@@ -2793,7 +2798,7 @@ impl ConfigWidget {
                     &mut options,
                     "use_cpu_buffer",
                     "Use CPU Buffer",
-                    "Makes HW cursors use a CPU buffer. Required on Nvidia to have HW cursors. 0 - off, 1 - on, 2 - auto (nvidia only). [0/1/2]",
+                    "Makes HW cursors use a CPU buffer.\nRequired on Nvidia to have HW cursors.\n0 - off, 1 - on, 2 - auto (nvidia only).\n[0/1/2]",
                     "2",
                 );
                 Self::add_bool_option(
@@ -2865,7 +2870,7 @@ impl ConfigWidget {
                     &mut options,
                     "overlay",
                     "Overlay",
-                    "Print the debug performance overlay. Disable VFR for accurate results.",
+                    "Print the debug performance overlay.\nDisable VFR for accurate results.",
                     "false",
                 );
                 Self::add_bool_option(
@@ -2897,7 +2902,7 @@ impl ConfigWidget {
                     &mut options,
                     "damage_tracking",
                     "Damage Tracking",
-                    "Redraw only the needed bits of the display. Do not change. 0 - none, 1 - monitor, 2 - full (default) [0/1/2]",
+                    "Redraw only the needed bits of the display.\nDo not change.\n0 - none,\n1 - monitor,\n2 - full (default)\n[0/1/2]",
                     "2",
                 );
                 Self::add_bool_option(
@@ -2929,7 +2934,7 @@ impl ConfigWidget {
                     &mut options,
                     "watchdog_timeout",
                     "Watchdog Timeout",
-                    "Sets the timeout in seconds for watchdog to abort processing of a signal of the main thread. Set to 0 to disable.",
+                    "Sets the timeout in seconds for watchdog to abort processing of a signal of the main thread.\nSet to 0 to disable.",
                     "5",
                 );
                 Self::add_bool_option(
@@ -2937,7 +2942,7 @@ impl ConfigWidget {
                     &mut options,
                     "disable_scale_checks",
                     "Disable Scale Checks",
-                    "Disables verification of the scale factors. Will result in pixel alignment and rounding errors.",
+                    "Disables verification of the scale factors.\nWill result in pixel alignment and rounding errors.",
                     "false",
                 );
                 Self::add_int_option(
@@ -2953,7 +2958,7 @@ impl ConfigWidget {
                     &mut options,
                     "error_position",
                     "Error Position",
-                    "Sets the position of the error bar. 0 - top, 1 - bottom [0/1]",
+                    "Sets the position of the error bar.\n0 - top,\n1 - bottom\n[0/1]\n(idk why this is int",
                     "0",
                 );
                 Self::add_bool_option(
@@ -3000,7 +3005,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:pseudotile",
                     "Pseudotile",
-                    "Enable pseudotiling. Pseudotiled windows retain their floating size when tiled.",
+                    "Enable pseudotiling.\nPseudotiled windows retain their floating size when tiled.",
                     "false",
                 );
                 Self::add_int_option(
@@ -3008,7 +3013,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:force_split",
                     "Force Split",
-                    "0 -> split follows mouse, 1 -> always split to the left (new = left or top) 2 -> always split to the right (new = right or bottom). [0/1/2]",
+                    "0 -> split follows mouse, 1 -> always split to the left (new = left or top) 2 -> always split to the right (new = right or bottom).\n[0/1/2]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -3024,7 +3029,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:smart_split",
                     "Smart Split",
-                    "If enabled, allows a more precise control over the window split direction based on the cursor’s position. The window is conceptually divided into four triangles, and cursor’s triangle determines the split direction. This feature also turns on preserve_split.",
+                    "If enabled, allows a more precise control over the window split direction based on the cursor’s position.\nThe window is conceptually divided into four triangles, and cursor’s triangle determines the split direction.\nThis feature also turns on preserve_split.",
                     "false",
                 );
                 Self::add_bool_option(
@@ -3032,7 +3037,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:smart_resizing",
                     "Smart Resizing",
-                    "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner). Else, it is based on the window’s tiling position.",
+                    "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner).\nElse, it is based on the window’s tiling position.",
                     "true",
                 );
                 Self::add_bool_option(
@@ -3048,7 +3053,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:special_scale_factor",
                     "Special Scale Factor",
-                    "Specifies the scale factor of windows on the special workspace [0.0 - 1.0]",
+                    "Specifies the scale factor of windows on the special workspace.\n[0.0 - 1.0]",
                     "1.0",
                 );
                 Self::add_float_option(
@@ -3056,7 +3061,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:split_width_multiplier",
                     "Split Width Multiplier",
-                    "Specifies the auto-split width multiplier. Multiplying window size is useful on widescreen monitors where window W > H even after several splits.",
+                    "Specifies the auto-split width multiplier.\nMultiplying window size is useful on widescreen monitors where window W > H even after several splits.",
                     "1.0",
                 );
                 Self::add_bool_option(
@@ -3072,7 +3077,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:default_split_ratio",
                     "Default Split Ratio",
-                    "The default split ratio on window open. 1 means even 50/50 split. [0.1 - 1.9]",
+                    "The default split ratio on window open.\n1 means even 50/50 split.\n[0.1 - 1.9]",
                     "1.0",
                 );
                 Self::add_int_option(
@@ -3080,7 +3085,7 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:split_bias",
                     "Split Bias",
-                    "Specifies which window will receive the larger half of a split. [0/1/2]",
+                    "Specifies which window will receive the larger half of a split.\n[0/1/2]",
                     "0",
                 );
                 Self::add_bool_option(
@@ -3088,7 +3093,7 @@ impl ConfigWidget {
                     &mut options,
                     "precise_mouse_move",
                     "Precise Mouse Move",
-                    "bindm movewindow will drop the window more precisely depending on where your mouse is.",
+                    "Bindm movewindow will drop the window more precisely depending on where your mouse is.",
                     "false",
                 );
                 Self::add_string_option(
@@ -3096,7 +3101,7 @@ impl ConfigWidget {
                     &mut options,
                     "single_window_aspect_ratio",
                     "Single Window Aspect Ratio",
-                    "Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio. A value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with padding to the sides. x y",
+                    "Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio.\nA value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with padding to the sides.\nx y",
                     "0 0",
                 );
                 Self::add_float_option(
@@ -3104,14 +3109,14 @@ impl ConfigWidget {
                     &mut options,
                     "single_window_aspect_ratio_tolerance",
                     "Single Window Aspect Ratio Tolerance",
-                    "Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to adjust the window size [0.0 - 1.0]",
+                    "Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to adjust the window size.\n[0.0 - 1.0]",
                     "0.1",
                 );
 
                 Self::add_section(
                     &container,
                     "Master Layout",
-                    "The master layout makes one (or more) window(s) be the “master”, taking (by default) the left part of the screen, and tiles the rest on the right. You can change the orientation on a per-workspace basis if you want to use anything other than the default left/right split.",
+                    "The master layout makes one (or more) window(s) be the “master”, taking (by default) the left part of the screen, and tiles the rest on the right.\nYou can change the orientation on a per-workspace basis if you want to use anything other than the default left/right split.",
                     first_section.clone(),
                 );
                 Self::add_bool_option(
@@ -3127,7 +3132,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:special_scale_factor",
                     "Special Scale Factor",
-                    "The scale of the special workspace windows. [0.0 - 1.0]",
+                    "The scale of the special workspace windows.\n[0.0 - 1.0]",
                     "1.0",
                 );
                 Self::add_float_option(
@@ -3135,7 +3140,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:mfact",
                     "Master Factor",
-                    "the size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave [0.0 - 1.0]",
+                    "The size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave.\n[0.0 - 1.0]",
                     "0.55",
                 );
                 add_dropdown_option(
@@ -3143,7 +3148,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:new_status",
                     "New Window Status",
-                    "Determines how new windows are added to the layout.    master: new window becomes master;    slave: new windows are added to slave stack;    inherit: inherit from focused window",
+                    "Determines how new windows are added to the layout.\nmaster: new window becomes master;\nslave: new windows are added to slave stack;\ninherit: inherit from focused window",
                     &["master", "slave", "inherit"],
                     "slave",
                 );
@@ -3160,7 +3165,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:new_on_active",
                     "New on Active",
-                    "before, after: place new window relative to the focused window;    none: place new window according to the value of New on Top.",
+                    "Before, after: place new window relative to the focused window;\nnone: place new window according to the value of New on Top.",
                     &["before", "after", "none"],
                     "none",
                 );
@@ -3186,7 +3191,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:slave_count_for_center_master",
                     "Slave Count for Center Master",
-                    "When using orientation=center, make the master window centered only when at least this many slave windows are open. (Set 0 to always_center_master)",
+                    "When using orientation=center, make the master window centered only when at least this many slave windows are open.\n(Set 0 to always_center_master)",
                     "2",
                 );
                 add_dropdown_option(
@@ -3203,7 +3208,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:smart_resizing",
                     "Smart Resizing",
-                    "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner). Else, it is based on the window’s tiling position.",
+                    "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner).\nElse, it is based on the window’s tiling position.",
                     "true",
                 );
                 Self::add_bool_option(
@@ -3211,7 +3216,7 @@ impl ConfigWidget {
                     &mut options,
                     "master:drop_at_cursor",
                     "Drop at Cursor",
-                    "When enabled, dragging and dropping windows will put them at the cursor position. Otherwise, when dropped at the stack side, they will go to the top/bottom of the stack depending on new_on_top.",
+                    "When enabled, dragging and dropping windows will put them at the cursor position.\nOtherwise, when dropped at the stack side, they will go to the top/bottom of the stack depending on new_on_top.",
                     "true",
                 );
                 Self::add_bool_option(
@@ -3304,6 +3309,11 @@ impl ConfigWidget {
 
         let popover = Popover::new();
         let description_label = Label::new(Some(description));
+        description_label.set_wrap(true);
+        description_label.set_width_chars(40);
+        description_label.set_max_width_chars(60);
+        description_label.set_justify(Justification::Fill);
+        description_label.set_xalign(0.0);
         description_label.set_margin_top(5);
         description_label.set_margin_bottom(5);
         description_label.set_margin_start(5);
@@ -3366,6 +3376,11 @@ impl ConfigWidget {
 
         let popover = Popover::new();
         let description_label = Label::new(Some(description));
+        description_label.set_wrap(true);
+        description_label.set_width_chars(40);
+        description_label.set_max_width_chars(60);
+        description_label.set_justify(Justification::Fill);
+        description_label.set_xalign(0.0);
         description_label.set_margin_top(5);
         description_label.set_margin_bottom(5);
         description_label.set_margin_start(5);
@@ -3426,6 +3441,11 @@ impl ConfigWidget {
 
         let popover = Popover::new();
         let description_label = Label::new(Some(description));
+        description_label.set_wrap(true);
+        description_label.set_width_chars(40);
+        description_label.set_max_width_chars(60);
+        description_label.set_justify(Justification::Fill);
+        description_label.set_xalign(0.0);
         description_label.set_margin_top(5);
         description_label.set_margin_bottom(5);
         description_label.set_margin_start(5);
@@ -3488,6 +3508,11 @@ impl ConfigWidget {
 
         let popover = Popover::new();
         let description_label = Label::new(Some(description));
+        description_label.set_wrap(true);
+        description_label.set_width_chars(40);
+        description_label.set_max_width_chars(60);
+        description_label.set_justify(Justification::Fill);
+        description_label.set_xalign(0.0);
         description_label.set_margin_top(5);
         description_label.set_margin_bottom(5);
         description_label.set_margin_start(5);
@@ -3548,6 +3573,11 @@ impl ConfigWidget {
 
         let popover = Popover::new();
         let description_label = Label::new(Some(description));
+        description_label.set_wrap(true);
+        description_label.set_width_chars(40);
+        description_label.set_max_width_chars(60);
+        description_label.set_justify(Justification::Fill);
+        description_label.set_xalign(0.0);
         description_label.set_margin_top(5);
         description_label.set_margin_bottom(5);
         description_label.set_margin_start(5);
