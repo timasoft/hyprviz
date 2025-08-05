@@ -3780,7 +3780,7 @@ impl ConfigWidget {
     ) -> String {
         let config_str = self.transform_config(config.to_string());
         if category == "layouts" {
-            for line in config_str.lines() {
+            for line in config_str.lines().rev() {
                 if line.trim().starts_with(&format!("{name} = ")) {
                     return line
                         .split('=')
@@ -3789,14 +3789,15 @@ impl ConfigWidget {
                         .unwrap_or_default();
                 }
             }
-        }
-        for line in config_str.lines() {
-            if line.trim().starts_with(&format!("{category}:{name} = ")) {
-                return line
-                    .split('=')
-                    .nth(1)
-                    .map(|s| s.trim().to_string())
-                    .unwrap_or_default();
+        } else {
+            for line in config_str.lines().rev() {
+                if line.trim().starts_with(&format!("{category}:{name} = ")) {
+                    return line
+                        .split('=')
+                        .nth(1)
+                        .map(|s| s.trim().to_string())
+                        .unwrap_or_default();
+                }
             }
         }
         default.to_string()
@@ -3821,7 +3822,11 @@ impl ConfigWidget {
                 let key = parts.next().unwrap().trim();
                 let value = parts.next().unwrap().trim();
                 let prefix = path.iter().cloned().collect::<Vec<_>>().join(":");
-                let full_key = format!("{prefix}:{key}");
+                let full_key = if !prefix.is_empty() {
+                    format!("{prefix}:{key}")
+                } else {
+                    key.to_string()
+                };
                 result.push(format!("{full_key} = {value}"));
             }
         }
