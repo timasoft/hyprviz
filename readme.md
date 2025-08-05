@@ -47,6 +47,7 @@ paru -S hyprviz-bin
 - [ ] Add bind section
 - [ ] Add windowrule section
 - [ ] Add other config sections from Hyprland
+- [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
 ## Credits:
