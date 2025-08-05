@@ -2594,7 +2594,7 @@ impl ConfigWidget {
                     "Configure render behavior.",
                     first_section.clone(),
                 );
-                Self::add_bool_option(
+                Self::add_int_option(
                     &container,
                     &mut options,
                     "direct_scanout",
