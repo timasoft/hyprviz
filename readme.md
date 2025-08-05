@@ -44,9 +44,11 @@ paru -S hyprviz-bin
 - [x] Improve colour options
 - [x] Create aur repo
 - [x] Add default values
+- [ ] Add ability to create and switch between custom profiles
 - [ ] Add bind section
 - [ ] Add windowrule section
 - [ ] Add other config sections from Hyprland
+- [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
 ## Credits:
