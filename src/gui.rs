@@ -1,8 +1,8 @@
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton,
     DropDown, Entry, FileDialog, Frame, HeaderBar, Image, Justification, Label, Orientation,
-    Popover, ScrolledWindow, SpinButton, Stack, StackSidebar, StringList, Switch, Widget, gdk,
-    glib, prelude::*,
+    Popover, ScrolledWindow, SearchEntry, SpinButton, Stack, StackSidebar, StringList, Switch,
+    Widget, gdk, glib, prelude::*,
 };
 
 use hyprparser::HyprlandConfig;
@@ -82,12 +82,13 @@ fn add_dropdown_option(
 
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
-    config_widgets: HashMap<String, ConfigWidget>,
+    pub config_widgets: HashMap<String, ConfigWidget>,
     pub save_button: Button,
+    pub search_entry: SearchEntry,
     content_box: Box,
     changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
     stack: Stack,
-    sidebar: StackSidebar,
+    pub sidebar: StackSidebar,
     load_config_button: Button,
     save_config_button: Button,
     pub gear_menu: Rc<RefCell<Popover>>,
@@ -118,8 +119,17 @@ impl ConfigGUI {
         gear_menu_box.set_margin_start(5);
         gear_menu_box.set_margin_end(5);
 
-        let save_config_button = Button::with_label("Save HyprViz Config");
-        let load_config_button = Button::with_label("Load HyprViz Config");
+        let search_button = Button::from_icon_name("system-search-symbolic");
+        let search_entry = SearchEntry::new();
+        search_entry.set_width_chars(25);
+
+        let popover = gtk::Popover::new();
+        popover.set_child(Some(&search_entry));
+        popover.set_position(gtk::PositionType::Bottom);
+        popover.set_parent(&search_button);
+
+        let save_config_button = Button::with_label("Save HyprGUI Config");
+        let load_config_button = Button::with_label("Load HyprGUI Config");
 
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
@@ -131,27 +141,33 @@ impl ConfigGUI {
             gear_menu_clone.borrow().popup();
         });
 
-        let tooltip_button = Button::new();
-        let question_mark_icon = Image::from_icon_name("dialog-question-symbolic");
-        tooltip_button.set_child(Some(&question_mark_icon));
-        tooltip_button.set_has_frame(false);
-        header_bar.pack_start(&tooltip_button);
-
-        let popover = Popover::new();
-        let tooltip_text = "The save button saves the options that you chose in the gui and exports it to json format, likewise the load button loads these saved options from the exported json file; automatically filling in the options in the gui with the specified ones in the json file, clicking save to apply these changes is still necessary though.";
-        let tooltip_label = Label::new(Some(tooltip_text));
-        tooltip_label.set_margin_top(5);
-        tooltip_label.set_margin_bottom(5);
-        tooltip_label.set_margin_start(5);
-        tooltip_label.set_margin_end(5);
-        tooltip_label.set_wrap(true);
-        tooltip_label.set_max_width_chars(50);
-        popover.set_child(Some(&tooltip_label));
-
-        tooltip_button.connect_clicked(move |button| {
-            popover.set_parent(button);
-            popover.popup();
+        let popover_clone = popover.clone();
+        let search_entry_clone = search_entry.clone();
+        search_button.connect_clicked(move |_| {
+            if !popover_clone.is_visible() {
+                popover_clone.popup();
+                search_entry_clone.grab_focus();
+            }
         });
+
+        let popover_clone = popover.clone();
+        search_entry.connect_activate(move |_| {
+            popover_clone.popdown();
+        });
+
+        let popover_clone = popover.clone();
+        let key_controller = gtk::EventControllerKey::new();
+        key_controller.connect_key_pressed(move |_, key, _, _| {
+            if key == gdk::Key::Escape {
+                popover_clone.popdown();
+                glib::Propagation::Stop
+            } else {
+                glib::Propagation::Proceed
+            }
+        });
+        search_entry.add_controller(key_controller);
+
+        header_bar.pack_start(&search_button);
 
         let save_button = Button::with_label("Save");
         header_bar.pack_end(&save_button);
@@ -177,6 +193,7 @@ impl ConfigGUI {
             window,
             config_widgets,
             save_button,
+            search_entry,
             content_box,
             changed_options: Rc::new(RefCell::new(HashMap::new())),
             stack,
@@ -588,8 +605,8 @@ pub struct WidgetData {
     pub default: String,
 }
 pub struct ConfigWidget {
-    options: HashMap<String, WidgetData>,
-    scrolled_window: ScrolledWindow,
+    pub options: HashMap<String, WidgetData>,
+    pub scrolled_window: ScrolledWindow,
 }
 
 impl ConfigWidget {
