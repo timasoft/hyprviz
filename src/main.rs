@@ -188,7 +188,7 @@ fn save_config_file(gui: Rc<RefCell<gui::ConfigGUI>>) {
             }
         }
     } else {
-        gui_ref.custom_info_popup("Saving failed", "No changes to save.", true);
+        gui_ref.custom_error_popup("Saving failed", "No changes to save.", true);
     }
 }
 
