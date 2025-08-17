@@ -1,2 +1,4 @@
 /target
 *.sh
+result
+result-*
