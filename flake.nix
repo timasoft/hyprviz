@@ -18,11 +18,11 @@
         nativeBuildInputs = [ pkgs.pkg-config ];
       };
     in {
-      packages.${system}.default = hyprviz;
+      packages.default = hyprviz;
 
       defaultPackage = hyprviz;
 
-      devShells.${system}.default = pkgs.mkShell {
+      devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
           fish
           cargo rustc rustfmt clippy rust-analyzer
