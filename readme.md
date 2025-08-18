@@ -38,6 +38,9 @@ paru -S <package>
 This project is packaged as a Nix flake.
 Make sure you have flakes enabled in Nix.
 
+⚠️ Note: when installing on NixOS via flakes, no `.desktop` file is provided.  
+You will need to create your own `.desktop` entry if you want Hyprviz to appear in application menus.
+
 You can run **hyprviz** directly with:
 ```bash
 nix run github:timasoft/hyprviz
