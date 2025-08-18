@@ -34,6 +34,42 @@ Or, if you're using an [AUR Helper](https://wiki.archlinux.org/title/AUR_helpers
 paru -S <package>
 ```
 
+### NixOS
+This project is packaged as a Nix flake.
+Make sure you have flakes enabled in Nix.
+
+You can run **hyprviz** directly with:
+```bash
+nix run github:timasoft/hyprviz
+```
+
+If you want to have hyprviz always available in your $PATH:
+```bash
+nix profile install github:timasoft/hyprviz
+```
+
+If you manage your NixOS configuration with flakes, add hyprviz as an input in your flake.nix:
+```nix
+{
+  inputs.hyprviz.url = "github:timasoft/hyprviz";
+
+  outputs = { self, nixpkgs, hyprviz, ... }:
+    {
+      nixosConfigurations.my-hostname = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./configuration.nix
+          {
+            environment.systemPackages = [
+              hyprviz.packages.x86_64-linux.hyprviz
+            ];
+          }
+        ];
+      };
+    };
+}
+```
+
 ## Building from source
 1. Install Rust (preferably `rustup`) through your distro's package or [the official script](https://www.rust-lang.org/tools/install)
 2. Install `git`, `pango` and `gtk4`
