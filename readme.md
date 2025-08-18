@@ -17,19 +17,21 @@ Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprla
 ## Installation
 
 ### Arch Linux
+There are 2 different [AUR](https://aur.archlinux.org) packages available:
 
+- [hyprviz](https://aur.archlinux.org/packages/hyprviz) - Latest release built from source
 - [hyprviz-bin](https://aur.archlinux.org/packages/hyprviz-bin) - Latest release in binary form
 
-Install the package with:
+Install the preferred package with:
 ```bash
-git clone https://aur.archlinux.org/hyprviz-bin.git
-cd hyprviz-bin
+git clone https://aur.archlinux.org/<package>.git
+cd <package>
 makepkg -si
 ```
 
 Or, if you're using an [AUR Helper](https://wiki.archlinux.org/title/AUR_helpers), it's even simpler (using [paru](https://github.com/Morganamilo/paru) as an example):
 ```bash
-paru -S hyprviz-bin
+paru -S <package>
 ```
 
 ## Building from source
