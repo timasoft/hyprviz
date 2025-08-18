@@ -48,6 +48,7 @@ paru -S <package>
 - [x] Add default values
 - [ ] Add support for sourced files
 - [ ] Add ability to create and switch between custom profiles
+- [ ] Add system info section
 - [ ] Add bind section
 - [ ] Add windowrule section
 - [ ] Add other config sections from Hyprland
