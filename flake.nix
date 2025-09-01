@@ -16,6 +16,9 @@
         src = ./.;
         buildInputs = with pkgs; [ gtk4 cairo pango graphene ];
         nativeBuildInputs = [ pkgs.pkg-config ];
+        postInstall = ''
+          install -Dm644 hyprviz.desktop -t $out/share/applications
+        '';
       };
     in {
       packages.default = hyprviz;
