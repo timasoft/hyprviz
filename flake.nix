@@ -15,7 +15,7 @@
       hyprviz = naerskLib.buildPackage {
         src = ./.;
         buildInputs = with pkgs; [ gtk4 cairo pango graphene ];
-        nativeBuildInputs = [ pkgs.pkg-config ];
+        nativeBuildInputs = with pkgs; [ pkg-config wrapGAppsHook4 ];
         postInstall = ''
           install -Dm644 hyprviz.desktop -t $out/share/applications
         '';
