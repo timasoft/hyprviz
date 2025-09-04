@@ -2,3 +2,5 @@
 *.sh
 result
 result-*
+.gptree_config
+gptree_output.txt
