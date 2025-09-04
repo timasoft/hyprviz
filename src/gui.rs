@@ -1,8 +1,8 @@
 use gtk::{
-    AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton,
-    DropDown, Entry, FileDialog, Frame, HeaderBar, Image, Justification, Label, Orientation,
-    Popover, ScrolledWindow, SearchEntry, SpinButton, Stack, StackSidebar, StringList, Switch,
-    Widget, gdk, glib, prelude::*,
+    gdk, glib, prelude::*, AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialog,
+    ColorDialogButton, DropDown, Entry, FileDialog, Frame, HeaderBar, Image, Justification, Label,
+    Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton, Stack, StackSidebar, StringList,
+    Switch, Widget,
 };
 
 use hyprparser::HyprlandConfig;
@@ -128,8 +128,8 @@ impl ConfigGUI {
         popover.set_position(gtk::PositionType::Bottom);
         popover.set_parent(&search_button);
 
-        let save_config_button = Button::with_label("Save HyprGUI Config");
-        let load_config_button = Button::with_label("Load HyprGUI Config");
+        let save_config_button = Button::with_label("Save HyprViz Config");
+        let load_config_button = Button::with_label("Load HyprViz Config");
 
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
@@ -223,10 +223,10 @@ impl ConfigGUI {
                         .accept_label("Open")
                         .build();
 
-                    if let Ok(file) = dialog.open_future(Some(&window)).await {
-                        if let Some(path) = file.path() {
-                            gui.borrow_mut().load_hyprviz_config(&path);
-                        }
+                    if let Ok(file) = dialog.open_future(Some(&window)).await
+                        && let Some(path) = file.path()
+                    {
+                        gui.borrow_mut().load_hyprviz_config(&path);
                     }
                 });
             });
@@ -250,10 +250,10 @@ impl ConfigGUI {
                         .accept_label("Save")
                         .build();
 
-                    if let Ok(file) = dialog.save_future(Some(&window)).await {
-                        if let Some(path) = file.path() {
-                            gui.borrow_mut().save_hyprviz_config(&path);
-                        }
+                    if let Ok(file) = dialog.save_future(Some(&window)).await
+                        && let Some(path) = file.path()
+                    {
+                        gui.borrow_mut().save_hyprviz_config(&path);
                     }
                 });
             });
@@ -269,14 +269,14 @@ impl ConfigGUI {
                         if parts.len() >= 2 {
                             let category = parts[0].to_string();
                             let name = parts[1..].join(":");
-                            if let Some(widget) = self.config_widgets.get(&category) {
-                                if let Some(option_widget) = widget.options.get(&name) {
-                                    let actual_widget = &option_widget.widget;
-                                    self.set_widget_value(actual_widget, &value);
-                                    self.changed_options
-                                        .borrow_mut()
-                                        .insert((category, name), value);
-                                }
+                            if let Some(widget) = self.config_widgets.get(&category)
+                                && let Some(option_widget) = widget.options.get(&name)
+                            {
+                                let actual_widget = &option_widget.widget;
+                                self.set_widget_value(actual_widget, &value);
+                                self.changed_options
+                                    .borrow_mut()
+                                    .insert((category, name), value);
                             }
                         }
                     }
@@ -355,13 +355,12 @@ impl ConfigGUI {
         } else if let Some(dropdown) = widget.downcast_ref::<DropDown>() {
             let model = dropdown.model().unwrap();
             for i in 0..model.n_items() {
-                if let Some(item) = model.item(i) {
-                    if let Some(string_object) = item.downcast_ref::<gtk::StringObject>() {
-                        if string_object.string() == value {
-                            dropdown.set_selected(i);
-                            break;
-                        }
-                    }
+                if let Some(item) = model.item(i)
+                    && let Some(string_object) = item.downcast_ref::<gtk::StringObject>()
+                    && string_object.string() == value
+                {
+                    dropdown.set_selected(i);
+                    break;
                 }
             }
         }
@@ -423,11 +422,11 @@ impl ConfigGUI {
         self.content_box.append(&self.stack);
 
         self.stack.connect_visible_child_notify(move |stack| {
-            if let Some(child) = stack.visible_child() {
-                if let Some(scrolled_window) = child.downcast_ref::<ScrolledWindow>() {
-                    let adj = scrolled_window.vadjustment();
-                    adj.set_value(adj.lower());
-                }
+            if let Some(child) = stack.visible_child()
+                && let Some(scrolled_window) = child.downcast_ref::<ScrolledWindow>()
+            {
+                let adj = scrolled_window.vadjustment();
+                adj.set_value(adj.lower());
             }
         });
 
@@ -3746,13 +3745,12 @@ impl ConfigWidget {
             } else if let Some(dropdown) = widget.downcast_ref::<gtk::DropDown>() {
                 let model = dropdown.model().unwrap();
                 for i in 0..model.n_items() {
-                    if let Some(item) = model.item(i) {
-                        if let Some(string_object) = item.downcast_ref::<gtk::StringObject>() {
-                            if string_object.string() == value {
-                                dropdown.set_selected(i);
-                                break;
-                            }
-                        }
+                    if let Some(item) = model.item(i)
+                        && let Some(string_object) = item.downcast_ref::<gtk::StringObject>()
+                        && string_object.string() == value
+                    {
+                        dropdown.set_selected(i);
+                        break;
                     }
                 }
                 let category = category.to_string();
@@ -3760,11 +3758,11 @@ impl ConfigWidget {
                 let changed_options = changed_options.clone();
                 dropdown.connect_selected_notify(move |dd| {
                     let mut changes = changed_options.borrow_mut();
-                    if let Some(selected) = dd.selected_item() {
-                        if let Some(string_object) = selected.downcast_ref::<gtk::StringObject>() {
-                            let new_value = string_object.string().to_string();
-                            changes.insert((category.clone(), name.clone()), new_value);
-                        }
+                    if let Some(selected) = dd.selected_item()
+                        && let Some(string_object) = selected.downcast_ref::<gtk::StringObject>()
+                    {
+                        let new_value = string_object.string().to_string();
+                        changes.insert((category.clone(), name.clone()), new_value);
                     }
                 });
             }
