@@ -4,9 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    ignore:
-      - dependency-name: "gtk"
-        versions: '>= 0.10'
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
