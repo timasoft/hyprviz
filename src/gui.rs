@@ -3255,7 +3255,7 @@ impl ConfigWidget {
         let label_box = Box::new(Orientation::Horizontal, 5);
         label_box.set_hexpand(true);
 
-        let label_widget = Label::new(Some(label));
+        let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
         label_widget.set_halign(gtk::Align::Start);
 
         let tooltip_button = Button::new();
@@ -3345,7 +3345,7 @@ impl ConfigWidget {
         let label_box = Box::new(Orientation::Horizontal, 5);
         label_box.set_hexpand(true);
 
-        let label_widget = Label::new(Some(label));
+        let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
         label_widget.set_halign(gtk::Align::Start);
 
         let tooltip_button = Button::new();
@@ -3425,7 +3425,7 @@ impl ConfigWidget {
         let label_box = Box::new(Orientation::Horizontal, 5);
         label_box.set_hexpand(true);
 
-        let label_widget = Label::new(Some(label));
+        let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
         label_widget.set_halign(gtk::Align::Start);
 
         let tooltip_button = Button::new();
@@ -3507,7 +3507,7 @@ impl ConfigWidget {
         let label_box = Box::new(Orientation::Horizontal, 5);
         label_box.set_hexpand(true);
 
-        let label_widget = Label::new(Some(label));
+        let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
         label_widget.set_halign(gtk::Align::Start);
 
         let tooltip_button = Button::new();
@@ -3589,7 +3589,7 @@ impl ConfigWidget {
         let label_box = Box::new(Orientation::Horizontal, 5);
         label_box.set_hexpand(true);
 
-        let label_widget = Label::new(Some(label));
+        let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
         label_widget.set_halign(gtk::Align::Start);
 
         let tooltip_button = Button::new();
@@ -3669,7 +3669,7 @@ impl ConfigWidget {
         let label_box = Box::new(Orientation::Horizontal, 5);
         label_box.set_hexpand(true);
 
-        let label_widget = Label::new(Some(label));
+        let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
         label_widget.set_halign(gtk::Align::Start);
 
         let tooltip_button = Button::new();
