@@ -13,73 +13,6 @@ use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-fn add_dropdown_option(
-    container: &Box,
-    options: &mut HashMap<String, WidgetData>,
-    name: &str,
-    label: &str,
-    description: &str,
-    items: &[&str],
-    default: &str,
-) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
-
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
-
-    let label_widget = Label::new(Some(label));
-    label_widget.set_halign(gtk::Align::Start);
-
-    let tooltip_button = Button::new();
-    let question_mark_icon = Image::from_icon_name("dialog-question-symbolic");
-    tooltip_button.set_child(Some(&question_mark_icon));
-    tooltip_button.set_has_frame(false);
-
-    let popover = Popover::new();
-    let description_label = Label::new(Some(description));
-    description_label.set_wrap(true);
-    description_label.set_width_chars(40);
-    description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
-    popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
-
-    tooltip_button.connect_clicked(move |button| {
-        popover.set_parent(button);
-        popover.popup();
-    });
-
-    label_box.append(&label_widget);
-    label_box.append(&tooltip_button);
-
-    let string_list = StringList::new(items);
-    let dropdown = DropDown::new(Some(string_list), None::<gtk::Expression>);
-    dropdown.set_halign(gtk::Align::End);
-    dropdown.set_width_request(100);
-
-    hbox.append(&label_box);
-    hbox.append(&dropdown);
-
-    container.append(&hbox);
-
-    options.insert(
-        name.to_string(),
-        WidgetData {
-            widget: dropdown.upcast(),
-            default: default.to_string(),
-        },
-    );
-}
-
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
     pub config_widgets: HashMap<String, ConfigWidget>,
@@ -522,69 +455,71 @@ impl ConfigGUI {
 
 fn get_option_limits(name: &str, description: &str) -> (f64, f64, f64) {
     match name {
-        "border_size" => (0.0, 10.0, 1.0),
-        "gaps_in" | "gaps_out" | "gaps_workspaces" | "float_gaps" => (0.0, 500.0, 1.0),
-        "resize_corner" => (0.0, 4.0, 1.0),
-        "rounding" => (0.0, 500.0, 1.0),
-        "rounding_power" => (2.0, 10.0, 0.01),
         "active_opacity" | "inactive_opacity" | "fullscreen_opacity" => (0.0, 1.0, 0.01),
-        "shadow:range" => (0.0, 500.0, 1.0),
-        "shadow:render_power" => (1.0, 4.0, 1.0),
-        "shadow:scale" => (0.0, 1.0, 0.01),
-        "dim_strength" | "dim_special" | "dim_around" => (0.0, 1.0, 0.01),
-        "blur:size" => (1.0, 20.0, 1.0),
-        "blur:passes" => (1.0, 10.0, 1.0),
-        "blur:noise" => (0.0, 1.0, 0.01),
-        "blur:contrast" => (0.0, 2.0, 0.01),
         "blur:brightness" => (0.0, 2.0, 0.01),
-        "blur:vibrancy" | "blur:vibrancy_darkness" => (0.0, 1.0, 0.01),
+        "blur:contrast" => (0.0, 2.0, 0.01),
+        "blur:noise" => (0.0, 1.0, 0.01),
+        "blur:passes" => (1.0, 10.0, 1.0),
         "blur:popups_ignorealpha" => (0.0, 1.0, 0.01),
-        "touchpad:drag_3fg" => (0.0, 2.0, 1.0),
-        "sensitivity" => (-1.0, 1.0, 0.02),
-        "scroll_button" => (0.0, 9.0, 1.0),
-        "scroll_factor" => (0.1, 10.0, 0.1),
-        "follow_mouse" => (0.0, 3.0, 1.0),
-        "follow_mouse_threshold" => (0.0, 500.0, 1.0),
-        "float_switch_override_focus" => (0.0, 2.0, 1.0),
-        "workspace_swipe_fingers" => (2.0, 5.0, 1.0),
-        "workspace_swipe_distance" => (100.0, 500.0, 10.0),
-        "workspace_swipe_min_speed_to_force" => (0.0, 100.0, 1.0),
-        "workspace_swipe_cancel_ratio" => (0.0, 1.0, 0.01),
-        "workspace_swipe_direction_lock_threshold" => (0.0, 50.0, 1.0),
-        "drag_into_group" => (0.0, 2.0, 1.0),
-        "force_default_wallpaper" => (-1.0, 2.0, 1.0),
-        "vrr" => (0.0, 3.0, 1.0),
-        "render_ahead_safezone" => (0.0, 10.0, 1.0),
-        "new_window_takes_over_fullscreen" => (0.0, 2.0, 1.0),
-        "initial_workspace_tracking" => (0.0, 2.0, 1.0),
-        "render_unfocused_fps" => (1.0, 60.0, 1.0),
-        "scroll_event_delay" => (0.0, 2000.0, 10.0),
-        "workspace_center_on" => (0.0, 1.0, 1.0),
-        "focus_preferred_method" => (0.0, 1.0, 1.0),
-        "force_introspection" => (0.0, 2.0, 1.0),
-        "explicit_sync" | "explicit_sync_kms" => (0.0, 2.0, 1.0),
-        "min_refresh_rate" => (1.0, 240.0, 1.0),
-        "hotspot_padding" => (0.0, 10.0, 1.0),
-        "inactive_timeout" => (0.0, 60.0, 1.0),
-        "zoom_factor" => (1.0, 10.0, 0.1),
+        "blur:size" => (1.0, 20.0, 1.0),
+        "blur:vibrancy" | "blur:vibrancy_darkness" => (0.0, 1.0, 0.01),
+        "border_size" => (0.0, 10.0, 1.0),
         "damage_tracking" => (0.0, 2.0, 1.0),
-        "watchdog_timeout" => (0.0, 60.0, 1.0),
+        "dim_strength" | "dim_special" | "dim_around" => (0.0, 1.0, 0.01),
+        "drag_into_group" => (0.0, 2.0, 1.0),
+        "dwindle:default_split_ratio" => (0.1, 1.9, 0.02),
+        "emulate_discrete_scroll" => (0.0, 2.0, 1.0),
         "error_limit" => (1.0, 100.0, 1.0),
         "error_position" => (0.0, 1.0, 1.0),
-        "repeat_rate" => (1.0, 1000.0, 1.0),
-        "repeat_delay" => (100.0, 5000.0, 100.0),
-        "touchpad:scroll_factor" => (0.1, 10.0, 0.1),
-        "touchdevice:transform" => (0.0, 7.0, 1.0),
-        "tablet:transform" => (0.0, 7.0, 1.0),
-        "off_window_axis_events" => (0.0, 3.0, 1.0),
-        "emulate_discrete_scroll" => (0.0, 2.0, 1.0),
+        "explicit_sync" | "explicit_sync_kms" => (0.0, 2.0, 1.0),
+        "float_switch_override_focus" => (0.0, 2.0, 1.0),
         "focus_on_close" => (0.0, 1.0, 1.0),
+        "focus_preferred_method" => (0.0, 1.0, 1.0),
+        "follow_mouse" => (0.0, 3.0, 1.0),
+        "follow_mouse_threshold" => (0.0, 500.0, 1.0),
+        "force_default_wallpaper" => (-1.0, 2.0, 1.0),
+        "force_introspection" => (0.0, 2.0, 1.0),
+        "gaps_in" | "gaps_out" | "gaps_workspaces" | "float_gaps" => (0.0, 500.0, 1.0),
         "groupbar:font_size" => (4.0, 32.0, 1.0),
         "groupbar:height" => (10.0, 50.0, 1.0),
         "groupbar:priority" => (0.0, 10.0, 1.0),
+        "hotspot_padding" => (0.0, 10.0, 1.0),
+        "inactive_timeout" => (0.0, 60.0, 1.0),
+        "initial_workspace_tracking" => (0.0, 2.0, 1.0),
         "lockdead_screen_delay" => (0.0, 5000.0, 100.0),
-        "dwindle:default_split_ratio" => (0.1, 1.9, 0.02),
         "manual_crash" => (0.0, 1.0, 1.0),
+        "min_refresh_rate" => (1.0, 240.0, 1.0),
+        "new_window_takes_over_fullscreen" => (0.0, 2.0, 1.0),
+        "off_window_axis_events" => (0.0, 3.0, 1.0),
+        "render_ahead_safezone" => (0.0, 10.0, 1.0),
+        "render_unfocused_fps" => (1.0, 60.0, 1.0),
+        "repeat_delay" => (100.0, 5000.0, 100.0),
+        "repeat_rate" => (1.0, 1000.0, 1.0),
+        "resize_corner" => (0.0, 4.0, 1.0),
+        "rounding" => (0.0, 500.0, 1.0),
+        "rounding_power" => (2.0, 10.0, 0.01),
+        "scroll_button" => (0.0, 9.0, 1.0),
+        "scroll_event_delay" => (0.0, 2000.0, 10.0),
+        "scroll_factor" => (0.1, 10.0, 0.1),
+        "sensitivity" => (-1.0, 1.0, 0.02),
+        "shadow:range" => (0.0, 500.0, 1.0),
+        "shadow:render_power" => (1.0, 4.0, 1.0),
+        "shadow:scale" => (0.0, 1.0, 0.01),
+        "tablet:transform" => (0.0, 7.0, 1.0),
+        "touchdevice:transform" => (0.0, 7.0, 1.0),
+        "touchpad:drag_3fg" => (0.0, 2.0, 1.0),
+        "touchpad:drag_lock" => (0.0, 2.0, 1.0),
+        "touchpad:scroll_factor" => (0.1, 10.0, 0.1),
+        "vrr" => (0.0, 3.0, 1.0),
+        "warp_on_toggle_special" => (0.0, 2.0, 1.0),
+        "watchdog_timeout" => (0.0, 60.0, 1.0),
+        "workspace_center_on" => (0.0, 1.0, 1.0),
+        "workspace_swipe_cancel_ratio" => (0.0, 1.0, 0.01),
+        "workspace_swipe_direction_lock_threshold" => (0.0, 50.0, 1.0),
+        "workspace_swipe_distance" => (100.0, 500.0, 10.0),
+        "workspace_swipe_fingers" => (2.0, 5.0, 1.0),
+        "workspace_swipe_min_speed_to_force" => (0.0, 100.0, 1.0),
+        "zoom_factor" => (1.0, 10.0, 0.1),
         _ => {
             if description.contains("[0.0 - 1.0]") {
                 (0.0, 1.0, 0.01)
@@ -645,7 +580,7 @@ impl ConfigWidget {
                     "Choose the default layout.",
                     first_section.clone(),
                 );
-                add_dropdown_option(
+                Self::add_dropdown_option(
                     &container,
                     &mut options,
                     "layout",
@@ -1497,7 +1432,7 @@ impl ConfigWidget {
                     "Tapping on the touchpad with 1, 2, or 3 fingers will send LMB, RMB, and MMB respectively.",
                     "true",
                 );
-                Self::add_bool_option(
+                Self::add_int_option(
                     &container,
                     &mut options,
                     "touchpad:drag_lock",
@@ -2757,7 +2692,7 @@ impl ConfigWidget {
                     "Move the cursor to the last focused window after changing the workspace.\n Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option).\n[0/1/2]",
                     "0",
                 );
-                Self::add_bool_option(
+                Self::add_int_option(
                     &container,
                     &mut options,
                     "warp_on_toggle_special",
@@ -3163,7 +3098,7 @@ impl ConfigWidget {
                     "The size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave.\n[0.0 - 1.0]",
                     "0.55",
                 );
-                add_dropdown_option(
+                Self::add_dropdown_option(
                     &container,
                     &mut options,
                     "master:new_status",
@@ -3180,7 +3115,7 @@ impl ConfigWidget {
                     "Whether a newly open window should be on the top of the stack",
                     "false",
                 );
-                add_dropdown_option(
+                Self::add_dropdown_option(
                     &container,
                     &mut options,
                     "master:new_on_active",
@@ -3189,7 +3124,7 @@ impl ConfigWidget {
                     &["before", "after", "none"],
                     "none",
                 );
-                add_dropdown_option(
+                Self::add_dropdown_option(
                     &container,
                     &mut options,
                     "master:orientation",
@@ -3214,7 +3149,7 @@ impl ConfigWidget {
                     "When using orientation=center, make the master window centered only when at least this many slave windows are open.\n(Set 0 to always_center_master)",
                     "2",
                 );
-                add_dropdown_option(
+                Self::add_dropdown_option(
                     &container,
                     &mut options,
                     "center_master_fallback",
@@ -3302,12 +3237,13 @@ impl ConfigWidget {
         container.append(&section_box);
     }
 
-    fn add_int_option(
+    fn add_dropdown_option(
         container: &Box,
         options: &mut HashMap<String, WidgetData>,
         name: &str,
         label: &str,
         description: &str,
+        items: &[&str],
         default: &str,
     ) {
         let hbox = Box::new(Orientation::Horizontal, 10);
@@ -3349,21 +3285,44 @@ impl ConfigWidget {
         label_box.append(&label_widget);
         label_box.append(&tooltip_button);
 
-        let (min, max, step) = get_option_limits(name, description);
-        let spin_button = SpinButton::with_range(min, max, step);
-        spin_button.set_digits(0);
-        spin_button.set_halign(gtk::Align::End);
-        spin_button.set_width_request(100);
+        let string_list = StringList::new(items);
+        let dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
+        dropdown.set_halign(gtk::Align::End);
+        dropdown.set_width_request(100);
+
+        let reset_button = Button::new();
+        let reset_icon = Image::from_icon_name("view-refresh-symbolic");
+        reset_button.set_child(Some(&reset_icon));
+        reset_button.set_has_frame(false);
+
+        let dropdown_clone = dropdown.clone();
+        let parsed_default: String = default
+            .parse()
+            .expect(&format!("Failed to parse the default value for '{}'", name));
+
+        reset_button.connect_clicked(move |_| {
+            for idx in 0..string_list.n_items() {
+                if let Some(item) = string_list.item(idx) {
+                    if let item_str = item.property::<String>("string") {
+                        if item_str == parsed_default {
+                            dropdown_clone.set_selected(idx as u32);
+                            break;
+                        }
+                    }
+                }
+            }
+        });
 
         hbox.append(&label_box);
-        hbox.append(&spin_button);
+        hbox.append(&dropdown);
+        hbox.append(&reset_button);
 
         container.append(&hbox);
 
         options.insert(
             name.to_string(),
             WidgetData {
-                widget: spin_button.upcast(),
+                widget: dropdown.upcast(),
                 default: default.to_string(),
             },
         );
@@ -3420,8 +3379,23 @@ impl ConfigWidget {
         switch.set_halign(gtk::Align::End);
         switch.set_valign(gtk::Align::Center);
 
+        let reset_button = Button::new();
+        let reset_icon = Image::from_icon_name("view-refresh-symbolic");
+        reset_button.set_child(Some(&reset_icon));
+        reset_button.set_has_frame(false);
+
+        let switch_clone = switch.clone();
+        let parsed_default: bool = default
+            .parse()
+            .expect(&format!("Failed to parse the default value for '{}'", name));
+
+        reset_button.connect_clicked(move |_| {
+            switch_clone.set_active(parsed_default);
+        });
+
         hbox.append(&label_box);
         hbox.append(&switch);
+        hbox.append(&reset_button);
 
         container.append(&hbox);
 
@@ -3429,6 +3403,88 @@ impl ConfigWidget {
             name.to_string(),
             WidgetData {
                 widget: switch.upcast(),
+                default: default.to_string(),
+            },
+        );
+    }
+
+    fn add_int_option(
+        container: &Box,
+        options: &mut HashMap<String, WidgetData>,
+        name: &str,
+        label: &str,
+        description: &str,
+        default: &str,
+    ) {
+        let hbox = Box::new(Orientation::Horizontal, 10);
+        hbox.set_margin_start(10);
+        hbox.set_margin_end(10);
+        hbox.set_margin_top(5);
+        hbox.set_margin_bottom(5);
+
+        let label_box = Box::new(Orientation::Horizontal, 5);
+        label_box.set_hexpand(true);
+
+        let label_widget = Label::new(Some(label));
+        label_widget.set_halign(gtk::Align::Start);
+
+        let tooltip_button = Button::new();
+        let question_mark_icon = Image::from_icon_name("dialog-question-symbolic");
+        tooltip_button.set_child(Some(&question_mark_icon));
+        tooltip_button.set_has_frame(false);
+
+        let popover = Popover::new();
+        let description_label = Label::new(Some(description));
+        description_label.set_wrap(true);
+        description_label.set_width_chars(40);
+        description_label.set_max_width_chars(60);
+        description_label.set_justify(Justification::Fill);
+        description_label.set_xalign(0.0);
+        description_label.set_margin_top(5);
+        description_label.set_margin_bottom(5);
+        description_label.set_margin_start(5);
+        description_label.set_margin_end(5);
+        popover.set_child(Some(&description_label));
+        popover.set_position(gtk::PositionType::Right);
+
+        tooltip_button.connect_clicked(move |button| {
+            popover.set_parent(button);
+            popover.popup();
+        });
+
+        label_box.append(&label_widget);
+        label_box.append(&tooltip_button);
+
+        let (min, max, step) = get_option_limits(name, description);
+        let spin_button = SpinButton::with_range(min, max, step);
+        spin_button.set_digits(0);
+        spin_button.set_halign(gtk::Align::End);
+        spin_button.set_width_request(100);
+
+        let reset_button = Button::new();
+        let reset_icon = Image::from_icon_name("view-refresh-symbolic");
+        reset_button.set_child(Some(&reset_icon));
+        reset_button.set_has_frame(false);
+
+        let spin_clone = spin_button.clone();
+        let parsed_default: f64 = default
+            .parse()
+            .expect(&format!("Failed to parse the default value for '{}'", name));
+
+        reset_button.connect_clicked(move |_| {
+            spin_clone.set_value(parsed_default);
+        });
+
+        hbox.append(&label_box);
+        hbox.append(&spin_button);
+        hbox.append(&reset_button);
+
+        container.append(&hbox);
+
+        options.insert(
+            name.to_string(),
+            WidgetData {
+                widget: spin_button.upcast(),
                 default: default.to_string(),
             },
         );
@@ -3487,8 +3543,23 @@ impl ConfigWidget {
         spin_button.set_halign(gtk::Align::End);
         spin_button.set_width_request(100);
 
+        let reset_button = Button::new();
+        let reset_icon = Image::from_icon_name("view-refresh-symbolic");
+        reset_button.set_child(Some(&reset_icon));
+        reset_button.set_has_frame(false);
+
+        let spin_clone = spin_button.clone();
+        let parsed_default: f64 = default
+            .parse()
+            .expect(&format!("Failed to parse the default value for '{}'", name));
+
+        reset_button.connect_clicked(move |_| {
+            spin_clone.set_value(parsed_default);
+        });
+
         hbox.append(&label_box);
         hbox.append(&spin_button);
+        hbox.append(&reset_button);
 
         container.append(&hbox);
 
@@ -3552,8 +3623,23 @@ impl ConfigWidget {
         entry.set_halign(gtk::Align::End);
         entry.set_width_request(100);
 
+        let reset_button = Button::new();
+        let reset_icon = Image::from_icon_name("view-refresh-symbolic");
+        reset_button.set_child(Some(&reset_icon));
+        reset_button.set_has_frame(false);
+
+        let entry_clone = entry.clone();
+        let parsed_default: String = default
+            .parse()
+            .expect(&format!("Failed to parse the default value for '{}'", name));
+
+        reset_button.connect_clicked(move |_| {
+            entry_clone.set_text(&parsed_default);
+        });
+
         hbox.append(&label_box);
         hbox.append(&entry);
+        hbox.append(&reset_button);
 
         container.append(&hbox);
 
@@ -3634,9 +3720,25 @@ impl ConfigWidget {
             entry.set_text(&hex);
         }
 
+        let reset_button = Button::new();
+        let reset_icon = Image::from_icon_name("view-refresh-symbolic");
+        reset_button.set_child(Some(&reset_icon));
+        reset_button.set_has_frame(false);
+
+        let entry_clone = entry.clone();
+        let parsed_default: String = default
+            .parse()
+            .expect(&format!("Failed to parse the default value for '{}'", name));
+
+        reset_button.connect_clicked(move |_| {
+            entry_clone.set_text(&parsed_default);
+        });
+
         hbox.append(&label_box);
         hbox.append(&color_button);
         hbox.append(&entry);
+        hbox.append(&reset_button);
+
         container.append(&hbox);
 
         color_button.connect_rgba_notify(glib::clone!(
