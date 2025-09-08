@@ -84,6 +84,7 @@ pub struct ConfigGUI {
     pub window: ApplicationWindow,
     pub config_widgets: HashMap<String, ConfigWidget>,
     pub save_button: Button,
+    pub undo_button: Button,
     pub search_entry: SearchEntry,
     content_box: Box,
     changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
@@ -171,6 +172,8 @@ impl ConfigGUI {
 
         let save_button = Button::with_label("Save");
         header_bar.pack_end(&save_button);
+        let undo_button = Button::with_label("Undo");
+        header_bar.pack_end(&undo_button);
 
         window.set_titlebar(Some(&header_bar));
 
@@ -193,6 +196,7 @@ impl ConfigGUI {
             window,
             config_widgets,
             save_button,
+            undo_button,
             search_entry,
             content_box,
             changed_options: Rc::new(RefCell::new(HashMap::new())),
@@ -373,7 +377,7 @@ impl ConfigGUI {
             .buttons(&["OK"][..])
             .modal(modal)
             .build();
-        dialog.show(None::<&gtk::Window>);
+        dialog.show(Some(&self.window));
     }
 
     pub fn custom_error_popup(&mut self, title: &str, text: &str, modal: bool) {
@@ -383,7 +387,7 @@ impl ConfigGUI {
             .buttons(&["OK"][..])
             .modal(modal)
             .build();
-        dialog.show(None::<&gtk::Window>);
+        dialog.show(Some(&self.window));
     }
 
     pub fn custom_error_popup_critical(&mut self, title: &str, text: &str, modal: bool) {
@@ -394,7 +398,7 @@ impl ConfigGUI {
             .modal(modal)
             .build();
         dialog.choose(
-            None::<&gtk::Window>,
+            Some(&self.window),
             None::<&gio::Cancellable>,
             move |_res: Result<i32, _>| {
                 std::process::exit(1);

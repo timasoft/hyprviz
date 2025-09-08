@@ -1,6 +1,6 @@
 use gtk::{Application, Button, prelude::*};
 use hyprparser::parse_config;
-use std::{cell::RefCell, env, fs, path::Path, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, env, fs, path::Path, path::PathBuf, process::Command, rc::Rc};
 
 mod gui;
 
@@ -8,7 +8,7 @@ const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 const BACKUP_SUFFIX: &str = "-bak";
 
 fn main() {
-    let app = Application::builder().application_id("hyprviz").build();
+    let app = Application::builder().application_id("io.github.timasoft.hyprviz").build();
 
     app.connect_activate(build_ui);
     app.run();
@@ -47,17 +47,16 @@ fn build_ui(app: &Application) {
         });
 
         let gui_clone = gui.clone();
+        gui.borrow().undo_button.connect_clicked(move |_| {
+            undo_changes(gui_clone.clone());
+        });
+
+        let gui_clone = gui.clone();
         gui.borrow().search_entry.connect_changed(move |entry| {
             filter_options(gui_clone.clone(), entry.text());
         });
 
-        let undo_button = Button::with_label("Undo Changes");
         let copy_button = Button::with_label("Copyright");
-
-        let gui_clone = gui.clone();
-        undo_button.connect_clicked(move |_| {
-            undo_changes(gui_clone.clone());
-        });
 
         let gui_clone = gui.clone();
         copy_button.connect_clicked(move |_| {
@@ -81,7 +80,6 @@ along with this program; if not, see
         if let Some(gear_menu_box) = gui.borrow().gear_menu.borrow().child()
             && let Some(box_widget) = gear_menu_box.downcast_ref::<gtk::Box>()
         {
-            box_widget.append(&undo_button);
             box_widget.append(&copy_button);
         }
     }
@@ -135,6 +133,15 @@ fn filter_options(gui: Rc<RefCell<gui::ConfigGUI>>, search_text: impl AsRef<str>
     }
 }
 
+fn reload_hyprland() {
+    let cmd = Command::new("hyprctl")
+        .arg("reload")
+        .output()
+        .expect("failed to reload hyprland");
+
+    println!("Reloading Hyprland status: {}", cmd.status.code().unwrap_or(-1));
+}
+
 fn save_config_file(gui: Rc<RefCell<gui::ConfigGUI>>) {
     let mut gui_ref = gui.borrow_mut();
     let path = get_config_path();
@@ -176,7 +183,10 @@ fn save_config_file(gui: Rc<RefCell<gui::ConfigGUI>>) {
         let updated_config_str = parsed_config.to_string();
 
         match fs::write(&path, updated_config_str) {
-            Ok(_) => println!("Configuration saved to: ~/{CONFIG_PATH}"),
+            Ok(_) => {
+                println!("Configuration saved to: ~/{CONFIG_PATH}");
+                reload_hyprland();
+            },
             Err(e) => {
                 gui_ref.custom_error_popup(
                     "Saving failed",
@@ -216,6 +226,7 @@ fn undo_changes(gui: Rc<RefCell<gui::ConfigGUI>>) {
                             true,
                         );
                     } else {
+                        reload_hyprland();
                         gui_ref.custom_info_popup(
                             "Undo Successful",
                             "Configuration restored from backup and backup file deleted.",
