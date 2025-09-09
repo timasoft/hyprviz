@@ -3,9 +3,9 @@ use gtk::{
     DropDown, Entry, FileDialog, HeaderBar, Orientation, Popover, ScrolledWindow,
     SearchEntry, SpinButton, Stack, StackSidebar, Switch, Widget, gdk, glib, prelude::*,
 };
-use std::{ cell::RefCell, collections::HashMap, fs, rc::Rc, path::PathBuf };
-use hyprparser::{ HyprlandConfig, parse_config, };
-use crate::utils::{ CONFIG_PATH, BACKUP_SUFFIX, get_config_path, reload_hyprland, };
+use std::{cell::RefCell, collections::HashMap, fs, rc::Rc, path::PathBuf};
+use hyprparser::{HyprlandConfig, parse_config};
+use crate::utils::{CONFIG_PATH, BACKUP_SUFFIX, get_config_path, reload_hyprland};
 use crate::widget::ConfigWidget;
 
 pub struct ConfigGUI {

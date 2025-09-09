@@ -1,4 +1,4 @@
-use std::{ process::Command, path::Path, path::PathBuf, env, };
+use std::{process::Command, path::Path, path::PathBuf, env};
 
 pub fn get_config_path() -> PathBuf {
     Path::new(&env::var("HOME").unwrap_or_else(|_| ".".to_string())).join(CONFIG_PATH)

@@ -1,11 +1,11 @@
 use gtk::{
     Box, Button, ColorDialogButton,
-    ColorDialog, Frame, Image, Justification, Label, StringList,
+    ColorDialog, Frame, Justification, Label, StringList,
     DropDown, Entry, Orientation, Popover, ScrolledWindow,
     SpinButton, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
-use std::{ cell::RefCell, collections::{ HashMap, VecDeque, }, rc::Rc, };
+use std::{cell::RefCell, collections::{HashMap, VecDeque}, rc::Rc,};
 
 pub struct WidgetData {
     pub widget: Widget,
@@ -104,9 +104,7 @@ fn add_dropdown_option(
     dropdown.set_halign(gtk::Align::End);
     dropdown.set_width_request(100);
 
-    let reset_button = Button::new();
-    let reset_icon = Image::from_icon_name("view-refresh-symbolic");
-    reset_button.set_child(Some(&reset_icon));
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.set_has_frame(false);
 
     let dropdown_clone = dropdown.clone();
@@ -190,9 +188,7 @@ fn add_bool_option(
     switch.set_halign(gtk::Align::End);
     switch.set_valign(gtk::Align::Center);
 
-    let reset_button = Button::new();
-    let reset_icon = Image::from_icon_name("view-refresh-symbolic");
-    reset_button.set_child(Some(&reset_icon));
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.set_has_frame(false);
 
     let switch_clone = switch.clone();
@@ -270,9 +266,7 @@ fn add_int_option(
     spin_button.set_halign(gtk::Align::End);
     spin_button.set_width_request(100);
 
-    let reset_button = Button::new();
-    let reset_icon = Image::from_icon_name("view-refresh-symbolic");
-    reset_button.set_child(Some(&reset_icon));
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.set_has_frame(false);
 
     let spin_clone = spin_button.clone();
@@ -350,9 +344,7 @@ fn add_float_option(
     spin_button.set_halign(gtk::Align::End);
     spin_button.set_width_request(100);
 
-    let reset_button = Button::new();
-    let reset_icon = Image::from_icon_name("view-refresh-symbolic");
-    reset_button.set_child(Some(&reset_icon));
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.set_has_frame(false);
 
     let spin_clone = spin_button.clone();
@@ -427,9 +419,7 @@ fn add_string_option(
     entry.set_halign(gtk::Align::End);
     entry.set_width_request(100);
 
-    let reset_button = Button::new();
-    let reset_icon = Image::from_icon_name("view-refresh-symbolic");
-    reset_button.set_child(Some(&reset_icon));
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();
@@ -521,9 +511,7 @@ fn add_color_option(
         entry.set_text(&hex);
     }
 
-    let reset_button = Button::new();
-    let reset_icon = Image::from_icon_name("view-refresh-symbolic");
-    reset_button.set_child(Some(&reset_icon));
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();
@@ -562,8 +550,11 @@ fn add_color_option(
         #[weak]
         entry,
         move |e| {
-            let text = e.text().to_string();
-            if let Ok(color) = gtk::gdk::RGBA::parse(&text) {
+            let text = e.text().trim().to_string();
+
+            if text.len() == 9 && text.starts_with("#")
+                && let Ok(color) = gtk::gdk::RGBA::parse(&text)
+            {
                 color_button.set_rgba(&color);
                 entry.set_css_classes(&[]);
             } else {
@@ -713,7 +704,7 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "float_gaps",
-                    "Fload Gaps",
+                    "Float Gaps",
                     "Gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20).\n-1 means default",
                     "0",
                     (0.0, 500.0, 1.0),
@@ -913,7 +904,7 @@ impl ConfigWidget {
                     "0",
                     (0.0, 500.0, 1.0),
                 );
-                add_int_option(
+                add_float_option(
                     &container,
                     &mut options,
                     "rounding_power",
@@ -1022,7 +1013,7 @@ impl ConfigWidget {
                     "Blur Size",
                     "Blur size (distance)",
                     "8",
-                    (0.0, 500.0, 1.0),
+                    (1.0, 50.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2783,14 +2774,6 @@ impl ConfigWidget {
                     "Cursor Settings",
                     "Configure cursor behavior.",
                     first_section.clone(),
-                );
-                add_bool_option(
-                    &container,
-                    &mut options,
-                    "invisible",
-                    "Invisible",
-                    "Don’t render cursors",
-                    "false",
                 );
                 add_bool_option(
                     &container,
