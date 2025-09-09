@@ -1,7 +1,7 @@
 use gtk::{
-    gdk, glib, prelude::*, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame,
-    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList, Switch,
-    Widget,
+    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Justification, Label,
+    Orientation, Popover, ScrolledWindow, SpinButton, StringList, Switch, Widget, gdk, glib,
+    prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use std::{
