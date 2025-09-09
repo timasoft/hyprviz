@@ -1,11 +1,14 @@
 use gtk::{
-    Box, Button, ColorDialogButton,
-    ColorDialog, Frame, Justification, Label, StringList,
-    DropDown, Entry, Orientation, Popover, ScrolledWindow,
-    SpinButton, Switch, Widget, gdk, glib, prelude::*,
+    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Justification, Label,
+    Orientation, Popover, ScrolledWindow, SpinButton, StringList, Switch, Widget, gdk, glib,
+    prelude::*,
 };
 use hyprparser::HyprlandConfig;
-use std::{cell::RefCell, collections::{HashMap, VecDeque}, rc::Rc,};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, VecDeque},
+    rc::Rc,
+};
 
 pub struct WidgetData {
     pub widget: Widget,
@@ -16,12 +19,7 @@ pub struct ConfigWidget {
     pub scrolled_window: ScrolledWindow,
 }
 
-fn add_section(
-    container: &Box,
-    title: &str,
-    description: &str,
-    first_section: Rc<RefCell<bool>>,
-) {
+fn add_section(container: &Box, title: &str, description: &str, first_section: Rc<RefCell<bool>>) {
     let section_box = Box::new(Orientation::Vertical, 5);
     section_box.set_margin_top(15);
     section_box.set_margin_bottom(10);
@@ -552,7 +550,8 @@ fn add_color_option(
         move |e| {
             let text = e.text().trim().to_string();
 
-            if text.len() == 9 && text.starts_with("#")
+            if text.len() == 9
+                && text.starts_with("#")
                 && let Ok(color) = gtk::gdk::RGBA::parse(&text)
             {
                 color_button.set_rgba(&color);
@@ -603,12 +602,7 @@ fn transform_config(input: String) -> String {
     result.join("\n")
 }
 
-fn extract_value(
-    config: &HyprlandConfig,
-    category: &str,
-    name: &str,
-    default: &str,
-) -> String {
+fn extract_value(config: &HyprlandConfig, category: &str, name: &str, default: &str) -> String {
     let config_str = transform_config(config.to_string());
     if category == "layouts" {
         for line in config_str.lines().rev() {

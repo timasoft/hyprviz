@@ -1,12 +1,12 @@
-use gtk::{
-    AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton,
-    DropDown, Entry, FileDialog, HeaderBar, Orientation, Popover, ScrolledWindow,
-    SearchEntry, SpinButton, Stack, StackSidebar, Switch, Widget, gdk, glib, prelude::*,
-};
-use std::{cell::RefCell, collections::HashMap, fs, rc::Rc, path::PathBuf};
-use hyprparser::{HyprlandConfig, parse_config};
-use crate::utils::{CONFIG_PATH, BACKUP_SUFFIX, get_config_path, reload_hyprland};
+use crate::utils::{BACKUP_SUFFIX, CONFIG_PATH, get_config_path, reload_hyprland};
 use crate::widget::ConfigWidget;
+use gtk::{
+    AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
+    FileDialog, HeaderBar, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton, Stack,
+    StackSidebar, Switch, Widget, gdk, glib, prelude::*,
+};
+use hyprparser::{HyprlandConfig, parse_config};
+use std::{cell::RefCell, collections::HashMap, fs, path::PathBuf, rc::Rc};
 
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
@@ -198,19 +198,19 @@ along with this program; if not, see
         });
 
         let gui_clone = Rc::clone(&gui);
-        gui.borrow().search_entry.connect_changed(move |entry| {
-            gui_clone.borrow().filter_options(entry.text())
-        });
+        gui.borrow()
+            .search_entry
+            .connect_changed(move |entry| gui_clone.borrow().filter_options(entry.text()));
 
         let gui_clone = Rc::clone(&gui);
-        gui.borrow().save_button.connect_clicked(move |_| {
-            gui_clone.borrow().save_config_file()
-        });
+        gui.borrow()
+            .save_button
+            .connect_clicked(move |_| gui_clone.borrow().save_config_file());
 
         let gui_clone = Rc::clone(&gui);
-        gui.borrow().undo_button.connect_clicked(move |_| {
-            gui_clone.borrow_mut().undo_changes()
-        });
+        gui.borrow()
+            .undo_button
+            .connect_clicked(move |_| gui_clone.borrow_mut().undo_changes());
     }
 
     fn load_hyprviz_config(&self, path: &PathBuf) {
@@ -357,10 +357,7 @@ along with this program; if not, see
             if !backup_path.exists()
                 && let Err(e) = fs::copy(&path, &backup_path)
             {
-                self.custom_error_popup(
-                    "Backup failed",
-                    &format!("Failed to create backup: {e}"),
-                );
+                self.custom_error_popup("Backup failed", &format!("Failed to create backup: {e}"));
                 return;
             }
 
@@ -372,7 +369,7 @@ along with this program; if not, see
                 Ok(_) => {
                     println!("Configuration saved to: ~/{CONFIG_PATH}");
                     reload_hyprland();
-                },
+                }
                 Err(e) => {
                     self.custom_error_popup(
                         "Saving failed",
@@ -381,10 +378,7 @@ along with this program; if not, see
                 }
             }
         } else {
-            self.custom_error_popup(
-                "Saving failed",
-                "No changes to save.",
-            );
+            self.custom_error_popup("Saving failed", "No changes to save.");
         }
     }
 

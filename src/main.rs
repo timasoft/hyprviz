@@ -1,15 +1,17 @@
 use gtk::{Application, prelude::*};
+use gui::ConfigGUI;
 use hyprparser::parse_config;
 use std::{cell::RefCell, fs, rc::Rc};
 use utils::{CONFIG_PATH, get_config_path};
-use gui::ConfigGUI;
 
+mod gui;
 mod utils;
 mod widget;
-mod gui;
 
 fn main() {
-    let app = Application::builder().application_id("io.github.timasoft.hyprviz").build();
+    let app = Application::builder()
+        .application_id("io.github.timasoft.hyprviz")
+        .build();
 
     app.connect_activate(build_ui);
     app.run();
