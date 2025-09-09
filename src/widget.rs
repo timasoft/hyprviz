@@ -1,7 +1,7 @@
 use gtk::{
-    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Justification, Label,
-    Orientation, Popover, ScrolledWindow, SpinButton, StringList, Switch, Widget, gdk, glib,
-    prelude::*,
+    gdk, glib, prelude::*, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame,
+    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList, Switch,
+    Widget,
 };
 use hyprparser::HyprlandConfig;
 use std::{
@@ -70,8 +70,15 @@ fn add_dropdown_option(
     let label_box = Box::new(Orientation::Horizontal, 5);
     label_box.set_hexpand(true);
 
-    let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
+    let label_widget = Label::new(None);
     label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
@@ -155,8 +162,15 @@ fn add_bool_option(
     let label_box = Box::new(Orientation::Horizontal, 5);
     label_box.set_hexpand(true);
 
-    let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
+    let label_widget = Label::new(None);
     label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
@@ -231,8 +245,15 @@ fn add_int_option(
     let label_box = Box::new(Orientation::Horizontal, 5);
     label_box.set_hexpand(true);
 
-    let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
+    let label_widget = Label::new(None);
     label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
@@ -309,8 +330,15 @@ fn add_float_option(
     let label_box = Box::new(Orientation::Horizontal, 5);
     label_box.set_hexpand(true);
 
-    let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
+    let label_widget = Label::new(None);
     label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
@@ -386,8 +414,15 @@ fn add_string_option(
     let label_box = Box::new(Orientation::Horizontal, 5);
     label_box.set_hexpand(true);
 
-    let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
+    let label_widget = Label::new(None);
     label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
@@ -461,8 +496,15 @@ fn add_color_option(
     let label_box = Box::new(Orientation::Horizontal, 5);
     label_box.set_hexpand(true);
 
-    let label_widget = Label::new(Some(&format!("{} ({})", label, name)));
+    let label_widget = Label::new(None);
     label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
 
     let popover = Popover::new();
     let description_label = Label::new(Some(description));
