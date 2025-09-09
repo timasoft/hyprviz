@@ -21,7 +21,6 @@ pub struct ConfigGUI {
     content_box: Box,
     stack: Stack,
     sidebar: StackSidebar,
-    gear_menu: Rc<RefCell<Popover>>,
 }
 
 impl ConfigGUI {
@@ -137,7 +136,6 @@ impl ConfigGUI {
             changed_options: Rc::new(RefCell::new(HashMap::new())),
             stack,
             sidebar,
-            gear_menu,
         }
     }
 
@@ -151,8 +149,9 @@ impl ConfigGUI {
                     .title("Load HyprViz Config")
                     .accept_label("Open")
                     .build();
+                let window = gui.borrow().window.clone();
 
-                if let Ok(file) = dialog.open_future(Some(&gui.borrow().window)).await
+                if let Ok(file) = dialog.open_future(Some(&window)).await
                     && let Some(path) = file.path()
                 {
                     gui.borrow().load_hyprviz_config(&path);
@@ -170,8 +169,9 @@ impl ConfigGUI {
                     .initial_name("hyprviz_config.json")
                     .accept_label("Save")
                     .build();
+                let window = gui.borrow().window.clone();
 
-                if let Ok(file) = dialog.save_future(Some(&gui.borrow().window)).await
+                if let Ok(file) = dialog.save_future(Some(&window)).await
                     && let Some(path) = file.path()
                 {
                     gui.borrow().save_hyprviz_config(&path);
@@ -413,10 +413,6 @@ along with this program; if not, see
                             );
                         } else {
                             reload_hyprland();
-                            self.custom_info_popup(
-                                "Undo Successful",
-                                "Configuration restored from backup and backup file deleted.",
-                            );
                         }
                     } else {
                         self.custom_error_popup(

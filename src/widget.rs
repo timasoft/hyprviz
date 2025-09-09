@@ -110,7 +110,7 @@ fn add_dropdown_option(
     let dropdown_clone = dropdown.clone();
     let parsed_default: String = default
         .parse()
-        .expect(&format!("Failed to parse the default value for '{}'", name));
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
     reset_button.connect_clicked(move |_| {
         for idx in 0..string_list.n_items() {
@@ -118,7 +118,7 @@ fn add_dropdown_option(
                 let item_str = item.property::<String>("string");
 
                 if item_str == parsed_default {
-                    dropdown_clone.set_selected(idx as u32);
+                    dropdown_clone.set_selected(idx);
                     break;
                 }
             }
@@ -194,7 +194,7 @@ fn add_bool_option(
     let switch_clone = switch.clone();
     let parsed_default: bool = default
         .parse()
-        .expect(&format!("Failed to parse the default value for '{}'", name));
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
     reset_button.connect_clicked(move |_| {
         switch_clone.set_active(parsed_default);
@@ -272,7 +272,7 @@ fn add_int_option(
     let spin_clone = spin_button.clone();
     let parsed_default: f64 = default
         .parse()
-        .expect(&format!("Failed to parse the default value for '{}'", name));
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
     reset_button.connect_clicked(move |_| {
         spin_clone.set_value(parsed_default);
@@ -350,7 +350,7 @@ fn add_float_option(
     let spin_clone = spin_button.clone();
     let parsed_default: f64 = default
         .parse()
-        .expect(&format!("Failed to parse the default value for '{}'", name));
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
     reset_button.connect_clicked(move |_| {
         spin_clone.set_value(parsed_default);
@@ -425,7 +425,7 @@ fn add_string_option(
     let entry_clone = entry.clone();
     let parsed_default: String = default
         .parse()
-        .expect(&format!("Failed to parse the default value for '{}'", name));
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
     reset_button.connect_clicked(move |_| {
         entry_clone.set_text(&parsed_default);
@@ -517,7 +517,7 @@ fn add_color_option(
     let entry_clone = entry.clone();
     let parsed_default: String = default
         .parse()
-        .expect(&format!("Failed to parse the default value for '{}'", name));
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
     reset_button.connect_clicked(move |_| {
         entry_clone.set_text(&parsed_default);
