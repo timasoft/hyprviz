@@ -226,6 +226,7 @@ fn add_int_option(
     label: &str,
     description: &str,
     default: &str,
+    range: (f64, f64, f64),
 ) {
     let hbox = Box::new(Orientation::Horizontal, 10);
     hbox.set_margin_start(10);
@@ -263,7 +264,7 @@ fn add_int_option(
     label_box.append(&label_widget);
     label_box.append(&tooltip_button);
 
-    let (min, max, step) = get_option_limits(name, description);
+    let (min, max, step) = range;
     let spin_button = SpinButton::with_range(min, max, step);
     spin_button.set_digits(0);
     spin_button.set_halign(gtk::Align::End);
@@ -305,6 +306,7 @@ fn add_float_option(
     label: &str,
     description: &str,
     default: &str,
+    range: (f64, f64, f64),
 ) {
     let hbox = Box::new(Orientation::Horizontal, 10);
     hbox.set_margin_start(10);
@@ -342,7 +344,7 @@ fn add_float_option(
     label_box.append(&label_widget);
     label_box.append(&tooltip_button);
 
-    let (min, max, step) = get_option_limits(name, description);
+    let (min, max, step) = range;
     let spin_button = SpinButton::with_range(min, max, step);
     spin_button.set_digits(2);
     spin_button.set_halign(gtk::Align::End);
@@ -641,91 +643,6 @@ fn extract_value(
     default.to_string()
 }
 
-fn get_option_limits(name: &str, description: &str) -> (f64, f64, f64) {
-    match name {
-        "active_opacity" | "inactive_opacity" | "fullscreen_opacity" => (0.0, 1.0, 0.01),
-        "blur:brightness" => (0.0, 2.0, 0.01),
-        "blur:contrast" => (0.0, 2.0, 0.01),
-        "blur:noise" => (0.0, 1.0, 0.01),
-        "blur:passes" => (1.0, 10.0, 1.0),
-        "blur:popups_ignorealpha" => (0.0, 1.0, 0.01),
-        "blur:size" => (1.0, 20.0, 1.0),
-        "blur:vibrancy" | "blur:vibrancy_darkness" => (0.0, 1.0, 0.01),
-        "border_size" => (0.0, 10.0, 1.0),
-        "damage_tracking" => (0.0, 2.0, 1.0),
-        "dim_strength" | "dim_special" | "dim_around" => (0.0, 1.0, 0.01),
-        "drag_into_group" => (0.0, 2.0, 1.0),
-        "dwindle:default_split_ratio" => (0.1, 1.9, 0.02),
-        "emulate_discrete_scroll" => (0.0, 2.0, 1.0),
-        "error_limit" => (1.0, 100.0, 1.0),
-        "error_position" => (0.0, 1.0, 1.0),
-        "explicit_sync" | "explicit_sync_kms" => (0.0, 2.0, 1.0),
-        "float_switch_override_focus" => (0.0, 2.0, 1.0),
-        "focus_on_close" => (0.0, 1.0, 1.0),
-        "focus_preferred_method" => (0.0, 1.0, 1.0),
-        "follow_mouse" => (0.0, 3.0, 1.0),
-        "follow_mouse_threshold" => (0.0, 500.0, 1.0),
-        "force_default_wallpaper" => (-1.0, 2.0, 1.0),
-        "force_introspection" => (0.0, 2.0, 1.0),
-        "gaps_in" | "gaps_out" | "gaps_workspaces" | "float_gaps" => (0.0, 500.0, 1.0),
-        "groupbar:font_size" => (4.0, 32.0, 1.0),
-        "groupbar:height" => (10.0, 50.0, 1.0),
-        "groupbar:priority" => (0.0, 10.0, 1.0),
-        "hotspot_padding" => (0.0, 10.0, 1.0),
-        "inactive_timeout" => (0.0, 60.0, 1.0),
-        "initial_workspace_tracking" => (0.0, 2.0, 1.0),
-        "lockdead_screen_delay" => (0.0, 5000.0, 100.0),
-        "manual_crash" => (0.0, 1.0, 1.0),
-        "min_refresh_rate" => (1.0, 240.0, 1.0),
-        "new_window_takes_over_fullscreen" => (0.0, 2.0, 1.0),
-        "off_window_axis_events" => (0.0, 3.0, 1.0),
-        "render_ahead_safezone" => (0.0, 10.0, 1.0),
-        "render_unfocused_fps" => (1.0, 60.0, 1.0),
-        "repeat_delay" => (100.0, 5000.0, 100.0),
-        "repeat_rate" => (1.0, 1000.0, 1.0),
-        "resize_corner" => (0.0, 4.0, 1.0),
-        "rounding" => (0.0, 500.0, 1.0),
-        "rounding_power" => (2.0, 10.0, 0.01),
-        "scroll_button" => (0.0, 9.0, 1.0),
-        "scroll_event_delay" => (0.0, 2000.0, 10.0),
-        "scroll_factor" => (0.1, 10.0, 0.1),
-        "sensitivity" => (-1.0, 1.0, 0.02),
-        "shadow:range" => (0.0, 500.0, 1.0),
-        "shadow:render_power" => (1.0, 4.0, 1.0),
-        "shadow:scale" => (0.0, 1.0, 0.01),
-        "tablet:transform" => (0.0, 7.0, 1.0),
-        "touchdevice:transform" => (0.0, 7.0, 1.0),
-        "touchpad:drag_3fg" => (0.0, 2.0, 1.0),
-        "touchpad:drag_lock" => (0.0, 2.0, 1.0),
-        "touchpad:scroll_factor" => (0.1, 10.0, 0.1),
-        "vrr" => (0.0, 3.0, 1.0),
-        "warp_on_toggle_special" => (0.0, 2.0, 1.0),
-        "watchdog_timeout" => (0.0, 60.0, 1.0),
-        "workspace_center_on" => (0.0, 1.0, 1.0),
-        "workspace_swipe_cancel_ratio" => (0.0, 1.0, 0.01),
-        "workspace_swipe_direction_lock_threshold" => (0.0, 50.0, 1.0),
-        "workspace_swipe_distance" => (100.0, 500.0, 10.0),
-        "workspace_swipe_fingers" => (2.0, 5.0, 1.0),
-        "workspace_swipe_min_speed_to_force" => (0.0, 100.0, 1.0),
-        "zoom_factor" => (1.0, 10.0, 0.1),
-        _ => {
-            if description.contains("[0.0 - 1.0]") {
-                (0.0, 1.0, 0.01)
-            } else if description.contains("[0.0 - 2.0]") {
-                (0.0, 2.0, 0.01)
-            } else if description.contains("[0/1]") {
-                (0.0, 1.0, 1.0)
-            } else if description.contains("[0/1/2]") {
-                (0.0, 2.0, 1.0)
-            } else if name.contains("opacity") || name.contains("ratio") {
-                (0.0, 1.0, 0.01)
-            } else {
-                (0.0, 500.0, 1.0)
-            }
-        }
-    }
-}
-
 impl ConfigWidget {
     pub fn new(category: &str) -> Self {
         let scrolled_window = ScrolledWindow::new();
@@ -781,6 +698,7 @@ impl ConfigWidget {
                     "Gaps In",
                     "Gaps between windows, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
                     "5",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -789,6 +707,7 @@ impl ConfigWidget {
                     "Gaps Out",
                     "Gaps between windows and monitor edges, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
                     "20",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -797,6 +716,7 @@ impl ConfigWidget {
                     "Fload Gaps",
                     "Gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20).\n-1 means default",
                     "0",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -805,6 +725,7 @@ impl ConfigWidget {
                     "Gaps Workspaces",
                     "Gaps between workspaces.\nStacks with gaps_out.",
                     "0",
+                    (0.0, 500.0, 1.0),
                 );
 
                 add_section(
@@ -820,6 +741,7 @@ impl ConfigWidget {
                     "Border Size",
                     "Size of the border around windows",
                     "1",
+                    (0.0, 10.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -844,6 +766,7 @@ impl ConfigWidget {
                     "Resize Corner",
                     "Force floating windows to use a specific corner when being resized (1-4 going clockwise from top left, 0 to disable)",
                     "0",
+                    (0.0, 4.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -852,6 +775,7 @@ impl ConfigWidget {
                     "Extend Border Grab Area",
                     "Extends the area around the border where you can click and drag on, only used when general:resize_on_border is on.",
                     "15",
+                    (0.0, 500.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -883,6 +807,7 @@ impl ConfigWidget {
                     "Window Gap",
                     "Minimum gap in pixels between windows before snapping",
                     "10",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -891,6 +816,7 @@ impl ConfigWidget {
                     "Monitor Gap",
                     "Minimum gap in pixels between window and monitor edges before snapping",
                     "10",
+                    (0.0, 500.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -985,6 +911,7 @@ impl ConfigWidget {
                     "Rounding",
                     "Rounded corners' radius (in layout px)",
                     "0",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -993,6 +920,7 @@ impl ConfigWidget {
                     "Rounding Power",
                     "Adjusts the curve used for rounding corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle.\n[2.0 - 10.0]",
                     "2.0",
+                    (2.0, 10.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1001,6 +929,7 @@ impl ConfigWidget {
                     "Active Opacity",
                     "Opacity of active windows.\n[0.0 - 1.0]",
                     "1.0",
+                    (0.0, 1.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1009,6 +938,7 @@ impl ConfigWidget {
                     "Inactive Opacity",
                     "Opacity of inactive windows.\n[0.0 - 1.0]",
                     "1.0",
+                    (0.0, 1.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1017,6 +947,7 @@ impl ConfigWidget {
                     "Fullscreen Opacity",
                     "Opacity of fullscreen windows.\n[0.0 - 1.0]",
                     "1.0",
+                    (0.0, 1.0, 0.01),
                 );
                 add_bool_option(
                     &container,
@@ -1033,6 +964,7 @@ impl ConfigWidget {
                     "Dim Strength",
                     "How much inactive windows should be dimmed.\n[0.0 - 1.0]",
                     "0.5",
+                    (0.0, 1.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1041,6 +973,7 @@ impl ConfigWidget {
                     "Dim Special",
                     "How much to dim the rest of the screen by when a special workspace is open.\n[0.0 - 1.0]",
                     "0.2",
+                    (0.0, 1.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1049,6 +982,7 @@ impl ConfigWidget {
                     "Dim Around",
                     "How much the dimaround window rule should dim by.\n[0.0 - 1.0]",
                     "0.4",
+                    (0.0, 1.0, 0.01),
                 );
                 add_string_option(
                     &container,
@@ -1088,6 +1022,7 @@ impl ConfigWidget {
                     "Blur Size",
                     "Blur size (distance)",
                     "8",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -1096,6 +1031,7 @@ impl ConfigWidget {
                     "Blur Passes",
                     "The amount of passes to perform",
                     "1",
+                    (1.0, 10.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1128,6 +1064,7 @@ impl ConfigWidget {
                     "Blur Noise",
                     "How much noise to apply.\n[0.0 - 1.0]",
                     "0.0117",
+                    (0.0, 1.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1136,6 +1073,7 @@ impl ConfigWidget {
                     "Blur Contrast",
                     "Contrast modulation for blur.\n[0.0 - 2.0]",
                     "0.8916",
+                    (0.0, 2.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1144,6 +1082,7 @@ impl ConfigWidget {
                     "Blur Brightness",
                     "Brightness modulation for blur.\n[0.0 - 2.0]",
                     "0.8172",
+                    (0.0, 2.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1152,6 +1091,7 @@ impl ConfigWidget {
                     "Blur Vibrancy",
                     "Increase saturation of blurred colors.\n[0.0 - 1.0]",
                     "0.1696",
+                    (0.0, 1.0, 0.01),
                 );
                 add_float_option(
                     &container,
@@ -1160,6 +1100,7 @@ impl ConfigWidget {
                     "Blur Vibrancy Darkness",
                     "How strong the effect of vibrancy is on dark areas .\n[0.0 - 1.0]",
                     "0.0",
+                    (0.0, 1.0, 0.01),
                 );
                 add_bool_option(
                     &container,
@@ -1184,6 +1125,7 @@ impl ConfigWidget {
                     "Blur Popups Ignore Alpha",
                     "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]",
                     "0.2",
+                    (0.0, 1.0, 0.01),
                 );
                 add_bool_option(
                     &container,
@@ -1200,6 +1142,7 @@ impl ConfigWidget {
                     "Input Methods Ignore Alpha",
                     "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]",
                     "0.2",
+                    (0.0, 1.0, 0.01),
                 );
 
                 add_section(
@@ -1223,6 +1166,7 @@ impl ConfigWidget {
                     "Shadow Range",
                     "Shadow range (“size”) in layout px",
                     "4",
+                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -1231,6 +1175,7 @@ impl ConfigWidget {
                     "Shadow Render Power",
                     "In what power to render the falloff (more power, the faster the falloff).\n[1 - 4]",
                     "3",
+                    (1.0, 4.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1279,6 +1224,7 @@ impl ConfigWidget {
                     "Shadow Scale",
                     "Shadow’s scale.\n[0.0 - 1.0]",
                     "1.0",
+                    (0.0, 1.0, 0.01),
                 );
             }
             "animations" => {
@@ -1397,6 +1343,7 @@ impl ConfigWidget {
                     "Repeat Rate",
                     "The repeat rate for held-down keys, in repeats per second.",
                     "25",
+                    (1.0, 1000.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -1405,6 +1352,7 @@ impl ConfigWidget {
                     "Repeat Delay",
                     "Delay before a held-down key is repeated, in milliseconds.",
                     "600",
+                    (100.0, 5000.0, 100.0),
                 );
 
                 add_section(
@@ -1420,6 +1368,7 @@ impl ConfigWidget {
                     "Sensitivity",
                     "Sets the mouse input sensitivity.\nValue is clamped to the range -1.0 to 1.0.",
                     "0.0",
+                    (-1.0, 1.0, 0.02),
                 );
                 add_string_option(
                     &container,
@@ -1460,6 +1409,7 @@ impl ConfigWidget {
                     "Scroll Button",
                     "Sets the scroll button.\nHas to be an int, cannot be a string.\nCheck wev if you have any doubts regarding the ID.\n0 means default.",
                     "0",
+                    (0.0, 9.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1476,6 +1426,7 @@ impl ConfigWidget {
                     "Scroll Factor",
                     "Multiplier added to scroll movement for external mice.\nNote that there is a separate setting for touchpad scroll_factor.",
                     "1.0",
+                    (0.1, 10.0, 0.1),
                 );
                 add_bool_option(
                     &container,
@@ -1492,6 +1443,7 @@ impl ConfigWidget {
                     "Follow Mouse",
                     "Specify if and how cursor movement should affect window focus.\n0 - Cursor movement will not change focus, 1 - Cursor movement will always change focus to the window under the cursor, 2 - Cursor focus will be detached from keyboard focus, 3 - Cursor focus will be completely separate from keyboard focus.\n[0/1/2/3]",
                     "1",
+                    (0.0, 3.0, 1.0),
                 );
                 add_float_option(
                     &container,
@@ -1500,6 +1452,7 @@ impl ConfigWidget {
                     "Follow Mouse Threshold",
                     "The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused.\nWorks only with follow_mouse = 1.",
                     "0.0",
+                    (0.0, 500.0, 1.0),
                 );
                 add_string_option(
                     &container,
@@ -1523,6 +1476,7 @@ impl ConfigWidget {
                     "Focus on Close",
                     "Controls the window focus behavior when a window is closed.\n0 - focus will shift to the next window candidate, 1 - focus will shift to the window under the cursor.\n[0/1]",
                     "0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1539,6 +1493,7 @@ impl ConfigWidget {
                     "Float Switch Override Focus",
                     "If enabled, focus will change to the window under the cursor when changing from tiled-to-floating and vice versa.\n0 - disabled, 1 - enabled, 2 - focus will also follow mouse on float-to-float switches.\n[0/1/2]",
                     "1",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1578,6 +1533,7 @@ impl ConfigWidget {
                     "Scroll Factor",
                     "Multiplier applied to the amount of scroll movement.",
                     "1.0",
+                    (0.0, 500.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1618,6 +1574,7 @@ impl ConfigWidget {
                     "Drag Lock",
                     "Drag_lock When enabled, lifting the finger off while dragging will not drop the dragged item.\n0 -> disabled,\n1 -> enabled with timeout,\n2 -> enabled sticky.\nlibinput#tap-and-drag.\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1650,6 +1607,7 @@ impl ConfigWidget {
                     "Drag 3FG",
                     "Enables three finger drag,\n0 -> disabled,\n1 -> 3 fingers,\n2 -> 4 fingers libinput#drag-3fg\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
 
                 add_section(
@@ -1665,6 +1623,7 @@ impl ConfigWidget {
                     "Transform",
                     "Transform the input from touchdevices.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees",
                     "-1",
+                    (-1.0, 7.0, 1.0),
                 );
                 add_string_option(
                     &container,
@@ -1696,6 +1655,7 @@ impl ConfigWidget {
                     "Transform",
                     "Transform the input from tablets.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees",
                     "-1",
+                    (-1.0, 7.0, 1.0),
                 );
                 add_string_option(
                     &container,
@@ -1775,6 +1735,7 @@ impl ConfigWidget {
                     "Off Window Axis Events",
                     "Handles axis events around a focused window.\n0 - ignores axis events,\n1 - sends out-of-bound coordinates,\n2 - fakes pointer coordinates to the closest point inside the window,\n3 - warps the cursor to the closest point inside the window\n[0/1/2/3]",
                     "1",
+                    (0.0, 3.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -1783,6 +1744,7 @@ impl ConfigWidget {
                     "Emulate Discrete Scroll",
                     "Emulates discrete scrolling from high resolution scrolling events.\n0 - disables it,\n1 - enables handling of non-standard events only,\n2 - force enables all scroll wheel events to be handled\n[0/1/2]",
                     "1",
+                    (0.0, 2.0, 1.0),
                 );
             }
             "gestures" => {
@@ -1807,6 +1769,7 @@ impl ConfigWidget {
                     "Workspace Swipe Fingers",
                     "How many fingers for the touchpad gesture",
                     "3",
+                    (2.0, 5.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1823,6 +1786,7 @@ impl ConfigWidget {
                     "Workspace Swipe Distance",
                     "In px, the distance of the touchpad gesture",
                     "300",
+                    (100.0, 500.0, 10.0),
                 );
                 add_bool_option(
                     &container,
@@ -1855,6 +1819,7 @@ impl ConfigWidget {
                     "Workspace Swipe Min Speed to Force",
                     "Minimum speed in px per timepoint to force the change ignoring cancel_ratio.\nSetting to 0 will disable this mechanic.",
                     "30",
+                    (0.0, 100.0, 1.0),
                 );
                 add_float_option(
                     &container,
@@ -1863,6 +1828,7 @@ impl ConfigWidget {
                     "Workspace Swipe Cancel Ratio",
                     "How much the swipe has to proceed in order to commence it.\n(0.7 -> if > 0.7 * distance, switch, if less, revert)\n[0.0 - 1.0]",
                     "0.5",
+                    (0.0, 1.0, 0.01),
                 );
                 add_bool_option(
                     &container,
@@ -1887,6 +1853,7 @@ impl ConfigWidget {
                     "Workspace Swipe Direction Lock Threshold",
                     "In px, the distance to swipe before direction lock activates (touchpad only).",
                     "10",
+                    (0.0, 50.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -1944,6 +1911,7 @@ impl ConfigWidget {
                     "Drag Into Group",
                     "Whether dragging a window into a unlocked group will merge them.\n0 - disabled,\n1 - enabled,\n2 - only when dragging into the groupbar\n[0/1/2]",
                     "1",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2038,6 +2006,7 @@ impl ConfigWidget {
                     "Font Size",
                     "Font size of groupbar title",
                     "8",
+                    (4.0, 32.0, 1.0),
                 );
                 add_string_option(
                     &container,
@@ -2070,6 +2039,7 @@ impl ConfigWidget {
                     "Height",
                     "Height of the groupbar",
                     "14",
+                    (10.0, 50.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2078,6 +2048,7 @@ impl ConfigWidget {
                     "Indicator Gap",
                     "Height of gap between groupbar indicator and title",
                     "0",
+                    (0.0, 50.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2086,6 +2057,7 @@ impl ConfigWidget {
                     "Indicator Height",
                     "Height of the groupbar indicator",
                     "3",
+                    (0.0, 50.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2102,6 +2074,7 @@ impl ConfigWidget {
                     "Priority",
                     "Sets the decoration priority for groupbars",
                     "3",
+                    (0.0, 10.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2118,6 +2091,7 @@ impl ConfigWidget {
                     "Text Offset",
                     "Adjust vertical position for titles",
                     "0",
+                    (0.0, 50.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2134,6 +2108,7 @@ impl ConfigWidget {
                     "Rounding",
                     "How much to round the indicator",
                     "1",
+                    (0.0, 50.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2142,6 +2117,7 @@ impl ConfigWidget {
                     "Gradient Rounding",
                     "How much to round the gradients",
                     "2",
+                    (0.0, 50.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2230,6 +2206,7 @@ impl ConfigWidget {
                     "Gaps In",
                     "Gap size between gradients",
                     "2",
+                    (0.0, 50.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2238,6 +2215,7 @@ impl ConfigWidget {
                     "Gaps Out",
                     "Gap size between gradients and window",
                     "2",
+                    (0.0, 50.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2302,6 +2280,7 @@ impl ConfigWidget {
                     "Force Default Wallpaper",
                     "Enforce any of the 3 default wallpapers.\n-1 - random, 0 or 1 - disables the anime background, 2 - enables anime background.\n[-1/0/1/2]",
                     "-1",
+                    (-1.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2318,6 +2297,7 @@ impl ConfigWidget {
                     "VRR",
                     "Controls the VRR (Adaptive Sync) of your monitors.\n0 - off,\n1 - on,\n2 - fullscreen only,\n3 - fullscreen with video or game content type\n[0/1/2/3]",
                     "0",
+                    (0.0, 3.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2454,6 +2434,7 @@ impl ConfigWidget {
                     "New Window Takes Over Fullscreen",
                     "If there is a fullscreen or maximized window, decide whether a new tiled window opened should replace it, stay behind or disable the fullscreen/maximized state.\n0 - behind,\n1 - takes over,\n2 - unfullscreen/unmaxize\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2470,6 +2451,7 @@ impl ConfigWidget {
                     "Initial Workspace Tracking",
                     "If enabled, windows will open on the workspace they were invoked on.\n0 - disabled,\n1 - single-shot,\n2 - persistent (all children too)\n[0/1/2]",
                     "1",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2486,6 +2468,7 @@ impl ConfigWidget {
                     "Render Unfocused FPS",
                     "The maximum limit for renderunfocused windows' fps in the background (see also Window-Rules - renderunfocused)",
                     "15",
+                    (1.0, 60.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2510,6 +2493,7 @@ impl ConfigWidget {
                     "Lock Dead Screen Delay",
                     "Delay after which the “lockdead” screen will appear in case a lockscreen app fails to cover all the outputs (5 seconds max)",
                     "1000",
+                    (0.0, 5000.0, 100.0),
                 );
                 add_bool_option(
                     &container,
@@ -2526,6 +2510,7 @@ impl ConfigWidget {
                     "ANR Missed Pings",
                     "Number of missed pings before showing the ANR dialog",
                     "1",
+                    (0.0, 50.0, 1.0),
                 );
             }
             "binds" => {
@@ -2550,6 +2535,7 @@ impl ConfigWidget {
                     "Scroll Event Delay",
                     "In ms, how many ms to wait after a scroll event to allow passing another one for the binds.",
                     "300",
+                    (0.0, 2000.0, 10.0),
                 );
                 add_bool_option(
                     &container,
@@ -2582,6 +2568,7 @@ impl ConfigWidget {
                     "Workspace Center On",
                     "Whether switching workspaces should center the cursor on the workspace (0) or on the last active window for that workspace (1).\n[0/1]",
                     "0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2590,6 +2577,7 @@ impl ConfigWidget {
                     "Focus Preferred Method",
                     "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.\n0 - history (recent have priority),\n1 - length (longer shared edges have priority)\n[0/1]\n(idk why this is int)",
                     "0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2646,6 +2634,7 @@ impl ConfigWidget {
                     "Drag Threshold",
                     "Movement threshold in pixels for window dragging and c/g bind flags.\n0 to disable and grab on mousedown.",
                     "0",
+                    (0.0, 500.0, 1.0),
                 );
             }
             "xwayland" => {
@@ -2718,6 +2707,7 @@ impl ConfigWidget {
                     "Direct Scanout",
                     "Enables direct scanout.\nDirect scanout attempts to reduce lag when there is only one fullscreen application on a screen (e.g.\ngame).\nIt is also recommended to set this to false if the fullscreen application shows graphical glitches.\n0 - off,\n1 - on,\n2 - auto (on with content type ‘game’)\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2742,6 +2732,7 @@ impl ConfigWidget {
                     "CTM Animation",
                     "Whether to enable a fade animation for CTM changes (hyprsunset).\n2 means “auto” which disables them on Nvidia.\n[0/1/2]",
                     "2",
+                    (0.0, 2.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2750,6 +2741,7 @@ impl ConfigWidget {
                     "CM FS Passthrough",
                     "Passthrough color settings for fullscreen apps when possible.\n0 - off, 1 - always, 2 - hdr only.\n[0/1/2]",
                     "2",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2774,6 +2766,7 @@ impl ConfigWidget {
                     "CM Auto HDR",
                     "Auto-switch to HDR in fullscreen when needed.\n0 - off, 1 - switch to cm, hdr, 2 - switch to cm, hdredid.\n[0/1/2]",
                     "1",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2814,6 +2807,7 @@ impl ConfigWidget {
                     "No Hardware Cursors",
                     "Disables hardware cursors.\n0 - use hw cursors if possible, 1 - don’t use hw cursors, 2 - auto (disable when tearing).\n[0/1/2]",
                     "2",
+                    (0.0, 2.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2822,6 +2816,7 @@ impl ConfigWidget {
                     "No Break FS VRR",
                     "Disables scheduling new frames on cursor movement for fullscreen apps with VRR enabled to avoid framerate spikes (may require no_hardware_cursors = true) 0 - off, 1 - on, 2 - auto (on with content type ‘game’).\n[0/1/2]",
                     "2",
+                    (0.0, 2.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2830,6 +2825,7 @@ impl ConfigWidget {
                     "Min Refresh Rate",
                     "Minimum refresh rate for cursor movement when no_break_fs_vrr is active.\nSet to minimum supported refresh rate or higher.",
                     "24",
+                    (1.0, 240.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2838,6 +2834,7 @@ impl ConfigWidget {
                     "Hotspot Padding",
                     "The padding, in logical px, between screen edges and the cursor.",
                     "1",
+                    (0.0, 10.0, 1.0),
                 );
                 add_float_option(
                     &container,
@@ -2846,6 +2843,7 @@ impl ConfigWidget {
                     "Inactive Timeout",
                     "In seconds, after how many seconds of cursor's inactivity to hide it.\nSet to 0 for never.",
                     "0",
+                    (0.0, 60.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -2870,6 +2868,7 @@ impl ConfigWidget {
                     "Warp on Change Workspace",
                     "Move the cursor to the last focused window after changing the workspace.\n Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option).\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -2878,6 +2877,7 @@ impl ConfigWidget {
                     "Warp on Toggle Special",
                     "Move the cursor to the last focused window when toggling a special workspace.\n Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option).\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_string_option(
                     &container,
@@ -2894,6 +2894,7 @@ impl ConfigWidget {
                     "Zoom Factor",
                     "The factor to zoom by around the cursor.\nLike a magnifying glass.",
                     "1.0",
+                    (1.0, 10.0, 0.1),
                 );
                 add_bool_option(
                     &container,
@@ -2934,6 +2935,7 @@ impl ConfigWidget {
                     "Use CPU Buffer",
                     "Makes HW cursors use a CPU buffer.\nRequired on Nvidia to have HW cursors.\n0 - off, 1 - on, 2 - auto (nvidia only).\n[0/1/2]",
                     "2",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3038,6 +3040,7 @@ impl ConfigWidget {
                     "Damage Tracking",
                     "Redraw only the needed bits of the display.\nDo not change.\n0 - none,\n1 - monitor,\n2 - full (default)\n[0/1/2]",
                     "2",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3054,6 +3057,7 @@ impl ConfigWidget {
                     "Manual Crash",
                     "Set to 1 and then back to 0 to crash Hyprland.",
                     "0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3070,6 +3074,7 @@ impl ConfigWidget {
                     "Watchdog Timeout",
                     "Sets the timeout in seconds for watchdog to abort processing of a signal of the main thread.\nSet to 0 to disable.",
                     "5",
+                    (0.0, 60.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3086,6 +3091,7 @@ impl ConfigWidget {
                     "Error Limit",
                     "Limits the number of displayed config file parsing errors.",
                     "5",
+                    (1.0, 100.0, 1.0),
                 );
                 add_int_option(
                     &container,
@@ -3094,6 +3100,7 @@ impl ConfigWidget {
                     "Error Position",
                     "Sets the position of the error bar.\n0 - top,\n1 - bottom\n[0/1]\n(idk why this is int",
                     "0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3149,6 +3156,7 @@ impl ConfigWidget {
                     "Force Split",
                     "0 -> split follows mouse, 1 -> always split to the left (new = left or top) 2 -> always split to the right (new = right or bottom).\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3189,6 +3197,7 @@ impl ConfigWidget {
                     "Special Scale Factor",
                     "Specifies the scale factor of windows on the special workspace.\n[0.0 - 1.0]",
                     "1.0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_float_option(
                     &container,
@@ -3197,6 +3206,7 @@ impl ConfigWidget {
                     "Split Width Multiplier",
                     "Specifies the auto-split width multiplier.\nMultiplying window size is useful on widescreen monitors where window W > H even after several splits.",
                     "1.0",
+                    (0.0, 10.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3213,6 +3223,7 @@ impl ConfigWidget {
                     "Default Split Ratio",
                     "The default split ratio on window open.\n1 means even 50/50 split.\n[0.1 - 1.9]",
                     "1.0",
+                    (0.1, 1.9, 0.02),
                 );
                 add_int_option(
                     &container,
@@ -3221,6 +3232,7 @@ impl ConfigWidget {
                     "Split Bias",
                     "Specifies which window will receive the larger half of a split.\n[0/1/2]",
                     "0",
+                    (0.0, 2.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3245,6 +3257,7 @@ impl ConfigWidget {
                     "Single Window Aspect Ratio Tolerance",
                     "Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to adjust the window size.\n[0.0 - 1.0]",
                     "0.1",
+                    (0.0, 1.0, 1.0),
                 );
 
                 add_section(
@@ -3268,6 +3281,7 @@ impl ConfigWidget {
                     "Special Scale Factor",
                     "The scale of the special workspace windows.\n[0.0 - 1.0]",
                     "1.0",
+                    (0.0, 1.0, 1.0),
                 );
                 add_float_option(
                     &container,
@@ -3276,6 +3290,7 @@ impl ConfigWidget {
                     "Master Factor",
                     "The size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave.\n[0.0 - 1.0]",
                     "0.55",
+                    (0.0, 1.0, 1.0),
                 );
                 add_dropdown_option(
                     &container,
@@ -3327,6 +3342,7 @@ impl ConfigWidget {
                     "Slave Count for Center Master",
                     "When using orientation=center, make the master window centered only when at least this many slave windows are open.\n(Set 0 to always_center_master)",
                     "2",
+                    (0.0, 10.0, 1.0),
                 );
                 add_dropdown_option(
                     &container,
