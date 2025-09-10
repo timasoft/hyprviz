@@ -2,7 +2,7 @@ use gtk::{Application, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
 use std::{cell::RefCell, fs, rc::Rc};
-use utils::{CONFIG_PATH, get_config_path};
+use utils::{CONFIG_PATH, check_last_non_empty_line, get_config_path, reload_hyprland};
 
 mod gui;
 mod utils;
@@ -21,7 +21,7 @@ fn build_ui(app: &Application) {
     let gui = Rc::new(RefCell::new(ConfigGUI::new(app)));
     gui::ConfigGUI::setup_ui_events(Rc::clone(&gui));
 
-    let config_path_full = get_config_path();
+    let config_path_full = get_config_path(false);
 
     if !config_path_full.exists() {
         gui.borrow().custom_error_popup_critical(
@@ -39,7 +39,27 @@ fn build_ui(app: &Application) {
                 String::new()
             }
         };
-        let parsed_config = parse_config(&config_str);
+        let mut parsed_config = parse_config(&config_str);
+
+        if !check_last_non_empty_line(&config_str, "source = ./hyprviz.conf") {
+            parsed_config.add_entry_headless("#", "Source for hyprviz");
+            parsed_config.add_entry_headless("source", "./hyprviz.conf");
+            let updated_config_str = parsed_config.to_string();
+            match fs::write(&config_path_full, updated_config_str) {
+                Ok(_) => {
+                    println!("Added 'source = ./hyprviz.conf' to: ~/{CONFIG_PATH}");
+                    reload_hyprland();
+                }
+                Err(e) => {
+                    gui.borrow().custom_error_popup_critical(
+                        "Saving failed",
+                        &format!(
+                            "Failed to add 'source = ./hyprviz.conf' to: ~/{CONFIG_PATH}: {e}"
+                        ),
+                    );
+                }
+            }
+        }
 
         gui.borrow_mut().load_config(&parsed_config);
     }
