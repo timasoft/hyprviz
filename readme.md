@@ -10,6 +10,8 @@
 **Fork** of [HyprGUI](https://github.com/MarkusVolk/hyprgui) — an unofficial GUI for configuring Hyprland, built with GTK4 and Rust. 🚀🦀<br>
 Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprland's configuration file. (Rust btw) 🦀
 
+> **Note:** Hyprland 0.51 is not supported yet.
+
 ![Preview](.github/preview.png)
 
 </div>
