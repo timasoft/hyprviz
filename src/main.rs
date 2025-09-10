@@ -1,8 +1,8 @@
-use gtk::{prelude::*, Application};
+use gtk::{Application, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
 use std::{cell::RefCell, fs, rc::Rc};
-use utils::{check_last_non_empty_line, get_config_path, reload_hyprland, CONFIG_PATH};
+use utils::{CONFIG_PATH, check_last_non_empty_line, get_config_path, reload_hyprland};
 
 mod gui;
 mod utils;
