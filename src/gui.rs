@@ -1,4 +1,4 @@
-use crate::utils::{BACKUP_SUFFIX, CONFIG_PATH, get_config_path, reload_hyprland};
+use crate::utils::{BACKUP_SUFFIX, HYPRVIZ_CONFIG_PATH, get_config_path, reload_hyprland};
 use crate::widget::ConfigWidget;
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
@@ -332,12 +332,21 @@ along with this program; if not, see
     }
 
     fn save_config_file(&self) {
-        let path = get_config_path();
+        let path = get_config_path(true);
         let backup_path = path.with_file_name(format!(
             "{}{}",
             path.file_name().unwrap().to_str().unwrap(),
             BACKUP_SUFFIX
         ));
+
+        if !path.exists()
+            && let Err(e) = fs::File::create(&path)
+        {
+            self.custom_error_popup_critical(
+                "Failed to create hyprviz config file",
+                &format!("Failed to create hyprviz config file: {e}"),
+            );
+        }
 
         let config_str = match fs::read_to_string(&path) {
             Ok(s) => s,
@@ -367,7 +376,7 @@ along with this program; if not, see
 
             match fs::write(&path, updated_config_str) {
                 Ok(_) => {
-                    println!("Configuration saved to: ~/{CONFIG_PATH}");
+                    println!("Configuration saved to: ~/{HYPRVIZ_CONFIG_PATH}");
                     reload_hyprland();
                 }
                 Err(e) => {
@@ -383,7 +392,7 @@ along with this program; if not, see
     }
 
     fn undo_changes(&mut self) {
-        let path = get_config_path();
+        let path = get_config_path(true);
         let backup_path = path.with_file_name(format!(
             "{}{}",
             path.file_name().unwrap().to_str().unwrap(),
