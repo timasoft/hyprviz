@@ -1,4 +1,6 @@
-use crate::utils::{BACKUP_SUFFIX, HYPRVIZ_CONFIG_PATH, get_config_path, reload_hyprland};
+use crate::utils::{
+    BACKUP_SUFFIX, HYPRVIZ_CONFIG_PATH, expand_source, get_config_path, reload_hyprland,
+};
 use crate::widget::ConfigWidget;
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
@@ -6,6 +8,7 @@ use gtk::{
     StackSidebar, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::{HyprlandConfig, parse_config};
+use std::io::{self, Write};
 use std::{cell::RefCell, collections::HashMap, fs, path::PathBuf, rc::Rc};
 
 pub struct ConfigGUI {
@@ -363,26 +366,35 @@ along with this program; if not, see
         let changes = self.changed_options.clone();
 
         if !changes.borrow().is_empty() {
-            if !backup_path.exists()
-                && let Err(e) = fs::copy(&path, &backup_path)
-            {
+            if let Err(e) = fs::copy(&path, &backup_path) {
                 self.custom_error_popup("Backup failed", &format!("Failed to create backup: {e}"));
-                return;
             }
 
             self.apply_changes(&mut parsed_config);
 
             let updated_config_str = parsed_config.to_string();
+            let temp_path = path.with_extension("tmp");
 
-            match fs::write(&path, updated_config_str) {
-                Ok(_) => {
-                    println!("Configuration saved to: ~/{HYPRVIZ_CONFIG_PATH}");
+            let result = || -> Result<(), io::Error> {
+                let mut temp_file = fs::File::create(&temp_path)?;
+                temp_file.write_all(updated_config_str.as_bytes())?;
+                temp_file.sync_all()?;
+
+                fs::rename(&temp_path, &path)?;
+
+                Ok(())
+            }();
+
+            match result {
+                Ok(()) => {
+                    println!("Configuration saved atomically to: {:?}", path);
                     reload_hyprland();
                 }
                 Err(e) => {
+                    let _ = fs::remove_file(&temp_path);
                     self.custom_error_popup(
                         "Saving failed",
-                        &format!("Failed to save the configuration: {e}"),
+                        &format!("Failed to save the configuration atomically: {e}"),
                     );
                 }
             }
@@ -393,6 +405,7 @@ along with this program; if not, see
 
     fn undo_changes(&mut self) {
         let path = get_config_path(true);
+        let path_for_read = get_config_path(false);
         let backup_path = path.with_file_name(format!(
             "{}{}",
             path.file_name().unwrap().to_str().unwrap(),
@@ -400,10 +413,11 @@ along with this program; if not, see
         ));
 
         if backup_path.exists() {
-            match fs::copy(&backup_path, &path) {
+            match fs::rename(&backup_path, &path) {
                 Ok(_) => {
                     println!("Configuration restored from backup");
-                    if let Ok(config_str) = fs::read_to_string(&path) {
+                    reload_hyprland();
+                    if let Ok(config_str) = expand_source(&path_for_read) {
                         let parsed_config = parse_config(&config_str);
 
                         self.load_config(&parsed_config);
@@ -414,8 +428,6 @@ along with this program; if not, see
                                 "Backup Deletion Failed",
                                 &format!("Failed to delete the backup file: {e}"),
                             );
-                        } else {
-                            reload_hyprland();
                         }
                     } else {
                         self.custom_error_popup(
@@ -434,7 +446,7 @@ along with this program; if not, see
         } else {
             self.custom_error_popup(
                 "Undo Failed",
-                "No backup file found. Save changes at least once to create a backup.",
+                "No backup file found. Save changes to create a backup.",
             );
         }
     }

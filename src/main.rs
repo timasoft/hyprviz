@@ -42,16 +42,6 @@ fn build_ui(app: &Application) {
                 String::new()
             }
         };
-        let config_str_for_read = match expand_source(&config_path_full) {
-            Ok(s) => s,
-            Err(e) => {
-                gui.borrow().custom_error_popup_critical(
-                    "Reading failed",
-                    &format!("Failed to read the configuration file: {e}"),
-                );
-                String::new()
-            }
-        };
 
         if !check_last_non_empty_line(&config_str, "source = ./hyprviz.conf") {
             let mut parsed_config = parse_config(&config_str);
@@ -115,6 +105,17 @@ fn build_ui(app: &Application) {
                 }
             }
         }
+
+        let config_str_for_read = match expand_source(&config_path_full) {
+            Ok(s) => s,
+            Err(e) => {
+                gui.borrow().custom_error_popup_critical(
+                    "Reading failed",
+                    &format!("Failed to read the configuration file: {e}"),
+                );
+                String::new()
+            }
+        };
 
         let parsed_config = parse_config(&config_str_for_read);
 
