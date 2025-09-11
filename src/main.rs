@@ -1,8 +1,11 @@
 use gtk::{Application, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
+use std::path::PathBuf;
 use std::{cell::RefCell, fs, rc::Rc};
-use utils::{CONFIG_PATH, check_last_non_empty_line, get_config_path, reload_hyprland};
+use utils::{
+    CONFIG_PATH, check_last_non_empty_line, expand_source, get_config_path, reload_hyprland,
+};
 
 mod gui;
 mod utils;
@@ -39,12 +42,64 @@ fn build_ui(app: &Application) {
                 String::new()
             }
         };
-        let mut parsed_config = parse_config(&config_str);
+        let config_str_for_read = match expand_source(&config_path_full) {
+            Ok(s) => s,
+            Err(e) => {
+                gui.borrow().custom_error_popup_critical(
+                    "Reading failed",
+                    &format!("Failed to read the configuration file: {e}"),
+                );
+                String::new()
+            }
+        };
 
         if !check_last_non_empty_line(&config_str, "source = ./hyprviz.conf") {
+            let mut parsed_config = parse_config(&config_str);
+
             parsed_config.add_entry_headless("#", "Source for hyprviz");
             parsed_config.add_entry_headless("source", "./hyprviz.conf");
+
             let updated_config_str = parsed_config.to_string();
+
+            let hyprviz_path: PathBuf = config_path_full
+                .parent()
+                .map(|d| d.join("hyprviz.conf"))
+                .unwrap_or_else(|| PathBuf::from("./hyprviz.conf"));
+
+            if hyprviz_path.exists() {
+                if !hyprviz_path.is_file() {
+                    gui.borrow().custom_error_popup_critical(
+                        "Creating included file failed",
+                        &format!(
+                            "Path for included file exists but is not a regular file: {}",
+                            hyprviz_path.display()
+                        ),
+                    );
+                }
+            } else {
+                if let Some(parent) = hyprviz_path.parent()
+                    && let Err(e) = fs::create_dir_all(parent)
+                {
+                    gui.borrow().custom_error_popup_critical(
+                        "Creating included file failed",
+                        &format!(
+                            "Failed to create parent directory {} for {}: {}",
+                            parent.display(),
+                            hyprviz_path.display(),
+                            e
+                        ),
+                    );
+                }
+
+                let default = "# hyprviz configuration (created automatically)\n\n";
+                if let Err(e) = fs::write(&hyprviz_path, default) {
+                    gui.borrow().custom_error_popup_critical(
+                        "Creating included file failed",
+                        &format!("Failed to create {}: {}", hyprviz_path.display(), e),
+                    );
+                }
+            }
+
             match fs::write(&config_path_full, updated_config_str) {
                 Ok(_) => {
                     println!("Added 'source = ./hyprviz.conf' to: ~/{CONFIG_PATH}");
@@ -60,6 +115,8 @@ fn build_ui(app: &Application) {
                 }
             }
         }
+
+        let parsed_config = parse_config(&config_str_for_read);
 
         gui.borrow_mut().load_config(&parsed_config);
     }
