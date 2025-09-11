@@ -394,7 +394,7 @@ checksum = "930255d713784978cd22aeaf8eb31e80cd5adada0c0e4498dec31a4622d439c0"
 
 [[package]]
 name = "hyprviz"
-version = "0.4.4"
+version = "0.5.0"
 dependencies = [
  "gio",
  "gtk4",
