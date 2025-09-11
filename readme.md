@@ -87,7 +87,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Create aur repo
 - [x] Add default values
 - [x] Add support for sourced files
-- [ ] Update preview
+- [x] Update preview
 - [ ] Add hyprviz to nixpkgs
 - [ ] Add ability to create and switch between custom profiles
 - [ ] Add system info section
