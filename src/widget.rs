@@ -1272,14 +1272,6 @@ impl ConfigWidget {
                 add_bool_option(
                     &container,
                     &mut options,
-                    "first_launch_animation",
-                    "First Launch Animation",
-                    "Enables the first launch animation.",
-                    "true",
-                );
-                add_bool_option(
-                    &container,
-                    &mut options,
                     "workspace_wraparound",
                     "Workspace Wraparound",
                     "Enable workspace wraparound, causing directional workspace animations to animate as if the first and last workspaces were adjacent",
@@ -1671,6 +1663,29 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
+                    "Virtual Keyboard Settings",
+                    "Configure virtual keyboard behavior.",
+                    first_section.clone(),
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "virtualkeyboard:share_states",
+                    "Share States",
+                    "Unify key down states and modifier states with other keyboards.",
+                    "false",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "virtualkeyboard:release_pressed_on_close",
+                    "Release Pressed on Close",
+                    "Release all pressed keys by virtual keyboard on close.",
+                    "false",
+                );
+
+                add_section(
+                    &container,
                     "Tablet Settings",
                     "Configure tablet behavior.",
                     first_section.clone(),
@@ -1781,31 +1796,6 @@ impl ConfigWidget {
                     "Configure gesture behavior.",
                     first_section.clone(),
                 );
-                add_bool_option(
-                    &container,
-                    &mut options,
-                    "workspace_swipe",
-                    "Workspace Swipe",
-                    "Enable workspace swipe gesture on touchpad",
-                    "false",
-                );
-                add_int_option(
-                    &container,
-                    &mut options,
-                    "workspace_swipe_fingers",
-                    "Workspace Swipe Fingers",
-                    "How many fingers for the touchpad gesture",
-                    "3",
-                    (2.0, 5.0, 1.0),
-                );
-                add_bool_option(
-                    &container,
-                    &mut options,
-                    "workspace_swipe_min_fingers",
-                    "Workspace Swipe Min Fingers",
-                    "If enabled, workspace_swipe_fingers is considered the minimum number of fingers to swipe",
-                    "false",
-                );
                 add_int_option(
                     &container,
                     &mut options,
@@ -1897,6 +1887,15 @@ impl ConfigWidget {
                     "Workspace Swipe Use R",
                     "If enabled, swiping will use the r prefix instead of the m prefix for finding workspaces.",
                     "false",
+                );
+                add_int_option(
+                    &container,
+                    &mut options,
+                    "close_max_timeout",
+                    "Close Max Timeout",
+                    "Timeout for closing windows with the close gesture, in ms.",
+                    "1000",
+                    (10.0, 2000.0, 10.0),
                 );
             }
 
@@ -2137,6 +2136,15 @@ impl ConfigWidget {
                     "1",
                     (0.0, 50.0, 1.0),
                 );
+                add_float_option(
+                    &container,
+                    &mut options,
+                    "groupbar:rounding_power",
+                    "Rounding Power",
+                    "Rounding power of groupbar corners (2 is a circle).",
+                    "2",
+                    (2.0, 10.0, 0.1),
+                );
                 add_int_option(
                     &container,
                     &mut options,
@@ -2345,6 +2353,14 @@ impl ConfigWidget {
                 add_bool_option(
                     &container,
                     &mut options,
+                    "name_vk_after_proc",
+                    "Name VK After Proc",
+                    "Name virtual keyboards after the processes that create them. E.g. /usr/bin/fcitx5 will have hl-virtual-keyboard-fcitx5.",
+                    "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
                     "always_follow_on_dnd",
                     "Always Follow on DnD",
                     "Will make mouse focus follow the mouse when drag and dropping.\nRecommended to leave it enabled, especially for people using focus follows mouse at 0.",
@@ -2539,6 +2555,14 @@ impl ConfigWidget {
                     "1",
                     (0.0, 50.0, 1.0),
                 );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "screencopy_force_8b",
+                    "Force 8-bit color for screencopy",
+                    "Forces 8 bit screencopy. (fixes apps that don't understand 10bit)",
+                    "true",
+                );
             }
             "binds" => {
                 add_section(
@@ -2602,7 +2626,7 @@ impl ConfigWidget {
                     &mut options,
                     "focus_preferred_method",
                     "Focus Preferred Method",
-                    "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.\n0 - history (recent have priority),\n1 - length (longer shared edges have priority)\n[0/1]\n(idk why this is int)",
+                    "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.\n0 - history (recent have priority),\n1 - length (longer shared edges have priority)\n(idk why this is int)",
                     "0",
                     (0.0, 1.0, 1.0),
                 );
@@ -2818,6 +2842,14 @@ impl ConfigWidget {
                     "Sync GSettings Theme",
                     "Sync xcursor theme with gsettings, it applies cursor-theme and cursor-size on theme load to gsettings making most CSD gtk based clients use same xcursor theme and size.",
                     "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "invisible",
+                    "Invisible",
+                    "Don't render cursors.",
+                    "false",
                 );
                 add_int_option(
                     &container,
@@ -3117,7 +3149,7 @@ impl ConfigWidget {
                     &mut options,
                     "error_position",
                     "Error Position",
-                    "Sets the position of the error bar.\n0 - top,\n1 - bottom\n[0/1]\n(idk why this is int",
+                    "Sets the position of the error bar.\n0 - top,\n1 - bottom\n(idk why this is int)",
                     "0",
                     (0.0, 1.0, 1.0),
                 );
@@ -3249,9 +3281,9 @@ impl ConfigWidget {
                     &mut options,
                     "dwindle:split_bias",
                     "Split Bias",
-                    "Specifies which window will receive the larger half of a split.\n[0/1/2]",
+                    "Specifies which window will receive the split ratio.\n0 -> directional (the top or left window),\n1 -> the current window.\n(idk why it is int)",
                     "0",
-                    (0.0, 2.0, 1.0),
+                    (0.0, 1.0, 1.0),
                 );
                 add_bool_option(
                     &container,
