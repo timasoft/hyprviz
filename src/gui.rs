@@ -1,6 +1,4 @@
-use crate::utils::{
-    BACKUP_SUFFIX, HYPRVIZ_CONFIG_PATH, expand_source, get_config_path, reload_hyprland,
-};
+use crate::utils::{BACKUP_SUFFIX, expand_source, get_config_path, reload_hyprland};
 use crate::widget::ConfigWidget;
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
@@ -422,13 +420,6 @@ along with this program; if not, see
 
                         self.load_config(&parsed_config);
                         self.changed_options.clone().borrow_mut().clear();
-
-                        if let Err(e) = fs::remove_file(&backup_path) {
-                            self.custom_error_popup(
-                                "Backup Deletion Failed",
-                                &format!("Failed to delete the backup file: {e}"),
-                            );
-                        }
                     } else {
                         self.custom_error_popup(
                             "Reload Failed",
