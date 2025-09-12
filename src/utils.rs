@@ -207,3 +207,4 @@ fn expand_tilde_str(s: &str) -> String {
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const BACKUP_SUFFIX: &str = "-bak";
+pub const MAX_SAFE_INTEGER_F64: f64 = (1u64 << 53) as f64; // 2^53
