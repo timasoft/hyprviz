@@ -87,6 +87,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add support for sourced files
 - [x] Update preview
 - [ ] Add hyprviz to nixpkgs
+- [ ] Add dropdown_int and bool_int
 - [ ] Add ability to create and switch between custom profiles
 - [ ] Add system info section
 - [ ] Add bind section
