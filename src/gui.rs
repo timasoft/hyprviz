@@ -27,6 +27,7 @@ pub struct ConfigGUI {
     pub profile_dropdown: DropDown,
     create_profile_button: Button,
     delete_profile_button: Button,
+    clear_backups_button: Button,
     save_config_button: Button,
     load_config_button: Button,
     copy_button: Button,
@@ -73,12 +74,14 @@ impl ConfigGUI {
 
         let create_profile_button = Button::with_label("Create Profile");
         let delete_profile_button = Button::with_label("Delete Profile");
+        let clear_backups_button = Button::with_label("Clear Backup Files");
         let save_config_button = Button::with_label("Save HyprViz Config");
         let load_config_button = Button::with_label("Load HyprViz Config");
         let copy_button = Button::with_label("Copyright");
 
         gear_menu_box.append(&create_profile_button);
         gear_menu_box.append(&delete_profile_button);
+        gear_menu_box.append(&clear_backups_button);
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
         gear_menu_box.append(&copy_button);
@@ -167,6 +170,7 @@ impl ConfigGUI {
             profile_dropdown,
             create_profile_button,
             delete_profile_button,
+            clear_backups_button,
             save_config_button,
             load_config_button,
             copy_button,
@@ -224,8 +228,9 @@ impl ConfigGUI {
                     profile_name
                 )));
                 label.set_wrap(true);
-                label.set_width_chars(40);
+                label.set_width_chars(45);
                 label.set_max_width_chars(60);
+                label.set_halign(gtk::Align::Center);
 
                 dialog_box.append(&label);
 
@@ -285,6 +290,7 @@ impl ConfigGUI {
 
                 dialog_window.present();
             });
+
         let gui_clone = Rc::clone(&gui);
         gui.borrow()
             .create_profile_button
@@ -394,6 +400,117 @@ impl ConfigGUI {
 
                 dialog_window.present();
             });
+
+        let gui_clone = Rc::clone(&gui);
+        gui.borrow().clear_backups_button.connect_clicked(move |_| {
+            let gui = Rc::clone(&gui_clone);
+
+            let default_config = get_config_path(false, "Default");
+
+            let config_dir = default_config.parent().unwrap_or_else(|| Path::new(".config/hypr"));
+
+            let mut backup_files = Vec::new();
+            if let Ok(entries) = fs::read_dir(config_dir) {
+                for entry in entries.flatten() {
+                    let file_name = entry.file_name();
+                    if let Some(name) = file_name.to_str()
+                        && name.ends_with(BACKUP_SUFFIX)
+                    {
+                        backup_files.push(entry.path());
+                    }
+                }
+            }
+
+            if backup_files.is_empty() {
+                gui.borrow()
+                    .custom_info_popup("No Backup Files", "No backup files found to delete.");
+                return;
+            }
+
+            let dialog_window = Window::builder()
+                .title("Clear Backup Files")
+                .modal(true)
+                .transient_for(&gui.borrow().window)
+                .destroy_with_parent(true)
+                .default_width(300)
+                .build();
+
+            let dialog_box = Box::new(Orientation::Vertical, 10);
+            dialog_box.set_margin_top(10);
+            dialog_box.set_margin_bottom(10);
+            dialog_box.set_margin_start(10);
+            dialog_box.set_margin_end(10);
+
+            let label = Label::new(Some(&format!(
+                "Are you sure you want to delete {} backup file(s)?\nThis operation cannot be undone.",
+                backup_files.len()
+            )));
+            label.set_wrap(true);
+            label.set_width_chars(50);
+            label.set_max_width_chars(60);
+
+            dialog_box.append(&label);
+
+            let buttons_box = Box::new(Orientation::Horizontal, 5);
+            buttons_box.set_halign(gtk::Align::End);
+
+            let cancel_button = Button::with_label("Cancel");
+            let clear_button = Button::with_label("Clear");
+
+            buttons_box.append(&cancel_button);
+            buttons_box.append(&clear_button);
+
+            dialog_box.append(&buttons_box);
+            dialog_window.set_child(Some(&dialog_box));
+
+            let dialog_window_clone = dialog_window.clone();
+            cancel_button.connect_clicked(move |_| {
+                dialog_window_clone.close();
+            });
+
+            let dialog_window_clone = dialog_window.clone();
+            let gui_clone = Rc::clone(&gui);
+            let backup_files_clone = backup_files.clone();
+            clear_button.connect_clicked(move |_| {
+                let mut deleted_count = 0;
+                let mut error_message = String::new();
+
+                for file_path in &backup_files_clone {
+                    match fs::remove_file(file_path) {
+                        Ok(_) => deleted_count += 1,
+                        Err(e) => {
+                            error_message.push_str(&format!(
+                                "Failed to delete {}: {}\n",
+                                file_path.display(),
+                                e
+                            ));
+                        }
+                    }
+                }
+
+                dialog_window_clone.close();
+
+                if !error_message.is_empty() {
+                    gui_clone.borrow().custom_error_popup(
+                        "Partial Success",
+                        &format!(
+                            "Deleted {} of {} backup files.\nErrors:\n{}",
+                            deleted_count,
+                            backup_files_clone.len(),
+                            error_message
+                        ),
+                    );
+                } else {
+                    gui_clone.borrow().custom_info_popup(
+                        "Success",
+                        &format!("Successfully deleted {} backup file(s).", deleted_count),
+                    );
+                }
+            });
+
+            dialog_window.present();
+        });
+
         let gui_clone = Rc::clone(&gui);
         gui.borrow().load_config_button.connect_clicked(move |_| {
             let gui = Rc::clone(&gui_clone);
