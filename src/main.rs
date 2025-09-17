@@ -6,9 +6,9 @@ use std::{
     {cell::RefCell, fs, rc::Rc},
 };
 use utils::{
-    CONFIG_PATH, HYPRVIZ_CONFIG_PATH, atomic_write, check_last_non_empty_line_contains,
-    expand_source, find_all_profiles, get_config_path, get_current_profile, reload_hyprland,
-    update_source_line,
+    CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
+    check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
+    get_current_profile, reload_hyprland, update_source_line,
 };
 
 mod gui;
@@ -36,6 +36,29 @@ fn build_ui(app: &Application) {
             &format!("File not found: ~/{CONFIG_PATH}"),
         );
     } else {
+        let hyprviz_profile_none_path = get_config_path(true, "None");
+        let hyprviz_profiles_path = hyprviz_profile_none_path
+            .parent()
+            .unwrap_or_else(|| Path::new(HYPRVIZ_PROFILES_PATH));
+        if !hyprviz_profiles_path.exists() {
+            match fs::create_dir_all(hyprviz_profiles_path) {
+                Ok(_) => {}
+                Err(e) => {
+                    gui.borrow().custom_error_popup_critical(
+                        "Creating failed",
+                        &format!("Failed to create the profile directory: {e}"),
+                    );
+                    return;
+                }
+            }
+        } else if !hyprviz_profiles_path.is_dir() {
+            gui.borrow().custom_error_popup_critical(
+                "Creating failed",
+                "The profile directory is not a directory",
+            );
+            return;
+        }
+
         let config_str = match fs::read_to_string(&config_path_full) {
             Ok(s) => s,
             Err(e) => {

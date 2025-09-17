@@ -16,10 +16,8 @@ pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
 
     if write {
         if !profile.is_empty() && profile != "Default" {
-            let hyprviz_dir = Path::new(HYPRVIZ_CONFIG_PATH)
-                .parent()
-                .unwrap_or(Path::new("."));
-            let profile_filename = format!("hyprviz_{}.conf", profile);
+            let hyprviz_dir = Path::new(HYPRVIZ_PROFILES_PATH);
+            let profile_filename = format!("{}.conf", profile);
             base_path.join(hyprviz_dir).join(profile_filename)
         } else {
             base_path.join(HYPRVIZ_CONFIG_PATH)
@@ -73,7 +71,7 @@ pub fn atomic_write(path: &Path, data: &str) -> io::Result<()> {
 
 /// Updates the source line in Hyprland config for the specified profile
 /// For "Default" profile: `source = ./hyprviz.conf`
-/// For other profiles: `source = ./hyprviz_{profile}.conf`
+/// For other profiles: `source = ./hyprviz/{profile}.conf`
 /// Replaces the last non-empty line starting with "source = ./hyprviz" or appends if not found
 pub fn update_source_line(config_path: &PathBuf, profile: &str) -> io::Result<()> {
     let content = fs::read_to_string(config_path)?;
@@ -91,7 +89,7 @@ pub fn update_source_line(config_path: &PathBuf, profile: &str) -> io::Result<()
     let new_source = if profile == "Default" {
         "source = ./hyprviz.conf".to_string()
     } else {
-        format!("source = ./hyprviz_{}.conf", profile)
+        format!("source = ./hyprviz/{}.conf", profile)
     };
 
     if let Some(idx) = target_index {
@@ -111,7 +109,7 @@ pub fn get_current_profile(file_content: &str) -> String {
         .find(|line| !line.trim().is_empty());
 
     if let Some(line) = last_non_empty_line {
-        let prefix = "source = ./hyprviz_";
+        let prefix = "source = ./hyprviz/";
         let suffix = ".conf";
 
         if let Some(start_prefix_idx) = line.find(prefix) {
@@ -141,14 +139,13 @@ pub fn get_current_profile(file_content: &str) -> String {
 
 /// Finds all files matching pattern `hyprviz_*.conf` in the same directory as default config file
 pub fn find_all_profiles() -> Option<Vec<String>> {
-    let config_path = get_config_path(true, "Default");
+    let config_path = get_config_path(true, "None");
 
     let parent_dir = config_path.parent()?;
 
     let entries = fs::read_dir(parent_dir).ok()?;
 
     let mut profiles = Vec::new();
-    let prefix = "hyprviz_";
     let suffix = ".conf";
 
     for entry in entries.flatten() {
@@ -156,9 +153,8 @@ pub fn find_all_profiles() -> Option<Vec<String>> {
             Ok(name) => name,
             Err(_) => continue,
         };
-
-        if file_name.starts_with(prefix) && file_name.ends_with(suffix) {
-            let profile_name = &file_name[prefix.len()..file_name.len() - suffix.len()];
+        if file_name.ends_with(suffix) {
+            let profile_name = &file_name[..file_name.len() - suffix.len()];
 
             if !profile_name.is_empty() {
                 profiles.push(profile_name.to_string());
@@ -344,5 +340,6 @@ fn expand_tilde_str(s: &str) -> String {
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
+pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";
 pub const BACKUP_SUFFIX: &str = "-bak";
 pub const MAX_SAFE_INTEGER_F64: f64 = (1u64 << 53) as f64; // 2^53

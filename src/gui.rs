@@ -1,7 +1,7 @@
 use crate::{
     utils::{
-        BACKUP_SUFFIX, atomic_write, expand_source, find_all_profiles, get_config_path,
-        reload_hyprland,
+        BACKUP_SUFFIX, HYPRVIZ_PROFILES_PATH, atomic_write, expand_source, find_all_profiles,
+        get_config_path, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -185,114 +185,6 @@ impl ConfigGUI {
     pub fn setup_ui_events(gui: Rc<RefCell<ConfigGUI>>) {
         let gui_clone = Rc::clone(&gui);
         gui.borrow()
-            .delete_profile_button
-            .connect_clicked(move |_| {
-                let gui = Rc::clone(&gui_clone);
-
-                let selected_index = gui.borrow().profile_dropdown.selected();
-                let model = gui.borrow().profile_dropdown.model().unwrap();
-                let profile_name = if let Some(item) = model.item(selected_index) {
-                    if let Some(string_object) = item.downcast_ref::<StringObject>() {
-                        string_object.string().as_str().to_string()
-                    } else {
-                        "Default".to_string()
-                    }
-                } else {
-                    "Default".to_string()
-                };
-
-                if profile_name == "Default" {
-                    gui.borrow().custom_error_popup(
-                        "Cannot Delete Profile",
-                        "The 'Default' profile cannot be deleted",
-                    );
-                    return;
-                }
-
-                let dialog_window = Window::builder()
-                    .title("Delete Profile")
-                    .modal(true)
-                    .transient_for(&gui.borrow().window)
-                    .destroy_with_parent(true)
-                    .default_width(300)
-                    .build();
-
-                let dialog_box = Box::new(Orientation::Vertical, 10);
-                dialog_box.set_margin_top(10);
-                dialog_box.set_margin_bottom(10);
-                dialog_box.set_margin_start(10);
-                dialog_box.set_margin_end(10);
-
-                let label = Label::new(Some(&format!(
-                    "Are you sure you want to delete the profile '{}'?",
-                    profile_name
-                )));
-                label.set_wrap(true);
-                label.set_width_chars(45);
-                label.set_max_width_chars(60);
-                label.set_halign(gtk::Align::Center);
-
-                dialog_box.append(&label);
-
-                let buttons_box = Box::new(Orientation::Horizontal, 5);
-                buttons_box.set_halign(gtk::Align::End);
-
-                let cancel_button = Button::with_label("Cancel");
-                let delete_button = Button::with_label("Delete");
-
-                buttons_box.append(&cancel_button);
-                buttons_box.append(&delete_button);
-
-                dialog_box.append(&buttons_box);
-                dialog_window.set_child(Some(&dialog_box));
-
-                let dialog_window_clone = dialog_window.clone();
-                cancel_button.connect_clicked(move |_| {
-                    dialog_window_clone.close();
-                });
-
-                let dialog_window_clone = dialog_window.clone();
-                let gui_clone = Rc::clone(&gui);
-                let profile_name_clone = profile_name.clone();
-                delete_button.connect_clicked(move |_| {
-                    let hyprviz_path = get_config_path(true, &profile_name_clone);
-
-                    match fs::remove_file(&hyprviz_path) {
-                        Ok(_) => {
-                            if let Some(mut profiles) = find_all_profiles() {
-                                if !profiles.contains(&"Default".to_string()) {
-                                    profiles.insert(0, "Default".to_string());
-                                }
-
-                                let profiles_str_vec: Vec<&str> =
-                                    profiles.iter().map(|s| s.as_str()).collect();
-                                let string_list = StringList::new(&profiles_str_vec);
-                                gui_clone
-                                    .borrow()
-                                    .profile_dropdown
-                                    .set_model(Some(&string_list));
-
-                                if let Some(pos) = profiles.iter().position(|p| *p == "Default") {
-                                    gui_clone.borrow().profile_dropdown.set_selected(pos as u32);
-                                }
-                            }
-
-                            dialog_window_clone.close();
-                        }
-                        Err(e) => {
-                            gui_clone.borrow().custom_error_popup(
-                                "Failed to delete profile",
-                                &format!("Failed to delete profile file: {e}"),
-                            );
-                        }
-                    }
-                });
-
-                dialog_window.present();
-            });
-
-        let gui_clone = Rc::clone(&gui);
-        gui.borrow()
             .create_profile_button
             .connect_clicked(move |_| {
                 let gui = Rc::clone(&gui_clone);
@@ -402,12 +294,120 @@ impl ConfigGUI {
             });
 
         let gui_clone = Rc::clone(&gui);
+        gui.borrow()
+            .delete_profile_button
+            .connect_clicked(move |_| {
+                let gui = Rc::clone(&gui_clone);
+
+                let selected_index = gui.borrow().profile_dropdown.selected();
+                let model = gui.borrow().profile_dropdown.model().unwrap();
+                let profile_name = if let Some(item) = model.item(selected_index) {
+                    if let Some(string_object) = item.downcast_ref::<StringObject>() {
+                        string_object.string().as_str().to_string()
+                    } else {
+                        "Default".to_string()
+                    }
+                } else {
+                    "Default".to_string()
+                };
+
+                if profile_name == "Default" {
+                    gui.borrow().custom_error_popup(
+                        "Cannot Delete Profile",
+                        "The 'Default' profile cannot be deleted",
+                    );
+                    return;
+                }
+
+                let dialog_window = Window::builder()
+                    .title("Delete Profile")
+                    .modal(true)
+                    .transient_for(&gui.borrow().window)
+                    .destroy_with_parent(true)
+                    .default_width(300)
+                    .build();
+
+                let dialog_box = Box::new(Orientation::Vertical, 10);
+                dialog_box.set_margin_top(10);
+                dialog_box.set_margin_bottom(10);
+                dialog_box.set_margin_start(10);
+                dialog_box.set_margin_end(10);
+
+                let label = Label::new(Some(&format!(
+                    "Are you sure you want to delete the profile '{}'?",
+                    profile_name
+                )));
+                label.set_wrap(true);
+                label.set_width_chars(45);
+                label.set_max_width_chars(60);
+                label.set_halign(gtk::Align::Center);
+
+                dialog_box.append(&label);
+
+                let buttons_box = Box::new(Orientation::Horizontal, 5);
+                buttons_box.set_halign(gtk::Align::End);
+
+                let cancel_button = Button::with_label("Cancel");
+                let delete_button = Button::with_label("Delete");
+
+                buttons_box.append(&cancel_button);
+                buttons_box.append(&delete_button);
+
+                dialog_box.append(&buttons_box);
+                dialog_window.set_child(Some(&dialog_box));
+
+                let dialog_window_clone = dialog_window.clone();
+                cancel_button.connect_clicked(move |_| {
+                    dialog_window_clone.close();
+                });
+
+                let dialog_window_clone = dialog_window.clone();
+                let gui_clone = Rc::clone(&gui);
+                let profile_name_clone = profile_name.clone();
+                delete_button.connect_clicked(move |_| {
+                    let hyprviz_path = get_config_path(true, &profile_name_clone);
+
+                    match fs::remove_file(&hyprviz_path) {
+                        Ok(_) => {
+                            if let Some(mut profiles) = find_all_profiles() {
+                                if !profiles.contains(&"Default".to_string()) {
+                                    profiles.insert(0, "Default".to_string());
+                                }
+
+                                let profiles_str_vec: Vec<&str> =
+                                    profiles.iter().map(|s| s.as_str()).collect();
+                                let string_list = StringList::new(&profiles_str_vec);
+                                gui_clone
+                                    .borrow()
+                                    .profile_dropdown
+                                    .set_model(Some(&string_list));
+
+                                if let Some(pos) = profiles.iter().position(|p| *p == "Default") {
+                                    gui_clone.borrow().profile_dropdown.set_selected(pos as u32);
+                                }
+                            }
+
+                            dialog_window_clone.close();
+                        }
+                        Err(e) => {
+                            gui_clone.borrow().custom_error_popup(
+                                "Failed to delete profile",
+                                &format!("Failed to delete profile file: {e}"),
+                            );
+                        }
+                    }
+                });
+
+                dialog_window.present();
+            });
+
+        let gui_clone = Rc::clone(&gui);
         gui.borrow().clear_backups_button.connect_clicked(move |_| {
             let gui = Rc::clone(&gui_clone);
 
-            let default_config = get_config_path(false, "Default");
+            let none_config = get_config_path(true, "None");
 
-            let config_dir = default_config.parent().unwrap_or_else(|| Path::new(".config/hypr"));
+            let config_dir = none_config.parent().unwrap_or_else(|| Path::new(HYPRVIZ_PROFILES_PATH));
 
             let mut backup_files = Vec::new();
             if let Ok(entries) = fs::read_dir(config_dir) {
@@ -448,6 +448,7 @@ impl ConfigGUI {
             label.set_wrap(true);
             label.set_width_chars(50);
             label.set_max_width_chars(60);
+            label.set_halign(gtk::Align::Center);
 
             dialog_box.append(&label);
 
