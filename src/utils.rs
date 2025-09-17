@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::error::Error;
 use std::fs;
+use std::io::{self, Write};
 use std::{env, path::Path, path::PathBuf, process::Command};
 
 pub fn get_config_path(write: bool) -> PathBuf {
@@ -23,16 +24,132 @@ pub fn reload_hyprland() {
     );
 }
 
-pub fn check_last_non_empty_line(file_content: &str, expected_line: &str) -> bool {
-    let lines: Vec<&str> = file_content.lines().collect();
+pub fn check_last_non_empty_line_contains(file_content: &str, expected_text: &str) -> bool {
+    let last_non_empty = file_content
+        .lines()
+        .rev()
+        .find(|line| !line.trim().is_empty());
 
-    for line in lines.iter().rev() {
-        if !line.trim().is_empty() {
-            return line.trim() == expected_line;
+    match last_non_empty {
+        Some(line) => line.trim().contains(expected_text),
+        None => false,
+    }
+}
+
+/// Updates the source line in Hyprland config for the specified profile
+/// For "Default" profile: `source = ./hyprviz.conf`
+/// For other profiles: `source = ./hyprviz_{profile}.conf`
+/// Replaces the last non-empty line starting with "source = ./hyprviz" or appends if not found
+pub fn update_source_line(config_path: &PathBuf, profile: &str) -> io::Result<()> {
+    let content = fs::read_to_string(config_path)?;
+    let mut lines: Vec<String> = content.lines().map(|s| s.to_string()).collect();
+
+    let mut target_index = None;
+    for (i, line) in lines.iter().enumerate().rev() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("source = ./hyprviz") {
+            target_index = Some(i);
+            break;
         }
     }
 
-    false
+    let new_source = if profile == "Default" {
+        "source = ./hyprviz.conf".to_string()
+    } else {
+        format!("source = ./hyprviz_{}.conf", profile)
+    };
+
+    if let Some(idx) = target_index {
+        lines[idx] = new_source;
+    } else {
+        lines.push(new_source);
+    }
+
+    let new_content = lines.join("\n") + "\n";
+    let temp_path = config_path.with_extension("tmp");
+
+    let result = || -> Result<(), io::Error> {
+        let mut temp_file = fs::File::create(&temp_path)?;
+        temp_file.write_all(new_content.as_bytes())?;
+        temp_file.sync_all()?;
+        fs::rename(&temp_path, config_path)?;
+        Ok(())
+    }();
+
+    if result.is_err() {
+        let _ = fs::remove_file(&temp_path);
+    }
+
+    result
+}
+
+pub fn get_current_profile(file_content: &str) -> String {
+    let last_non_empty_line = file_content
+        .lines()
+        .rev()
+        .find(|line| !line.trim().is_empty());
+
+    if let Some(line) = last_non_empty_line {
+        let prefix = "source = ./hyprviz_";
+        let suffix = ".conf";
+
+        if let Some(start_prefix_idx) = line.find(prefix) {
+            let start_profile_idx = start_prefix_idx + prefix.len();
+
+            let line_after_prefix = &line[start_profile_idx..];
+            if let Some(start_suffix_idx_relative) = line_after_prefix.find(suffix) {
+                let start_suffix_idx_absolute = start_profile_idx + start_suffix_idx_relative;
+                let end_suffix_idx_absolute = start_suffix_idx_absolute + suffix.len();
+
+                let is_valid_ending = end_suffix_idx_absolute == line.len()
+                    || line[end_suffix_idx_absolute..]
+                        .starts_with(|c: char| c.is_whitespace() || c == '#');
+
+                if is_valid_ending && start_profile_idx < start_suffix_idx_absolute {
+                    let extracted = &line[start_profile_idx..start_suffix_idx_absolute];
+                    if !extracted.is_empty() {
+                        return extracted.to_string();
+                    }
+                }
+            }
+        }
+    }
+
+    "Default".to_string()
+}
+
+/// Finds all files matching pattern `hyprviz_*.conf` in the same directory as default config file
+pub fn find_all_profiles() -> Option<Vec<String>> {
+    let config_path = get_config_path(true);
+
+    let parent_dir = config_path.parent()?;
+
+    let entries = fs::read_dir(parent_dir).ok()?;
+
+    let mut profiles = Vec::new();
+    let prefix = "hyprviz_";
+    let suffix = ".conf";
+
+    for entry in entries.flatten() {
+        let file_name = match entry.file_name().into_string() {
+            Ok(name) => name,
+            Err(_) => continue,
+        };
+
+        if file_name.starts_with(prefix) && file_name.ends_with(suffix) {
+            let profile_name = &file_name[prefix.len()..file_name.len() - suffix.len()];
+
+            if !profile_name.is_empty() {
+                profiles.push(profile_name.to_string());
+            }
+        }
+    }
+
+    if profiles.is_empty() {
+        None
+    } else {
+        Some(profiles)
+    }
 }
 
 /// Expand all `source = <path>` occurrences in file `entry_path` recursively.

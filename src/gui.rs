@@ -1,9 +1,11 @@
-use crate::utils::{BACKUP_SUFFIX, expand_source, get_config_path, reload_hyprland};
+use crate::utils::{
+    BACKUP_SUFFIX, expand_source, find_all_profiles, get_config_path, reload_hyprland,
+};
 use crate::widget::ConfigWidget;
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
     FileDialog, HeaderBar, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton, Stack,
-    StackSidebar, Switch, Widget, gdk, glib, prelude::*,
+    StackSidebar, StringList, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::{HyprlandConfig, parse_config};
 use std::io::{self, Write};
@@ -14,6 +16,7 @@ pub struct ConfigGUI {
     config_widgets: HashMap<String, ConfigWidget>,
     save_button: Button,
     undo_button: Button,
+    pub profile_dropdown: DropDown,
     save_config_button: Button,
     load_config_button: Button,
     copy_button: Button,
@@ -104,8 +107,28 @@ impl ConfigGUI {
         let save_button = Button::with_label("Save");
         let undo_button = Button::with_label("Undo");
 
+        let profiles = if let Some(mut profiles) = find_all_profiles() {
+            if profiles.contains(&"Default".to_string()) {
+                profiles
+            } else {
+                profiles.insert(0, "Default".to_string());
+                profiles
+            }
+        } else {
+            vec!["Default".to_string()]
+        };
+        let profiles_str_vec: Vec<&str> = profiles.iter().map(|s| s.as_str()).collect();
+        let profiles_str: &[&str] = profiles_str_vec.as_slice();
+        let string_list = StringList::new(profiles_str);
+        let profile_dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
+        profile_dropdown.set_halign(gtk::Align::End);
+        profile_dropdown.set_width_request(100);
+
+        // profile_dropdown.connect_changed(move |dropdown| {});
+
         header_bar.pack_end(&save_button);
         header_bar.pack_end(&undo_button);
+        header_bar.pack_end(&profile_dropdown);
 
         window.set_titlebar(Some(&header_bar));
 
@@ -129,6 +152,7 @@ impl ConfigGUI {
             config_widgets,
             save_button,
             undo_button,
+            profile_dropdown,
             save_config_button,
             load_config_button,
             copy_button,

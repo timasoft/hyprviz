@@ -1,10 +1,12 @@
-use gtk::{Application, prelude::*};
+use gtk::{Application, StringList, StringObject, glib, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
+use std::path::Path;
 use std::path::PathBuf;
 use std::{cell::RefCell, fs, rc::Rc};
 use utils::{
-    CONFIG_PATH, check_last_non_empty_line, expand_source, get_config_path, reload_hyprland,
+    CONFIG_PATH, HYPRVIZ_CONFIG_PATH, check_last_non_empty_line_contains, expand_source,
+    find_all_profiles, get_config_path, get_current_profile, reload_hyprland, update_source_line,
 };
 
 mod gui;
@@ -43,7 +45,7 @@ fn build_ui(app: &Application) {
             }
         };
 
-        if !check_last_non_empty_line(&config_str, "source = ./hyprviz.conf") {
+        if !check_last_non_empty_line_contains(&config_str, "source = ./hyprviz") {
             let mut parsed_config = parse_config(&config_str);
 
             parsed_config.add_entry_headless("#", "Source for hyprviz");
@@ -106,6 +108,8 @@ fn build_ui(app: &Application) {
             }
         }
 
+        let profile = get_current_profile(&config_str);
+
         let config_str_for_read = match expand_source(&config_path_full) {
             Ok(s) => s,
             Err(e) => {
@@ -120,6 +124,106 @@ fn build_ui(app: &Application) {
         let parsed_config = parse_config(&config_str_for_read);
 
         gui.borrow_mut().load_config(&parsed_config);
+
+        let profiles = find_all_profiles();
+        println!("Available profiles: {profiles:?}");
+
+        println!("Loading config for profile: {profile}");
+        match gui.borrow().profile_dropdown.model() {
+            Some(model) => match model.downcast::<StringList>() {
+                Ok(string_list) => {
+                    let num_items = string_list.n_items();
+                    let mut found_index = None;
+
+                    for i in 0..num_items {
+                        if let Some(gstring) = string_list.string(i)
+                            && gstring.as_str() == profile
+                        {
+                            found_index = Some(i);
+                            break;
+                        }
+                    }
+
+                    match found_index {
+                        Some(index) => {
+                            gui.borrow().profile_dropdown.set_selected(index);
+                        }
+                        None => {
+                            let config_dir = Path::new(HYPRVIZ_CONFIG_PATH)
+                                .parent()
+                                .and_then(|p| p.to_str())
+                                .unwrap_or("config directory");
+
+                            gui.borrow().custom_error_popup(
+                                "Profile Not Found",
+                                &format!(
+                                    "Profile '{}' was not found in the config folder: {}",
+                                    profile, config_dir
+                                ),
+                            );
+                        }
+                    }
+                }
+                Err(_) => {
+                    gui.borrow().custom_error_popup_critical(
+                        "Model Type Error",
+                        "The dropdown model is not a StringList.",
+                    );
+                }
+            },
+            None => {
+                gui.borrow().custom_error_popup_critical(
+                    "Missing Model",
+                    "The dropdown widget has no model assigned.",
+                );
+            }
+        }
+
+        let gui_clone = Rc::clone(&gui);
+        gui.borrow()
+            .profile_dropdown
+            .connect_selected_notify(move |dropdown| {
+                let selected_index = dropdown.selected();
+                let model = dropdown.model().unwrap();
+
+                if let Some(item) = model.item(selected_index)
+                    && let Some(string_object) = item.downcast_ref::<StringObject>()
+                {
+                    let profile_name = string_object.string().as_str().to_string();
+                    match update_source_line(&config_path_full, &profile_name) {
+                        Ok(_) => {
+                            println!("Updated source line to profile: {}", profile_name);
+                            reload_hyprland();
+                        }
+                        Err(e) => {
+                            gui_clone.borrow().custom_error_popup(
+                                "Profile Switch Failed",
+                                &format!(
+                                    "Failed to update config for profile '{}': {}",
+                                    profile_name, e
+                                ),
+                            );
+                        }
+                    }
+                    let gui = Rc::clone(&gui_clone);
+
+                    let config_str_for_read = match expand_source(&config_path_full) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            gui.borrow().custom_error_popup_critical(
+                                "Reading failed",
+                                &format!("Failed to read the configuration file: {e}"),
+                            );
+                            String::new()
+                        }
+                    };
+
+                    let parsed_config = parse_config(&config_str_for_read);
+                    glib::MainContext::default().spawn_local(async move {
+                        gui.borrow_mut().load_config(&parsed_config);
+                    });
+                }
+            });
     }
 
     gui.borrow().window.present();
