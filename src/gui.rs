@@ -140,10 +140,12 @@ impl ConfigGUI {
         let profile_dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
         profile_dropdown.set_halign(gtk::Align::End);
         profile_dropdown.set_width_request(100);
+        let current_profile_label = Label::new(Some("Profile:"));
 
         header_bar.pack_end(&save_button);
         header_bar.pack_end(&undo_button);
         header_bar.pack_end(&profile_dropdown);
+        header_bar.pack_end(&current_profile_label);
 
         window.set_titlebar(Some(&header_bar));
 
