@@ -1,14 +1,31 @@
-use std::collections::HashSet;
-use std::error::Error;
-use std::fs;
-use std::io::{self, Write};
-use std::{env, path::Path, path::PathBuf, process::Command};
+use std::{
+    collections::HashSet,
+    error::Error,
+    fs,
+    io::{self, Write},
+    {
+        env,
+        path::{Path, PathBuf},
+        process::Command,
+    },
+};
 
-pub fn get_config_path(write: bool) -> PathBuf {
+pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
+    let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+    let base_path = Path::new(&home);
+
     if write {
-        Path::new(&env::var("HOME").unwrap_or_else(|_| ".".to_string())).join(HYPRVIZ_CONFIG_PATH)
+        if !profile.is_empty() && profile != "Default" {
+            let hyprviz_dir = Path::new(HYPRVIZ_CONFIG_PATH)
+                .parent()
+                .unwrap_or(Path::new("."));
+            let profile_filename = format!("hyprviz_{}.conf", profile);
+            base_path.join(hyprviz_dir).join(profile_filename)
+        } else {
+            base_path.join(HYPRVIZ_CONFIG_PATH)
+        }
     } else {
-        Path::new(&env::var("HOME").unwrap_or_else(|_| ".".to_string())).join(CONFIG_PATH)
+        base_path.join(CONFIG_PATH)
     }
 }
 
@@ -34,6 +51,24 @@ pub fn check_last_non_empty_line_contains(file_content: &str, expected_text: &st
         Some(line) => line.trim().contains(expected_text),
         None => false,
     }
+}
+
+pub fn atomic_write(path: &Path, data: &str) -> io::Result<()> {
+    let temp_path = path.with_extension("tmp");
+
+    let result = || -> Result<(), io::Error> {
+        let mut temp_file = fs::File::create(&temp_path)?;
+        temp_file.write_all(data.as_bytes())?;
+        temp_file.sync_all()?;
+        fs::rename(&temp_path, path)?;
+        Ok(())
+    }();
+
+    if result.is_err() {
+        let _ = fs::remove_file(&temp_path);
+    }
+
+    result
 }
 
 /// Updates the source line in Hyprland config for the specified profile
@@ -66,21 +101,7 @@ pub fn update_source_line(config_path: &PathBuf, profile: &str) -> io::Result<()
     }
 
     let new_content = lines.join("\n") + "\n";
-    let temp_path = config_path.with_extension("tmp");
-
-    let result = || -> Result<(), io::Error> {
-        let mut temp_file = fs::File::create(&temp_path)?;
-        temp_file.write_all(new_content.as_bytes())?;
-        temp_file.sync_all()?;
-        fs::rename(&temp_path, config_path)?;
-        Ok(())
-    }();
-
-    if result.is_err() {
-        let _ = fs::remove_file(&temp_path);
-    }
-
-    result
+    atomic_write(config_path, &new_content)
 }
 
 pub fn get_current_profile(file_content: &str) -> String {
@@ -120,7 +141,7 @@ pub fn get_current_profile(file_content: &str) -> String {
 
 /// Finds all files matching pattern `hyprviz_*.conf` in the same directory as default config file
 pub fn find_all_profiles() -> Option<Vec<String>> {
-    let config_path = get_config_path(true);
+    let config_path = get_config_path(true, "Default");
 
     let parent_dir = config_path.parent()?;
 

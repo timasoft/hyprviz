@@ -1,12 +1,14 @@
 use gtk::{Application, StringList, StringObject, glib, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
-use std::path::Path;
-use std::path::PathBuf;
-use std::{cell::RefCell, fs, rc::Rc};
+use std::{
+    path::{Path, PathBuf},
+    {cell::RefCell, fs, rc::Rc},
+};
 use utils::{
-    CONFIG_PATH, HYPRVIZ_CONFIG_PATH, check_last_non_empty_line_contains, expand_source,
-    find_all_profiles, get_config_path, get_current_profile, reload_hyprland, update_source_line,
+    CONFIG_PATH, HYPRVIZ_CONFIG_PATH, atomic_write, check_last_non_empty_line_contains,
+    expand_source, find_all_profiles, get_config_path, get_current_profile, reload_hyprland,
+    update_source_line,
 };
 
 mod gui;
@@ -26,7 +28,7 @@ fn build_ui(app: &Application) {
     let gui = Rc::new(RefCell::new(ConfigGUI::new(app)));
     gui::ConfigGUI::setup_ui_events(Rc::clone(&gui));
 
-    let config_path_full = get_config_path(false);
+    let config_path_full = get_config_path(false, "Default");
 
     if !config_path_full.exists() {
         gui.borrow().custom_error_popup_critical(
@@ -84,7 +86,7 @@ fn build_ui(app: &Application) {
                 }
 
                 let default = "# hyprviz configuration (created automatically)\n\n";
-                if let Err(e) = fs::write(&hyprviz_path, default) {
+                if let Err(e) = atomic_write(&hyprviz_path, default) {
                     gui.borrow().custom_error_popup_critical(
                         "Creating included file failed",
                         &format!("Failed to create {}: {}", hyprviz_path.display(), e),
@@ -92,7 +94,7 @@ fn build_ui(app: &Application) {
                 }
             }
 
-            match fs::write(&config_path_full, updated_config_str) {
+            match atomic_write(&config_path_full, &updated_config_str) {
                 Ok(_) => {
                     println!("Added 'source = ./hyprviz.conf' to: ~/{CONFIG_PATH}");
                     reload_hyprland();

@@ -1,15 +1,23 @@
-use crate::utils::{
-    BACKUP_SUFFIX, expand_source, find_all_profiles, get_config_path, reload_hyprland,
+use crate::{
+    utils::{
+        BACKUP_SUFFIX, atomic_write, expand_source, find_all_profiles, get_config_path,
+        reload_hyprland,
+    },
+    widget::ConfigWidget,
 };
-use crate::widget::ConfigWidget;
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
     FileDialog, HeaderBar, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton, Stack,
-    StackSidebar, StringList, Switch, Widget, gdk, glib, prelude::*,
+    StackSidebar, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::{HyprlandConfig, parse_config};
-use std::io::{self, Write};
-use std::{cell::RefCell, collections::HashMap, fs, path::PathBuf, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::HashMap,
+    fs,
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
@@ -123,8 +131,6 @@ impl ConfigGUI {
         let profile_dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
         profile_dropdown.set_halign(gtk::Align::End);
         profile_dropdown.set_width_request(100);
-
-        // profile_dropdown.connect_changed(move |dropdown| {});
 
         header_bar.pack_end(&save_button);
         header_bar.pack_end(&undo_button);
@@ -279,7 +285,7 @@ along with this program; if not, see
         }
     }
 
-    fn save_hyprviz_config(&self, path: &PathBuf) {
+    fn save_hyprviz_config(&self, path: &Path) {
         let config: HashMap<String, String> = self
             .changed_options
             .borrow()
@@ -288,7 +294,7 @@ along with this program; if not, see
             .collect();
 
         match serde_json::to_string_pretty(&config) {
-            Ok(json) => match fs::write(path, json) {
+            Ok(json) => match atomic_write(path, &json) {
                 Ok(_) => {
                     self.custom_info_popup(
                         "Config Saved",
@@ -357,7 +363,19 @@ along with this program; if not, see
     }
 
     fn save_config_file(&self) {
-        let path = get_config_path(true);
+        let profile_name = {
+            let selected_index = self.profile_dropdown.selected();
+            let model = self.profile_dropdown.model().unwrap();
+
+            if let Some(item) = model.item(selected_index)
+                && let Some(string_object) = item.downcast_ref::<StringObject>()
+            {
+                string_object.string().as_str().to_string()
+            } else {
+                "Default".to_string()
+            }
+        };
+        let path = get_config_path(true, &profile_name);
         let backup_path = path.with_file_name(format!(
             "{}{}",
             path.file_name().unwrap().to_str().unwrap(),
@@ -397,15 +415,7 @@ along with this program; if not, see
             let updated_config_str = parsed_config.to_string();
             let temp_path = path.with_extension("tmp");
 
-            let result = || -> Result<(), io::Error> {
-                let mut temp_file = fs::File::create(&temp_path)?;
-                temp_file.write_all(updated_config_str.as_bytes())?;
-                temp_file.sync_all()?;
-
-                fs::rename(&temp_path, &path)?;
-
-                Ok(())
-            }();
+            let result = atomic_write(&path, &updated_config_str);
 
             match result {
                 Ok(()) => {
@@ -426,8 +436,20 @@ along with this program; if not, see
     }
 
     fn undo_changes(&mut self) {
-        let path = get_config_path(true);
-        let path_for_read = get_config_path(false);
+        let profile_name = {
+            let selected_index = self.profile_dropdown.selected();
+            let model = self.profile_dropdown.model().unwrap();
+
+            if let Some(item) = model.item(selected_index)
+                && let Some(string_object) = item.downcast_ref::<StringObject>()
+            {
+                string_object.string().as_str().to_string()
+            } else {
+                "Default".to_string()
+            }
+        };
+        let path = get_config_path(true, &profile_name);
+        let path_for_read = get_config_path(false, "Default");
         let backup_path = path.with_file_name(format!(
             "{}{}",
             path.file_name().unwrap().to_str().unwrap(),
