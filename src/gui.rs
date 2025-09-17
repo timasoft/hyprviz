@@ -7,8 +7,8 @@ use crate::{
 };
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
-    FileDialog, HeaderBar, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton, Stack,
-    StackSidebar, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
+    FileDialog, HeaderBar, Label, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton,
+    Stack, StackSidebar, StringList, StringObject, Switch, Widget, Window, gdk, glib, prelude::*,
 };
 use hyprparser::{HyprlandConfig, parse_config};
 use std::{
@@ -25,6 +25,7 @@ pub struct ConfigGUI {
     save_button: Button,
     undo_button: Button,
     pub profile_dropdown: DropDown,
+    create_profile_button: Button,
     save_config_button: Button,
     load_config_button: Button,
     copy_button: Button,
@@ -69,10 +70,12 @@ impl ConfigGUI {
         popover.set_position(gtk::PositionType::Bottom);
         popover.set_parent(&search_button);
 
+        let create_profile_button = Button::with_label("Create Profile");
         let save_config_button = Button::with_label("Save HyprViz Config");
         let load_config_button = Button::with_label("Load HyprViz Config");
         let copy_button = Button::with_label("Copyright");
 
+        gear_menu_box.append(&create_profile_button);
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
         gear_menu_box.append(&copy_button);
@@ -159,6 +162,7 @@ impl ConfigGUI {
             save_button,
             undo_button,
             profile_dropdown,
+            create_profile_button,
             save_config_button,
             load_config_button,
             copy_button,
@@ -171,6 +175,115 @@ impl ConfigGUI {
     }
 
     pub fn setup_ui_events(gui: Rc<RefCell<ConfigGUI>>) {
+        let gui_clone = Rc::clone(&gui);
+        gui.borrow()
+            .create_profile_button
+            .connect_clicked(move |_| {
+                let gui = Rc::clone(&gui_clone);
+
+                let dialog_window = Window::builder()
+                    .title("Create New Profile")
+                    .modal(true)
+                    .transient_for(&gui.borrow().window)
+                    .destroy_with_parent(true)
+                    .default_width(300)
+                    .build();
+
+                let dialog_box = Box::new(Orientation::Vertical, 10);
+                dialog_box.set_margin_top(10);
+                dialog_box.set_margin_bottom(10);
+                dialog_box.set_margin_start(10);
+                dialog_box.set_margin_end(10);
+
+                let label = Label::new(Some("Enter profile name:"));
+                let entry = Entry::new();
+                entry.set_placeholder_text(Some("New Profile"));
+
+                dialog_box.append(&label);
+                dialog_box.append(&entry);
+
+                let buttons_box = Box::new(Orientation::Horizontal, 5);
+                buttons_box.set_halign(gtk::Align::End);
+
+                let cancel_button = Button::with_label("Cancel");
+                let create_button = Button::with_label("Create");
+
+                buttons_box.append(&cancel_button);
+                buttons_box.append(&create_button);
+
+                dialog_box.append(&buttons_box);
+                dialog_window.set_child(Some(&dialog_box));
+
+                let dialog_window_clone = dialog_window.clone();
+                cancel_button.connect_clicked(move |_| {
+                    dialog_window_clone.close();
+                });
+
+                let dialog_window_clone = dialog_window.clone();
+                let gui_clone = Rc::clone(&gui);
+                let entry_clone = entry.clone();
+                create_button.connect_clicked(move |_| {
+                    let profile_name = entry_clone.text().to_string();
+                    if profile_name.is_empty() || profile_name == "Default" {
+                        gui_clone.borrow().custom_error_popup(
+                            "Invalid Profile Name",
+                            "Profile name cannot be empty or 'Default'",
+                        );
+                        return;
+                    }
+
+                    let hyprviz_path = get_config_path(true, &profile_name);
+
+                    if hyprviz_path.exists() {
+                        gui_clone.borrow().custom_error_popup(
+                            "Profile Exists",
+                            &format!("Profile '{}' already exists", profile_name),
+                        );
+                        return;
+                    }
+
+                    let config_path_full = get_config_path(true, "Default");
+                    let config_str = match fs::read_to_string(&config_path_full) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            gui_clone.borrow().custom_error_popup_critical(
+                                "Reading failed",
+                                &format!("Failed to read the default configuration file: {e}"),
+                            );
+                            return;
+                        }
+                    };
+
+                    if let Err(e) = atomic_write(&hyprviz_path, &config_str) {
+                        gui_clone.borrow().custom_error_popup(
+                            "Failed to create profile",
+                            &format!("Failed to create profile file: {e}"),
+                        );
+                        return;
+                    }
+
+                    dialog_window_clone.close();
+
+                    if let Some(mut profiles) = find_all_profiles() {
+                        if !profiles.contains(&"Default".to_string()) {
+                            profiles.insert(0, "Default".to_string());
+                        }
+                        let profiles_str_vec: Vec<&str> =
+                            profiles.iter().map(|s| s.as_str()).collect();
+                        let string_list = StringList::new(&profiles_str_vec);
+                        gui_clone
+                            .borrow()
+                            .profile_dropdown
+                            .set_model(Some(&string_list));
+
+                        if let Some(pos) = profiles.iter().position(|p| *p == profile_name) {
+                            gui_clone.borrow().profile_dropdown.set_selected(pos as u32);
+                        }
+                    }
+                });
+
+                dialog_window.present();
+            });
         let gui_clone = Rc::clone(&gui);
         gui.borrow().load_config_button.connect_clicked(move |_| {
             let gui = Rc::clone(&gui_clone);
