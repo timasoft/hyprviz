@@ -6,14 +6,15 @@ use gtk::{
 use hyprparser::HyprlandConfig;
 use std::{
     cell::RefCell,
+    cmp::Ordering,
     collections::{HashMap, VecDeque},
     rc::Rc,
 };
 
 use crate::utils::{
-    MAX_SAFE_INTEGER_F64, get_cpu_info, get_gpu_info, get_host_info, get_hyprland_version,
-    get_hyprviz_version, get_kernel_info, get_memory_info, get_monitor_info, get_os_info,
-    get_user_info,
+    MAX_SAFE_INTEGER_F64, compare_versions, get_cpu_info, get_gpu_info, get_host_info,
+    get_hyprland_version, get_hyprviz_version, get_kernel_info, get_latest_version,
+    get_memory_info, get_monitor_info, get_os_info, get_user_info,
 };
 
 pub struct WidgetData {
@@ -3567,8 +3568,58 @@ impl ConfigWidget {
                 info_box.set_margin_start(15);
                 info_box.set_margin_end(15);
 
-                add_info_row(&info_box, "Hyprland Version:", &get_hyprland_version());
-                add_info_row(&info_box, "Hyprviz Version:", &get_hyprviz_version());
+                let hyprland_version_label =
+                    add_info_row(&info_box, "Hyprland Version:", "Loading...");
+                let hyprviz_version_label =
+                    add_info_row(&info_box, "Hyprviz Version:", "Loading...");
+
+                glib::idle_add_local(move || {
+                    let hyprland_latest_version = get_latest_version("hyprwm/hyprland");
+                    let hyprland_version = get_hyprland_version();
+                    let hyprland_version_str = if !hyprland_latest_version.starts_with("v") {
+                        hyprland_version
+                    } else {
+                        match compare_versions(&hyprland_version, &hyprland_latest_version) {
+                            Ordering::Greater => {
+                                format!(
+                                    "{} (Your version is greater than latest)",
+                                    hyprland_version
+                                )
+                            }
+                            Ordering::Less => {
+                                format!(
+                                    "{} (New version available({}))",
+                                    hyprland_version, hyprland_latest_version
+                                )
+                            }
+                            Ordering::Equal => hyprland_version,
+                        }
+                    };
+
+                    let hyprviz_latest_version = get_latest_version("timasoft/hyprviz");
+                    let hyprviz_version = get_hyprviz_version();
+                    let hyprviz_version_str = if !hyprviz_latest_version.starts_with("v") {
+                        hyprviz_version
+                    } else {
+                        match compare_versions(&hyprviz_version, &hyprviz_latest_version) {
+                            Ordering::Greater => {
+                                format!("{} (Your version is greater than latest)", hyprviz_version)
+                            }
+                            Ordering::Less => {
+                                format!(
+                                    "{} (New version available({}))",
+                                    hyprviz_version, hyprviz_latest_version
+                                )
+                            }
+                            Ordering::Equal => hyprviz_version,
+                        }
+                    };
+
+                    hyprland_version_label.set_label(&hyprland_version_str);
+                    hyprviz_version_label.set_label(&hyprviz_version_str);
+
+                    glib::ControlFlow::Break
+                });
                 add_info_row(&info_box, "OS:", &get_os_info());
                 add_info_row(&info_box, "Kernel:", &get_kernel_info());
                 add_info_row(&info_box, "User:", &get_user_info());

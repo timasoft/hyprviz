@@ -1,13 +1,12 @@
 use std::{
+    cmp::Ordering,
     collections::HashSet,
+    env,
     error::Error,
     fs,
     io::{self, Read, Write},
-    {
-        env,
-        path::{Path, PathBuf},
-        process::Command,
-    },
+    path::{Path, PathBuf},
+    process::Command,
 };
 
 pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
@@ -60,6 +59,89 @@ pub fn get_hyprland_version() -> String {
 
 pub fn get_hyprviz_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
+}
+
+/// Returns the latest version of the GitHub repository
+pub fn get_latest_version(repo: &str) -> String {
+    match Command::new("curl")
+        .arg("-s")
+        .arg("-H")
+        .arg("User-Agent: repository-updater")
+        .arg(format!(
+            "https://api.github.com/repos/{}/releases/latest",
+            repo,
+        ))
+        .output()
+    {
+        Ok(output) => {
+            if output.status.success() {
+                let response = String::from_utf8_lossy(&output.stdout).to_string();
+                if let Some(tag_start) = response.find(r#""tag_name":"#) {
+                    let after_tag = &response[tag_start + 12..];
+                    if let Some(tag_end) = after_tag.find('"') {
+                        return after_tag[..tag_end].to_string();
+                    }
+                }
+                "Version parse failed".to_string()
+            } else {
+                "API request failed".to_string()
+            }
+        }
+        Err(_) => {
+            match Command::new("wget")
+                .arg("-qO-")
+                .arg("-U")
+                .arg("repository-updater")
+                .arg(format!(
+                    "https://api.github.com/repos/{}/releases/latest",
+                    repo,
+                ))
+                .output()
+            {
+                Ok(output) => {
+                    if output.status.success() {
+                        let response = String::from_utf8_lossy(&output.stdout).to_string();
+                        if let Some(tag_start) = response.find(r#""tag_name":"#) {
+                            let after_tag = &response[tag_start + 12..];
+                            if let Some(tag_end) = after_tag.find('"') {
+                                return after_tag[..tag_end].to_string();
+                            }
+                        }
+                        "Version parse failed".to_string()
+                    } else {
+                        "API request failed (wget)".to_string()
+                    }
+                }
+                Err(_) => "curl/wget not found".to_string(),
+            }
+        }
+    }
+}
+
+pub fn compare_versions(current: &str, latest: &str) -> Ordering {
+    let current_parts: Vec<u32> = current
+        .trim_start_matches('v')
+        .split('.')
+        .filter_map(|s| s.parse().ok())
+        .collect();
+
+    let latest_parts: Vec<u32> = latest
+        .trim_start_matches('v')
+        .split('.')
+        .filter_map(|s| s.parse().ok())
+        .collect();
+
+    for i in 0..3 {
+        let current_val = current_parts.get(i).copied().unwrap_or(0);
+        let latest_val = latest_parts.get(i).copied().unwrap_or(0);
+
+        match current_val.cmp(&latest_val) {
+            Ordering::Equal => continue,
+            ordering => return ordering,
+        }
+    }
+
+    Ordering::Equal
 }
 
 pub fn get_os_info() -> String {
