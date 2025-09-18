@@ -12,7 +12,8 @@ use std::{
 
 use crate::utils::{
     MAX_SAFE_INTEGER_F64, get_cpu_info, get_gpu_info, get_host_info, get_hyprland_version,
-    get_kernel_info, get_memory_info, get_monitor_info, get_os_info, get_user_info,
+    get_hyprviz_version, get_kernel_info, get_memory_info, get_monitor_info, get_os_info,
+    get_user_info,
 };
 
 pub struct WidgetData {
@@ -3567,6 +3568,7 @@ impl ConfigWidget {
                 info_box.set_margin_end(15);
 
                 add_info_row(&info_box, "Hyprland Version:", &get_hyprland_version());
+                add_info_row(&info_box, "Hyprviz Version:", &get_hyprviz_version());
                 add_info_row(&info_box, "OS:", &get_os_info());
                 add_info_row(&info_box, "Kernel:", &get_kernel_info());
                 add_info_row(&info_box, "User:", &get_user_info());

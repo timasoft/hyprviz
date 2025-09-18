@@ -58,6 +58,10 @@ pub fn get_hyprland_version() -> String {
     }
 }
 
+pub fn get_hyprviz_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
 pub fn get_os_info() -> String {
     if let Ok(mut file) = fs::File::open("/etc/os-release") {
         let mut content = String::new();
