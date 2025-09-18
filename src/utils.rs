@@ -63,57 +63,31 @@ pub fn get_hyprviz_version() -> String {
 
 /// Returns the latest version of the GitHub repository
 pub fn get_latest_version(repo: &str) -> String {
-    match Command::new("curl")
-        .arg("-s")
-        .arg("-H")
-        .arg("User-Agent: repository-updater")
-        .arg(format!(
-            "https://api.github.com/repos/{}/releases/latest",
-            repo,
-        ))
-        .output()
+    let url = format!("https://api.github.com/repos/{}/releases/latest", repo);
+
+    match minreq::get(&url)
+        .with_header("User-Agent", "repository-updater")
+        .send()
     {
-        Ok(output) => {
-            if output.status.success() {
-                let response = String::from_utf8_lossy(&output.stdout).to_string();
-                if let Some(tag_start) = response.find(r#""tag_name":"#) {
-                    let after_tag = &response[tag_start + 12..];
-                    if let Some(tag_end) = after_tag.find('"') {
-                        return after_tag[..tag_end].to_string();
-                    }
-                }
-                "Version parse failed".to_string()
-            } else {
-                "API request failed".to_string()
-            }
-        }
-        Err(_) => {
-            match Command::new("wget")
-                .arg("-qO-")
-                .arg("-U")
-                .arg("repository-updater")
-                .arg(format!(
-                    "https://api.github.com/repos/{}/releases/latest",
-                    repo,
-                ))
-                .output()
-            {
-                Ok(output) => {
-                    if output.status.success() {
-                        let response = String::from_utf8_lossy(&output.stdout).to_string();
-                        if let Some(tag_start) = response.find(r#""tag_name":"#) {
-                            let after_tag = &response[tag_start + 12..];
-                            if let Some(tag_end) = after_tag.find('"') {
-                                return after_tag[..tag_end].to_string();
-                            }
+        Ok(response) => {
+            if response.status_code == 200 {
+                match serde_json::from_str::<serde_json::Value>(response.as_str().unwrap_or("")) {
+                    Ok(json) => {
+                        if let Some(tag_name) = json.get("tag_name")
+                            && let Some(version) = tag_name.as_str()
+                        {
+                            return version.to_string();
                         }
                         "Version parse failed".to_string()
-                    } else {
-                        "API request failed (wget)".to_string()
                     }
+                    Err(_) => "JSON parse error".to_string(),
                 }
-                Err(_) => "curl/wget not found".to_string(),
+            } else {
+                format!("HTTP error: {}", response.status_code)
             }
+        }
+        Err(e) => {
+            format!("Request failed: {}", e)
         }
     }
 }
