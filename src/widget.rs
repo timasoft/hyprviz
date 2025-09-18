@@ -10,7 +10,10 @@ use std::{
     rc::Rc,
 };
 
-use crate::utils::MAX_SAFE_INTEGER_F64;
+use crate::utils::{
+    MAX_SAFE_INTEGER_F64, get_cpu_info, get_gpu_info, get_host_info, get_hyprland_version,
+    get_kernel_info, get_memory_info, get_monitor_info, get_os_info, get_user_info,
+};
 
 pub struct WidgetData {
     pub widget: Widget,
@@ -52,6 +55,31 @@ fn add_section(container: &Box, title: &str, description: &str, first_section: R
     section_box.append(&frame);
 
     container.append(&section_box);
+}
+
+pub fn add_info_row(container: &Box, label: &str, value: &str) -> Label {
+    let row = Box::new(Orientation::Horizontal, 10);
+    row.set_margin_start(10);
+    row.set_margin_end(10);
+    row.set_margin_top(5);
+    row.set_margin_bottom(5);
+
+    let label_widget = Label::new(Some(label));
+    label_widget.set_xalign(0.0);
+    label_widget.add_css_class("heading");
+    label_widget.set_hexpand(false);
+
+    let value_widget = Label::new(Some(value));
+    value_widget.set_xalign(0.0);
+    value_widget.set_selectable(true);
+    value_widget.set_hexpand(true);
+    value_widget.set_wrap(true);
+
+    row.append(&label_widget);
+    row.append(&value_widget);
+    container.append(&row);
+
+    value_widget
 }
 
 fn add_dropdown_option(
@@ -3523,6 +3551,32 @@ impl ConfigWidget {
                     "Whether to keep the master window in its configured position when there are no slave windows",
                     "false",
                 )
+            }
+            "systeminfo" => {
+                add_section(
+                    &container,
+                    "System Info",
+                    "Displays information about the system.",
+                    first_section.clone(),
+                );
+
+                let info_box = Box::new(Orientation::Vertical, 10);
+                info_box.set_margin_top(10);
+                info_box.set_margin_bottom(10);
+                info_box.set_margin_start(15);
+                info_box.set_margin_end(15);
+
+                add_info_row(&info_box, "Hyprland Version:", &get_hyprland_version());
+                add_info_row(&info_box, "OS:", &get_os_info());
+                add_info_row(&info_box, "Kernel:", &get_kernel_info());
+                add_info_row(&info_box, "User:", &get_user_info());
+                add_info_row(&info_box, "Host:", &get_host_info());
+                add_info_row(&info_box, "CPU:", &get_cpu_info());
+                add_info_row(&info_box, "GPU:", &get_gpu_info());
+                add_info_row(&info_box, "Memory:", &get_memory_info());
+                add_info_row(&info_box, "Monitors:", &get_monitor_info());
+
+                container.append(&info_box);
             }
             _ => {
                 add_section(
