@@ -11,11 +11,9 @@ use std::{
     rc::Rc,
 };
 
-use crate::utils::{
-    MAX_SAFE_INTEGER_F64, compare_versions, get_cpu_info, get_gpu_info, get_host_info,
-    get_hyprland_version, get_hyprviz_version, get_kernel_info, get_latest_version,
-    get_memory_info, get_monitor_info, get_os_info, get_user_info,
-};
+use crate::utils::{MAX_SAFE_INTEGER_F64, compare_versions, get_latest_version};
+
+use crate::system_info::*;
 
 pub struct WidgetData {
     pub widget: Widget,
