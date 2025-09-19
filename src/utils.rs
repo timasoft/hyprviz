@@ -95,6 +95,21 @@ pub fn compare_versions(current: &str, latest: &str) -> Ordering {
     Ordering::Equal
 }
 
+pub fn execute_command(cmd: &str, args: &[&str]) -> Result<std::process::Output, String> {
+    Command::new(cmd)
+        .args(args)
+        .output()
+        .map_err(|_| format!("{} not found", cmd))
+}
+
+pub fn execute_shell_command(shell_cmd: &str) -> Result<std::process::Output, String> {
+    Command::new("sh")
+        .arg("-c")
+        .arg(shell_cmd)
+        .output()
+        .map_err(|_| "Failed to execute shell command".to_string())
+}
+
 pub fn extract_brackets(s: &str) -> Option<&str> {
     let start = s.find('[')?;
     let end = s[start + 1..].find(']')? + start + 1;
