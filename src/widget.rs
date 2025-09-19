@@ -77,8 +77,14 @@ pub fn add_info_row(container: &Box, label: &str, value: &str) -> Label {
     value_widget.set_hexpand(true);
     value_widget.set_wrap(true);
 
+    // let refresh_button = Button::from_icon_name("view-refresh-symbolic");
+    // refresh_button.set_tooltip_text(Some("Refresh"));
+    // refresh_button.set_valign(gtk::Align::Center);
+    // refresh_button.set_has_frame(false);
+
     row.append(&label_widget);
     row.append(&value_widget);
+    // row.append(&refresh_button);
     container.append(&row);
 
     value_widget
@@ -142,6 +148,8 @@ fn add_dropdown_option(
     dropdown.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let dropdown_clone = dropdown.clone();
@@ -233,6 +241,8 @@ fn add_bool_option(
     switch.set_valign(gtk::Align::Center);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let switch_clone = switch.clone();
@@ -315,6 +325,8 @@ fn add_bool_int_option(
     switch.set_valign(gtk::Align::Center);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let parsed_default: i32 = default
@@ -402,6 +414,8 @@ fn add_int_option(
     spin_button.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let spin_clone = spin_button.clone();
@@ -487,6 +501,8 @@ fn add_float_option(
     spin_button.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let spin_clone = spin_button.clone();
@@ -569,6 +585,8 @@ fn add_string_option(
     entry.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();
@@ -668,6 +686,8 @@ fn add_color_option(
     }
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();

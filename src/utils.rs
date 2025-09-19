@@ -439,7 +439,7 @@ pub fn get_monitor_info() -> String {
 
 fn extract_brackets(s: &str) -> Option<&str> {
     let start = s.find('[')?;
-    let end = s.find(']')?;
+    let end = s[start + 1..].find(']')? + start + 1;
     if start < end {
         Some(&s[start + 1..end])
     } else {
