@@ -753,6 +753,29 @@ fn add_color_option(
     );
 }
 
+fn update_version_label(label: &Label, repo: &str, version: &str) {
+    let latest_version = get_latest_version(repo);
+    let version_str = if !latest_version.starts_with("v") {
+        format!("{} (Unable to get latest version)", version)
+    } else {
+        match compare_versions(version, &latest_version) {
+            Ordering::Greater => {
+                format!(
+                    "{} (Your version is greater than latest({}))",
+                    version, latest_version
+                )
+            }
+            Ordering::Less => {
+                format!("{} (New version available({}))", version, latest_version)
+            }
+            Ordering::Equal => {
+                format!("{} (Your version is up to date)", version)
+            }
+        }
+    };
+    label.set_label(&version_str);
+}
+
 // transform from general{snap{enabled = true}} to general:snap:enabled = true
 fn transform_config(input: String) -> String {
     let mut result = Vec::new();
@@ -3599,29 +3622,11 @@ impl ConfigWidget {
                 let (hyprland_version_label, hyprland_version_refresh) =
                     add_info_row(&info_box, "Hyprland Version:", &hyprland_version);
                 hyprland_version_refresh.connect_clicked(move |_| {
-                    let hyprland_latest_version = get_latest_version("hyprwm/hyprland");
-                    let hyprland_version_str = if !hyprland_latest_version.starts_with("v") {
-                        hyprland_version.to_owned()
-                    } else {
-                        match compare_versions(&hyprland_version, &hyprland_latest_version) {
-                            Ordering::Greater => {
-                                format!(
-                                    "{} (Your version is greater than latest({}))",
-                                    hyprland_version, hyprland_latest_version
-                                )
-                            }
-                            Ordering::Less => {
-                                format!(
-                                    "{} (New version available({}))",
-                                    hyprland_version, hyprland_latest_version
-                                )
-                            }
-                            Ordering::Equal => {
-                                format!("{} (Your version is up to date)", hyprland_version)
-                            }
-                        }
-                    };
-                    hyprland_version_label.set_label(&hyprland_version_str);
+                    update_version_label(
+                        &hyprland_version_label,
+                        "hyprwm/hyprland",
+                        &hyprland_version,
+                    );
                 });
 
                 let hyprviz_version = get_hyprviz_version();
@@ -3629,30 +3634,11 @@ impl ConfigWidget {
                 let (hyprviz_version_label, hyprviz_version_refresh) =
                     add_info_row(&info_box, "Hyprviz Version:", &hyprviz_version);
                 hyprviz_version_refresh.connect_clicked(move |_| {
-                    let hyprviz_latest_version = get_latest_version("timasoft/hyprviz");
-                    let hyprviz_version_str = if !hyprviz_latest_version.starts_with("v") {
-                        hyprviz_version.to_owned()
-                    } else {
-                        match compare_versions(&hyprviz_version, &hyprviz_latest_version) {
-                            Ordering::Greater => {
-                                format!(
-                                    "{} (Your version is greater than latest({}))",
-                                    hyprviz_version, hyprviz_latest_version
-                                )
-                            }
-                            Ordering::Less => {
-                                format!(
-                                    "{} (New version available({}))",
-                                    hyprviz_version, hyprviz_latest_version
-                                )
-                            }
-                            Ordering::Equal => {
-                                format!("{} (Your version is up to date)", hyprviz_version)
-                            }
-                        }
-                    };
-
-                    hyprviz_version_label.set_label(&hyprviz_version_str);
+                    update_version_label(
+                        &hyprviz_version_label,
+                        "timasoft/hyprviz",
+                        &hyprviz_version,
+                    );
                 });
 
                 // Section for other system info
