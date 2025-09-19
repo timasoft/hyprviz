@@ -59,7 +59,7 @@ fn add_section(container: &Box, title: &str, description: &str, first_section: R
     container.append(&section_box);
 }
 
-pub fn add_info_row(container: &Box, label: &str, value: &str) -> Label {
+pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button) {
     let row = Box::new(Orientation::Horizontal, 10);
     row.set_margin_start(10);
     row.set_margin_end(10);
@@ -77,17 +77,21 @@ pub fn add_info_row(container: &Box, label: &str, value: &str) -> Label {
     value_widget.set_hexpand(true);
     value_widget.set_wrap(true);
 
-    // let refresh_button = Button::from_icon_name("view-refresh-symbolic");
-    // refresh_button.set_tooltip_text(Some("Refresh"));
-    // refresh_button.set_valign(gtk::Align::Center);
-    // refresh_button.set_has_frame(false);
+    let refresh_button = Button::from_icon_name("view-refresh-symbolic");
+    if label.to_lowercase().contains("version") {
+        refresh_button.set_tooltip_text(Some("Check if there is a new version available"));
+    } else {
+        refresh_button.set_tooltip_text(Some("Refresh"));
+    }
+    refresh_button.set_valign(gtk::Align::Center);
+    refresh_button.set_has_frame(false);
 
     row.append(&label_widget);
     row.append(&value_widget);
-    // row.append(&refresh_button);
+    row.append(&refresh_button);
     container.append(&row);
 
-    value_widget
+    (value_widget, refresh_button)
 }
 
 fn add_dropdown_option(
@@ -3588,22 +3592,22 @@ impl ConfigWidget {
                 info_box.set_margin_start(15);
                 info_box.set_margin_end(15);
 
-                let hyprland_version_label =
-                    add_info_row(&info_box, "Hyprland Version:", "Loading...");
-                let hyprviz_version_label =
-                    add_info_row(&info_box, "Hyprviz Version:", "Loading...");
+                // Section for hyprland and hyprviz versions
 
-                glib::idle_add_local(move || {
+                let hyprland_version = get_hyprland_version();
+
+                let (hyprland_version_label, hyprland_version_refresh) =
+                    add_info_row(&info_box, "Hyprland Version:", &hyprland_version);
+                hyprland_version_refresh.connect_clicked(move |_| {
                     let hyprland_latest_version = get_latest_version("hyprwm/hyprland");
-                    let hyprland_version = get_hyprland_version();
                     let hyprland_version_str = if !hyprland_latest_version.starts_with("v") {
-                        hyprland_version
+                        hyprland_version.to_owned()
                     } else {
                         match compare_versions(&hyprland_version, &hyprland_latest_version) {
                             Ordering::Greater => {
                                 format!(
-                                    "{} (Your version is greater than latest)",
-                                    hyprland_version
+                                    "{} (Your version is greater than latest({}))",
+                                    hyprland_version, hyprland_latest_version
                                 )
                             }
                             Ordering::Less => {
@@ -3612,18 +3616,29 @@ impl ConfigWidget {
                                     hyprland_version, hyprland_latest_version
                                 )
                             }
-                            Ordering::Equal => hyprland_version,
+                            Ordering::Equal => {
+                                format!("{} (Your version is up to date)", hyprland_version)
+                            }
                         }
                     };
+                    hyprland_version_label.set_label(&hyprland_version_str);
+                });
 
+                let hyprviz_version = get_hyprviz_version();
+
+                let (hyprviz_version_label, hyprviz_version_refresh) =
+                    add_info_row(&info_box, "Hyprviz Version:", &hyprviz_version);
+                hyprviz_version_refresh.connect_clicked(move |_| {
                     let hyprviz_latest_version = get_latest_version("timasoft/hyprviz");
-                    let hyprviz_version = get_hyprviz_version();
                     let hyprviz_version_str = if !hyprviz_latest_version.starts_with("v") {
-                        hyprviz_version
+                        hyprviz_version.to_owned()
                     } else {
                         match compare_versions(&hyprviz_version, &hyprviz_latest_version) {
                             Ordering::Greater => {
-                                format!("{} (Your version is greater than latest)", hyprviz_version)
+                                format!(
+                                    "{} (Your version is greater than latest({}))",
+                                    hyprviz_version, hyprviz_latest_version
+                                )
                             }
                             Ordering::Less => {
                                 format!(
@@ -3631,23 +3646,59 @@ impl ConfigWidget {
                                     hyprviz_version, hyprviz_latest_version
                                 )
                             }
-                            Ordering::Equal => hyprviz_version,
+                            Ordering::Equal => {
+                                format!("{} (Your version is up to date)", hyprviz_version)
+                            }
                         }
                     };
 
-                    hyprland_version_label.set_label(&hyprland_version_str);
                     hyprviz_version_label.set_label(&hyprviz_version_str);
-
-                    glib::ControlFlow::Break
                 });
-                add_info_row(&info_box, "OS:", &get_os_info());
-                add_info_row(&info_box, "Kernel:", &get_kernel_info());
-                add_info_row(&info_box, "User:", &get_user_info());
-                add_info_row(&info_box, "Host:", &get_host_info());
-                add_info_row(&info_box, "CPU:", &get_cpu_info());
-                add_info_row(&info_box, "GPU:", &get_gpu_info());
-                add_info_row(&info_box, "Memory:", &get_memory_info());
-                add_info_row(&info_box, "Monitors:", &get_monitor_info());
+
+                // Section for other system info
+
+                let (os_label, os_refresh) = add_info_row(&info_box, "OS:", &get_os_info());
+                os_refresh.connect_clicked(move |_| {
+                    os_label.set_label(&get_os_info());
+                });
+
+                let (kernel_label, kernel_refresh) =
+                    add_info_row(&info_box, "Kernel:", &get_kernel_info());
+                kernel_refresh.connect_clicked(move |_| {
+                    kernel_label.set_label(&get_kernel_info());
+                });
+
+                let (user_label, user_refresh) = add_info_row(&info_box, "User:", &get_user_info());
+                user_refresh.connect_clicked(move |_| {
+                    user_label.set_label(&get_user_info());
+                });
+
+                let (host_label, host_refresh) = add_info_row(&info_box, "Host:", &get_host_info());
+                host_refresh.connect_clicked(move |_| {
+                    host_label.set_label(&get_host_info());
+                });
+
+                let (cpu_label, cpu_refresh) = add_info_row(&info_box, "CPU:", &get_cpu_info());
+                cpu_refresh.connect_clicked(move |_| {
+                    cpu_label.set_label(&get_cpu_info());
+                });
+
+                let (gpu_label, gpu_refresh) = add_info_row(&info_box, "GPU:", &get_gpu_info());
+                gpu_refresh.connect_clicked(move |_| {
+                    gpu_label.set_label(&get_gpu_info());
+                });
+
+                let (memory_label, memory_refresh) =
+                    add_info_row(&info_box, "Memory:", &get_memory_info());
+                memory_refresh.connect_clicked(move |_| {
+                    memory_label.set_label(&get_memory_info());
+                });
+
+                let (monitors_label, monitors_refresh) =
+                    add_info_row(&info_box, "Monitors:", &get_monitor_info());
+                monitors_refresh.connect_clicked(move |_| {
+                    monitors_label.set_label(&get_monitor_info());
+                });
 
                 container.append(&info_box);
             }
