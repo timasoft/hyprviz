@@ -6,11 +6,14 @@ use gtk::{
 use hyprparser::HyprlandConfig;
 use std::{
     cell::RefCell,
+    cmp::Ordering,
     collections::{HashMap, VecDeque},
     rc::Rc,
 };
 
-use crate::utils::MAX_SAFE_INTEGER_F64;
+use crate::utils::{MAX_SAFE_INTEGER_F64, compare_versions, get_latest_version};
+
+use crate::system_info::*;
 
 pub struct WidgetData {
     pub widget: Widget,
@@ -52,6 +55,41 @@ fn add_section(container: &Box, title: &str, description: &str, first_section: R
     section_box.append(&frame);
 
     container.append(&section_box);
+}
+
+pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button) {
+    let row = Box::new(Orientation::Horizontal, 10);
+    row.set_margin_start(10);
+    row.set_margin_end(10);
+    row.set_margin_top(5);
+    row.set_margin_bottom(5);
+
+    let label_widget = Label::new(Some(label));
+    label_widget.set_xalign(0.0);
+    label_widget.add_css_class("heading");
+    label_widget.set_hexpand(false);
+
+    let value_widget = Label::new(Some(value));
+    value_widget.set_xalign(0.0);
+    value_widget.set_selectable(true);
+    value_widget.set_hexpand(true);
+    value_widget.set_wrap(true);
+
+    let refresh_button = Button::from_icon_name("view-refresh-symbolic");
+    if label.to_lowercase().contains("version") {
+        refresh_button.set_tooltip_text(Some("Check if there is a new version available"));
+    } else {
+        refresh_button.set_tooltip_text(Some("Refresh"));
+    }
+    refresh_button.set_valign(gtk::Align::Center);
+    refresh_button.set_has_frame(false);
+
+    row.append(&label_widget);
+    row.append(&value_widget);
+    row.append(&refresh_button);
+    container.append(&row);
+
+    (value_widget, refresh_button)
 }
 
 fn add_dropdown_option(
@@ -112,6 +150,8 @@ fn add_dropdown_option(
     dropdown.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let dropdown_clone = dropdown.clone();
@@ -203,6 +243,8 @@ fn add_bool_option(
     switch.set_valign(gtk::Align::Center);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let switch_clone = switch.clone();
@@ -285,6 +327,8 @@ fn add_bool_int_option(
     switch.set_valign(gtk::Align::Center);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let parsed_default: i32 = default
@@ -372,6 +416,8 @@ fn add_int_option(
     spin_button.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let spin_clone = spin_button.clone();
@@ -457,6 +503,8 @@ fn add_float_option(
     spin_button.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let spin_clone = spin_button.clone();
@@ -539,6 +587,8 @@ fn add_string_option(
     entry.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();
@@ -638,6 +688,8 @@ fn add_color_option(
     }
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();
@@ -697,6 +749,29 @@ fn add_color_option(
             default: default.to_string(),
         },
     );
+}
+
+fn update_version_label(label: &Label, repo: &str, version: &str) {
+    let latest_version = get_latest_version(repo);
+    let version_str = if !latest_version.starts_with("v") {
+        format!("{} (Unable to get latest version)", version)
+    } else {
+        match compare_versions(version, &latest_version) {
+            Ordering::Greater => {
+                format!(
+                    "{} (Your version is greater than latest({}))",
+                    version, latest_version
+                )
+            }
+            Ordering::Less => {
+                format!("{} (New version available({}))", version, latest_version)
+            }
+            Ordering::Equal => {
+                format!("{} (Your version is up to date)", version)
+            }
+        }
+    };
+    label.set_label(&version_str);
 }
 
 // transform from general{snap{enabled = true}} to general:snap:enabled = true
@@ -3523,6 +3598,93 @@ impl ConfigWidget {
                     "Whether to keep the master window in its configured position when there are no slave windows",
                     "false",
                 )
+            }
+            "systeminfo" => {
+                add_section(
+                    &container,
+                    "System Info",
+                    "Displays information about the system.",
+                    first_section.clone(),
+                );
+
+                let info_box = Box::new(Orientation::Vertical, 10);
+                info_box.set_margin_top(10);
+                info_box.set_margin_bottom(10);
+                info_box.set_margin_start(15);
+                info_box.set_margin_end(15);
+
+                // Section for hyprland and hyprviz versions
+
+                let hyprland_version = get_hyprland_version();
+
+                let (hyprland_version_label, hyprland_version_refresh) =
+                    add_info_row(&info_box, "Hyprland Version:", &hyprland_version);
+                hyprland_version_refresh.connect_clicked(move |_| {
+                    update_version_label(
+                        &hyprland_version_label,
+                        "hyprwm/hyprland",
+                        &hyprland_version,
+                    );
+                });
+
+                let hyprviz_version = get_hyprviz_version();
+
+                let (hyprviz_version_label, hyprviz_version_refresh) =
+                    add_info_row(&info_box, "Hyprviz Version:", &hyprviz_version);
+                hyprviz_version_refresh.connect_clicked(move |_| {
+                    update_version_label(
+                        &hyprviz_version_label,
+                        "timasoft/hyprviz",
+                        &hyprviz_version,
+                    );
+                });
+
+                // Section for other system info
+
+                let (os_label, os_refresh) = add_info_row(&info_box, "OS:", &get_os_info());
+                os_refresh.connect_clicked(move |_| {
+                    os_label.set_label(&get_os_info());
+                });
+
+                let (kernel_label, kernel_refresh) =
+                    add_info_row(&info_box, "Kernel:", &get_kernel_info());
+                kernel_refresh.connect_clicked(move |_| {
+                    kernel_label.set_label(&get_kernel_info());
+                });
+
+                let (user_label, user_refresh) = add_info_row(&info_box, "User:", &get_user_info());
+                user_refresh.connect_clicked(move |_| {
+                    user_label.set_label(&get_user_info());
+                });
+
+                let (host_label, host_refresh) = add_info_row(&info_box, "Host:", &get_host_info());
+                host_refresh.connect_clicked(move |_| {
+                    host_label.set_label(&get_host_info());
+                });
+
+                let (cpu_label, cpu_refresh) = add_info_row(&info_box, "CPU:", &get_cpu_info());
+                cpu_refresh.connect_clicked(move |_| {
+                    cpu_label.set_label(&get_cpu_info());
+                });
+
+                let (gpu_label, gpu_refresh) = add_info_row(&info_box, "GPU:", &get_gpu_info());
+                gpu_refresh.connect_clicked(move |_| {
+                    gpu_label.set_label(&get_gpu_info());
+                });
+
+                let (memory_label, memory_refresh) =
+                    add_info_row(&info_box, "Memory:", &get_memory_info());
+                memory_refresh.connect_clicked(move |_| {
+                    memory_label.set_label(&get_memory_info());
+                });
+
+                let (monitors_label, monitors_refresh) =
+                    add_info_row(&info_box, "Monitors:", &get_monitor_info());
+                monitors_refresh.connect_clicked(move |_| {
+                    monitors_label.set_label(&get_monitor_info());
+                });
+
+                container.append(&info_box);
             }
             _ => {
                 add_section(

@@ -940,6 +940,7 @@ along with this program; if not, see
             ("Ecosystem", "ecosystem"),
             ("Experimental", "experimental"),
             ("Debug", "debug"),
+            ("System Info", "systeminfo"),
         ];
 
         for (display_name, category) in &categories {

@@ -12,6 +12,7 @@ use utils::{
 };
 
 mod gui;
+mod system_info;
 mod utils;
 mod widget;
 

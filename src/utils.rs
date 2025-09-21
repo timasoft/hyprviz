@@ -1,13 +1,12 @@
 use std::{
+    cmp::Ordering,
     collections::HashSet,
+    env,
     error::Error,
     fs,
     io::{self, Write},
-    {
-        env,
-        path::{Path, PathBuf},
-        process::Command,
-    },
+    path::{Path, PathBuf},
+    process::Command,
 };
 
 pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
@@ -37,6 +36,88 @@ pub fn reload_hyprland() {
         "Reloading Hyprland status: {}",
         cmd.status.code().unwrap_or(-1)
     );
+}
+
+/// Returns the latest version of the GitHub repository
+pub fn get_latest_version(repo: &str) -> String {
+    let url = format!("https://api.github.com/repos/{}/releases/latest", repo);
+
+    match minreq::get(&url)
+        .with_header("User-Agent", "repository-updater")
+        .send()
+    {
+        Ok(response) => {
+            if response.status_code == 200 {
+                match serde_json::from_str::<serde_json::Value>(response.as_str().unwrap_or("")) {
+                    Ok(json) => {
+                        if let Some(tag_name) = json.get("tag_name")
+                            && let Some(version) = tag_name.as_str()
+                        {
+                            return version.to_string();
+                        }
+                        "Version parse failed".to_string()
+                    }
+                    Err(_) => "JSON parse error".to_string(),
+                }
+            } else {
+                format!("HTTP error: {}", response.status_code)
+            }
+        }
+        Err(e) => {
+            format!("Request failed: {}", e)
+        }
+    }
+}
+
+pub fn compare_versions(current: &str, latest: &str) -> Ordering {
+    let current_parts: Vec<u32> = current
+        .trim_start_matches('v')
+        .split('.')
+        .filter_map(|s| s.parse().ok())
+        .collect();
+
+    let latest_parts: Vec<u32> = latest
+        .trim_start_matches('v')
+        .split('.')
+        .filter_map(|s| s.parse().ok())
+        .collect();
+
+    for i in 0..3 {
+        let current_val = current_parts.get(i).copied().unwrap_or(0);
+        let latest_val = latest_parts.get(i).copied().unwrap_or(0);
+
+        match current_val.cmp(&latest_val) {
+            Ordering::Equal => continue,
+            ordering => return ordering,
+        }
+    }
+
+    Ordering::Equal
+}
+
+pub fn execute_command(cmd: &str, args: &[&str]) -> Result<std::process::Output, String> {
+    Command::new(cmd)
+        .args(args)
+        .output()
+        .map_err(|_| format!("{} not found", cmd))
+}
+
+pub fn execute_shell_command(shell_cmd: &str) -> Result<std::process::Output, String> {
+    Command::new("sh")
+        .arg("-c")
+        .arg(shell_cmd)
+        .output()
+        .map_err(|_| "Failed to execute shell command".to_string())
+}
+
+pub fn extract_brackets(s: &str) -> Option<&str> {
+    let start = s.find('[')?;
+    let end = s[start + 1..].find(']')? + start + 1;
+    if start < end {
+        Some(&s[start + 1..end])
+    } else {
+        None
+    }
 }
 
 pub fn check_last_non_empty_line_contains(file_content: &str, expected_text: &str) -> bool {
