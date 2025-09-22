@@ -110,16 +110,6 @@ pub fn execute_shell_command(shell_cmd: &str) -> Result<std::process::Output, St
         .map_err(|_| "Failed to execute shell command".to_string())
 }
 
-pub fn extract_brackets(s: &str) -> Option<&str> {
-    let start = s.find('[')?;
-    let end = s[start + 1..].find(']')? + start + 1;
-    if start < end {
-        Some(&s[start + 1..end])
-    } else {
-        None
-    }
-}
-
 pub fn check_last_non_empty_line_contains(file_content: &str, expected_text: &str) -> bool {
     let last_non_empty = file_content
         .lines()
