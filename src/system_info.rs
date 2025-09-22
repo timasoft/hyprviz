@@ -3,7 +3,7 @@ use std::{
     {env, fs},
 };
 
-use crate::utils::{execute_command, execute_shell_command, extract_brackets};
+use crate::utils::{execute_command, execute_shell_command};
 
 pub fn get_hyprland_version() -> String {
     let output = match execute_command("hyprctl", &["version"]) {
@@ -168,15 +168,22 @@ pub fn get_cpu_info() -> String {
 pub fn get_gpu_info() -> String {
     match execute_shell_command("lspci | grep -i vga") {
         Ok(output) if output.status.success() => {
-            let output_str = String::from_utf8_lossy(&output.stdout).to_string();
-            let gpu_info = extract_brackets(&output_str);
-            match gpu_info {
-                Some(info) => info.trim().to_string(),
-                None => "Failed to get GPU info".to_string(),
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            let gpu_lines: Vec<String> = output_str
+                .lines()
+                .filter_map(|line| {
+                    line.split_once(": ")
+                        .map(|(_, info)| info.trim().to_string())
+                })
+                .collect();
+
+            if gpu_lines.is_empty() {
+                "Failed to parse GPU info".to_string()
+            } else {
+                gpu_lines.join("\n")
             }
         }
-        Ok(_) => "Failed to get GPU info".to_string(),
-        Err(e) => e,
+        _ => "Failed to get GPU info".to_string(),
     }
 }
 
