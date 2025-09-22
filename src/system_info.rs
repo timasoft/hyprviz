@@ -57,6 +57,11 @@ pub fn get_distro_id() -> String {
 
 pub fn get_distro_logo_path() -> Option<String> {
     let distro_id = get_distro_id();
+    let distro_id = if distro_id == "arch" {
+        "archlinux".to_string()
+    } else {
+        distro_id
+    };
 
     let logo_names = vec![
         format!("{}-logo", distro_id),
