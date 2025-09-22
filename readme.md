@@ -93,6 +93,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [ ] Add bind section
 - [ ] Add windowrule section
 - [ ] Add other config sections from Hyprland
+- [ ] Add i18n
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
