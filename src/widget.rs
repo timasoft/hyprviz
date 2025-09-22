@@ -3613,6 +3613,16 @@ impl ConfigWidget {
                 info_box.set_margin_start(15);
                 info_box.set_margin_end(15);
 
+                let distro_logo_path = get_distro_logo_path();
+                if let Some(path) = distro_logo_path {
+                    let image = gtk::Image::from_file(&path);
+                    image.set_margin_top(10);
+                    image.set_margin_bottom(10);
+                    image.set_margin_start(15);
+                    image.set_margin_end(15);
+                    container.append(&image);
+                }
+
                 // Section for hyprland and hyprviz versions
 
                 let hyprland_version = get_hyprland_version();

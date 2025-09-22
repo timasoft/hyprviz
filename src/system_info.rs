@@ -30,6 +30,62 @@ pub fn get_hyprviz_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
 
+pub fn get_distro_id() -> String {
+    if let Ok(mut file) = fs::File::open("/etc/os-release") {
+        let mut content = String::new();
+        if file.read_to_string(&mut content).is_ok() {
+            for line in content.lines() {
+                if let Some(id) = line.strip_prefix("ID=") {
+                    return id.trim_matches('"').to_string();
+                }
+            }
+        }
+    }
+
+    if let Ok(output) = execute_command("lsb_release", &["-i", "-s"])
+        && output.status.success()
+    {
+        return String::from_utf8_lossy(&output.stdout)
+            .trim()
+            .trim_matches('"')
+            .to_lowercase()
+            .to_string();
+    }
+
+    "unknown".to_string()
+}
+
+pub fn get_distro_logo_path() -> Option<String> {
+    let distro_id = get_distro_id();
+
+    let logo_names = vec![
+        format!("{}-logo", distro_id),
+        format!("{}-logo-icon", distro_id),
+        format!("{}-logo-symbolic", distro_id),
+        distro_id.clone(),
+    ];
+
+    let search_paths = vec![
+        "/usr/share/icons/",
+        "/usr/share/pixmaps/",
+        "/usr/share/icons/hicolor/256x256/apps/",
+        "/usr/share/icons/hicolor/128x128/apps/",
+    ];
+
+    for path in search_paths {
+        for name in &logo_names {
+            for ext in &["png", "svg", "jpg"] {
+                let full_path = format!("{}/{}.{}", path, name, ext);
+                if fs::metadata(&full_path).is_ok() {
+                    return Some(full_path);
+                }
+            }
+        }
+    }
+
+    None
+}
+
 pub fn get_os_info() -> String {
     // Try /etc/os-release
     if let Ok(mut file) = fs::File::open("/etc/os-release") {
