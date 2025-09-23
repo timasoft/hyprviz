@@ -764,7 +764,7 @@ fn update_version_label(label: &Label, repo: &str, version: &str) {
                 )
             }
             Ordering::Less => {
-                format!("{} (New version available({}))", version, latest_version)
+                format!("{} (New version available ({}))", version, latest_version)
             }
             Ordering::Equal => {
                 format!("{} (Your version is up to date)", version)
@@ -3617,11 +3617,13 @@ impl ConfigWidget {
                 os_info_box.set_margin_top(10);
                 os_info_box.set_margin_bottom(10);
 
-                let distro_logo_path = get_distro_logo_path();
-                if let Some(path) = distro_logo_path {
-                    let image = gtk::Image::from_file(&path);
-                    image.set_margin_end(10);
-                    os_info_box.append(&image);
+                if let Some(path) = get_distro_logo_path() {
+                    let picture = gtk::Picture::for_filename(&path);
+                    picture.set_vexpand(true);
+                    picture.set_valign(gtk::Align::Fill);
+                    picture.set_content_fit(gtk::ContentFit::ScaleDown);
+                    picture.set_margin_end(10);
+                    os_info_box.append(&picture);
                 }
 
                 let os_text_box = Box::new(Orientation::Vertical, 10);
