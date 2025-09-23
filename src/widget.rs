@@ -764,7 +764,7 @@ fn update_version_label(label: &Label, repo: &str, version: &str) {
                 )
             }
             Ordering::Less => {
-                format!("{} (New version available({}))", version, latest_version)
+                format!("{} (New version available ({}))", version, latest_version)
             }
             Ordering::Equal => {
                 format!("{} (Your version is up to date)", version)
@@ -3622,6 +3622,36 @@ impl ConfigWidget {
                 info_box.set_margin_start(15);
                 info_box.set_margin_end(15);
 
+                let os_info_box = Box::new(Orientation::Horizontal, 5);
+                os_info_box.set_margin_top(10);
+                os_info_box.set_margin_bottom(10);
+
+                if let Some(path) = get_distro_logo_path() {
+                    let picture = gtk::Picture::for_filename(&path);
+                    picture.set_vexpand(true);
+                    picture.set_valign(gtk::Align::Fill);
+                    picture.set_content_fit(gtk::ContentFit::ScaleDown);
+                    picture.set_margin_end(10);
+                    os_info_box.append(&picture);
+                }
+
+                let os_text_box = Box::new(Orientation::Vertical, 10);
+
+                let (os_label, os_refresh) = add_info_row(&os_text_box, "OS:", &get_os_info());
+                os_refresh.connect_clicked(move |_| {
+                    os_label.set_label(&get_os_info());
+                });
+
+                let (kernel_label, kernel_refresh) =
+                    add_info_row(&os_text_box, "Kernel:", &get_kernel_info());
+                kernel_refresh.connect_clicked(move |_| {
+                    kernel_label.set_label(&get_kernel_info());
+                });
+
+                os_info_box.append(&os_text_box);
+
+                info_box.append(&os_info_box);
+
                 // Section for hyprland and hyprviz versions
 
                 let hyprland_version = get_hyprland_version();
@@ -3649,17 +3679,6 @@ impl ConfigWidget {
                 });
 
                 // Section for other system info
-
-                let (os_label, os_refresh) = add_info_row(&info_box, "OS:", &get_os_info());
-                os_refresh.connect_clicked(move |_| {
-                    os_label.set_label(&get_os_info());
-                });
-
-                let (kernel_label, kernel_refresh) =
-                    add_info_row(&info_box, "Kernel:", &get_kernel_info());
-                kernel_refresh.connect_clicked(move |_| {
-                    kernel_label.set_label(&get_kernel_info());
-                });
 
                 let (user_label, user_refresh) = add_info_row(&info_box, "User:", &get_user_info());
                 user_refresh.connect_clicked(move |_| {
