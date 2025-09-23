@@ -3613,15 +3613,33 @@ impl ConfigWidget {
                 info_box.set_margin_start(15);
                 info_box.set_margin_end(15);
 
+                let os_info_box = Box::new(Orientation::Horizontal, 5);
+                os_info_box.set_margin_top(10);
+                os_info_box.set_margin_bottom(10);
+
                 let distro_logo_path = get_distro_logo_path();
                 if let Some(path) = distro_logo_path {
                     let image = gtk::Image::from_file(&path);
-                    image.set_margin_top(10);
-                    image.set_margin_bottom(10);
-                    image.set_margin_start(15);
-                    image.set_margin_end(15);
-                    container.append(&image);
+                    image.set_margin_end(10);
+                    os_info_box.append(&image);
                 }
+
+                let os_text_box = Box::new(Orientation::Vertical, 10);
+
+                let (os_label, os_refresh) = add_info_row(&os_text_box, "OS:", &get_os_info());
+                os_refresh.connect_clicked(move |_| {
+                    os_label.set_label(&get_os_info());
+                });
+
+                let (kernel_label, kernel_refresh) =
+                    add_info_row(&os_text_box, "Kernel:", &get_kernel_info());
+                kernel_refresh.connect_clicked(move |_| {
+                    kernel_label.set_label(&get_kernel_info());
+                });
+
+                os_info_box.append(&os_text_box);
+
+                info_box.append(&os_info_box);
 
                 // Section for hyprland and hyprviz versions
 
@@ -3650,17 +3668,6 @@ impl ConfigWidget {
                 });
 
                 // Section for other system info
-
-                let (os_label, os_refresh) = add_info_row(&info_box, "OS:", &get_os_info());
-                os_refresh.connect_clicked(move |_| {
-                    os_label.set_label(&get_os_info());
-                });
-
-                let (kernel_label, kernel_refresh) =
-                    add_info_row(&info_box, "Kernel:", &get_kernel_info());
-                kernel_refresh.connect_clicked(move |_| {
-                    kernel_label.set_label(&get_kernel_info());
-                });
 
                 let (user_label, user_refresh) = add_info_row(&info_box, "User:", &get_user_info());
                 user_refresh.connect_clicked(move |_| {
