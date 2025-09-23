@@ -1834,13 +1834,14 @@ impl ConfigWidget {
                     "Configure virtual keyboard behavior.",
                     first_section.clone(),
                 );
-                add_bool_option(
+                add_dropdown_option(
                     &container,
                     &mut options,
                     "virtualkeyboard:share_states",
                     "Share States",
                     "Unify key down states and modifier states with other keyboards.",
-                    "false",
+                    &["No", "Yes", "Yes unless IME client"],
+                    "2",
                 );
                 add_bool_option(
                     &container,
@@ -2739,6 +2740,14 @@ impl ConfigWidget {
                     "Force 8-bit color for screencopy",
                     "Forces 8 bit screencopy. (fixes apps that don't understand 10bit)",
                     "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "disable_scale_notification",
+                    "Disable Scale Notification",
+                    "Disables notification popup when a monitor fails to set a suitable scale and falls back to suggested.",
+                    "false",
                 );
             }
             "binds" => {
