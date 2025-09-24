@@ -1,17 +1,21 @@
 use gtk::{
-    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Justification, Label,
-    Orientation, Popover, ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget,
-    gdk, glib, prelude::*,
+    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Grid, Justification,
+    Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList, StringObject, Switch,
+    Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use std::{
     cell::RefCell,
     cmp::Ordering,
     collections::{HashMap, VecDeque},
+    fs,
     rc::Rc,
 };
 
-use crate::utils::{MAX_SAFE_INTEGER_F64, compare_versions, get_latest_version};
+use crate::utils::{
+    MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
+    get_latest_version, parse_top_level_options,
+};
 
 use crate::system_info::*;
 
@@ -832,7 +836,7 @@ fn extract_value(config: &HyprlandConfig, category: &str, name: &str, default: &
 }
 
 impl ConfigWidget {
-    pub fn new(category: &str) -> Self {
+    pub fn new(category: &str, display_name: &str) -> Self {
         let scrolled_window = ScrolledWindow::new();
         scrolled_window.set_vexpand(false);
         scrolled_window.set_propagate_natural_height(true);
@@ -3717,9 +3721,16 @@ impl ConfigWidget {
             _ => {
                 add_section(
                     &container,
-                    &format!("{category} Settings"),
-                    &format!("Configure {category} behavior."),
+                    &format!("{display_name} Settings"),
+                    &format!("Configure {display_name} behavior."),
                     first_section.clone(),
+                );
+                options.insert(
+                    category.to_string(),
+                    WidgetData {
+                        widget: container.upcast(),
+                        default: format!("This is a {} as widget", category),
+                    },
                 );
             }
         }
@@ -3733,6 +3744,7 @@ impl ConfigWidget {
     pub fn load_config(
         &self,
         config: &HyprlandConfig,
+        profile: &str,
         category: &str,
         changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
     ) {
@@ -3835,6 +3847,130 @@ impl ConfigWidget {
                         changes.insert((category.clone(), name.clone()), new_value);
                     }
                 });
+            } else if let Some(gtkbox) = widget.downcast_ref::<Box>() {
+                let read_only_label = Label::new(Some(&format!(
+                    "This is a read-only {} (from main config)",
+                    name
+                )));
+                gtkbox.append(&read_only_label);
+
+                let frame = Frame::new(None);
+                frame.set_margin_top(10);
+                gtkbox.append(&frame);
+
+                let read_only_path = get_config_path(false, profile);
+                let rw_path = get_config_path(true, profile);
+
+                let profile = if profile == "Default" {
+                    String::new()
+                } else {
+                    profile.to_string()
+                };
+
+                let read_only_config_raw = match fs::read_to_string(&read_only_path) {
+                    Ok(read_only_config) => read_only_config
+                        .lines()
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .starts_with(&format!("source = ./hyprviz{}.conf", profile))
+                        })
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .starts_with(&format!("source =./hyprviz{}.conf", profile))
+                        })
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .contains(&format!("source= ./hyprviz{}.conf", profile))
+                        })
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .starts_with(&format!("source=./hyprviz{}.conf", profile))
+                        })
+                        .collect::<Vec<&str>>()
+                        .join("\n"),
+                    Err(_) => {
+                        let error_label = Label::new(Some(&format!(
+                            "Error reading {}",
+                            read_only_path.to_string_lossy()
+                        )));
+                        error_label.set_markup("<span foreground=\"red\">{read_only_path}</span>");
+                        error_label.set_margin_top(5);
+                        error_label.set_margin_bottom(5);
+                        error_label.set_margin_start(5);
+                        error_label.set_margin_end(5);
+                        gtkbox.append(&error_label);
+                        String::new()
+                    }
+                };
+                let read_only_config =
+                    match expand_source_str(&read_only_path, &read_only_config_raw) {
+                        Ok(read_only_config) => read_only_config,
+                        Err(_) => {
+                            let error_label = Label::new(Some(&format!(
+                                "Error reading {}",
+                                read_only_path.to_string_lossy()
+                            )));
+                            error_label
+                                .set_markup("<span foreground=\"red\">{read_only_path}</span>");
+                            error_label.set_margin_top(5);
+                            error_label.set_margin_bottom(5);
+                            error_label.set_margin_start(5);
+                            error_label.set_margin_end(5);
+                            gtkbox.append(&error_label);
+                            String::new()
+                        }
+                    };
+
+                let parsed_headless_readonly_options = parse_top_level_options(&read_only_config);
+                let options_grid = Grid::new();
+                options_grid.set_column_spacing(10);
+                options_grid.set_row_spacing(5);
+                options_grid.set_margin_top(2);
+                options_grid.set_margin_bottom(2);
+                options_grid.set_margin_start(5);
+                options_grid.set_margin_end(5);
+                for (row_num, (name, value)) in parsed_headless_readonly_options.iter().enumerate()
+                {
+                    let name_label = Label::new(Some(name));
+                    name_label.set_xalign(0.0);
+                    name_label.set_size_request(name_label.width(), 1);
+                    name_label.set_selectable(true);
+
+                    let equals_label = Label::new(Some("="));
+                    equals_label.set_xalign(0.5);
+
+                    let value_label = Label::new(Some(value));
+                    value_label.set_xalign(0.0);
+                    value_label.set_selectable(true);
+
+                    let row_num = row_num as i32;
+                    options_grid.attach(&name_label, 0, row_num, 1, 1);
+                    options_grid.attach(&equals_label, 1, row_num, 1, 1);
+                    options_grid.attach(&value_label, 2, row_num, 1, 1);
+                }
+                gtkbox.append(&options_grid);
+
+                let rw_config = match expand_source(&rw_path) {
+                    Ok(rw_config) => rw_config,
+                    Err(_) => {
+                        let error_label = Label::new(Some(&format!(
+                            "Error reading {}",
+                            rw_path.to_string_lossy()
+                        )));
+                        error_label.set_markup("<span foreground=\"red\">{rw_path}</span>");
+                        error_label.set_margin_top(5);
+                        error_label.set_margin_bottom(5);
+                        error_label.set_margin_start(5);
+                        error_label.set_margin_end(5);
+                        gtkbox.append(&error_label);
+
+                        String::new()
+                    }
+                };
             }
         }
     }

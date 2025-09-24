@@ -240,15 +240,22 @@ pub fn find_all_profiles() -> Option<Vec<String>> {
     }
 }
 
+/// Expands all `source = <path>` occurrences in file `entry_path` recursively from str
+pub fn expand_source_str(entry_path: &Path, entry: &str) -> Result<String, Box<dyn Error>> {
+    let mut visited = HashSet::new();
+    expand_file_recursive(entry_path, &mut visited, entry)
+}
+
 /// Expand all `source = <path>` occurrences in file `entry_path` recursively.
 pub fn expand_source(entry_path: &Path) -> Result<String, Box<dyn Error>> {
     let mut visited = HashSet::new();
-    expand_file_recursive(entry_path, &mut visited)
+    expand_file_recursive(entry_path, &mut visited, "")
 }
 
 fn expand_file_recursive(
     path: &Path,
     visited: &mut HashSet<PathBuf>,
+    entry: &str,
 ) -> Result<String, Box<dyn Error>> {
     let resolved = expand_tilde(path)?;
     let canonical = resolved
@@ -263,15 +270,19 @@ fn expand_file_recursive(
         .into());
     }
 
-    let content = fs::read_to_string(&resolved)
-        .map_err(|e| format!("failed to read {}: {}", resolved.display(), e))?;
+    let content = if entry.is_empty() {
+        fs::read_to_string(&resolved)
+            .map_err(|e| format!("failed to read {}: {}", resolved.display(), e))?
+    } else {
+        entry.to_string()
+    };
 
     let mut out = String::with_capacity(content.len());
 
     for line in content.lines() {
         if let Some(include_path_str) = parse_source_line(line) {
             let include_path = resolve_relative(&include_path_str, &resolved);
-            let included_text = expand_file_recursive(&include_path, visited)
+            let included_text = expand_file_recursive(&include_path, visited, "")
                 .map_err(|e| format!("while including {}: {}", include_path.display(), e))?;
             out.push_str(&included_text);
             out.push('\n');
@@ -388,6 +399,40 @@ pub fn resolve_relative(p: &str, base_file: &Path) -> PathBuf {
             .map(|d| d.join(p_path))
             .unwrap_or_else(|| p_path.to_path_buf())
     }
+}
+
+pub fn parse_top_level_options(config_str: &str) -> Vec<(String, String)> {
+    let mut options = Vec::new();
+    let mut brace_depth: usize = 0;
+
+    for line in config_str.lines() {
+        let trimmed_line = line.trim_start();
+
+        if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
+            continue;
+        }
+
+        let closing_braces_count = trimmed_line.chars().filter(|&c| c == '}').count();
+        let opening_braces_count = trimmed_line.chars().filter(|&c| c == '{').count();
+
+        brace_depth += opening_braces_count;
+        brace_depth = brace_depth.saturating_sub(closing_braces_count);
+
+        if brace_depth == 0
+            && let Some(eq_pos) = trimmed_line.find('=')
+        {
+            let key = trimmed_line[..eq_pos].trim();
+            if key.contains('{') || key.contains(':') {
+                continue;
+            }
+
+            let value = trimmed_line[eq_pos + 1..].trim();
+
+            options.push((key.to_string(), value.to_string()));
+        }
+    }
+
+    options
 }
 
 /// Expand `~` in a Path if present.

@@ -807,7 +807,7 @@ along with this program; if not, see
                     if let Ok(config_str) = expand_source(&path_for_read) {
                         let parsed_config = parse_config(&config_str);
 
-                        self.load_config(&parsed_config);
+                        self.load_config(&parsed_config, &profile_name);
                         self.changed_options.clone().borrow_mut().clear();
                     } else {
                         self.custom_error_popup(
@@ -895,7 +895,7 @@ along with this program; if not, see
         );
     }
 
-    pub fn load_config(&mut self, config: &HyprlandConfig) {
+    pub fn load_config(&mut self, config: &HyprlandConfig, profile_name: &str) {
         self.config_widgets.clear();
         self.content_box.set_visible(true);
 
@@ -940,11 +940,12 @@ along with this program; if not, see
             ("Ecosystem", "ecosystem"),
             ("Experimental", "experimental"),
             ("Debug", "debug"),
+            ("Top level", "top_level"),
             ("System Info", "systeminfo"),
         ];
 
         for (display_name, category) in &categories {
-            let widget = ConfigWidget::new(category);
+            let widget = ConfigWidget::new(category, display_name);
             self.stack
                 .add_titled(&widget.scrolled_window, Some(category), display_name);
             self.config_widgets.insert(category.to_string(), widget);
@@ -952,7 +953,7 @@ along with this program; if not, see
 
         for (_, category) in &categories {
             if let Some(widget) = self.config_widgets.get(*category) {
-                widget.load_config(config, category, self.changed_options.clone());
+                widget.load_config(config, profile_name, category, self.changed_options.clone());
             }
         }
 
