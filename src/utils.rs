@@ -401,7 +401,7 @@ pub fn resolve_relative(p: &str, base_file: &Path) -> PathBuf {
     }
 }
 
-pub fn parse_top_level_options(config_str: &str) -> Vec<(String, String)> {
+pub fn parse_top_level_options(config_str: &str, raw: bool) -> Vec<(String, String)> {
     let mut options = Vec::new();
     let mut brace_depth: usize = 0;
 
@@ -428,7 +428,11 @@ pub fn parse_top_level_options(config_str: &str) -> Vec<(String, String)> {
 
             let value = trimmed_line[eq_pos + 1..].trim();
 
-            options.push((key.to_string(), value.to_string()));
+            if raw {
+                options.push((line.to_string(), "".to_string()));
+            } else {
+                options.push((key.to_string(), value.to_string()));
+            }
         }
     }
 

@@ -13,8 +13,8 @@ use std::{
 };
 
 use crate::utils::{
-    MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
-    get_latest_version, parse_top_level_options,
+    MAX_SAFE_INTEGER_F64, atomic_write, compare_versions, expand_source, expand_source_str,
+    get_config_path, get_latest_version, parse_top_level_options,
 };
 
 use crate::system_info::*;
@@ -3848,10 +3848,10 @@ impl ConfigWidget {
                     }
                 });
             } else if let Some(gtkbox) = widget.downcast_ref::<Box>() {
-                let read_only_label = Label::new(Some(&format!(
-                    "This is a read-only {} (from main config)",
-                    name
-                )));
+                let read_only_str = &format!("This is a read-only {} (from main config)", name);
+                let read_only_label = Label::new(Some(read_only_str));
+                read_only_label.set_halign(gtk::Align::Start);
+                read_only_label.set_markup(&format!("<b>{read_only_str}</b>"));
                 gtkbox.append(&read_only_label);
 
                 let frame = Frame::new(None);
@@ -3925,7 +3925,8 @@ impl ConfigWidget {
                         }
                     };
 
-                let parsed_headless_readonly_options = parse_top_level_options(&read_only_config);
+                let parsed_headless_readonly_options =
+                    parse_top_level_options(&read_only_config, false);
                 let options_grid = Grid::new();
                 options_grid.set_column_spacing(10);
                 options_grid.set_row_spacing(5);
@@ -3942,6 +3943,7 @@ impl ConfigWidget {
 
                     let equals_label = Label::new(Some("="));
                     equals_label.set_xalign(0.5);
+                    equals_label.set_markup("<b>=</b>");
 
                     let value_label = Label::new(Some(value));
                     value_label.set_xalign(0.0);
@@ -3953,6 +3955,17 @@ impl ConfigWidget {
                     options_grid.attach(&value_label, 2, row_num, 1, 1);
                 }
                 gtkbox.append(&options_grid);
+
+                let rw_str = &format!("This is a read-write {} (from your profile)", name);
+                let rw_label = Label::new(Some(rw_str));
+                rw_label.set_halign(gtk::Align::Start);
+                rw_label.set_margin_top(10);
+                rw_label.set_markup(&format!("<b>{rw_str}</b>"));
+                gtkbox.append(&rw_label);
+
+                let frame = Frame::new(None);
+                frame.set_margin_top(10);
+                gtkbox.append(&frame);
 
                 let rw_config = match expand_source(&rw_path) {
                     Ok(rw_config) => rw_config,
@@ -3971,6 +3984,46 @@ impl ConfigWidget {
                         String::new()
                     }
                 };
+
+                let parsed_headless_options_raw = parse_top_level_options(&rw_config, true);
+                let parsed_headless_options = parse_top_level_options(&rw_config, false);
+                let mut rw_options: HashMap<String, (String, String)> = HashMap::new();
+
+                for ((raw, _), (value, name)) in parsed_headless_options_raw
+                    .into_iter()
+                    .zip(parsed_headless_options)
+                {
+                    let boxline = Box::new(Orientation::Horizontal, 5);
+                    boxline.set_hexpand(true);
+                    boxline.set_margin_top(5);
+                    boxline.set_margin_bottom(5);
+                    boxline.set_margin_start(5);
+                    boxline.set_margin_end(5);
+
+                    let name_entry = Entry::new();
+                    name_entry.set_text(&value);
+                    name_entry.set_margin_top(5);
+                    name_entry.set_margin_bottom(5);
+                    name_entry.set_margin_start(5);
+                    name_entry.set_margin_end(5);
+                    boxline.append(&name_entry);
+
+                    let equals_label = Label::new(Some("="));
+                    equals_label.set_xalign(0.5);
+                    boxline.append(&equals_label);
+
+                    let value_entry = Entry::new();
+                    value_entry.set_text(&raw);
+                    value_entry.set_margin_top(5);
+                    value_entry.set_margin_bottom(5);
+                    value_entry.set_margin_start(5);
+                    value_entry.set_margin_end(5);
+                    value_entry.set_hexpand(true);
+                    boxline.append(&value_entry);
+
+                    rw_options.insert(raw, (value, name));
+                    gtkbox.append(&boxline);
+                }
             }
         }
     }
