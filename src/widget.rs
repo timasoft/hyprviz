@@ -13,8 +13,8 @@ use std::{
 };
 
 use crate::utils::{
-    MAX_SAFE_INTEGER_F64, atomic_write, compare_versions, expand_source, expand_source_str,
-    get_config_path, get_latest_version, parse_top_level_options,
+    MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
+    get_latest_version, parse_top_level_options,
 };
 
 use crate::system_info::*;
@@ -3849,13 +3849,16 @@ impl ConfigWidget {
                 });
             } else if let Some(gtkbox) = widget.downcast_ref::<Box>() {
                 let read_only_str = &format!("This is a read-only {} (from main config)", name);
+
                 let read_only_label = Label::new(Some(read_only_str));
                 read_only_label.set_halign(gtk::Align::Start);
                 read_only_label.set_markup(&format!("<b>{read_only_str}</b>"));
+
                 gtkbox.append(&read_only_label);
 
                 let frame = Frame::new(None);
                 frame.set_margin_top(10);
+
                 gtkbox.append(&frame);
 
                 let read_only_path = get_config_path(false, profile);
@@ -3897,15 +3900,19 @@ impl ConfigWidget {
                             "Error reading {}",
                             read_only_path.to_string_lossy()
                         )));
+
                         error_label.set_markup("<span foreground=\"red\">{read_only_path}</span>");
                         error_label.set_margin_top(5);
                         error_label.set_margin_bottom(5);
                         error_label.set_margin_start(5);
                         error_label.set_margin_end(5);
+
                         gtkbox.append(&error_label);
+
                         String::new()
                     }
                 };
+
                 let read_only_config =
                     match expand_source_str(&read_only_path, &read_only_config_raw) {
                         Ok(read_only_config) => read_only_config,
@@ -3914,19 +3921,23 @@ impl ConfigWidget {
                                 "Error reading {}",
                                 read_only_path.to_string_lossy()
                             )));
+
                             error_label
                                 .set_markup("<span foreground=\"red\">{read_only_path}</span>");
                             error_label.set_margin_top(5);
                             error_label.set_margin_bottom(5);
                             error_label.set_margin_start(5);
                             error_label.set_margin_end(5);
+
                             gtkbox.append(&error_label);
+
                             String::new()
                         }
                     };
 
                 let parsed_headless_readonly_options =
                     parse_top_level_options(&read_only_config, false);
+
                 let options_grid = Grid::new();
                 options_grid.set_column_spacing(10);
                 options_grid.set_row_spacing(5);
@@ -3934,6 +3945,7 @@ impl ConfigWidget {
                 options_grid.set_margin_bottom(2);
                 options_grid.set_margin_start(5);
                 options_grid.set_margin_end(5);
+
                 for (row_num, (name, value)) in parsed_headless_readonly_options.iter().enumerate()
                 {
                     let name_label = Label::new(Some(name));
@@ -3950,21 +3962,26 @@ impl ConfigWidget {
                     value_label.set_selectable(true);
 
                     let row_num = row_num as i32;
+
                     options_grid.attach(&name_label, 0, row_num, 1, 1);
                     options_grid.attach(&equals_label, 1, row_num, 1, 1);
                     options_grid.attach(&value_label, 2, row_num, 1, 1);
                 }
+
                 gtkbox.append(&options_grid);
 
                 let rw_str = &format!("This is a read-write {} (from your profile)", name);
+
                 let rw_label = Label::new(Some(rw_str));
                 rw_label.set_halign(gtk::Align::Start);
                 rw_label.set_margin_top(10);
                 rw_label.set_markup(&format!("<b>{rw_str}</b>"));
+
                 gtkbox.append(&rw_label);
 
                 let frame = Frame::new(None);
                 frame.set_margin_top(10);
+
                 gtkbox.append(&frame);
 
                 let rw_config = match expand_source(&rw_path) {
@@ -3974,11 +3991,13 @@ impl ConfigWidget {
                             "Error reading {}",
                             rw_path.to_string_lossy()
                         )));
+
                         error_label.set_markup("<span foreground=\"red\">{rw_path}</span>");
                         error_label.set_margin_top(5);
                         error_label.set_margin_bottom(5);
                         error_label.set_margin_start(5);
                         error_label.set_margin_end(5);
+
                         gtkbox.append(&error_label);
 
                         String::new()
@@ -3987,9 +4006,10 @@ impl ConfigWidget {
 
                 let parsed_headless_options_raw = parse_top_level_options(&rw_config, true);
                 let parsed_headless_options = parse_top_level_options(&rw_config, false);
+
                 let mut rw_options: HashMap<String, (String, String)> = HashMap::new();
 
-                for ((raw, _), (value, name)) in parsed_headless_options_raw
+                for ((raw, _), (name, value)) in parsed_headless_options_raw
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
@@ -4001,27 +4021,57 @@ impl ConfigWidget {
                     boxline.set_margin_end(5);
 
                     let name_entry = Entry::new();
-                    name_entry.set_text(&value);
+                    name_entry.set_text(&name);
                     name_entry.set_margin_top(5);
                     name_entry.set_margin_bottom(5);
                     name_entry.set_margin_start(5);
                     name_entry.set_margin_end(5);
+
+                    let changed_options_clone = changed_options.clone();
+                    let raw_clone = raw.clone();
+                    let category_str = category.to_string();
+
+                    name_entry.connect_changed(move |entry| {
+                        let mut changes = changed_options_clone.borrow_mut();
+                        let new_name = entry.text().to_string();
+                        changes.insert(
+                            (category_str.clone(), format!("{}_name", raw_clone)),
+                            new_name,
+                        );
+                    });
+
                     boxline.append(&name_entry);
 
                     let equals_label = Label::new(Some("="));
                     equals_label.set_xalign(0.5);
+
                     boxline.append(&equals_label);
 
                     let value_entry = Entry::new();
-                    value_entry.set_text(&raw);
+                    value_entry.set_text(&value);
                     value_entry.set_margin_top(5);
                     value_entry.set_margin_bottom(5);
                     value_entry.set_margin_start(5);
                     value_entry.set_margin_end(5);
-                    value_entry.set_hexpand(true);
+                    value_entry.set_width_request(512);
+
+                    let changed_options_clone = changed_options.clone();
+                    let raw_clone = raw.clone();
+                    let category_str = category.to_string();
+
+                    value_entry.connect_changed(move |entry| {
+                        let mut changes = changed_options_clone.borrow_mut();
+                        let new_value = entry.text().to_string();
+                        changes.insert(
+                            (category_str.clone(), format!("{}_value", raw_clone)),
+                            new_value,
+                        );
+                    });
+
                     boxline.append(&value_entry);
 
                     rw_options.insert(raw, (value, name));
+
                     gtkbox.append(&boxline);
                 }
             }

@@ -965,6 +965,11 @@ along with this program; if not, see
         for (category, widget) in &self.config_widgets {
             for (name, widget_data) in &widget.options {
                 let widget = &widget_data.widget;
+
+                if widget.downcast_ref::<Box>().is_some() {
+                    continue;
+                }
+
                 if let Some(value) = changes.get(&(category.to_string(), name.to_string())) {
                     let formatted_value =
                         if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
@@ -1004,5 +1009,74 @@ along with this program; if not, see
                 }
             }
         }
+
+        let mut names: HashMap<String, String> = HashMap::new();
+        let mut values: HashMap<String, String> = HashMap::new();
+        for ((_, name), new) in changes.iter() {
+            if name.ends_with("_name") {
+                let formatted_name = if name.ends_with("_name") {
+                    name.strip_suffix("_name").unwrap().to_string()
+                } else {
+                    name.clone()
+                };
+                names.insert(formatted_name.clone(), new.clone());
+            }
+
+            if name.ends_with("_value") {
+                let formatted_value = if name.ends_with("_value") {
+                    name.strip_suffix("_value").unwrap().to_string()
+                } else {
+                    name.clone()
+                };
+                values.insert(formatted_value.clone(), new.clone());
+            }
+        }
+
+        let mut lines: Vec<String> = config.to_string().lines().map(String::from).collect();
+
+        for ((_, name), _) in changes.iter() {
+            if name.ends_with("_name") || name.ends_with("_value") {
+                let key = name
+                    .strip_suffix("_name")
+                    .or_else(|| name.strip_suffix("_value"))
+                    .unwrap_or(name);
+
+                let has_name = names.contains_key(key);
+                let has_value = values.contains_key(key);
+
+                let mut new_name = names.get(key).cloned().unwrap_or_default();
+                let mut new_value = values.get(key).cloned().unwrap_or_default();
+
+                let mut found = false;
+                for line in &mut lines {
+                    if line.trim_start().starts_with(key)
+                        && let Some((original_name, original_value)) = line.split_once('=')
+                    {
+                        let indent = line
+                            .chars()
+                            .take_while(|c| c.is_whitespace())
+                            .collect::<String>();
+
+                        if !has_name {
+                            new_name = original_name.trim().to_string();
+                        }
+                        if !has_value {
+                            new_value = original_value.trim_start().to_string();
+                        }
+
+                        *line = format!("{}{} = {}", indent, new_name, new_value);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if !found {
+                    lines.push(format!("{} = {}", new_name, new_value));
+                }
+            }
+        }
+
+        let new_config = parse_config(&lines.join("\n"));
+        *config = new_config;
     }
 }
