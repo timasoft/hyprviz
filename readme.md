@@ -18,7 +18,7 @@ Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprla
 
 [![Packaging status](https://repology.org/badge/vertical-allrepos/hyprviz.svg)](https://repology.org/project/hyprviz)
 
-### Arch Linux (Broken)
+### Arch Linux
 There are 2 different [AUR](https://aur.archlinux.org) packages available:
 
 - [hyprviz](https://aur.archlinux.org/packages/hyprviz) - Latest release built from source
