@@ -755,6 +755,73 @@ fn add_color_option(
     );
 }
 
+fn append_option_row(
+    gtkbox: &gtk::Box,
+    raw: String,
+    name: String,
+    value: String,
+    changed_options: &Rc<RefCell<HashMap<(String, String), String>>>,
+    category: &str,
+) {
+    let boxline = Box::new(Orientation::Horizontal, 5);
+    boxline.set_hexpand(true);
+    boxline.set_margin_top(5);
+    boxline.set_margin_bottom(5);
+    boxline.set_margin_start(5);
+    boxline.set_margin_end(5);
+
+    let name_entry = Entry::new();
+    name_entry.set_text(&name);
+    name_entry.set_margin_top(5);
+    name_entry.set_margin_bottom(5);
+    name_entry.set_margin_start(5);
+    name_entry.set_margin_end(5);
+
+    let changed_options_clone = changed_options.clone();
+    let raw_clone = raw.clone();
+    let category_str = category.to_string();
+
+    name_entry.connect_changed(move |entry| {
+        let mut changes = changed_options_clone.borrow_mut();
+        let new_name = entry.text().to_string();
+        changes.insert(
+            (category_str.clone(), format!("{}_name", raw_clone)),
+            new_name,
+        );
+    });
+
+    boxline.append(&name_entry);
+
+    let equals_label = Label::new(Some("="));
+    equals_label.set_xalign(0.5);
+    boxline.append(&equals_label);
+
+    let value_entry = Entry::new();
+    value_entry.set_text(&value);
+    value_entry.set_margin_top(5);
+    value_entry.set_margin_bottom(5);
+    value_entry.set_margin_start(5);
+    value_entry.set_margin_end(5);
+    value_entry.set_width_request(512);
+
+    let changed_options_clone = changed_options.clone();
+    let raw_clone = raw.clone();
+    let category_str = category.to_string();
+
+    value_entry.connect_changed(move |entry| {
+        let mut changes = changed_options_clone.borrow_mut();
+        let new_value = entry.text().to_string();
+        changes.insert(
+            (category_str.clone(), format!("{}_value", raw_clone)),
+            new_value,
+        );
+    });
+
+    boxline.append(&value_entry);
+
+    gtkbox.append(&boxline);
+}
+
 fn update_version_label(label: &Label, repo: &str, version: &str) {
     let latest_version = get_latest_version(repo);
     let version_str = if !latest_version.starts_with("v") {
@@ -3725,10 +3792,14 @@ impl ConfigWidget {
                     &format!("Configure {display_name} behavior."),
                     first_section.clone(),
                 );
+
+                let gtkbox = Box::new(Orientation::Vertical, 0);
+                container.append(&gtkbox);
+
                 options.insert(
                     category.to_string(),
                     WidgetData {
-                        widget: container.upcast(),
+                        widget: gtkbox.upcast(),
                         default: format!("This is a {} as widget", category),
                     },
                 );
@@ -4004,75 +4075,45 @@ impl ConfigWidget {
                     }
                 };
 
+                let create_button = Button::with_label("Create");
+                create_button.set_margin_top(10);
+                create_button.set_margin_bottom(10);
+                create_button.set_margin_start(5);
+                create_button.set_margin_end(5);
+                create_button.set_width_request(256);
+                create_button.set_halign(gtk::Align::Start);
+
+                let id_new = Rc::new(RefCell::new(0));
+
+                let gtkbox_clone = gtkbox.clone();
+
+                let changed_options_clone = changed_options.clone();
+
+                let category_string = category.to_string();
+
+                create_button.connect_clicked(move |_| {
+                    let mut id = id_new.borrow_mut();
+                    append_option_row(
+                        &gtkbox_clone,
+                        id.to_string(),
+                        "".to_string(),
+                        "".to_string(),
+                        &changed_options_clone,
+                        &category_string,
+                    );
+                    *id += 1;
+                });
+
+                gtkbox.append(&create_button);
+
                 let parsed_headless_options_raw = parse_top_level_options(&rw_config, true);
                 let parsed_headless_options = parse_top_level_options(&rw_config, false);
-
-                let mut rw_options: HashMap<String, (String, String)> = HashMap::new();
 
                 for ((raw, _), (name, value)) in parsed_headless_options_raw
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
-                    let boxline = Box::new(Orientation::Horizontal, 5);
-                    boxline.set_hexpand(true);
-                    boxline.set_margin_top(5);
-                    boxline.set_margin_bottom(5);
-                    boxline.set_margin_start(5);
-                    boxline.set_margin_end(5);
-
-                    let name_entry = Entry::new();
-                    name_entry.set_text(&name);
-                    name_entry.set_margin_top(5);
-                    name_entry.set_margin_bottom(5);
-                    name_entry.set_margin_start(5);
-                    name_entry.set_margin_end(5);
-
-                    let changed_options_clone = changed_options.clone();
-                    let raw_clone = raw.clone();
-                    let category_str = category.to_string();
-
-                    name_entry.connect_changed(move |entry| {
-                        let mut changes = changed_options_clone.borrow_mut();
-                        let new_name = entry.text().to_string();
-                        changes.insert(
-                            (category_str.clone(), format!("{}_name", raw_clone)),
-                            new_name,
-                        );
-                    });
-
-                    boxline.append(&name_entry);
-
-                    let equals_label = Label::new(Some("="));
-                    equals_label.set_xalign(0.5);
-
-                    boxline.append(&equals_label);
-
-                    let value_entry = Entry::new();
-                    value_entry.set_text(&value);
-                    value_entry.set_margin_top(5);
-                    value_entry.set_margin_bottom(5);
-                    value_entry.set_margin_start(5);
-                    value_entry.set_margin_end(5);
-                    value_entry.set_width_request(512);
-
-                    let changed_options_clone = changed_options.clone();
-                    let raw_clone = raw.clone();
-                    let category_str = category.to_string();
-
-                    value_entry.connect_changed(move |entry| {
-                        let mut changes = changed_options_clone.borrow_mut();
-                        let new_value = entry.text().to_string();
-                        changes.insert(
-                            (category_str.clone(), format!("{}_value", raw_clone)),
-                            new_value,
-                        );
-                    });
-
-                    boxline.append(&value_entry);
-
-                    rw_options.insert(raw, (value, name));
-
-                    gtkbox.append(&boxline);
+                    append_option_row(gtkbox, raw, name, value, &changed_options, category);
                 }
             }
         }

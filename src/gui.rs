@@ -760,6 +760,26 @@ along with this program; if not, see
 
             let result = atomic_write(&path, &updated_config_str);
 
+            for (category, category_widget) in &self.config_widgets {
+                for widget_data in category_widget.options.values() {
+                    let widget = &widget_data.widget;
+
+                    if let Some(gtkbox) = widget.downcast_ref::<Box>() {
+                        while let Some(child) = gtkbox.first_child() {
+                            gtkbox.remove(&child);
+                        }
+
+                        category_widget.load_config(
+                            &parsed_config,
+                            &profile_name,
+                            category,
+                            self.changed_options.clone(),
+                        );
+                    }
+                }
+            }
+            self.changed_options.clone().borrow_mut().clear();
+
             match result {
                 Ok(()) => {
                     println!("Configuration saved atomically to: {:?}", path);
@@ -1034,12 +1054,17 @@ along with this program; if not, see
 
         let mut lines: Vec<String> = config.to_string().lines().map(String::from).collect();
 
+        let mut changed: Vec<String> = Vec::new();
+
         for ((_, name), _) in changes.iter() {
             if name.ends_with("_name") || name.ends_with("_value") {
                 let key = name
                     .strip_suffix("_name")
                     .or_else(|| name.strip_suffix("_value"))
                     .unwrap_or(name);
+                if changed.contains(&key.to_string()) {
+                    continue;
+                }
 
                 let has_name = names.contains_key(key);
                 let has_value = values.contains_key(key);
@@ -1073,6 +1098,7 @@ along with this program; if not, see
                 if !found {
                     lines.push(format!("{} = {}", new_name, new_value));
                 }
+                changed.push(key.to_string());
             }
         }
 
