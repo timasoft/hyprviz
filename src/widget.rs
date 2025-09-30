@@ -819,6 +819,36 @@ fn append_option_row(
 
     boxline.append(&value_entry);
 
+    let delete_button = Button::from_icon_name("edit-delete-symbolic");
+    delete_button.set_tooltip_text(Some("Delete this option"));
+    delete_button.set_valign(gtk::Align::Center);
+    delete_button.set_has_frame(false);
+    value_entry.set_margin_top(5);
+    value_entry.set_margin_bottom(5);
+    value_entry.set_margin_start(5);
+    value_entry.set_margin_end(5);
+
+    let gtkbox_clone = gtkbox.clone();
+    let category_str = category.to_string();
+    let changed_options_clone = changed_options.clone();
+    let boxline_clone = boxline.clone();
+
+    delete_button.connect_clicked(move |_| {
+        gtkbox_clone.remove(&boxline_clone);
+
+        let mut changes = changed_options_clone.borrow_mut();
+
+        changes.remove(&(category_str.clone(), format!("{}_name", raw)));
+        changes.remove(&(category_str.clone(), format!("{}_value", raw)));
+
+        changes.insert(
+            (category_str.clone(), format!("{}_delete", raw)),
+            "DELETE".to_string(),
+        );
+    });
+
+    boxline.append(&delete_button);
+
     gtkbox.append(&boxline);
 }
 
@@ -830,12 +860,12 @@ fn update_version_label(label: &Label, repo: &str, version: &str) {
         match compare_versions(version, &latest_version) {
             Ordering::Greater => {
                 format!(
-                    "{} (Your version is greater than latest({}))",
+                    "{} (Your version is greater than latest ({}) )",
                     version, latest_version
                 )
             }
             Ordering::Less => {
-                format!("{} (New version available ({}))", version, latest_version)
+                format!("{} (New version available ({}) )", version, latest_version)
             }
             Ordering::Equal => {
                 format!("{} (Your version is up to date)", version)

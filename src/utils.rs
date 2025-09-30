@@ -426,7 +426,7 @@ pub fn parse_top_level_options(config_str: &str, raw: bool) -> Vec<(String, Stri
                 continue;
             }
 
-            let value = trimmed_line[eq_pos + 1..].trim();
+            let value = trimmed_line[eq_pos + 1..].trim_start();
 
             if raw {
                 options.push((line.to_string(), "".to_string()));

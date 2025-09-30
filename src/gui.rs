@@ -1032,27 +1032,44 @@ along with this program; if not, see
 
         let mut names: HashMap<String, String> = HashMap::new();
         let mut values: HashMap<String, String> = HashMap::new();
-        for ((_, name), new) in changes.iter() {
-            if name.ends_with("_name") {
-                let formatted_name = if name.ends_with("_name") {
-                    name.strip_suffix("_name").unwrap().to_string()
-                } else {
-                    name.clone()
-                };
-                names.insert(formatted_name.clone(), new.clone());
+        let mut delete: Vec<String> = Vec::new();
+        for ((_, raw), new) in changes.iter() {
+            if raw.ends_with("_name") {
+                let formatted_raw = raw.strip_suffix("_name").unwrap().to_string();
+                names.insert(formatted_raw.clone(), new.clone());
             }
 
-            if name.ends_with("_value") {
-                let formatted_value = if name.ends_with("_value") {
-                    name.strip_suffix("_value").unwrap().to_string()
-                } else {
-                    name.clone()
-                };
-                values.insert(formatted_value.clone(), new.clone());
+            if raw.ends_with("_value") {
+                let formatted_raw = raw.strip_suffix("_value").unwrap().to_string();
+                values.insert(formatted_raw.clone(), new.clone());
+            }
+
+            if raw.ends_with("_delete") {
+                let formatted_raw = raw.strip_suffix("_delete").unwrap().to_string();
+                delete.push(formatted_raw.clone());
             }
         }
 
         let mut lines: Vec<String> = config.to_string().lines().map(String::from).collect();
+
+        let mut delete_tracker = HashMap::new();
+
+        for raw in &delete {
+            *delete_tracker.entry(raw.clone()).or_insert(0) += 1;
+        }
+
+        lines.retain(|line| {
+            let normalized_line = line.trim_start().to_string();
+
+            if let Some(count) = delete_tracker.get_mut(&normalized_line)
+                && *count > 0
+            {
+                *count -= 1;
+                return false;
+            }
+
+            true
+        });
 
         let mut changed: Vec<String> = Vec::new();
 
