@@ -802,7 +802,7 @@ fn append_option_row(
     value_entry.set_margin_bottom(5);
     value_entry.set_margin_start(5);
     value_entry.set_margin_end(5);
-    value_entry.set_width_request(512);
+    value_entry.set_hexpand(true);
 
     let changed_options_clone = changed_options.clone();
     let raw_clone = raw.clone();
@@ -823,10 +823,6 @@ fn append_option_row(
     delete_button.set_tooltip_text(Some("Delete this option"));
     delete_button.set_valign(gtk::Align::Center);
     delete_button.set_has_frame(false);
-    value_entry.set_margin_top(5);
-    value_entry.set_margin_bottom(5);
-    value_entry.set_margin_start(5);
-    value_entry.set_margin_end(5);
 
     let gtkbox_clone = gtkbox.clone();
     let category_str = category.to_string();
@@ -3965,10 +3961,10 @@ impl ConfigWidget {
                 let read_only_path = get_config_path(false, profile);
                 let rw_path = get_config_path(true, profile);
 
-                let profile = if profile == "Default" {
-                    String::new()
+                let profile_path = if profile == "Default" {
+                    "./hyprviz.conf".to_string()
                 } else {
-                    profile.to_string()
+                    format!("./hyprviz/{}.conf", profile)
                 };
 
                 let read_only_config_raw = match fs::read_to_string(&read_only_path) {
@@ -3977,22 +3973,22 @@ impl ConfigWidget {
                         .filter(|line| {
                             !line
                                 .trim_start()
-                                .starts_with(&format!("source = ./hyprviz{}.conf", profile))
+                                .starts_with(&format!("source = {}", profile_path))
                         })
                         .filter(|line| {
                             !line
                                 .trim_start()
-                                .starts_with(&format!("source =./hyprviz{}.conf", profile))
+                                .starts_with(&format!("source ={}", profile_path))
                         })
                         .filter(|line| {
                             !line
                                 .trim_start()
-                                .contains(&format!("source= ./hyprviz{}.conf", profile))
+                                .contains(&format!("source= {}", profile_path))
                         })
                         .filter(|line| {
                             !line
                                 .trim_start()
-                                .starts_with(&format!("source=./hyprviz{}.conf", profile))
+                                .starts_with(&format!("source={}", profile_path))
                         })
                         .collect::<Vec<&str>>()
                         .join("\n"),
@@ -4061,6 +4057,7 @@ impl ConfigWidget {
                     let value_label = Label::new(Some(value));
                     value_label.set_xalign(0.0);
                     value_label.set_selectable(true);
+                    value_label.set_wrap(true);
 
                     let row_num = row_num as i32;
 
@@ -4069,6 +4066,26 @@ impl ConfigWidget {
                     options_grid.attach(&value_label, 2, row_num, 1, 1);
                 }
 
+                let toggle_button = Button::with_label("Hide read-only options");
+                toggle_button.set_margin_top(10);
+                toggle_button.set_margin_bottom(10);
+                toggle_button.set_margin_start(5);
+                toggle_button.set_margin_end(5);
+                toggle_button.set_has_frame(false);
+
+                let options_grid_clone = options_grid.clone();
+                let toggle_button_clone = toggle_button.clone();
+                toggle_button.connect_clicked(move |_| {
+                    let visible = !options_grid_clone.is_visible();
+                    options_grid_clone.set_visible(visible);
+                    toggle_button_clone.set_label(if visible {
+                        "Hide read-only options"
+                    } else {
+                        "Show read-only options"
+                    });
+                });
+
+                gtkbox.append(&toggle_button);
                 gtkbox.append(&options_grid);
 
                 let rw_str = &format!("This is a read-write {} (from your profile)", name);
@@ -4111,7 +4128,6 @@ impl ConfigWidget {
                 create_button.set_margin_start(5);
                 create_button.set_margin_end(5);
                 create_button.set_width_request(256);
-                create_button.set_halign(gtk::Align::Start);
 
                 let id_new = Rc::new(RefCell::new(0));
 
