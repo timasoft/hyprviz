@@ -1,7 +1,7 @@
 use gtk::{
-    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Grid, Justification,
-    Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList, StringObject, Switch,
-    Widget, gdk, glib, prelude::*,
+    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander, Frame, Grid,
+    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList,
+    StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use std::{
@@ -846,6 +846,31 @@ fn append_option_row(
     boxline.append(&delete_button);
 
     gtkbox.append(&boxline);
+}
+
+fn add_guide(container: &Box, title: &str, content: &str, default_collapsed: bool) {
+    let expander = Expander::new(None);
+    expander.set_margin_top(5);
+    expander.set_margin_bottom(10);
+
+    let title_label = Label::new(None);
+    title_label.set_halign(gtk::Align::Start);
+    title_label.add_css_class("heading");
+    title_label.set_markup(title);
+
+    expander.set_label_widget(Some(&title_label));
+
+    expander.set_expanded(!default_collapsed);
+
+    let content_label = Label::new(None);
+    content_label.set_markup(content);
+    content_label.set_wrap(true);
+    content_label.set_selectable(true);
+    content_label.set_halign(gtk::Align::Start);
+
+    expander.set_child(Some(&content_label));
+
+    container.append(&expander);
 }
 
 fn update_version_label(label: &Label, repo: &str, version: &str) {
@@ -3812,12 +3837,31 @@ impl ConfigWidget {
                 container.append(&info_box);
             }
             _ => {
-                add_section(
-                    &container,
-                    &format!("{display_name} Settings"),
-                    &format!("Configure {display_name} behavior."),
-                    first_section.clone(),
-                );
+                match category {
+                    "bind" => {
+                        add_section(
+                            &container,
+                            "Bindings",
+                            "Configure keybindings.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "test", "TEST", false);
+                    }
+                    "top_level" => {
+                        add_section(
+                            &container,
+                            "All top-level options",
+                            "Configure behavior for all top-level options.",
+                            first_section.clone(),
+                        );
+                    }
+                    _ => add_section(
+                        &container,
+                        &format!("{display_name} Settings"),
+                        &format!("Configure {display_name} behavior."),
+                        first_section.clone(),
+                    ),
+                }
 
                 let gtkbox = Box::new(Orientation::Vertical, 0);
                 container.append(&gtkbox);
@@ -4038,13 +4082,17 @@ impl ConfigWidget {
                 let options_grid = Grid::new();
                 options_grid.set_column_spacing(10);
                 options_grid.set_row_spacing(5);
-                options_grid.set_margin_top(2);
-                options_grid.set_margin_bottom(2);
+                options_grid.set_margin_top(10);
+                options_grid.set_margin_bottom(10);
                 options_grid.set_margin_start(5);
                 options_grid.set_margin_end(5);
 
                 for (row_num, (name, value)) in parsed_headless_readonly_options.iter().enumerate()
                 {
+                    if !name.starts_with(category) && category != "top_level" {
+                        continue;
+                    }
+
                     let name_label = Label::new(Some(name));
                     name_label.set_xalign(0.0);
                     name_label.set_size_request(name_label.width(), 1);
@@ -4066,27 +4114,15 @@ impl ConfigWidget {
                     options_grid.attach(&value_label, 2, row_num, 1, 1);
                 }
 
-                let toggle_button = Button::with_label("Hide read-only options");
-                toggle_button.set_margin_top(10);
-                toggle_button.set_margin_bottom(10);
-                toggle_button.set_margin_start(5);
-                toggle_button.set_margin_end(5);
-                toggle_button.set_has_frame(false);
+                let expander = Expander::new(Some("Show read-only options"));
+                expander.set_margin_top(10);
+                expander.set_margin_bottom(10);
+                expander.set_margin_start(5);
+                expander.set_margin_end(5);
 
-                let options_grid_clone = options_grid.clone();
-                let toggle_button_clone = toggle_button.clone();
-                toggle_button.connect_clicked(move |_| {
-                    let visible = !options_grid_clone.is_visible();
-                    options_grid_clone.set_visible(visible);
-                    toggle_button_clone.set_label(if visible {
-                        "Hide read-only options"
-                    } else {
-                        "Show read-only options"
-                    });
-                });
+                expander.set_child(Some(&options_grid));
 
-                gtkbox.append(&toggle_button);
-                gtkbox.append(&options_grid);
+                gtkbox.append(&expander);
 
                 let rw_str = &format!("This is a read-write {} (from your profile)", name);
 
@@ -4159,6 +4195,10 @@ impl ConfigWidget {
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
+                    if !name.starts_with(category) && category != "top_level" {
+                        continue;
+                    }
+
                     append_option_row(gtkbox, raw, name, value, &changed_options, category);
                 }
             }

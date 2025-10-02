@@ -948,7 +948,7 @@ along with this program; if not, see
             ("Decoration", "decoration"),
             ("Animations", "animations"),
             ("Input", "input"),
-            ("Gestures", "gestures"),
+            ("Gestures Settings", "gestures"),
             ("Misc", "misc"),
             ("Bind Settings", "binds"),
             ("Group", "group"),
@@ -960,7 +960,13 @@ along with this program; if not, see
             ("Ecosystem", "ecosystem"),
             ("Experimental", "experimental"),
             ("Debug", "debug"),
-            ("Top level", "top_level"),
+            ("Binds", "bind"),
+            ("Monitors", "monitor"),
+            ("Execs", "exec"),
+            ("Workspaces", "workspace"),
+            ("Window Rules", "windowrule"),
+            ("Gestures", "gesture"),
+            ("All Top Level", "top_level"),
             ("System Info", "systeminfo"),
         ];
 
