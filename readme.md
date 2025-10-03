@@ -89,10 +89,10 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add dropdown_int and bool_int
 - [x] Add ability to create and switch between custom profiles
 - [x] Add system info section
+- [x] Add bind section
+- [x] Add windowrule section
+- [x] Add other top-level config sections from Hyprland
 - [ ] Add hyprviz to nixpkgs
-- [ ] Add bind section
-- [ ] Add windowrule section
-- [ ] Add other config sections from Hyprland
 - [ ] Add i18n
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
