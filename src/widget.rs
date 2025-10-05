@@ -1,7 +1,7 @@
 use gtk::{
-    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander, Frame, Grid,
-    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList,
-    StringObject, Switch, Widget, gdk, glib, prelude::*,
+    gdk, glib, prelude::*, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander,
+    Frame, Grid, Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton,
+    StringList, StringObject, Switch, Widget,
 };
 use hyprparser::HyprlandConfig;
 use std::{
@@ -12,9 +12,12 @@ use std::{
     rc::Rc,
 };
 
-use crate::utils::{
-    MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
-    get_latest_version, parse_top_level_options,
+use crate::{
+    guides::create_guide,
+    utils::{
+        compare_versions, expand_source, expand_source_str, get_config_path, get_latest_version,
+        parse_top_level_options, MAX_SAFE_INTEGER_F64,
+    },
 };
 
 use crate::system_info::*;
@@ -848,7 +851,7 @@ fn append_option_row(
     gtkbox.append(&boxline);
 }
 
-fn add_guide(container: &Box, title: &str, content: &str, default_collapsed: bool) {
+fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
     let expander = Expander::new(None);
     expander.set_margin_top(5);
     expander.set_margin_bottom(10);
@@ -856,19 +859,14 @@ fn add_guide(container: &Box, title: &str, content: &str, default_collapsed: boo
     let title_label = Label::new(None);
     title_label.set_halign(gtk::Align::Start);
     title_label.add_css_class("heading");
-    title_label.set_markup(title);
+    title_label.set_markup("Guide");
 
     expander.set_label_widget(Some(&title_label));
 
     expander.set_expanded(!default_collapsed);
 
-    let content_label = Label::new(None);
-    content_label.set_markup(content);
-    content_label.set_wrap(true);
-    content_label.set_selectable(true);
-    content_label.set_halign(gtk::Align::Start);
-
-    expander.set_child(Some(&content_label));
+    let guide_box = create_guide(name);
+    expander.set_child(Some(&guide_box));
 
     container.append(&expander);
 }
@@ -3845,7 +3843,7 @@ impl ConfigWidget {
                             "Configure keybindings.",
                             first_section.clone(),
                         );
-                        add_guide(&container, "test", "TEST", false);
+                        add_guide(&container, "Binds", true);
                     }
                     "top_level" => {
                         add_section(

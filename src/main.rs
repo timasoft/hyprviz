@@ -1,4 +1,4 @@
-use gtk::{Application, StringList, StringObject, glib, prelude::*};
+use gtk::{glib, prelude::*, Application, StringList, StringObject};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
 use std::{
@@ -6,12 +6,13 @@ use std::{
     {cell::RefCell, fs, rc::Rc},
 };
 use utils::{
-    CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
-    check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
-    get_current_profile, reload_hyprland, update_source_line,
+    atomic_write, check_last_non_empty_line_contains, expand_source, find_all_profiles,
+    get_config_path, get_current_profile, reload_hyprland, update_source_line, CONFIG_PATH,
+    HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH,
 };
 
 mod gui;
+mod guides;
 mod system_info;
 mod utils;
 mod widget;
