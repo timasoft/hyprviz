@@ -372,11 +372,7 @@ fn parse_source_line(line: &str) -> Option<String> {
                 out.push(c);
             }
         }
-        if out.is_empty() {
-            None
-        } else {
-            Some(out)
-        }
+        if out.is_empty() { None } else { Some(out) }
     } else {
         let mut out = String::new();
         for c in rhs.chars() {
@@ -387,11 +383,7 @@ fn parse_source_line(line: &str) -> Option<String> {
             }
         }
         let res = out.trim_end().to_string();
-        if res.is_empty() {
-            None
-        } else {
-            Some(res)
-        }
+        if res.is_empty() { None } else { Some(res) }
     }
 }
 
@@ -676,7 +668,7 @@ pub fn markdown_to_pango(text: &str, guide_name: &str) -> String {
 }
 
 fn escape_pango(text: &str) -> String {
-    text.replace('&', "&amp;").replace("<br>", "\n")
+    text.replace('&', "&amp;").replace("<br> ", "\n")
 }
 
 fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {

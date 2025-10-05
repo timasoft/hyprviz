@@ -1,5 +1,5 @@
 use crate::utils::markdown_to_pango;
-use gtk::{pango::WrapMode, prelude::*, Align, Box, Frame, Grid, Label, Orientation};
+use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
 
 enum ContentBlock {
     Text(String),

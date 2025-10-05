@@ -1,7 +1,7 @@
 use gtk::{
-    gdk, glib, prelude::*, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander,
-    Frame, Grid, Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton,
-    StringList, StringObject, Switch, Widget,
+    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander, Frame, Grid,
+    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList,
+    StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use std::{
@@ -15,8 +15,8 @@ use std::{
 use crate::{
     guides::create_guide,
     utils::{
-        compare_versions, expand_source, expand_source_str, get_config_path, get_latest_version,
-        parse_top_level_options, MAX_SAFE_INTEGER_F64,
+        MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
+        get_latest_version, parse_top_level_options,
     },
 };
 
@@ -869,6 +869,10 @@ fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
     expander.set_child(Some(&guide_box));
 
     container.append(&expander);
+
+    let frame = Frame::new(None);
+    frame.set_margin_bottom(10);
+    container.append(&frame);
 }
 
 fn update_version_label(label: &Label, repo: &str, version: &str) {
@@ -4193,11 +4197,19 @@ impl ConfigWidget {
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
-                    if !name.starts_with(category) && category != "top_level" {
+                    if name.starts_with(category) || category == "top_level" {
+                        append_option_row(gtkbox, raw, name, value, &changed_options, category);
                         continue;
                     }
 
-                    append_option_row(gtkbox, raw, name, value, &changed_options, category);
+                    if (category == "bind"
+                        && (name.starts_with("unbind") || name.starts_with("bind")))
+                        || (category == "animation"
+                            && (name.starts_with("animation") || name.starts_with("bezier")))
+                    {
+                        append_option_row(gtkbox, raw, name, value, &changed_options, category);
+                    }
+                    continue;
                 }
             }
         }
