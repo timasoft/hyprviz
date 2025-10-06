@@ -668,7 +668,15 @@ pub fn markdown_to_pango(text: &str, guide_name: &str) -> String {
 }
 
 fn escape_pango(text: &str) -> String {
-    text.replace('&', "&amp;").replace("<br> ", "\n")
+    text.replace('&', "&amp;")
+        .replace("<br> ", "\n")
+        .replace("<br>", "\n")
+        .replace(">>", ">&gt;")
+        .replace("<<", "&lt;<")
+        // HARDCODED PATTERNS
+        .replace("<NAME>", "&lt;NAME&gt;")
+        .replace("<1280", "&lt;1280")
+        .replace("<40%", "&lt;40%")
 }
 
 fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {

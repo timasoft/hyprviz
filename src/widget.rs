@@ -3840,6 +3840,33 @@ impl ConfigWidget {
             }
             _ => {
                 match category {
+                    "monitor" => {
+                        add_section(
+                            &container,
+                            "Monitors",
+                            "Configure monitors.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Monitors", true);
+                    }
+                    "workspace" => {
+                        add_section(
+                            &container,
+                            "Workspaces",
+                            "Configure workspaces.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Workspace-Rules", true);
+                    }
+                    "animation" => {
+                        add_section(
+                            &container,
+                            "Animations",
+                            "Configure animations.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Animations", true);
+                    }
                     "bind" => {
                         add_section(
                             &container,
@@ -3848,6 +3875,51 @@ impl ConfigWidget {
                             first_section.clone(),
                         );
                         add_guide(&container, "Binds", true);
+                    }
+                    "gesture" => {
+                        add_section(
+                            &container,
+                            "Gestures",
+                            "Configure gestures.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Gestures", true);
+                    }
+                    "windowrule" => {
+                        add_section(
+                            &container,
+                            "Window Rules",
+                            "Configure window rules.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Window-Rules", true);
+                    }
+                    "layerrule" => {
+                        add_section(
+                            &container,
+                            "Layer Rules",
+                            "Configure layer rules.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Layer-Rules", true);
+                    }
+                    "exec" => {
+                        add_section(
+                            &container,
+                            "Execs",
+                            "Configure execs.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Execs", false);
+                    }
+                    "env" => {
+                        add_section(
+                            &container,
+                            "Envs",
+                            "Configure environment variables.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Envs", false);
                     }
                     "top_level" => {
                         add_section(

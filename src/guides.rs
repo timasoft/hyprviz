@@ -60,12 +60,52 @@ pub fn create_guide(name: &str) -> Box {
 
 fn get_content(name: &str) -> Vec<ContentBlock> {
     match name {
+        "Monitors" => {
+            let content = include_str!("../guides/Monitors.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Workspace-Rules" => {
+            let content = include_str!("../guides/Workspace-Rules.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Animations" => {
+            let content = include_str!("../guides/Animations.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
         "Binds" => {
             let content = include_str!("../guides/Binds.md");
             let lines: Vec<&str> = content.lines().collect();
             parse_lines(&lines, name)
         }
-        _ => panic!("Invalid content name"),
+        "Gestures" => {
+            let content = include_str!("../guides/Gestures.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Window-Rules" => {
+            let content = include_str!("../guides/Window-Rules.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Layer-Rules" => {
+            let content = include_str!("../guides/Layer-Rules.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Execs" => {
+            let content = include_str!("../guides/Execs.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Envs" => {
+            let content = include_str!("../guides/Envs.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        name => panic!("Invalid content name: {name}"),
     }
 }
 
