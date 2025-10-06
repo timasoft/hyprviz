@@ -240,15 +240,22 @@ pub fn find_all_profiles() -> Option<Vec<String>> {
     }
 }
 
+/// Expands all `source = <path>` occurrences in file `entry_path` recursively from str
+pub fn expand_source_str(entry_path: &Path, entry: &str) -> Result<String, Box<dyn Error>> {
+    let mut visited = HashSet::new();
+    expand_file_recursive(entry_path, &mut visited, entry)
+}
+
 /// Expand all `source = <path>` occurrences in file `entry_path` recursively.
 pub fn expand_source(entry_path: &Path) -> Result<String, Box<dyn Error>> {
     let mut visited = HashSet::new();
-    expand_file_recursive(entry_path, &mut visited)
+    expand_file_recursive(entry_path, &mut visited, "")
 }
 
 fn expand_file_recursive(
     path: &Path,
     visited: &mut HashSet<PathBuf>,
+    entry: &str,
 ) -> Result<String, Box<dyn Error>> {
     let resolved = expand_tilde(path)?;
     let canonical = resolved
@@ -263,15 +270,19 @@ fn expand_file_recursive(
         .into());
     }
 
-    let content = fs::read_to_string(&resolved)
-        .map_err(|e| format!("failed to read {}: {}", resolved.display(), e))?;
+    let content = if entry.is_empty() {
+        fs::read_to_string(&resolved)
+            .map_err(|e| format!("failed to read {}: {}", resolved.display(), e))?
+    } else {
+        entry.to_string()
+    };
 
     let mut out = String::with_capacity(content.len());
 
     for line in content.lines() {
         if let Some(include_path_str) = parse_source_line(line) {
             let include_path = resolve_relative(&include_path_str, &resolved);
-            let included_text = expand_file_recursive(&include_path, visited)
+            let included_text = expand_file_recursive(&include_path, visited, "")
                 .map_err(|e| format!("while including {}: {}", include_path.display(), e))?;
             out.push_str(&included_text);
             out.push('\n');
@@ -390,6 +401,44 @@ pub fn resolve_relative(p: &str, base_file: &Path) -> PathBuf {
     }
 }
 
+pub fn parse_top_level_options(config_str: &str, raw: bool) -> Vec<(String, String)> {
+    let mut options = Vec::new();
+    let mut brace_depth: usize = 0;
+
+    for line in config_str.lines() {
+        let trimmed_line = line.trim_start();
+
+        if trimmed_line.is_empty() || trimmed_line.starts_with('#') {
+            continue;
+        }
+
+        let closing_braces_count = trimmed_line.chars().filter(|&c| c == '}').count();
+        let opening_braces_count = trimmed_line.chars().filter(|&c| c == '{').count();
+
+        brace_depth += opening_braces_count;
+        brace_depth = brace_depth.saturating_sub(closing_braces_count);
+
+        if brace_depth == 0
+            && let Some(eq_pos) = trimmed_line.find('=')
+        {
+            let key = trimmed_line[..eq_pos].trim();
+            if key.contains('{') || key.contains(':') {
+                continue;
+            }
+
+            let value = trimmed_line[eq_pos + 1..].trim_start();
+
+            if raw {
+                options.push((line.to_string(), "".to_string()));
+            } else {
+                options.push((key.to_string(), value.to_string()));
+            }
+        }
+    }
+
+    options
+}
+
 /// Expand `~` in a Path if present.
 pub fn expand_tilde(path: &Path) -> Result<PathBuf, Box<dyn Error>> {
     let s = path.to_string_lossy();
@@ -407,6 +456,247 @@ fn expand_tilde_str(s: &str) -> String {
         }
     }
     s.to_string()
+}
+
+pub fn markdown_to_pango(text: &str, guide_name: &str) -> String {
+    let mut result = String::new();
+    let mut chars = text.chars().peekable();
+    let mut in_bold = false;
+    let mut in_italic = false;
+    let mut in_code = false;
+
+    while let Some(c) = chars.next() {
+        match c {
+            '`' => {
+                if in_code {
+                    if in_bold {
+                        result.push_str("</b>");
+                    }
+                    in_bold = false;
+                    in_code = false;
+                } else {
+                    in_code = true;
+                    in_bold = true;
+                    result.push_str("<b>");
+                }
+            }
+            '*' => {
+                if !in_code
+                    && let Some(next) = chars.peek()
+                    && *next == '*'
+                {
+                    chars.next();
+
+                    if in_bold {
+                        result.push_str("</b>");
+                        in_bold = false;
+                    } else {
+                        result.push_str("<b>");
+                        in_bold = true;
+                    }
+                } else {
+                    result.push('*')
+                }
+            }
+            '_' => {
+                if !in_code {
+                    if in_italic {
+                        result.push_str("</i>");
+                        in_italic = false;
+                    } else {
+                        result.push_str("<i>");
+                        in_italic = true;
+                    }
+                } else {
+                    result.push('_');
+                }
+            }
+            '[' => {
+                if !in_code {
+                    let mut link_text = String::new();
+                    let mut is_link = false;
+                    let mut closing_bracket_found = false;
+
+                    while let Some(&next) = chars.peek() {
+                        if next == ']' {
+                            chars.next();
+                            closing_bracket_found = true;
+                            break;
+                        } else {
+                            link_text.push(chars.next().unwrap());
+                        }
+                    }
+
+                    if closing_bracket_found && chars.peek() == Some(&'(') {
+                        chars.next();
+
+                        let mut url = String::new();
+                        while let Some(&next) = chars.peek() {
+                            if next == ')' {
+                                chars.next();
+                                is_link = true;
+                                break;
+                            } else {
+                                url.push(chars.next().unwrap());
+                            }
+                        }
+
+                        if is_link {
+                            let resolved_url = resolve_hyprwiki_url(&url, guide_name);
+                            result.push_str(&format!(
+                                "<a href=\"{}\">{}</a>",
+                                escape_pango(&resolved_url),
+                                escape_pango(&link_text)
+                            ));
+                        } else {
+                            result.push('[');
+                            result.push_str(&escape_pango(&link_text));
+                            if closing_bracket_found {
+                                result.push(']');
+                            }
+                            result.push('(');
+                            result.push_str(&escape_pango(&url));
+                        }
+                    } else {
+                        result.push('[');
+                        result.push_str(&escape_pango(&link_text));
+                        if closing_bracket_found {
+                            result.push(']');
+                        }
+                    }
+                } else {
+                    result.push('[');
+                }
+            }
+            '<' => {
+                if !in_code
+                    && chars.next_if(|&c| c == 'k').is_some()
+                    && chars.next_if(|&c| c == 'e').is_some()
+                    && chars.next_if(|&c| c == 'y').is_some()
+                    && chars.next_if(|&c| c == '>').is_some()
+                {
+                    let mut key_content = String::new();
+                    while chars.peek().is_some() {
+                        if chars.next_if(|&c| c == '<').is_some()
+                            && chars.next_if(|&c| c == '/').is_some()
+                            && chars.next_if(|&c| c == 'k').is_some()
+                            && chars.next_if(|&c| c == 'e').is_some()
+                            && chars.next_if(|&c| c == 'y').is_some()
+                            && chars.next_if(|&c| c == '>').is_some()
+                        {
+                            break;
+                        }
+
+                        key_content.push(chars.next().unwrap());
+                    }
+
+                    if !in_bold {
+                        result.push_str("<b>");
+                        in_bold = true;
+                    }
+                    result.push_str(&escape_pango(&key_content));
+                    if in_bold {
+                        result.push_str("</b>");
+                        in_bold = false;
+                    }
+                } else {
+                    result.push('<');
+                }
+            }
+            '#' => {
+                if !in_code {
+                    let mut header_level = 1;
+                    while chars.peek() == Some(&'#') {
+                        header_level += 1;
+                        chars.next();
+                    }
+
+                    while chars.peek() == Some(&' ') {
+                        chars.next();
+                    }
+
+                    let mut header_text = String::new();
+                    while let Some(&c) = chars.peek() {
+                        if c == '\n' {
+                            break;
+                        }
+                        header_text.push(chars.next().unwrap());
+                    }
+
+                    let size = match header_level {
+                        1 => "x-large",
+                        2 => "large",
+                        3 => "medium",
+                        _ => "medium",
+                    };
+
+                    result.push_str(&format!(
+                        "<span size=\"{}\" weight=\"bold\">{}</span>",
+                        size,
+                        escape_pango(header_text.trim())
+                    ));
+
+                    while let Some(&c) = chars.peek() {
+                        if c == '\n' {
+                            chars.next();
+                        } else {
+                            break;
+                        }
+                    }
+                } else {
+                    result.push('#');
+                }
+            }
+            _ => {
+                if c == '\n' && in_code {
+                    result.push(' ');
+                } else {
+                    result.push(c);
+                }
+            }
+        }
+    }
+
+    if in_bold {
+        result.push_str("</b>");
+    }
+    if in_italic {
+        result.push_str("</i>");
+    }
+
+    escape_pango(&result)
+}
+
+fn escape_pango(text: &str) -> String {
+    text.replace('&', "&amp;")
+        .replace("<br> ", "\n")
+        .replace("<br>", "\n")
+        .replace(">>", ">&gt;")
+        .replace("<<", "&lt;<")
+        // HARDCODED PATTERNS
+        .replace("<NAME>", "&lt;NAME&gt;")
+        .replace("<1280", "&lt;1280")
+        .replace("<40%", "&lt;40%")
+}
+
+fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {
+    if url.contains("://") {
+        return url.to_string();
+    }
+
+    let base_url = "https://wiki.hypr.land/";
+
+    if let Some(stripped) = url.strip_prefix("../../") {
+        return format!("{}{}", base_url, stripped);
+    } else if let Some(stripped) = url.strip_prefix("../") {
+        return format!("{}Configuring/{}", base_url, stripped);
+    } else if let Some(stripped) = url.strip_prefix("./") {
+        return format!("{}Configuring/{}", base_url, stripped);
+    } else if url.starts_with('#') {
+        return format!("{}Configuring/{}/{}", base_url, guide_name, url);
+    }
+
+    url.to_string()
 }
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";

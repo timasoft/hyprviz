@@ -1,17 +1,24 @@
 use gtk::{
-    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Frame, Justification, Label,
-    Orientation, Popover, ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget,
-    gdk, glib, prelude::*,
+    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander, Frame, Grid,
+    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList,
+    StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use std::{
     cell::RefCell,
     cmp::Ordering,
     collections::{HashMap, VecDeque},
+    fs,
     rc::Rc,
 };
 
-use crate::utils::{MAX_SAFE_INTEGER_F64, compare_versions, get_latest_version};
+use crate::{
+    guides::create_guide,
+    utils::{
+        MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
+        get_latest_version, parse_top_level_options,
+    },
+};
 
 use crate::system_info::*;
 
@@ -751,6 +758,123 @@ fn add_color_option(
     );
 }
 
+fn append_option_row(
+    gtkbox: &gtk::Box,
+    raw: String,
+    name: String,
+    value: String,
+    changed_options: &Rc<RefCell<HashMap<(String, String), String>>>,
+    category: &str,
+) {
+    let boxline = Box::new(Orientation::Horizontal, 5);
+    boxline.set_hexpand(true);
+    boxline.set_margin_top(5);
+    boxline.set_margin_bottom(5);
+    boxline.set_margin_start(5);
+    boxline.set_margin_end(5);
+
+    let name_entry = Entry::new();
+    name_entry.set_text(&name);
+    name_entry.set_margin_top(5);
+    name_entry.set_margin_bottom(5);
+    name_entry.set_margin_start(5);
+    name_entry.set_margin_end(5);
+
+    let changed_options_clone = changed_options.clone();
+    let raw_clone = raw.clone();
+    let category_str = category.to_string();
+
+    name_entry.connect_changed(move |entry| {
+        let mut changes = changed_options_clone.borrow_mut();
+        let new_name = entry.text().to_string();
+        changes.insert(
+            (category_str.clone(), format!("{}_name", raw_clone)),
+            new_name,
+        );
+    });
+
+    boxline.append(&name_entry);
+
+    let equals_label = Label::new(Some("="));
+    equals_label.set_xalign(0.5);
+    boxline.append(&equals_label);
+
+    let value_entry = Entry::new();
+    value_entry.set_text(&value);
+    value_entry.set_margin_top(5);
+    value_entry.set_margin_bottom(5);
+    value_entry.set_margin_start(5);
+    value_entry.set_margin_end(5);
+    value_entry.set_hexpand(true);
+
+    let changed_options_clone = changed_options.clone();
+    let raw_clone = raw.clone();
+    let category_str = category.to_string();
+
+    value_entry.connect_changed(move |entry| {
+        let mut changes = changed_options_clone.borrow_mut();
+        let new_value = entry.text().to_string();
+        changes.insert(
+            (category_str.clone(), format!("{}_value", raw_clone)),
+            new_value,
+        );
+    });
+
+    boxline.append(&value_entry);
+
+    let delete_button = Button::from_icon_name("edit-delete-symbolic");
+    delete_button.set_tooltip_text(Some("Delete this option"));
+    delete_button.set_valign(gtk::Align::Center);
+    delete_button.set_has_frame(false);
+
+    let gtkbox_clone = gtkbox.clone();
+    let category_str = category.to_string();
+    let changed_options_clone = changed_options.clone();
+    let boxline_clone = boxline.clone();
+
+    delete_button.connect_clicked(move |_| {
+        gtkbox_clone.remove(&boxline_clone);
+
+        let mut changes = changed_options_clone.borrow_mut();
+
+        changes.remove(&(category_str.clone(), format!("{}_name", raw)));
+        changes.remove(&(category_str.clone(), format!("{}_value", raw)));
+
+        changes.insert(
+            (category_str.clone(), format!("{}_delete", raw)),
+            "DELETE".to_string(),
+        );
+    });
+
+    boxline.append(&delete_button);
+
+    gtkbox.append(&boxline);
+}
+
+fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
+    let expander = Expander::new(None);
+    expander.set_margin_top(5);
+    expander.set_margin_bottom(10);
+
+    let title_label = Label::new(None);
+    title_label.set_halign(gtk::Align::Start);
+    title_label.add_css_class("heading");
+    title_label.set_markup("Guide");
+
+    expander.set_label_widget(Some(&title_label));
+
+    expander.set_expanded(!default_collapsed);
+
+    let guide_box = create_guide(name);
+    expander.set_child(Some(&guide_box));
+
+    container.append(&expander);
+
+    let frame = Frame::new(None);
+    frame.set_margin_bottom(10);
+    container.append(&frame);
+}
+
 fn update_version_label(label: &Label, repo: &str, version: &str) {
     let latest_version = get_latest_version(repo);
     let version_str = if !latest_version.starts_with("v") {
@@ -759,12 +883,12 @@ fn update_version_label(label: &Label, repo: &str, version: &str) {
         match compare_versions(version, &latest_version) {
             Ordering::Greater => {
                 format!(
-                    "{} (Your version is greater than latest({}))",
+                    "{} (Your version is greater than latest ({}) )",
                     version, latest_version
                 )
             }
             Ordering::Less => {
-                format!("{} (New version available ({}))", version, latest_version)
+                format!("{} (New version available ({}) )", version, latest_version)
             }
             Ordering::Equal => {
                 format!("{} (Your version is up to date)", version)
@@ -832,7 +956,7 @@ fn extract_value(config: &HyprlandConfig, category: &str, name: &str, default: &
 }
 
 impl ConfigWidget {
-    pub fn new(category: &str) -> Self {
+    pub fn new(category: &str, display_name: &str) -> Self {
         let scrolled_window = ScrolledWindow::new();
         scrolled_window.set_vexpand(false);
         scrolled_window.set_propagate_natural_height(true);
@@ -3715,11 +3839,113 @@ impl ConfigWidget {
                 container.append(&info_box);
             }
             _ => {
-                add_section(
-                    &container,
-                    &format!("{category} Settings"),
-                    &format!("Configure {category} behavior."),
-                    first_section.clone(),
+                match category {
+                    "monitor" => {
+                        add_section(
+                            &container,
+                            "Monitors",
+                            "Configure monitors.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Monitors", true);
+                    }
+                    "workspace" => {
+                        add_section(
+                            &container,
+                            "Workspaces",
+                            "Configure workspaces.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Workspace-Rules", true);
+                    }
+                    "animation" => {
+                        add_section(
+                            &container,
+                            "Animations",
+                            "Configure animations.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Animations", true);
+                    }
+                    "bind" => {
+                        add_section(
+                            &container,
+                            "Bindings",
+                            "Configure keybindings.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Binds", true);
+                    }
+                    "gesture" => {
+                        add_section(
+                            &container,
+                            "Gestures",
+                            "Configure gestures.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Gestures", true);
+                    }
+                    "windowrule" => {
+                        add_section(
+                            &container,
+                            "Window Rules",
+                            "Configure window rules.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Window-Rules", true);
+                    }
+                    "layerrule" => {
+                        add_section(
+                            &container,
+                            "Layer Rules",
+                            "Configure layer rules.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Layer-Rules", true);
+                    }
+                    "exec" => {
+                        add_section(
+                            &container,
+                            "Execs",
+                            "Configure execs.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Execs", false);
+                    }
+                    "env" => {
+                        add_section(
+                            &container,
+                            "Envs",
+                            "Configure environment variables.",
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Envs", false);
+                    }
+                    "top_level" => {
+                        add_section(
+                            &container,
+                            "All top-level options",
+                            "Configure behavior for all top-level options.",
+                            first_section.clone(),
+                        );
+                    }
+                    _ => add_section(
+                        &container,
+                        &format!("{display_name} Settings"),
+                        &format!("Configure {display_name} behavior."),
+                        first_section.clone(),
+                    ),
+                }
+
+                let gtkbox = Box::new(Orientation::Vertical, 0);
+                container.append(&gtkbox);
+
+                options.insert(
+                    category.to_string(),
+                    WidgetData {
+                        widget: gtkbox.upcast(),
+                        default: format!("This is a {} as widget", category),
+                    },
                 );
             }
         }
@@ -3733,6 +3959,7 @@ impl ConfigWidget {
     pub fn load_config(
         &self,
         config: &HyprlandConfig,
+        profile: &str,
         category: &str,
         changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
     ) {
@@ -3835,6 +4062,227 @@ impl ConfigWidget {
                         changes.insert((category.clone(), name.clone()), new_value);
                     }
                 });
+            } else if let Some(gtkbox) = widget.downcast_ref::<Box>() {
+                let read_only_str = &format!("This is a read-only {} (from main config)", name);
+
+                let read_only_label = Label::new(Some(read_only_str));
+                read_only_label.set_halign(gtk::Align::Start);
+                read_only_label.set_markup(&format!("<b>{read_only_str}</b>"));
+
+                gtkbox.append(&read_only_label);
+
+                let frame = Frame::new(None);
+                frame.set_margin_top(10);
+
+                gtkbox.append(&frame);
+
+                let read_only_path = get_config_path(false, profile);
+                let rw_path = get_config_path(true, profile);
+
+                let profile_path = if profile == "Default" {
+                    "./hyprviz.conf".to_string()
+                } else {
+                    format!("./hyprviz/{}.conf", profile)
+                };
+
+                let read_only_config_raw = match fs::read_to_string(&read_only_path) {
+                    Ok(read_only_config) => read_only_config
+                        .lines()
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .starts_with(&format!("source = {}", profile_path))
+                        })
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .starts_with(&format!("source ={}", profile_path))
+                        })
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .contains(&format!("source= {}", profile_path))
+                        })
+                        .filter(|line| {
+                            !line
+                                .trim_start()
+                                .starts_with(&format!("source={}", profile_path))
+                        })
+                        .collect::<Vec<&str>>()
+                        .join("\n"),
+                    Err(_) => {
+                        let error_label = Label::new(Some(&format!(
+                            "Error reading {}",
+                            read_only_path.to_string_lossy()
+                        )));
+
+                        error_label.set_markup("<span foreground=\"red\">{read_only_path}</span>");
+                        error_label.set_margin_top(5);
+                        error_label.set_margin_bottom(5);
+                        error_label.set_margin_start(5);
+                        error_label.set_margin_end(5);
+
+                        gtkbox.append(&error_label);
+
+                        String::new()
+                    }
+                };
+
+                let read_only_config =
+                    match expand_source_str(&read_only_path, &read_only_config_raw) {
+                        Ok(read_only_config) => read_only_config,
+                        Err(_) => {
+                            let error_label = Label::new(Some(&format!(
+                                "Error reading {}",
+                                read_only_path.to_string_lossy()
+                            )));
+
+                            error_label
+                                .set_markup("<span foreground=\"red\">{read_only_path}</span>");
+                            error_label.set_margin_top(5);
+                            error_label.set_margin_bottom(5);
+                            error_label.set_margin_start(5);
+                            error_label.set_margin_end(5);
+
+                            gtkbox.append(&error_label);
+
+                            String::new()
+                        }
+                    };
+
+                let parsed_headless_readonly_options =
+                    parse_top_level_options(&read_only_config, false);
+
+                let options_grid = Grid::new();
+                options_grid.set_column_spacing(10);
+                options_grid.set_row_spacing(5);
+                options_grid.set_margin_top(10);
+                options_grid.set_margin_bottom(10);
+                options_grid.set_margin_start(5);
+                options_grid.set_margin_end(5);
+
+                for (row_num, (name, value)) in parsed_headless_readonly_options.iter().enumerate()
+                {
+                    if !name.starts_with(category) && category != "top_level" {
+                        continue;
+                    }
+
+                    let name_label = Label::new(Some(name));
+                    name_label.set_xalign(0.0);
+                    name_label.set_size_request(name_label.width(), 1);
+                    name_label.set_selectable(true);
+
+                    let equals_label = Label::new(Some("="));
+                    equals_label.set_xalign(0.5);
+                    equals_label.set_markup("<b>=</b>");
+
+                    let value_label = Label::new(Some(value));
+                    value_label.set_xalign(0.0);
+                    value_label.set_selectable(true);
+                    value_label.set_wrap(true);
+
+                    let row_num = row_num as i32;
+
+                    options_grid.attach(&name_label, 0, row_num, 1, 1);
+                    options_grid.attach(&equals_label, 1, row_num, 1, 1);
+                    options_grid.attach(&value_label, 2, row_num, 1, 1);
+                }
+
+                let expander = Expander::new(Some("Show read-only options"));
+                expander.set_margin_top(10);
+                expander.set_margin_bottom(10);
+                expander.set_margin_start(5);
+                expander.set_margin_end(5);
+
+                expander.set_child(Some(&options_grid));
+
+                gtkbox.append(&expander);
+
+                let rw_str = &format!("This is a read-write {} (from your profile)", name);
+
+                let rw_label = Label::new(Some(rw_str));
+                rw_label.set_halign(gtk::Align::Start);
+                rw_label.set_margin_top(10);
+                rw_label.set_markup(&format!("<b>{rw_str}</b>"));
+
+                gtkbox.append(&rw_label);
+
+                let frame = Frame::new(None);
+                frame.set_margin_top(10);
+
+                gtkbox.append(&frame);
+
+                let rw_config = match expand_source(&rw_path) {
+                    Ok(rw_config) => rw_config,
+                    Err(_) => {
+                        let error_label = Label::new(Some(&format!(
+                            "Error reading {}",
+                            rw_path.to_string_lossy()
+                        )));
+
+                        error_label.set_markup("<span foreground=\"red\">{rw_path}</span>");
+                        error_label.set_margin_top(5);
+                        error_label.set_margin_bottom(5);
+                        error_label.set_margin_start(5);
+                        error_label.set_margin_end(5);
+
+                        gtkbox.append(&error_label);
+
+                        String::new()
+                    }
+                };
+
+                let create_button = Button::with_label("Create");
+                create_button.set_margin_top(10);
+                create_button.set_margin_bottom(10);
+                create_button.set_margin_start(5);
+                create_button.set_margin_end(5);
+                create_button.set_width_request(256);
+
+                let id_new = Rc::new(RefCell::new(0));
+
+                let gtkbox_clone = gtkbox.clone();
+
+                let changed_options_clone = changed_options.clone();
+
+                let category_string = category.to_string();
+
+                create_button.connect_clicked(move |_| {
+                    let mut id = id_new.borrow_mut();
+                    append_option_row(
+                        &gtkbox_clone,
+                        id.to_string(),
+                        "".to_string(),
+                        "".to_string(),
+                        &changed_options_clone,
+                        &category_string,
+                    );
+                    *id += 1;
+                });
+
+                gtkbox.append(&create_button);
+
+                let parsed_headless_options_raw = parse_top_level_options(&rw_config, true);
+                let parsed_headless_options = parse_top_level_options(&rw_config, false);
+
+                for ((raw, _), (name, value)) in parsed_headless_options_raw
+                    .into_iter()
+                    .zip(parsed_headless_options)
+                {
+                    if name.starts_with(category) || category == "top_level" {
+                        append_option_row(gtkbox, raw, name, value, &changed_options, category);
+                        continue;
+                    }
+
+                    if (category == "bind"
+                        && (name.starts_with("unbind") || name.starts_with("bind")))
+                        || (category == "animation"
+                            && (name.starts_with("animation") || name.starts_with("bezier")))
+                    {
+                        append_option_row(gtkbox, raw, name, value, &changed_options, category);
+                    }
+                    continue;
+                }
             }
         }
     }

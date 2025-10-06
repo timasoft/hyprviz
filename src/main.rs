@@ -12,6 +12,7 @@ use utils::{
 };
 
 mod gui;
+mod guides;
 mod system_info;
 mod utils;
 mod widget;
@@ -149,7 +150,7 @@ fn build_ui(app: &Application) {
 
         let parsed_config = parse_config(&config_str_for_read);
 
-        gui.borrow_mut().load_config(&parsed_config);
+        gui.borrow_mut().load_config(&parsed_config, &profile);
 
         let profiles = find_all_profiles();
         println!("Available profiles: {profiles:?}");
@@ -246,7 +247,7 @@ fn build_ui(app: &Application) {
 
                     let parsed_config = parse_config(&config_str_for_read);
                     glib::MainContext::default().spawn_local(async move {
-                        gui.borrow_mut().load_config(&parsed_config);
+                        gui.borrow_mut().load_config(&parsed_config, &profile_name);
                     });
                 }
             });

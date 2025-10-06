@@ -760,6 +760,26 @@ along with this program; if not, see
 
             let result = atomic_write(&path, &updated_config_str);
 
+            for (category, category_widget) in &self.config_widgets {
+                for widget_data in category_widget.options.values() {
+                    let widget = &widget_data.widget;
+
+                    if let Some(gtkbox) = widget.downcast_ref::<Box>() {
+                        while let Some(child) = gtkbox.first_child() {
+                            gtkbox.remove(&child);
+                        }
+
+                        category_widget.load_config(
+                            &parsed_config,
+                            &profile_name,
+                            category,
+                            self.changed_options.clone(),
+                        );
+                    }
+                }
+            }
+            self.changed_options.clone().borrow_mut().clear();
+
             match result {
                 Ok(()) => {
                     println!("Configuration saved atomically to: {:?}", path);
@@ -807,7 +827,7 @@ along with this program; if not, see
                     if let Ok(config_str) = expand_source(&path_for_read) {
                         let parsed_config = parse_config(&config_str);
 
-                        self.load_config(&parsed_config);
+                        self.load_config(&parsed_config, &profile_name);
                         self.changed_options.clone().borrow_mut().clear();
                     } else {
                         self.custom_error_popup(
@@ -895,7 +915,7 @@ along with this program; if not, see
         );
     }
 
-    pub fn load_config(&mut self, config: &HyprlandConfig) {
+    pub fn load_config(&mut self, config: &HyprlandConfig, profile_name: &str) {
         self.config_widgets.clear();
         self.content_box.set_visible(true);
 
@@ -926,9 +946,9 @@ along with this program; if not, see
         let categories = [
             ("General", "general"),
             ("Decoration", "decoration"),
-            ("Animations", "animations"),
+            ("Animations Settings", "animations"),
             ("Input", "input"),
-            ("Gestures", "gestures"),
+            ("Gestures Settings", "gestures"),
             ("Misc", "misc"),
             ("Bind Settings", "binds"),
             ("Group", "group"),
@@ -940,11 +960,21 @@ along with this program; if not, see
             ("Ecosystem", "ecosystem"),
             ("Experimental", "experimental"),
             ("Debug", "debug"),
+            ("Monitors", "monitor"),
+            ("Workspaces", "workspace"),
+            ("Animations", "animation"),
+            ("Binds", "bind"),
+            ("Gestures", "gesture"),
+            ("Window Rules", "windowrule"),
+            ("Layer Rules", "layerrule"),
+            ("Execs", "exec"),
+            ("Envs", "env"),
+            ("All Top Level", "top_level"),
             ("System Info", "systeminfo"),
         ];
 
         for (display_name, category) in &categories {
-            let widget = ConfigWidget::new(category);
+            let widget = ConfigWidget::new(category, display_name);
             self.stack
                 .add_titled(&widget.scrolled_window, Some(category), display_name);
             self.config_widgets.insert(category.to_string(), widget);
@@ -952,7 +982,7 @@ along with this program; if not, see
 
         for (_, category) in &categories {
             if let Some(widget) = self.config_widgets.get(*category) {
-                widget.load_config(config, category, self.changed_options.clone());
+                widget.load_config(config, profile_name, category, self.changed_options.clone());
             }
         }
 
@@ -964,6 +994,11 @@ along with this program; if not, see
         for (category, widget) in &self.config_widgets {
             for (name, widget_data) in &widget.options {
                 let widget = &widget_data.widget;
+
+                if widget.downcast_ref::<Box>().is_some() {
+                    continue;
+                }
+
                 if let Some(value) = changes.get(&(category.to_string(), name.to_string())) {
                     let formatted_value =
                         if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
@@ -1003,5 +1038,97 @@ along with this program; if not, see
                 }
             }
         }
+
+        let mut names: HashMap<String, String> = HashMap::new();
+        let mut values: HashMap<String, String> = HashMap::new();
+        let mut delete: Vec<String> = Vec::new();
+        for ((_, raw), new) in changes.iter() {
+            if raw.ends_with("_name") {
+                let formatted_raw = raw.strip_suffix("_name").unwrap().to_string();
+                names.insert(formatted_raw.clone(), new.clone());
+            }
+
+            if raw.ends_with("_value") {
+                let formatted_raw = raw.strip_suffix("_value").unwrap().to_string();
+                values.insert(formatted_raw.clone(), new.clone());
+            }
+
+            if raw.ends_with("_delete") {
+                let formatted_raw = raw.strip_suffix("_delete").unwrap().to_string();
+                delete.push(formatted_raw.clone());
+            }
+        }
+
+        let mut lines: Vec<String> = config.to_string().lines().map(String::from).collect();
+
+        let mut delete_tracker = HashMap::new();
+
+        for raw in &delete {
+            *delete_tracker.entry(raw.clone()).or_insert(0) += 1;
+        }
+
+        lines.retain(|line| {
+            let normalized_line = line.trim_start().to_string();
+
+            if let Some(count) = delete_tracker.get_mut(&normalized_line)
+                && *count > 0
+            {
+                *count -= 1;
+                return false;
+            }
+
+            true
+        });
+
+        let mut changed: Vec<String> = Vec::new();
+
+        for ((_, name), _) in changes.iter() {
+            if name.ends_with("_name") || name.ends_with("_value") {
+                let key = name
+                    .strip_suffix("_name")
+                    .or_else(|| name.strip_suffix("_value"))
+                    .unwrap_or(name);
+                if changed.contains(&key.to_string()) {
+                    continue;
+                }
+
+                let has_name = names.contains_key(key);
+                let has_value = values.contains_key(key);
+
+                let mut new_name = names.get(key).cloned().unwrap_or_default();
+                let mut new_value = values.get(key).cloned().unwrap_or_default();
+
+                let mut found = false;
+                for line in &mut lines {
+                    if line.trim_start().starts_with(key)
+                        && let Some((original_name, original_value)) = line.split_once('=')
+                    {
+                        let indent = line
+                            .chars()
+                            .take_while(|c| c.is_whitespace())
+                            .collect::<String>();
+
+                        if !has_name {
+                            new_name = original_name.trim().to_string();
+                        }
+                        if !has_value {
+                            new_value = original_value.trim_start().to_string();
+                        }
+
+                        *line = format!("{}{} = {}", indent, new_name, new_value);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if !found {
+                    lines.push(format!("{} = {}", new_name, new_value));
+                }
+                changed.push(key.to_string());
+            }
+        }
+
+        let new_config = parse_config(&lines.join("\n"));
+        *config = new_config;
     }
 }
