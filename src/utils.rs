@@ -677,6 +677,10 @@ fn escape_pango(text: &str) -> String {
         .replace("<NAME>", "&lt;NAME&gt;")
         .replace("<1280", "&lt;1280")
         .replace("<40%", "&lt;40%")
+        .replace(
+            "{{< relref \"#executing-with-rules\" >}}",
+            "#executing-with-rules",
+        )
 }
 
 fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {

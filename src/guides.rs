@@ -60,6 +60,21 @@ pub fn create_guide(name: &str) -> Box {
 
 fn get_content(name: &str) -> Vec<ContentBlock> {
     match name {
+        "Dispatchers" => {
+            let content = include_str!("../guides/Dispatchers.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Dwindle-Layout" => {
+            let content = include_str!("../guides/Dwindle-Layout.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
+        "Master-Layout" => {
+            let content = include_str!("../guides/Master-Layout.md");
+            let lines: Vec<&str> = content.lines().collect();
+            parse_lines(&lines, name)
+        }
         "Monitors" => {
             let content = include_str!("../guides/Monitors.md");
             let lines: Vec<&str> = content.lines().collect();
@@ -398,6 +413,12 @@ fn create_table_grid(headers: &[String], rows: &[Vec<String>]) -> Grid {
                 .margin_top(3)
                 .margin_bottom(3)
                 .build();
+
+            if col_idx == 0 {
+                label.set_max_width_chars(15);
+                label.set_wrap(true);
+                label.set_wrap_mode(WrapMode::Char);
+            }
 
             grid.attach(&label, col_idx as i32, (row_idx + 1) as i32, 1, 1);
         }
