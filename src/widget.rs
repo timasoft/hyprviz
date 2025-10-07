@@ -3491,6 +3491,7 @@ impl ConfigWidget {
                     "Dwindle is a BSPWM-like layout, where every window on a workspace is a member of a binary tree.",
                     first_section.clone(),
                 );
+                add_guide(&container, "Dwindle-Layout", false);
                 add_bool_option(
                     &container,
                     &mut options,
@@ -3620,6 +3621,7 @@ impl ConfigWidget {
                     "The master layout makes one (or more) window(s) be the “master”, taking (by default) the left part of the screen, and tiles the rest on the right.\nYou can change the orientation on a per-workspace basis if you want to use anything other than the default left/right split.",
                     first_section.clone(),
                 );
+                add_guide(&container, "Master-Layout", true);
                 add_bool_option(
                     &container,
                     &mut options,
@@ -3928,6 +3930,7 @@ impl ConfigWidget {
                             "Configure behavior for all top-level options.",
                             first_section.clone(),
                         );
+                        add_guide(&container, "Dispatchers", true);
                     }
                     _ => add_section(
                         &container,
