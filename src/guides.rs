@@ -341,6 +341,9 @@ fn create_code_frame(language: &str, content: &str) -> Frame {
 
     vbox.append(&header);
 
+    let frame = Frame::builder().build();
+    vbox.append(&frame);
+
     let code_box = Box::builder()
         .orientation(Orientation::Vertical)
         .spacing(0)
