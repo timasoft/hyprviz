@@ -1,0 +1,47 @@
+_version: 2
+file_not_found:
+  en: "File not found"
+creating_failed:
+  en: "Creating failed"
+failed_to_create_the_profile_directory:
+  en: "Failed to create the profile directory"
+the_profile_directory_is_not_a_directory:
+  en: "The profile directory is not a directory"
+reading_failed:
+  en: "Reading failed"
+failed_to_read_the_configuration_file:
+  en: "Failed to read the configuration file"
+creating_included_file_failed:
+  en: "Creating included file failed"
+path_for_included_file_exists_but_is_not_a_regular_file:
+  en: "Path for included file exists but is not a regular file"
+failed_to_create_parent_directory_for:
+  en: "Failed to create parent directory for"
+failed_to_create:
+  en: "Failed to create"
+added_source_line_to:
+  en: "Added 'source = ./hyprviz.conf' to"
+saving_failed:
+  en: "Saving failed"
+failed_to_add_source_line_to:
+  en: "Failed to add 'source = ./hyprviz.conf' to"
+available_profiles:
+  en: "Available profiles"
+loading_config_for_profile:
+  en: "Loading config for profile"
+profile_not_found:
+  en: "Profile not found"
+was_not_found_in_config_folder:
+  en: "was not found in the config folder"
+model_type_error:
+  en: "Model type error"
+the_dropdown_model_is_not_a_string_list:
+  en: "The dropdown model is not a StringList."
+missing_model:
+  en: "Missing model"
+the_dropdown_widget_has_no_model_assigned:
+  en: "The dropdown widget has no model assigned."
+profile_switch_failed:
+  en: "Profile switch failed"
+failed_to_update_config_for_profile:
+  en: "Failed to update config for profile"

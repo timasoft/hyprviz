@@ -1,0 +1,178 @@
+_version: 2
+hyprland_configuration:
+  en: "Hyprland Configuration"
+create_profile:
+  en: "Create Profile"
+delete_profile:
+  en: "Delete Profile"
+clear_backups_files:
+  en: "Clear Backup Files"
+save_hyprviz_config:
+  en: "Save HyprViz Config"
+load_hyprviz_config:
+  en: "Load HyprViz Config"
+copyright:
+  en: "Copyright"
+save:
+  en: "Save"
+undo:
+  en: "Undo"
+profile:
+  en: "Profile"
+enter_profile_name:
+  en: "Enter Profile Name"
+new_profile:
+  en: "New Profile"
+cancel:
+  en: "Cancel"
+# create is for gui.rs and widget.rs
+create:
+  en: "Create"
+invalid_profile_name:
+  en: "Invalid Profile Name"
+profile_name_cannot_be_empty_or_default:
+  en: "Profile name cannot be empty or 'Default'"
+profile_exists:
+  en: "Profile Exists"
+already_exists:
+  en: "already exists"
+reading_failed:
+  en: "Reading failed"
+failed_to_read_the_default_configuration_file:
+  en: "Failed to read the default configuration file"
+failed_to_create_profile:
+  en: "Failed to create profile"
+failed_to_create_profile_file:
+  en: "Failed to create profile file"
+cannot_delete_profile:
+  en: "Cannot delete profile"
+the_default_profile_cannot_be_deleted:
+  en: "The 'Default' profile cannot be deleted"
+are_you_sure_you_want_to_delete_the_profile:
+  en: "Are you sure you want to delete the profile"
+failed_to_delete_profile:
+  en: "Failed to delete profile"
+failed_to_delete_profile_file:
+  en: "Failed to delete profile file"
+no_backup_files:
+  en: "No backup files"
+no_backup_files_found_to_delete:
+  en: "No backup files found to delete"
+clear_backup_files:
+  en: "Clear Backup Files"
+are_you_sure_you_want_to_delete__backup_files:
+  en: Are you sure you want to delete %{n} backup file(s)
+this_operation_cannot_be_undone:
+  en: "This operation cannot be undone"
+failed_to_delete:
+  en: "Failed to delete"
+partial_success:
+  en: "Partial Success"
+deleted__of__backup_files:
+  en: "Deleted %{n} of %{all} backup files"
+errors:
+  en: "Errors"
+success:
+  en: "Success"
+successfully_deleted__backup_files:
+  en: "Successfully deleted %{n} backup file(s)"
+open:
+  en: "Open"
+config_loaded:
+  en: "Config Loaded"
+hyprviz_configuration_loaded_successfully:
+  en: "HyprViz configuration loaded successfully."
+invalid_config:
+  en: "Invalid Config"
+failed_to_parse_the_configuration_file:
+  en: "Failed to parse the configuration file."
+loading_failed:
+  en: "Loading Failed"
+failed_to_read_the_configuration_file:
+  en: "Failed to read the configuration file"
+config_saved:
+  en: "Config Saved"
+hyprviz_configuration_saved_successfully:
+  en: "HyprViz configuration saved successfully."
+saving_failed:
+  en: "Saving Failed"
+failed_to_write_the_configuration_file:
+  en: "Failed to write the configuration file"
+serialization_failed:
+  en: "Serialization Failed"
+failed_to_serialize_the_configuration:
+  en: "Failed to serialize the configuration"
+failed_to_create_hyprviz_config_file:
+  en: "Failed to create hyprviz config file"
+backup_failed:
+  en: "Backup Failed"
+failed_to_create_backup:
+  en: "Failed to create backup"
+configuration_saved_automatically_to:
+  en: "Configuration saved automatically to"
+failed_to_save_the_configuration_automatically:
+  en: "Failed to save the configuration automatically"
+no_changes_to_save:
+  en: "No changes to save"
+configuration_restored_from_backup:
+  en: "Configuration restored from backup"
+reload_failed:
+  en: "Reload Failed"
+failed_to_reload_the_configuration_after_undo:
+  en: "Failed to reload the configuration after undo."
+undo_failed:
+  en: "Undo Failed"
+failed_to_restore_from_backup:
+  en: "Failed to restore from backup"
+no_backup_file_found_save_changes_to_create_a_backup:
+  en: "No backup file found. Save changes to create a backup."
+general:
+  en: "General"
+decoration:
+  en: "Decoration"
+animations_settings:
+  en: "Animations Settings"
+input:
+  en: "Input"
+gestures_settings:
+  en: "Gestures Settings"
+misc:
+  en: "Misc"
+bind_settings:
+  en: "Bind Settings"
+group:
+  en: "Group"
+layouts:
+  en: "Layouts"
+render:
+  en: "Render"
+cursor:
+  en: "Cursor"
+ecosystem:
+  en: "Ecosystem"
+experimental:
+  en: "Experimental"
+debug:
+  en: "Debug"
+monitors:
+  en: "Monitors"
+workspaces:
+  en: "Workspaces"
+animations:
+  en: "Animations"
+binds:
+  en: "Binds"
+gestures:
+  en: "Gestures"
+window_rules:
+  en: "Window Rules"
+layer_rules:
+  en: "Layer Rules"
+execs:
+  en: "Execs"
+envs:
+  en: "Envs"
+all_top_level:
+  en: "All Top Level"
+system_info:
+  en: "System Info"

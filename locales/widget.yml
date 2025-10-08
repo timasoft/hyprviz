@@ -1,0 +1,1468 @@
+_version: 2
+check_if_there_is_a_new_version_available:
+  en: "Check if there is a new version available"
+refresh:
+  en: "Refresh"
+reset_to_default:
+  en: "Reset to default"
+delete_this_option:
+  en: "Delete this option"
+guide:
+  en: "Guide"
+unable_to_get_latest_version:
+  en: "Unable to get latest version"
+your_version_is_greater_than_latest:
+  en: "Your version is greater than latest"
+new_version_available:
+  en: "New version available"
+your_version_is_up_to_date:
+  en: "Your version is up to date"
+
+general_category.first_section_title:
+  en: "General Settings"
+general_category.first_section_description:
+  en: "Configure general behavior."
+
+general_category.layout_section_title:
+  en: "Layout"
+general_category.layout_section_description:
+  en: "Choose the default layout."
+general_category.layout_label:
+  en: "Layout"
+general_category.layout_description:
+  en: "Which layout to use (see the layouts section for information)."
+
+general_category.gaps_section_title:
+  en: "Gaps"
+general_category.gaps_section_description:
+  en: "Change gaps in & out, workspaces."
+general_category.gaps_in_label:
+  en: "Gaps In"
+general_category.gaps_in_description:
+  en: "Gaps between windows, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)"
+general_category.gaps_out_label:
+  en: "Gaps Out"
+general_category.gaps_out_description:
+  en: "Gaps between windows and monitor edges, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)"
+general_category.float_gaps_label:
+  en: "Float Gaps"
+general_category.float_gaps_description:
+  en: "Gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20).\n-1 means default"
+general_category.gaps_workspaces_label:
+  en: "Gaps Workspaces"
+general_category.gaps_workspaces_description:
+  en: "Gaps between workspaces.\nStacks with gaps_out."
+
+general_category.borders_section_title:
+  en: "Borders"
+general_category.borders_section_description:
+  en: "Size, resize, floating..."
+general_category.border_size_label:
+  en: "Border Size"
+general_category.border_size_description:
+  en: "Size of the border around windows"
+general_category.no_border_on_floating_label:
+  en: "No Border on Floating"
+general_category.no_border_on_floating_description:
+  en: "Disable borders for floating windows"
+general_category.resize_on_border_label:
+  en: "Resize on Border"
+general_category.resize_on_border_description:
+  en: "Enables resizing windows by clicking and dragging on borders and gaps"
+general_category.resize_corner_label:
+  en: "Resize Corner"
+general_category.resize_corner_description:
+  en: "Force floating windows to use a specific corner when being resized."
+general_category.extend_border_grab_area_label:
+  en: "Extend Border Grab Area"
+general_category.extend_border_grab_area_description:
+  en: "Extends the area around the border where you can click and drag on, only used when general:resize_on_border is on."
+general_category.hover_icon_on_border_label:
+  en: "Hover Icon on Border"
+general_category.hover_icon_on_border_description:
+  en: "Show a cursor icon when hovering over borders, only used when general:resize_on_border is on."
+
+general_category.snap_section_title:
+  en: "Snap"
+general_category.snap_section_description:
+  en: "Configure snap behavior."
+general_category.snap_enabled_label:
+  en: "Enabled"
+general_category.snap_enabled_description:
+  en: "Enable snapping for floating windows"
+general_category.snap_window_gap_label:
+  en: "Window Gap"
+general_category.snap_window_gap_description:
+  en: "Minimum gap in pixels between windows before snapping"
+general_category.snap_monitor_gap_label:
+  en: "Monitor Gap"
+general_category.snap_monitor_gap_description:
+  en: "Minimum gap in pixels between window and monitor edges before snapping"
+general_category.snap_border_overlap_label:
+  en: "Border Overlap"
+general_category.snap_border_overlap_description:
+  en: "If true, windows snap such that only one border’s worth of space is between them"
+general_category.snap_respect_gaps_label:
+  en: "Respect Gaps"
+general_category.snap_respect_gaps_description:
+  en: "If true, snapping will respect gaps between windows(set in general:gaps_in)"
+
+general_category.other_stuff_section_title:
+  en: "Other stuff"
+general_category.other_stuff_section_description:
+  en: "Some other settings."
+general_category.no_focus_fallback_label:
+  en: "No Focus Fallback"
+general_category.no_focus_fallback_description:
+  en: "If true, will not fall back to the next available window when moving focus in a direction where no window was found."
+general_category.allow_tearing_label:
+  en: "Allow Tearing"
+general_category.allow_tearing_description:
+  en: "Master switch for allowing tearing to occur.\nSee the Hyprland's Tearing page."
+
+general_category.colors_section_title:
+  en: "Colors"
+general_category.colors_section_description:
+  en: "Change borders colors."
+general_category.inactive_border_label:
+  en: "Inactive Border Color"
+general_category.inactive_border_description:
+  en: "Border color for inactive windows"
+general_category.active_border_label:
+  en: "Active Border Color"
+general_category.active_border_description:
+  en: "Border color for the active window"
+general_category.nogroup_border_label:
+  en: "No Group Border Color"
+general_category.nogroup_border_description:
+  en: "Inactive border color for window that cannot be added to a group (see denywindowfromgroup dispatcher)"
+general_category.nogroup_border_active_label:
+  en: "No Group Active Border Color"
+general_category.nogroup_border_active_description:
+  en: "Active border color for window that cannot be added to a group"
+
+decoration_category.window_decoration_section_title:
+  en: "Window Decoration"
+decoration_category.window_decoration_section_description:
+  en: "Configure window appearance."
+decoration_category.rounding_label:
+  en: "Rounding"
+decoration_category.rounding_description:
+  en: "Rounded corners' radius (in layout px)"
+decoration_category.rounding_power_label:
+  en: "Rounding Power"
+decoration_category.rounding_power_description:
+  en: "Adjusts the curve used for rounding corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle.\n[2.0 - 10.0]"
+decoration_category.active_opacity_label:
+  en: "Active Opacity"
+decoration_category.active_opacity_description:
+  en: "Opacity of active windows.\n[0.0 - 1.0]"
+decoration_category.inactive_opacity_label:
+  en: "Inactive Opacity"
+decoration_category.inactive_opacity_description:
+  en: "Opacity of inactive windows.\n[0.0 - 1.0]"
+decoration_category.fullscreen_opacity_label:
+  en: "Fullscreen Opacity"
+decoration_category.fullscreen_opacity_description:
+  en: "Opacity of fullscreen windows.\n[0.0 - 1.0]"
+decoration_category.dim_inactive_label:
+  en: "Dim Inactive"
+decoration_category.dim_inactive_description:
+  en: "Enables dimming of inactive windows"
+decoration_category.dim_strength_label:
+  en: "Dim Strength"
+decoration_category.dim_strength_description:
+  en: "How much inactive windows should be dimmed.\n[0.0 - 1.0]"
+decoration_category.dim_special_label:
+  en: "Dim Special"
+decoration_category.dim_special_description:
+  en: "How much to dim the rest of the screen by when a special workspace is open.\n[0.0 - 1.0]"
+decoration_category.dim_around_label:
+  en: "Dim Around"
+decoration_category.dim_around_description:
+  en: "How much the dimaround window rule should dim by.\n[0.0 - 1.0]"
+decoration_category.screen_shader_label:
+  en: "Screen Shader"
+decoration_category.screen_shader_description:
+  en: "A path to a custom shader to be applied at the end of rendering.\nSee examples/screenShader.frag for an example."
+decoration_category.border_part_of_window_label:
+  en: "Border Part of Window"
+decoration_category.border_part_of_window_description:
+  en: "Whether the window border should be a part of the window"
+
+decoration_category.blur_section_title:
+  en: "Blur"
+decoration_category.blur_section_description:
+  en: "Configure blur settings."
+decoration_category.blur_enabled_label:
+  en: "Blur Enabled"
+decoration_category.blur_enabled_description:
+  en: "Enable kawase window background blur"
+decoration_category.blur_size_label:
+  en: "Blur Size"
+decoration_category.blur_size_description:
+  en: "Blur size (distance)"
+decoration_category.blur_passes_label:
+  en: "Blur Passes"
+decoration_category.blur_passes_description:
+  en: "The amount of passes to perform"
+decoration_category.blur_ignore_opacity_label:
+  en: "Blur Ignore Opacity"
+decoration_category.blur_ignore_opacity_description:
+  en: "Make the blur layer ignore the opacity of the window"
+decoration_category.blur_new_optimizations_label:
+  en: "Blur New Optimizations"
+decoration_category.blur_new_optimizations_description:
+  en: "Whether to enable further optimizations to the blur.\nRecommended to leave on, as it will massively improve performance."
+decoration_category.blur_xray_label:
+  en: "Blur X-Ray"
+decoration_category.blur_xray_description:
+  en: "If enabled, floating windows will ignore tiled windows in their blur.\nOnly available if blur_new_optimizations is true.\nWill reduce overhead on floating blur significantly."
+decoration_category.blur_noise_label:
+  en: "Blur Noise"
+decoration_category.blur_noise_description:
+  en: "How much noise to apply.\n[0.0 - 1.0]"
+decoration_category.blur_contrast_label:
+  en: "Blur Contrast"
+decoration_category.blur_contrast_description:
+  en: "Contrast modulation for blur.\n[0.0 - 2.0]"
+decoration_category.blur_brightness_label:
+  en: "Blur Brightness"
+decoration_category.blur_brightness_description:
+  en: "Brightness modulation for blur.\n[0.0 - 2.0]"
+decoration_category.blur_vibrancy_label:
+  en: "Blur Vibrancy"
+decoration_category.blur_vibrancy_description:
+  en: "Increase saturation of blurred colors.\n[0.0 - 1.0]"
+decoration_category.blur_vibrancy_darkness_label:
+  en: "Blur Vibrancy Darkness"
+decoration_category.blur_vibrancy_darkness_description:
+  en: "How strong the effect of vibrancy is on dark areas .\n[0.0 - 1.0]"
+decoration_category.blur_special_label:
+  en: "Blur Special"
+decoration_category.blur_special_description:
+  en: "Whether to blur behind the special workspace (note: expensive)"
+decoration_category.blur_popups_label:
+  en: "Blur Popups"
+decoration_category.blur_popups_description:
+  en: "Whether to blur popups (e.g.\nright-click menus)"
+decoration_category.blur_popups_ignorealpha_label:
+  en: "Blur Popups Ignore Alpha"
+decoration_category.blur_popups_ignorealpha_description:
+  en: "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]"
+decoration_category.blur_input_methods_label:
+  en: "Input Methods"
+decoration_category.blur_input_methods_description:
+  en: "Whether to blur input methods (e.g.\nfcitx5)"
+decoration_category.input_methods_ignorealpha_label:
+  en: "Input Methods Ignore Alpha"
+decoration_category.input_methods_ignorealpha_description:
+  en: "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]"
+
+decoration_category.shadow_section_title:
+  en: "Shadow"
+decoration_category.shadow_section_description:
+  en: "Configure shadow settings."
+decoration_category.shadow_enabled_label:
+  en: "Shadow Enabled"
+decoration_category.shadow_enabled_description:
+  en: "Enable drop shadows on windows"
+decoration_category.shadow_range_label:
+  en: "Shadow Range"
+decoration_category.shadow_range_description:
+  en: "Shadow range (“size”) in layout px"
+decoration_category.shadow_render_power_label:
+  en: "Shadow Render Power"
+decoration_category.shadow_render_power_description:
+  en: "In what power to render the falloff (more power, the faster the falloff).\n[1 - 4]"
+decoration_category.shadow_sharp_label:
+  en: "Shadow Sharp"
+decoration_category.shadow_sharp_description:
+  en: "If enabled, will make the shadows sharp, akin to an infinite render power"
+decoration_category.shadow_ignore_window_label:
+  en: "Shadow Ignore Window"
+decoration_category.shadow_ignore_window_description:
+  en: "If true, the shadow will not be rendered behind the window itself, only around it."
+decoration_category.shadow_color_label:
+  en: "Shadow Color"
+decoration_category.shadow_color_description:
+  en: "Shadow’s color.\nAlpha dictates shadow’s opacity."
+decoration_category.shadow_color_inactive_label:
+  en: "Shadow Color Inactive"
+decoration_category.shadow_color_inactive_description:
+  en: "Inactive shadow color.\n(if not set, will fall back to color)"
+decoration_category.shadow_offset_label:
+  en: "Shadow Offset"
+decoration_category.shadow_offset_description:
+  en: "Shadow’s rendering offset.\n[x, y]"
+decoration_category.shadow_scale_label:
+  en: "Shadow Scale"
+decoration_category.shadow_scale_description:
+  en: "Shadow’s scale.\n[0.0 - 1.0]"
+
+animations_category.animation_settings_section_title:
+  en: "Animation Settings"
+animations_category.animation_settings_section_description:
+  en: "Configure animation behavior."
+animations_category.enabled_label:
+  en: "Enable Animations"
+animations_category.enabled_description:
+  en: "Enables animations."
+animations_category.workspace_wraparound_label:
+  en: "Workspace Wraparound"
+animations_category.workspace_wraparound_description:
+  en: "Enable workspace wraparound, causing directional workspace animations to animate as if the first and last workspaces were adjacent"
+
+input_category.input_settings_section_title:
+  en: "Input Settings"
+input_category.input_settings_section_description:
+  en: "Configure input devices."
+input_category.keyboard_settings_section_title:
+  en: "Keyboard Settings"
+input_category.keyboard_settings_section_description:
+  en: "Configure keyboard behavior."
+input_category.kb_model_label:
+  en: "Keyboard Model"
+input_category.kb_model_description:
+  en: "Appropriate XKB keymap parameter."
+input_category.kb_layout_label:
+  en: "Keyboard Layout"
+input_category.kb_layout_description:
+  en: "Appropriate XKB keymap parameter"
+input_category.kb_variant_label:
+  en: "Keyboard Variant"
+input_category.kb_variant_description:
+  en: "Appropriate XKB keymap parameter"
+input_category.kb_options_label:
+  en: "Keyboard Options"
+input_category.kb_options_description:
+  en: "Appropriate XKB keymap parameter"
+input_category.kb_rules_label:
+  en: "Keyboard Rules"
+input_category.kb_rules_description:
+  en: "Appropriate XKB keymap parameter"
+input_category.kb_file_label:
+  en: "Keyboard File"
+input_category.kb_file_description:
+  en: "If you prefer, you can use a path to your custom .xkb file."
+input_category.numlock_by_default_label:
+  en: "Numlock by Default"
+input_category.numlock_by_default_description:
+  en: "Engage numlock by default."
+input_category.resolve_binds_by_sym_label:
+  en: "Resolve Binds by Symbol"
+input_category.resolve_binds_by_sym_description:
+  en: "Determines how keybinds act when multiple layouts are used.\nIf false, keybinds will always act as if the first specified layout is active.\nIf true, keybinds specified by symbols are activated when you type the respective symbol with the current layout."
+input_category.repeat_rate_label:
+  en: "Repeat Rate"
+input_category.repeat_rate_description:
+  en: "The repeat rate for held-down keys, in repeats per second."
+input_category.repeat_delay_label:
+  en: "Repeat Delay"
+input_category.repeat_delay_description:
+  en: "Delay before a held-down key is repeated, in milliseconds."
+
+input_category.mouse_settings_section_title:
+  en: "Mouse Settings"
+input_category.mouse_settings_section_description:
+  en: "Configure mouse behavior."
+input_category.sensitivity_label:
+  en: "Sensitivity"
+input_category.sensitivity_description:
+  en: "Sets the mouse input sensitivity.\nValue is clamped to the range -1.0 to 1.0."
+input_category.accel_profile_label:
+  en: "Acceleration Profile"
+input_category.accel_profile_description:
+  en: "Sets the cursor acceleration profile.\nCan be one of adaptive, flat.\nCan also be custom, see below.\nLeave empty to use libinput's default mode for your input device."
+input_category.force_no_accel_label:
+  en: "Force No Acceleration"
+input_category.force_no_accel_description:
+  en: "Force no cursor acceleration.\nThis bypasses most of your pointer settings to get as raw of a signal as possible.\nEnabling this is not recommended due to potential cursor desynchronization."
+input_category.left_handed_label:
+  en: "Left Handed"
+input_category.left_handed_description:
+  en: "Switches RMB and LMB"
+input_category.scroll_method_label:
+  en: "Scroll Method"
+input_category.scroll_method_description:
+  en: "Sets the scroll method.\nCan be one of 2fg (2 fingers), edge, on_button_down, no_scroll."
+input_category.scroll_button_label:
+  en: "Scroll Button"
+input_category.scroll_button_description:
+  en: "Sets the scroll button.\nHas to be an int, cannot be a string.\nCheck wev if you have any doubts regarding the ID.\n0 means default."
+input_category.scroll_button_lock_label:
+  en: "Scroll Button Lock"
+input_category.scroll_button_lock_description:
+  en: "If the scroll button lock is enabled, the button does not need to be held down.\nPressing and releasing the button toggles the button lock, which logically holds the button down or releases it.\nWhile the button is logically held down, motion events are converted to scroll events."
+input_category.scroll_factor_label:
+  en: "Scroll Factor"
+input_category.scroll_factor_description:
+  en: "Multiplier added to scroll movement for external mice.\nNote that there is a separate setting for touchpad scroll_factor."
+input_category.natural_scroll_label:
+  en: "Natural Scroll"
+input_category.natural_scroll_description:
+  en: "Inverts scrolling direction.\nWhen enabled, scrolling moves content directly, rather than manipulating a scrollbar."
+input_category.follow_mouse_label:
+  en: "Follow Mouse"
+input_category.follow_mouse_description:
+  en: "Specify if and how cursor movement should affect window focus.\nIgnore - Cursor movement will not change focus,\nAlways - Cursor movement will always change focus to the window under the cursor,\nDetach - Cursor focus will be detached from keyboard focus,\nSeparate - Cursor focus will be completely separate from keyboard focus."
+input_category.follow_mouse_threshold_label:
+  en: "Follow Mouse Threshold"
+input_category.follow_mouse_threshold_description:
+  en: "The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused.\nWorks only with follow_mouse = 1."
+input_category.scroll_points_label:
+  en: "Scroll Points"
+input_category.scroll_points_description:
+  en: "Sets the scroll acceleration profile, when accel_profile is set to custom.\nHas to be in the form <step> <points>.\nLeave empty to have a flat scroll curve."
+
+input_category.focus_settings_section_title:
+  en: "Focus Settings"
+input_category.focus_settings_section_description:
+  en: "Configure focus behavior."
+input_category.focus_on_close_label:
+  en: "Focus on Close"
+input_category.focus_on_close_description:
+  en: "Controls the window focus behavior when a window is closed.\nNext window candidate - focus will shift to the next window candidate,\nWindow under cursor - focus will shift to the window under the cursor."
+input_category.mouse_refocus_label:
+  en: "Mouse Refocus"
+input_category.mouse_refocus_description:
+  en: "If disabled, mouse focus won't switch to the hovered window unless the mouse crosses a window boundary when follow_mouse=1."
+input_category.float_switch_override_focus_label:
+  en: "Float Switch Override Focus"
+input_category.float_switch_override_focus_description:
+  en: "If enabled, focus will change to the window under the cursor when changing from tiled-to-floating and vice versa.\nFocus follows mouse - focus will also follow mouse on float-to-float switches."
+input_category.special_fallthrough_label:
+  en: "Special Fallthrough"
+input_category.special_fallthrough_description:
+  en: "If enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace."
+
+input_category.touchpad_settings_section_title:
+  en: "Touchpad Settings"
+input_category.touchpad_settings_section_description:
+  en: "Configure touchpad behavior."
+input_category.touchpad_disable_while_typing_label:
+  en: "Disable While Typing"
+input_category.touchpad_disable_while_typing_description:
+  en: "Disables the touchpad while typing."
+input_category.touchpad_natural_scroll_label:
+  en: "Natural Scroll"
+input_category.touchpad_natural_scroll_description:
+  en: "Inverts scrolling direction.\nWhen enabled, scrolling moves content directly, rather than manipulating a scrollbar."
+input_category.touchpad_scroll_factor_label:
+  en: "Scroll Factor"
+input_category.touchpad_scroll_factor_description:
+  en: "Multiplier applied to the amount of scroll movement."
+input_category.touchpad_middle_button_emulation_label:
+  en: "Middle Button Emulation"
+input_category.touchpad_middle_button_emulation_description:
+  en: "Sending LMB and RMB simultaneously will be interpreted as a middle click.\nThis disables any touchpad area that would normally send a middle click based on location.\nlibinput#middle-button-emulation"
+input_category.touchpad_tap_button_map_label:
+  en: "Tap Button Map"
+input_category.touchpad_tap_button_map_description:
+  en: "Sets the tap button mapping for touchpad button emulation.\nCan be one of lrm (default) or lmr (Left, Middle, Right Buttons).\n[lrm/lmr]"
+input_category.touchpad_clickfinger_behavior_label:
+  en: "Clickfinger Behavior"
+input_category.touchpad_clickfinger_behavior_description:
+  en: "Button presses with 1, 2, or 3 fingers will be mapped to LMB, RMB, and MMB respectively.\nThis disables interpretation of clicks based on location on the touchpad.\nlibinput#clickfinger-behavior"
+input_category.touchpad_tap_to_click_label:
+  en: "Tap to Click"
+input_category.touchpad_tap_to_click_description:
+  en: "Tapping on the touchpad with 1, 2, or 3 fingers will send LMB, RMB, and MMB respectively."
+input_category.touchpad_drag_lock_label:
+  en: "Drag Lock"
+input_category.touchpad_drag_lock_description:
+  en: "Drag_lock When enabled, lifting the finger off while dragging will not drop the dragged item.\nlibinput#tap-and-drag."
+input_category.touchpad_tap_and_drag_label:
+  en: "Tap and Drag"
+input_category.touchpad_tap_and_drag_description:
+  en: "Sets the tap and drag mode for the touchpad"
+input_category.touchpad_flip_x_label:
+  en: "Flip X"
+input_category.touchpad_flip_x_description:
+  en: "Inverts the horizontal movement of the touchpad"
+input_category.touchpad_flip_y_label:
+  en: "Flip Y"
+input_category.touchpad_flip_y_description:
+  en: "Inverts the vertical movement of the touchpad"
+input_category.touchpad_drag_3fg_label:
+  en: "Drag 3FG"
+input_category.touchpad_drag_3fg_description:
+  en: "Enables three finger drag,\nlibinput#drag-3fg"
+
+input_category.touchscreen_settings_section_title:
+  en: "Touchscreen Settings"
+input_category.touchscreen_settings_section_description:
+  en: "Configure touchscreen behavior."
+input_category.touchdevice_transform_label:
+  en: "Transform"
+input_category.touchdevice_transform_description:
+  en: "Transform the input from touchdevices.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees"
+input_category.touchdevice_output_label:
+  en: "Output"
+input_category.touchdevice_output_description:
+  en: "The monitor to bind touch devices.\nThe default is auto-detection.\nTo stop auto-detection, use an empty string or the “[[Empty]]” value."
+input_category.touchdevice_enabled_label:
+  en: "Enabled"
+input_category.touchdevice_enabled_description:
+  en: "Whether input is enabled for touch devices."
+
+input_category.virtual_keyboard_settings_section_title:
+  en: "Virtual Keyboard Settings"
+input_category.virtual_keyboard_settings_section_description:
+  en: "Configure virtual keyboard behavior."
+input_category.virtualkeyboard_share_states_label:
+  en: "Share States"
+input_category.virtualkeyboard_share_states_description:
+  en: "Unify key down states and modifier states with other keyboards."
+input_category.virtualkeyboard_release_pressed_on_close_label:
+  en: "Release Pressed on Close"
+input_category.virtualkeyboard_release_pressed_on_close_description:
+  en: "Release all pressed keys by virtual keyboard on close."
+
+input_category.tablet_settings_section_title:
+  en: "Tablet Settings"
+input_category.tablet_settings_section_description:
+  en: "Configure tablet behavior."
+input_category.tablet_transform_label:
+  en: "Transform"
+input_category.tablet_transform_description:
+  en: "Transform the input from tablets.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees"
+input_category.tablet_output_label:
+  en: "Output"
+input_category.tablet_output_description:
+  en: "The monitor to bind tablets.\nCan be current or a monitor name.\nLeave empty to map across all monitors."
+input_category.tablet_region_position_label:
+  en: "Region Position"
+input_category.tablet_region_position_description:
+  en: "Position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors.\n[x, y]"
+input_category.tablet_absolute_position_label:
+  en: "Absolute Position"
+input_category.tablet_absolute_position_description:
+  en: "Whether to treat the region_position as an absolute position in monitor layout.\nOnly applies when output is empty."
+input_category.tablet_region_size_label:
+  en: "Region Size"
+input_category.tablet_region_size_description:
+  en: "Size of the mapped region.\nWhen this variable is set, tablet input will be mapped to the region.\n[0, 0] or invalid size means unset.\n[x, y]"
+input_category.tablet_relative_input_label:
+  en: "Relative Input"
+input_category.tablet_relative_input_description:
+  en: "Whether the input should be relative"
+input_category.tablet_left_handed_label:
+  en: "Left Handed"
+input_category.tablet_left_handed_description:
+  en: "If enabled, the tablet will be rotated 180 degrees"
+input_category.tablet_active_area_size_label:
+  en: "Active Area Size"
+input_category.tablet_active_area_size_description:
+  en: "Size of tablet’s active area in mm\n[x, y]"
+input_category.tablet_active_area_position_label:
+  en: "Active Area Position"
+input_category.tablet_active_area_position_description:
+  en: "Position of the active area in mm\n[x, y]"
+
+input_category.miscellaneous_input_settings_section_title:
+  en: "Miscellaneous Input Settings"
+input_category.miscellaneous_input_settings_section_description:
+  en: "Other input-related settings."
+input_category.off_window_axis_events_label:
+  en: "Off Window Axis Events"
+input_category.off_window_axis_events_description:
+  en: "Handles axis events around a focused window.\nFakes pointer coordinates - fakes pointer coordinates to the closest point inside the window,\nWarps the cursor - warps the cursor to the closest point inside the window"
+input_category.emulate_discrete_scroll_label:
+  en: "Emulate Discrete Scroll"
+input_category.emulate_discrete_scroll_description:
+  en: "Emulates discrete scrolling from high resolution scrolling events.\nNon-standard events only - enables handling of non-standard events only,\nForce enable all events - force enables all scroll wheel events to be handled"
+
+gestures_category.gesture_settings_section_title:
+  en: "Gesture Settings"
+gestures_category.gesture_settings_section_description:
+  en: "Configure gesture behavior."
+gestures_category.workspace_swipe_distance_label:
+  en: "Workspace Swipe Distance"
+gestures_category.workspace_swipe_distance_description:
+  en: "In px, the distance of the touchpad gesture"
+gestures_category.workspace_swipe_touch_label:
+  en: "Workspace Swipe Touch"
+gestures_category.workspace_swipe_touch_description:
+  en: "Enable workspace swiping from the edge of a touchscreen"
+gestures_category.workspace_swipe_invert_label:
+  en: "Workspace Swipe Invert"
+gestures_category.workspace_swipe_invert_description:
+  en: "Invert the direction (touchpad only)"
+gestures_category.workspace_swipe_touch_invert_label:
+  en: "Workspace Swipe Touch Invert"
+gestures_category.workspace_swipe_touch_invert_description:
+  en: "Invert the direction (touchscreen only)"
+gestures_category.workspace_swipe_min_speed_to_force_label:
+  en: "Workspace Swipe Min Speed to Force"
+gestures_category.workspace_swipe_min_speed_to_force_description:
+  en: "Minimum speed in px per timepoint to force the change ignoring cancel_ratio.\nSetting to 0 will disable this mechanic."
+gestures_category.workspace_swipe_cancel_ratio_label:
+  en: "Workspace Swipe Cancel Ratio"
+gestures_category.workspace_swipe_cancel_ratio_description:
+  en: "How much the swipe has to proceed in order to commence it.\n(0.7 -> if > 0.7 * distance, switch, if less, revert)\n[0.0 - 1.0]"
+gestures_category.workspace_swipe_create_new_label:
+  en: "Workspace Swipe Create New"
+gestures_category.workspace_swipe_create_new_description:
+  en: "Whether a swipe right on the last workspace should create a new one."
+gestures_category.workspace_swipe_direction_lock_label:
+  en: "Workspace Swipe Direction Lock"
+gestures_category.workspace_swipe_direction_lock_description:
+  en: "If enabled, switching direction will be locked when you swipe past the direction_lock_threshold (touchpad only)."
+gestures_category.workspace_swipe_direction_lock_threshold_label:
+  en: "Workspace Swipe Direction Lock Threshold"
+gestures_category.workspace_swipe_direction_lock_threshold_description:
+  en: "In px, the distance to swipe before direction lock activates (touchpad only)."
+gestures_category.workspace_swipe_forever_label:
+  en: "Workspace Swipe Forever"
+gestures_category.workspace_swipe_forever_description:
+  en: "If enabled, swiping will not clamp at the neighboring workspaces but continue to the further ones."
+gestures_category.workspace_swipe_use_r_label:
+  en: "Workspace Swipe Use R"
+gestures_category.workspace_swipe_use_r_description:
+  en: "If enabled, swiping will use the r prefix instead of the m prefix for finding workspaces."
+gestures_category.close_max_timeout_label:
+  en: "Close Max Timeout"
+gestures_category.close_max_timeout_description:
+  en: "Timeout for closing windows with the close gesture, in ms."
+
+group_category.group_settings_section_title:
+  en: "Group Settings"
+group_category.group_settings_section_description:
+  en: "Configure group behavior."
+group_category.auto_group_label:
+  en: "Auto Group"
+group_category.auto_group_description:
+  en: "Whether new windows will be automatically grouped into the focused unlocked group.\nNote: if you want to disable auto_group only for specific windows, use the “group barred” window rule instead."
+group_category.insert_after_current_label:
+  en: "Insert After Current"
+group_category.insert_after_current_description:
+  en: "Whether new windows in a group spawn after current or at group tail"
+group_category.focus_removed_window_label:
+  en: "Focus Removed Window"
+group_category.focus_removed_window_description:
+  en: "Whether Hyprland should focus on the window that has just been moved out of the group"
+group_category.drag_into_group_label:
+  en: "Drag Into Group"
+group_category.drag_into_group_description:
+  en: "Whether dragging a window into a unlocked group will merge them.\nOnly into groupbar - only when dragging into the groupbar."
+group_category.merge_groups_on_drag_label:
+  en: "Merge Groups on Drag"
+group_category.merge_groups_on_drag_description:
+  en: "Whether window groups can be dragged into other groups"
+group_category.merge_groups_on_groupbar_label:
+  en: "Merge Groups on Groupbar"
+group_category.merge_groups_on_groupbar_description:
+  en: "Whether one group will be merged with another when dragged into its groupbar"
+group_category.merge_floated_into_tiled_on_groupbar_label:
+  en: "Merge Floated Into Tiled on Groupbar"
+group_category.merge_floated_into_tiled_on_groupbar_description:
+  en: "Whether dragging a floating window into a tiled window groupbar will merge them"
+group_category.group_on_movetoworkspace_label:
+  en: "Group On MoveToWorkspace"
+group_category.group_on_movetoworkspace_description:
+  en: "Whether using movetoworkspace[silent] will merge the window into the workspace’s solitary unlocked group"
+group_category.border_active_label:
+  en: "Active Border Color"
+group_category.border_active_description:
+  en: "Active group border color"
+group_category.border_inactive_label:
+  en: "Inactive Border Color"
+group_category.border_inactive_description:
+  en: "Inactive (out of focus) group border color"
+group_category.border_locked_active_label:
+  en: "Locked Active Border Color"
+group_category.border_locked_active_description:
+  en: "Active locked group border color"
+group_category.border_locked_inactive_label:
+  en: "Locked Inactive Border Color"
+group_category.border_locked_inactive_description:
+  en: "Inactive locked group border color"
+
+group_category.groupbar_settings_section_title:
+  en: "Groupbar Settings"
+group_category.groupbar_settings_section_description:
+  en: "Configure groupbar behavior."
+group_category.groupbar_enabled_label:
+  en: "Enabled"
+group_category.groupbar_enabled_description:
+  en: "Enables groupbars"
+group_category.groupbar_font_family_label:
+  en: "Font Family"
+group_category.groupbar_font_family_description:
+  en: "Font used to display groupbar titles, use misc:font_family if not specified"
+group_category.groupbar_font_size_label:
+  en: "Font Size"
+group_category.groupbar_font_size_description:
+  en: "Font size of groupbar title"
+group_category.font_weight_active_label:
+  en: "Font Weight Active"
+group_category.font_weight_active_description:
+  en: "Font weight of active groupbar title.\nAn integer between 100 and 1000, or one of the following presets: thin\nultralight\nlight\nsemilight\nbook\nnormal\nmedium\nsemibold\nbold\nultrabold\nheavy\nultraheavy"
+group_category.font_weight_inactive_label:
+  en: "Font Weight Inactive"
+group_category.font_weight_inactive_description:
+  en: "Font weight of inactive groupbar title.\nAn integer between 100 and 1000, or one of the following presets: thin\nultralight\nlight\nsemilight\nbook\nnormal\nmedium\nsemibold\nbold\nultrabold\nheavy\nultraheavy"
+group_category.groupbar_gradients_label:
+  en: "Gradients"
+group_category.groupbar_gradients_description:
+  en: "Enables gradients"
+group_category.groupbar_height_label:
+  en: "Height"
+group_category.groupbar_height_description:
+  en: "Height of the groupbar"
+group_category.groupbar_indicator_gap_label:
+  en: "Indicator Gap"
+group_category.groupbar_indicator_gap_description:
+  en: "Height of gap between groupbar indicator and title"
+group_category.groupbar_indicator_height_label:
+  en: "Indicator Height"
+group_category.groupbar_indicator_height_description:
+  en: "Height of the groupbar indicator"
+group_category.groupbar_stacked_label:
+  en: "Stacked"
+group_category.groupbar_stacked_description:
+  en: "Render the groupbar as a vertical stack"
+group_category.groupbar_priority_label:
+  en: "Priority"
+group_category.groupbar_priority_description:
+  en: "Sets the decoration priority for groupbars"
+group_category.groupbar_render_titles_label:
+  en: "Render Titles"
+group_category.groupbar_render_titles_description:
+  en: "Whether to render titles in the group bar decoration"
+group_category.groupbar_text_offset_label:
+  en: "Text Offset"
+group_category.groupbar_text_offset_description:
+  en: "Adjust vertical position for titles"
+group_category.groupbar_scrolling_label:
+  en: "Scrolling"
+group_category.groupbar_scrolling_description:
+  en: "Whether scrolling in the groupbar changes group active window"
+group_category.groupbar_rounding_label:
+  en: "Rounding"
+group_category.groupbar_rounding_description:
+  en: "How much to round the indicator"
+group_category.groupbar_rounding_power_label:
+  en: "Rounding Power"
+group_category.groupbar_rounding_power_description:
+  en: "Rounding power of groupbar corners (2 is a circle)."
+group_category.groupbar_gradient_rounding_label:
+  en: "Gradient Rounding"
+group_category.groupbar_gradient_rounding_description:
+  en: "How much to round the gradients"
+group_category.groupbar_round_only_edges_label:
+  en: "Round Only Edges"
+group_category.groupbar_round_only_edges_description:
+  en: "Round only the indicator edges of the entire groupbar"
+group_category.groupbar_gradient_round_only_edges_label:
+  en: "Gradient Round Only Edges"
+group_category.groupbar_gradient_round_only_edges_description:
+  en: "Round only the gradient edges of the entire groupbar"
+group_category.groupbar_text_color_label:
+  en: "Text Color"
+group_category.groupbar_text_color_description:
+  en: "Controls the group bar text color"
+group_category.groupbar_text_color_inactive_label:
+  en: "Inactive Text Color"
+group_category.groupbar_text_color_inactive_description:
+  en: "Color for inactive windows’ titles in the groupbar (if unset, defaults to text_color)"
+group_category.groupbar_text_color_locked_active_label:
+  en: "Locked Active Text Color"
+group_category.groupbar_text_color_locked_active_description:
+  en: "Color for the active window’s title in a locked group (if unset, defaults to text_color)"
+group_category.groupbar_text_color_locked_inactive_label:
+  en: "Inactive Locked Text Color"
+group_category.groupbar_text_color_locked_inactive_description:
+  en: "Color for inactive windows’ titles in locked groups (if unset, defaults to text_color_inactive)"
+group_category.groupbar_col_active_label:
+  en: "Active Color"
+group_category.groupbar_col_active_description:
+  en: "Active group border color"
+group_category.groupbar_col_inactive_label:
+  en: "Inactive Color"
+group_category.groupbar_col_inactive_description:
+  en: "Inactive (out of focus) group border color"
+group_category.groupbar_col_locked_active_label:
+  en: "Locked Active Color"
+group_category.groupbar_col_locked_active_description:
+  en: "Active locked group border color"
+group_category.groupbar_col_locked_inactive_label:
+  en: "Locked Inactive Color"
+group_category.groupbar_col_locked_inactive_description:
+  en: "Inactive locked group border color"
+group_category.groupbar_gaps_in_label:
+  en: "Gaps In"
+group_category.groupbar_gaps_in_description:
+  en: "Gap size between gradients"
+group_category.groupbar_gaps_out_label:
+  en: "Gaps Out"
+group_category.groupbar_gaps_out_description:
+  en: "Gap size between gradients and window"
+group_category.groupbar_keep_upper_gap_label:
+  en: "Keep Upper Gap"
+group_category.groupbar_keep_upper_gap_description:
+  en: "Add or remove upper gap"
+
+misc_category.miscellaneous_settings_section_title:
+  en: "Miscellaneous Settings"
+misc_category.miscellaneous_settings_section_description:
+  en: "Configure miscellaneous behavior."
+misc_category.disable_hyprland_logo_label:
+  en: "Disable Hyprland Logo"
+misc_category.disable_hyprland_logo_description:
+  en: "Disables the random Hyprland logo / anime girl background.\n:("
+misc_category.disable_splash_rendering_label:
+  en: "Disable Splash Rendering"
+misc_category.disable_splash_rendering_description:
+  en: "Disables the Hyprland splash rendering.\n(requires a monitor reload to take effect)"
+misc_category.col_splash_label:
+  en: "Splash Color"
+misc_category.col_splash_description:
+  en: "Changes the color of the splash text (requires a monitor reload to take effect)."
+misc_category.font_family_label:
+  en: "Font Family"
+misc_category.font_family_description:
+  en: "Set the global default font to render the text including debug fps/notification, config error messages and etc., selected from system fonts."
+misc_category.splash_font_family_label:
+  en: "Splash Font Family"
+misc_category.splash_font_family_description:
+  en: "Changes the font used to render the splash text, selected from system fonts (requires a monitor reload to take effect)."
+misc_category.force_default_wallpaper_label:
+  en: "Force Default Wallpaper"
+misc_category.force_default_wallpaper_description:
+  en: "Enforce any of the 3 default wallpapers.\n-1 - random, 0 or 1 - disables the anime background, 2 - enables anime background.\n[-1/0/1/2]"
+misc_category.vfr_label:
+  en: "VFR"
+misc_category.vfr_description:
+  en: "Controls the VFR status of Hyprland.\nHeavily recommended to leave enabled to conserve resources."
+misc_category.vrr_label:
+  en: "VRR"
+misc_category.vrr_description:
+  en: "Controls the VRR (Adaptive Sync) of your monitors."
+misc_category.mouse_move_enables_dpms_label:
+  en: "Mouse Move Enables DPMS"
+misc_category.mouse_move_enables_dpms_description:
+  en: "If DPMS is set to off, wake up the monitors if the mouse moves."
+misc_category.key_press_enables_dpms_label:
+  en: "Key Press Enables DPMS"
+misc_category.key_press_enables_dpms_description:
+  en: "If DPMS is set to off, wake up the monitors if a key is pressed."
+misc_category.name_vk_after_proc_label:
+  en: "Name VK After Proc"
+misc_category.name_vk_after_proc_description:
+  en: "Name virtual keyboards after the processes that create them. E.g. /usr/bin/fcitx5 will have hl-virtual-keyboard-fcitx5."
+misc_category.always_follow_on_dnd_label:
+  en: "Always Follow on DnD"
+misc_category.always_follow_on_dnd_description:
+  en: "Will make mouse focus follow the mouse when drag and dropping.\nRecommended to leave it enabled, especially for people using focus follows mouse at 0."
+misc_category.layers_hog_keyboard_focus_label:
+  en: "Layers Hog Keyboard Focus"
+misc_category.layers_hog_keyboard_focus_description:
+  en: "If true, will make keyboard-interactive layers keep their focus on mouse move (e.g.\nwofi, bemenu)"
+misc_category.animate_manual_resizes_label:
+  en: "Animate Manual Resizes"
+misc_category.animate_manual_resizes_description:
+  en: "If true, will animate manual window resizes/moves"
+misc_category.animate_mouse_windowdragging_label:
+  en: "Animate Mouse Window Dragging"
+misc_category.animate_mouse_windowdragging_description:
+  en: "If true, will animate windows being dragged by mouse, note that this can cause weird behavior on some curves"
+misc_category.disable_autoreload_label:
+  en: "Disable Autoreload"
+misc_category.disable_autoreload_description:
+  en: "If true, the config will not reload automatically on save, and instead needs to be reloaded with hyprctl reload.\nMight save on battery."
+misc_category.enable_swallow_label:
+  en: "Enable Swallow"
+misc_category.enable_swallow_description:
+  en: "Enable window swallowing"
+misc_category.swallow_regex_label:
+  en: "Swallow Regex"
+misc_category.swallow_regex_description:
+  en: "The class regex to be used for windows that should be swallowed (usually, a terminal).\nTo know more about the list of regex which can be used use this cheatsheet."
+misc_category.swallow_exception_regex_label:
+  en: "Swallow Exception Regex"
+misc_category.swallow_exception_regex_description:
+  en: "The title regex to be used for windows that should not be swallowed by the windows specified in swallow_regex (e.g.\nwev).\nThe regex is matched against the parent (e.g.\nKitty) window's title on the assumption that it changes to whatever process it's running."
+misc_category.focus_on_activate_label:
+  en: "Focus on Activate"
+misc_category.focus_on_activate_description:
+  en: "Whether Hyprland should focus an app that requests to be focused (an activate request)"
+misc_category.mouse_move_focuses_monitor_label:
+  en: "Mouse Move Focuses Monitor"
+misc_category.mouse_move_focuses_monitor_description:
+  en: "Whether mouse moving into a different monitor should focus it"
+misc_category.allow_session_lock_restore_label:
+  en: "Allow Session Lock Restore"
+misc_category.allow_session_lock_restore_description:
+  en: "If true, will allow you to restart a lockscreen app in case it crashes (red screen of death)"
+misc_category.session_lock_xray_label:
+  en: "Session Lock Xray"
+misc_category.session_lock_xray_description:
+  en: "If true, keep rendering workspaces below your lockscreen"
+misc_category.background_color_label:
+  en: "Background Color"
+misc_category.background_color_description:
+  en: "Change the background color.\n(requires enabled disable_hyprland_logo)"
+misc_category.close_special_on_empty_label:
+  en: "Close Special on Empty"
+misc_category.close_special_on_empty_description:
+  en: "Close the special workspace if the last window is removed"
+misc_category.new_window_takes_over_fullscreen_label:
+  en: "New Window Takes Over Fullscreen"
+misc_category.new_window_takes_over_fullscreen_description:
+  en: "If there is a fullscreen or maximized window, decide whether a new tiled window opened should replace it, stay behind or disable the fullscreen/maximized state."
+misc_category.exit_window_retains_fullscreen_label:
+  en: "Exit Window Retains Fullscreen"
+misc_category.exit_window_retains_fullscreen_description:
+  en: "If true, closing a fullscreen window makes the next focused window fullscreen."
+misc_category.initial_workspace_tracking_label:
+  en: "Initial Workspace Tracking"
+misc_category.initial_workspace_tracking_description:
+  en: "If enabled, windows will open on the workspace they were invoked on.\nPersistent - all children too"
+misc_category.middle_click_paste_label:
+  en: "Middle Click Paste"
+misc_category.middle_click_paste_description:
+  en: "Whether to enable middle-click-paste (aka primary selection)"
+misc_category.render_unfocused_fps_label:
+  en: "Render Unfocused FPS"
+misc_category.render_unfocused_fps_description:
+  en: "The maximum limit for renderunfocused windows' fps in the background (see also Window-Rules - renderunfocused)"
+misc_category.disable_xdg_env_checks_label:
+  en: "Disable XDG Environment Checks"
+misc_category.disable_xdg_env_checks_description:
+  en: "Disable the warning if XDG environment is externally managed"
+misc_category.disable_hyprland_qtutils_check_label:
+  en: "Disable Hyprland Qtutils Check"
+misc_category.disable_hyprland_qtutils_check_description:
+  en: "Disable the warning if hyprland-qtutils is not installed"
+misc_category.lockdead_screen_delay_label:
+  en: "Lock Dead Screen Delay"
+misc_category.lockdead_screen_delay_description:
+  en: "Delay after which the “lockdead” screen will appear in case a lockscreen app fails to cover all the outputs (5 seconds max)"
+misc_category.enable_anr_dialog_label:
+  en: "Enable ANR Dialog"
+misc_category.enable_anr_dialog_description:
+  en: "Whether to enable the ANR (app not responding) dialog when your apps hang"
+misc_category.anr_missed_pings_label:
+  en: "ANR Missed Pings"
+misc_category.anr_missed_pings_description:
+  en: "Number of missed pings before showing the ANR dialog"
+misc_category.screencopy_force_8b_label:
+  en: "Force 8-bit color for screencopy"
+misc_category.screencopy_force_8b_description:
+  en: "Forces 8 bit screencopy. (fixes apps that don't understand 10bit)"
+misc_category.disable_scale_notification_label:
+  en: "Disable Scale Notification"
+misc_category.disable_scale_notification_description:
+  en: "Disables notification popup when a monitor fails to set a suitable scale and falls back to suggested."
+
+binds_category.bind_settings_section_title:
+  en: "Bind Settings"
+binds_category.bind_settings_section_description:
+  en: "Configure keybinding behavior."
+binds_category.pass_mouse_when_bound_label:
+  en: "Pass Mouse When Bound"
+binds_category.pass_mouse_when_bound_description:
+  en: "If disabled, will not pass the mouse events to apps / dragging windows around if a keybind has been triggered."
+binds_category.scroll_event_delay_label:
+  en: "Scroll Event Delay"
+binds_category.scroll_event_delay_description:
+  en: "In ms, how many ms to wait after a scroll event to allow passing another one for the binds."
+binds_category.workspace_back_and_forth_label:
+  en: "Workspace Back and Forth"
+binds_category.workspace_back_and_forth_description:
+  en: "If enabled, an attempt to switch to the currently focused workspace will instead switch to the previous workspace."
+binds_category.hide_special_on_workspace_change_label:
+  en: "Hide Special on Workspace Change"
+binds_category.hide_special_on_workspace_change_description:
+  en: "If enabled, changing the active workspace (including to itself) will hide the special workspace on the monitor where the newly active workspace resides."
+binds_category.allow_workspace_cycles_label:
+  en: "Allow Workspace Cycles"
+binds_category.allow_workspace_cycles_description:
+  en: "If enabled, workspaces don't forget their previous workspace, so cycles can be created."
+binds_category.workspace_center_on_label:
+  en: "Workspace Center On"
+binds_category.workspace_center_on_description:
+  en: "Whether switching workspaces should center the cursor on the workspace (Off) or on the last active window for that workspace (On)."
+binds_category.focus_preferred_method_label:
+  en: "Focus Preferred Method"
+binds_category.focus_preferred_method_description:
+  en: "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.\nHistory - recent have priority,\nLength - longer shared edges have priority."
+binds_category.ignore_group_lock_label:
+  en: "Ignore Group Lock"
+binds_category.ignore_group_lock_description:
+  en: "If enabled, dispatchers like moveintogroup, moveoutofgroup and movewindoworgroup will ignore lock per group."
+binds_category.movefocus_cycles_fullscreen_label:
+  en: "Movefocus Cycles Fullscreen"
+binds_category.movefocus_cycles_fullscreen_description:
+  en: "If enabled, when on a fullscreen window, movefocus will cycle fullscreen, if not, it will move the focus in a direction."
+binds_category.movefocus_cycles_groupfirst_label:
+  en: "Movefocus Cycles Groupfirst"
+binds_category.movefocus_cycles_groupfirst_description:
+  en: "If enabled, when in a grouped window, movefocus will cycle windows in the groups first, then at each ends of tabs, it’ll move on to other windows/groups."
+binds_category.disable_keybind_grabbing_label:
+  en: "Disable Keybind Grabbing"
+binds_category.disable_keybind_grabbing_description:
+  en: "If enabled, apps that request keybinds to be disabled (e.g.\nVMs) will not be able to do so."
+binds_category.window_direction_monitor_fallback_label:
+  en: "Window Direction Monitor Fallback"
+binds_category.window_direction_monitor_fallback_description:
+  en: "If enabled, moving a window or focus over the edge of a monitor with a direction will move it to the next monitor in that direction."
+binds_category.allow_pin_fullscreen_label:
+  en: "Allow Pin Fullscreen"
+binds_category.allow_pin_fullscreen_description:
+  en: "If enabled, Allow fullscreen to pinned windows, and restore their pinned status afterwards."
+binds_category.drag_threshold_label:
+  en: "Drag Threshold"
+binds_category.drag_threshold_description:
+  en: "Movement threshold in pixels for window dragging and c/g bind flags.\n0 to disable and grab on mousedown."
+
+xwayland_category.xwayland_settings_section_title:
+  en: "XWayland Settings"
+xwayland_category.xwayland_settings_section_description:
+  en: "Configure XWayland behavior."
+xwayland_category.enabled_label:
+  en: "Enabled"
+xwayland_category.enabled_description:
+  en: "Allow running applications using X11."
+xwayland_category.use_nearest_neighbor_label:
+  en: "Use Nearest Neighbor"
+xwayland_category.use_nearest_neighbor_description:
+  en: "Uses the nearest neighbor filtering for xwayland apps, making them pixelated rather than blurry."
+xwayland_category.force_zero_scaling_label:
+  en: "Force Zero Scaling"
+xwayland_category.force_zero_scaling_description:
+  en: "Forces a scale of 1 on xwayland windows on scaled displays."
+xwayland_category.create_abstract_socket_label:
+  en: "Create Abstract Socket"
+xwayland_category.create_abstract_socket_description:
+  en: "Create the abstract Unix domain socket for XWayland connections.\n(XWayland restart is required for changes to take effect; Linux only)"
+
+opengl_category.opengl_settings_section_title:
+  en: "OpenGL Settings"
+opengl_category.opengl_settings_section_description:
+  en: "Configure OpenGL behavior."
+opengl_category.nvidia_anti_flicker_label:
+  en: "Nvidia Anti Flicker"
+opengl_category.nvidia_anti_flicker_description:
+  en: "Reduces flickering on nvidia at the cost of possible frame drops on lower-end GPUs.\nOn non-nvidia, this is ignored."
+
+render_category.render_settings_section_title:
+  en: "Render Settings"
+render_category.render_settings_section_description:
+  en: "Configure render behavior."
+render_category.direct_scanout_label:
+  en: "Direct Scanout"
+render_category.direct_scanout_description:
+  en: "Enables direct scanout.\nDirect scanout attempts to reduce lag when there is only one fullscreen application on a screen (e.g.\ngame).\nIt is also recommended to set this to false if the fullscreen application shows graphical glitches.\nAuto - on with content type 'game'"
+render_category.expand_undersized_textures_label:
+  en: "Expand Undersized Textures"
+render_category.expand_undersized_textures_description:
+  en: "Whether to expand undersized textures along the edge, or rather stretch the entire texture."
+render_category.xp_mode_label:
+  en: "XP Mode"
+render_category.xp_mode_description:
+  en: "Disables back buffer and bottom layer rendering."
+render_category.ctm_animation_label:
+  en: "CTM Animation"
+render_category.ctm_animation_description:
+  en: "Whether to enable a fade animation for CTM changes (hyprsunset).\n'Auto' disables them on Nvidia."
+render_category.cm_fs_passthrough_label:
+  en: "CM FS Passthrough"
+render_category.cm_fs_passthrough_description:
+  en: "Passthrough color settings for fullscreen apps when possible."
+render_category.cm_enabled_label:
+  en: "CM Enabled"
+render_category.cm_enabled_description:
+  en: "Whether the color management pipeline should be enabled or not (requires a restart of Hyprland to fully take effect)"
+render_category.send_content_type_label:
+  en: "Send Content Type"
+render_category.send_content_type_description:
+  en: "Report content type to allow monitor profile autoswitch (may result in a black screen during the switch)."
+render_category.cm_auto_hdr_label:
+  en: "CM Auto HDR"
+render_category.cm_auto_hdr_description:
+  en: "Auto-switch to hdr mode when fullscreen app is in hdr.\n'cm_fs_passthrough' can switch to hdr even when this setting is off."
+render_category.new_render_scheduling_label:
+  en: "New Render Scheduling"
+render_category.new_render_scheduling_description:
+  en: "Automatically uses triple buffering when needed, improves FPS on underpowered devices."
+
+cursor_category.cursor_settings_section_title:
+  en: "Cursor Settings"
+cursor_category.cursor_settings_section_description:
+  en: "Configure cursor behavior."
+cursor_category.sync_gsettings_theme_label:
+  en: "Sync GSettings Theme"
+cursor_category.sync_gsettings_theme_description:
+  en: "Sync xcursor theme with gsettings, it applies cursor-theme and cursor-size on theme load to gsettings making most CSD gtk based clients use same xcursor theme and size."
+cursor_category.invisible_label:
+  en: "Invisible"
+cursor_category.invisible_description:
+  en: "Don't render cursors."
+cursor_category.no_hardware_cursors_label:
+  en: "No Hardware Cursors"
+cursor_category.no_hardware_cursors_description:
+  en: "Disables hardware cursors.\nAuto - disable when tearing."
+cursor_category.no_break_fs_vrr_label:
+  en: "No Break FS VRR"
+cursor_category.no_break_fs_vrr_description:
+  en: "Disables scheduling new frames on cursor movement for fullscreen apps with VRR enabled to avoid framerate spikes (may require no_hardware_cursors enabled).\nauto - on with content type 'game'."
+cursor_category.min_refresh_rate_label:
+  en: "Min Refresh Rate"
+cursor_category.min_refresh_rate_description:
+  en: "Minimum refresh rate for cursor movement when no_break_fs_vrr is active.\nSet to minimum supported refresh rate or higher."
+cursor_category.hotspot_padding_label:
+  en: "Hotspot Padding"
+cursor_category.hotspot_padding_description:
+  en: "The padding, in logical px, between screen edges and the cursor."
+cursor_category.inactive_timeout_label:
+  en: "Inactive Timeout"
+cursor_category.inactive_timeout_description:
+  en: "In seconds, after how many seconds of cursor's inactivity to hide it.\nSet to 0 for never."
+cursor_category.no_warps_label:
+  en: "No Warps"
+cursor_category.no_warps_description:
+  en: "If true, will not warp the cursor in many cases (focusing, keybinds, etc)."
+cursor_category.persistent_warps_label:
+  en: "Persistent Warps"
+cursor_category.persistent_warps_description:
+  en: "When a window is refocused, the cursor returns to its last position relative to that window."
+cursor_category.warp_on_change_workspace_label:
+  en: "Warp on Change Workspace"
+cursor_category.warp_on_change_workspace_description:
+  en: "Move the cursor to the last focused window after changing the workspace.\nForce - ignores cursor:no_warps option."
+cursor_category.warp_on_toggle_special_label:
+  en: "Warp on Toggle Special"
+cursor_category.warp_on_toggle_special_description:
+  en: "Move the cursor to the last focused window when toggling a special workspace.\nForce - ignores cursor:no_warps option."
+cursor_category.default_monitor_label:
+  en: "Default Monitor"
+cursor_category.default_monitor_description:
+  en: "The name of a default monitor for the cursor to be set to on startup."
+cursor_category.zoom_factor_label:
+  en: "Zoom Factor"
+cursor_category.zoom_factor_description:
+  en: "The factor to zoom by around the cursor.\nLike a magnifying glass."
+cursor_category.zoom_rigid_label:
+  en: "Zoom Rigid"
+cursor_category.zoom_rigid_description:
+  en: "Whether the zoom should follow the cursor rigidly (cursor is always centered if it can be) or loosely."
+cursor_category.enable_hyprcursor_label:
+  en: "Enable Hyprcursor"
+cursor_category.enable_hyprcursor_description:
+  en: "Whether to enable hyprcursor support."
+cursor_category.hide_on_key_press_label:
+  en: "Hide on Key Press"
+cursor_category.hide_on_key_press_description:
+  en: "Hides the cursor when you press any key until the mouse is moved."
+cursor_category.hide_on_touch_label:
+  en: "Hide on Touch"
+cursor_category.hide_on_touch_description:
+  en: "Hides the cursor when the last input was a touch input until a mouse input is done."
+cursor_category.use_cpu_buffer_label:
+  en: "Use CPU Buffer"
+cursor_category.use_cpu_buffer_description:
+  en: "Makes HW cursors use a CPU buffer.\nRequired on Nvidia to have HW cursors.\nAuto is nvidia only."
+cursor_category.warp_back_after_non_mouse_input_label:
+  en: "Warp Back After Non-Mouse Input"
+cursor_category.warp_back_after_non_mouse_input_description:
+  en: "Warp the cursor back to where it was after using a non-mouse input to move it, and then returning back to mouse."
+
+ecosystem_category.ecosystem_settings_section_title:
+  en: "Ecosystem Settings"
+ecosystem_category.ecosystem_settings_section_description:
+  en: "Configure ecosystem behavior."
+ecosystem_category.no_update_news_label:
+  en: "No Update News"
+ecosystem_category.no_update_news_description:
+  en: "Disable the popup that shows up when you update hyprland to a new version."
+ecosystem_category.no_donation_nag_label:
+  en: "No Donation Nag"
+ecosystem_category.no_donation_nag_description:
+  en: "Disable the popup that shows up twice a year encouraging to donate."
+ecosystem_category.enforce_permissions_label:
+  en: "Enforce Permissions"
+ecosystem_category.enforce_permissions_description:
+  en: "Whether to enable Hyprland's permission control."
+
+experimental_category.experimental_settings_section_title:
+  en: "Experimental Settings"
+experimental_category.experimental_settings_section_description:
+  en: "Configure experimental behavior."
+experimental_category.xx_color_management_v4_label:
+  en: "XX Color Management v4"
+experimental_category.xx_color_management_v4_description:
+  en: "Enable color management protocol"
+
+debug_category.debug_settings_section_title:
+  en: "Debug Settings"
+debug_category.debug_settings_section_description:
+  en: "Configure debug behavior."
+debug_category.overlay_label:
+  en: "Overlay"
+debug_category.overlay_description:
+  en: "Print the debug performance overlay.\nDisable VFR for accurate results."
+debug_category.damage_blink_label:
+  en: "Damage Blink (epilepsy warning!) "
+debug_category.damage_blink_description:
+  en: "Flash areas updated with damage tracking."
+debug_category.disable_logs_label:
+  en: "Disable Logs"
+debug_category.disable_logs_description:
+  en: "Disable logging to a file."
+debug_category.disable_time_label:
+  en: "Disable Time"
+debug_category.disable_time_description:
+  en: "Disables time logging."
+debug_category.damage_tracking_label:
+  en: "Damage Tracking. Do not change."
+debug_category.damage_tracking_description:
+  en: "Redraw only the needed bits of the display.\nDo not change."
+debug_category.enable_stdout_logs_label:
+  en: "Enable Stdout Logs"
+debug_category.enable_stdout_logs_description:
+  en: "Enables logging to stdout."
+debug_category.manual_crash_label:
+  en: "Manual Crash"
+debug_category.manual_crash_description:
+  en: "Set to 1 and then back to 0 to crash Hyprland."
+debug_category.suppress_errors_label:
+  en: "Suppress Errors"
+debug_category.suppress_errors_description:
+  en: "If true, do not display config file parsing errors."
+debug_category.disable_scale_checks_label:
+  en: "Disable Scale Checks"
+debug_category.disable_scale_checks_description:
+  en: "Disables verification of the scale factors.\nWill result in pixel alignment and rounding errors."
+debug_category.error_limit_label:
+  en: "Error Limit"
+debug_category.error_limit_description:
+  en: "Limits the number of displayed config file parsing errors."
+debug_category.error_position_label:
+  en: "Error Position"
+debug_category.error_position_description:
+  en: "Sets the position of the error bar."
+debug_category.colored_stdout_logs_label:
+  en: "Colored Stdout Logs"
+debug_category.colored_stdout_logs_description:
+  en: "Enables colors in the stdout logs."
+debug_category.pass_label:
+  en: "Pass"
+debug_category.pass_description:
+  en: "Enables render pass debugging."
+debug_category.full_cm_proto_label:
+  en: "Full CM Proto"
+debug_category.full_cm_proto_description:
+  en: "Claims support for all cm proto features (requires restart)."
+
+layouts_category.layout_settings_section_title:
+  en: "Layout Settings"
+layouts_category.layout_settings_section_description:
+  en: "Configure layout behavior."
+layouts_category.dwindle_layout_section_title:
+  en: "Dwindle Layout"
+layouts_category.dwindle_layout_section_description:
+  en: "Dwindle is a BSPWM-like layout, where every window on a workspace is a member of a binary tree."
+layouts_category.dwindle_pseudotile_label:
+  en: "Pseudotile"
+layouts_category.dwindle_pseudotile_description:
+  en: "Enable pseudotiling.\nPseudotiled windows retain their floating size when tiled."
+layouts_category.dwindle_force_split_label:
+  en: "Force Split"
+layouts_category.dwindle_force_split_description:
+  en: "Dwindle layout split direction."
+layouts_category.dwindle_preserve_split_label:
+  en: "Preserve Split"
+layouts_category.dwindle_preserve_split_description:
+  en: "If enabled, the split (side/top) will not change regardless of what happens to the container."
+layouts_category.dwindle_smart_split_label:
+  en: "Smart Split"
+layouts_category.dwindle_smart_split_description:
+  en: "If enabled, allows a more precise control over the window split direction based on the cursor’s position.\nThe window is conceptually divided into four triangles, and cursor’s triangle determines the split direction.\nThis feature also turns on preserve_split."
+layouts_category.dwindle_smart_resizing_label:
+  en: "Smart Resizing"
+layouts_category.dwindle_smart_resizing_description:
+  en: "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner).\nElse, it is based on the window’s tiling position."
+layouts_category.dwindle_permanent_direction_override_label:
+  en: "Permanent Direction Override"
+layouts_category.dwindle_permanent_direction_override_description:
+  en: "If enabled, makes the preselect direction persist until either this mode is turned off, another direction is specified, or a non-direction is specified (anything other than l,r,u/t,d/b)"
+layouts_category.dwindle_special_scale_factor_label:
+  en: "Special Scale Factor"
+layouts_category.dwindle_special_scale_factor_description:
+  en: "Specifies the scale factor of windows on the special workspace.\n[0.0 - 1.0]"
+layouts_category.dwindle_split_width_multiplier_label:
+  en: "Split Width Multiplier"
+layouts_category.dwindle_split_width_multiplier_description:
+  en: "Specifies the auto-split width multiplier.\nMultiplying window size is useful on widescreen monitors where window W > H even after several splits."
+layouts_category.dwindle_use_active_for_splits_label:
+  en: "Use Active for Splits"
+layouts_category.dwindle_use_active_for_splits_description:
+  en: "Whether to prefer the active window or the mouse position for splits"
+layouts_category.dwindle_default_split_ratio_label:
+  en: "Default Split Ratio"
+layouts_category.dwindle_default_split_ratio_description:
+  en: "The default split ratio on window open.\n1 means even 50/50 split.\n[0.1 - 1.9]"
+layouts_category.dwindle_split_bias_label:
+  en: "Split Bias"
+layouts_category.dwindle_split_bias_description:
+  en: "Specifies which window will receive the split ratio.\nDirectional - the top or left window."
+layouts_category.precise_mouse_move_label:
+  en: "Precise Mouse Move"
+layouts_category.precise_mouse_move_description:
+  en: "Bindm movewindow will drop the window more precisely depending on where your mouse is."
+layouts_category.single_window_aspect_ratio_label:
+  en: "Single Window Aspect Ratio"
+layouts_category.single_window_aspect_ratio_description:
+  en: "Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio.\nA value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with padding to the sides.\nx y"
+layouts_category.single_window_aspect_ratio_tolerance_label:
+  en: "Single Window Aspect Ratio Tolerance"
+layouts_category.single_window_aspect_ratio_tolerance_description:
+  en: "Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to adjust the window size.\n[0.0 - 1.0]"
+
+layouts_category.master_layout_section_title:
+  en: "Master Layout"
+layouts_category.master_layout_section_description:
+  en: "The master layout makes one (or more) window(s) be the “master”, taking (by default) the left part of the screen, and tiles the rest on the right.\nYou can change the orientation on a per-workspace basis if you want to use anything other than the default left/right split."
+layouts_category.master_allow_small_split_label:
+  en: "Allow Small Split"
+layouts_category.master_allow_small_split_description:
+  en: "Enable adding additional master windows in a horizontal split style"
+layouts_category.master_special_scale_factor_label:
+  en: "Special Scale Factor"
+layouts_category.master_special_scale_factor_description:
+  en: "The scale of the special workspace windows.\n[0.0 - 1.0]"
+layouts_category.master_mfact_label:
+  en: "Master Factor"
+layouts_category.master_mfact_description:
+  en: "The size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave.\n[0.0 - 1.0]"
+layouts_category.master_new_status_label:
+  en: "New Window Status"
+layouts_category.master_new_status_description:
+  en: "Determines how new windows are added to the layout.\nmaster: new window becomes master;\nslave: new windows are added to slave stack;\ninherit: inherit from focused window"
+layouts_category.master_new_on_top_label:
+  en: "New on Top"
+layouts_category.master_new_on_top_description:
+  en: "Whether a newly open window should be on the top of the stack"
+layouts_category.master_new_on_active_label:
+  en: "New on Active"
+layouts_category.master_new_on_active_description:
+  en: "Before, after: place new window relative to the focused window;\nnone: place new window according to the value of New on Top."
+layouts_category.master_orientation_label:
+  en: "Orientation"
+layouts_category.master_orientation_description:
+  en: "Default placement of the master area"
+layouts_category.master_inherit_fullscreen_label:
+  en: "Inherit Fullscreen"
+layouts_category.master_inherit_fullscreen_description:
+  en: "Inherit fullscreen status when cycling/swapping to another window"
+layouts_category.master_slave_count_for_center_master_label:
+  en: "Slave Count for Center Master"
+layouts_category.master_slave_count_for_center_master_description:
+  en: "When using orientation=center, make the master window centered only when at least this many slave windows are open.\n(Set 0 to always_center_master)"
+layouts_category.center_master_fallback_label:
+  en: "Center Master Fallback"
+layouts_category.center_master_fallback_description:
+  en: "Set fallback for center master when slaves are less than slave_count_for_center_master."
+layouts_category.master_smart_resizing_label:
+  en: "Smart Resizing"
+layouts_category.master_smart_resizing_description:
+  en: "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner).\nElse, it is based on the window’s tiling position."
+layouts_category.master_drop_at_cursor_label:
+  en: "Drop at Cursor"
+layouts_category.master_drop_at_cursor_description:
+  en: "When enabled, dragging and dropping windows will put them at the cursor position.\nOtherwise, when dropped at the stack side, they will go to the top/bottom of the stack depending on new_on_top."
+layouts_category.master_always_keep_position_label:
+  en: "Always keep position"
+layouts_category.master_always_keep_position_description:
+  en: "Whether to keep the master window in its configured position when there are no slave windows"
+
+system_info_category.system_info_section_title:
+  en: "System Info"
+system_info_category.system_info_section_description:
+  en: "Displays information about the system."
+system_info_category.kernel_label:
+  en: "Kernel:"
+system_info_category.hyprland_version_label:
+  en: "Hyprland Version:"
+system_info_category.hyprviz_version_label:
+  en: "Hyprviz Version:"
+system_info_category.user_label:
+  en: "User:"
+system_info_category.host_label:
+  en: "Host:"
+system_info_category.cpu_label:
+  en: "CPU:"
+system_info_category.gpu_label:
+  en: "GPU:"
+system_info_category.memory_label:
+  en: "Memory:"
+system_info_category.monitors_label:
+  en: "Monitors:"
+
+monitor_category.monitors_section_title:
+  en: "Monitors"
+monitor_category.monitors_section_description:
+  en: "Configure monitors."
+
+workspace_category.workspaces_section_title:
+  en: "Workspaces"
+workspace_category.workspaces_section_description:
+  en: "Configure workspaces."
+
+animation_category.animations_section_title:
+  en: "Animations"
+animation_category.animations_section_description:
+  en: "Configure animations."
+
+bind_category.binds_section_title:
+  en: "Bindings"
+bind_category.binds_section_description:
+  en: "Configure keybindings."
+
+gesture_category.gestures_section_title:
+  en: "Gestures"
+gesture_category.gestures_section_description:
+  en: "Configure gestures."
+
+windowrule_category.window_rules_section_title:
+  en: "Window Rules"
+windowrule_category.window_rules_section_description:
+  en: "Configure window rules."
+
+layerrule_category.layer_rules_section_title:
+  en: "Layer Rules"
+layerrule_category.layer_rules_section_description:
+  en: "Configure layer rules."
+
+exec_category.execs_section_title:
+  en: "Execs"
+exec_category.execs_section_description:
+  en: "Configure execs."
+
+env_category.envs_section_title:
+  en: "Envs"
+env_category.envs_section_description:
+  en: "Configure environment variables."
+
+top_level_category.top_level_section_title:
+  en: "All top-level options"
+top_level_category.top_level_section_description:
+  en: "Configure behavior for all top-level options."
+
+none_category.none_section_title:
+  en: "%{category_name} Settings"
+none_category.none_section_description:
+  en: "Configure %{category_name} behavior."
+
+
+this_is_a_read_only__from_main_config:
+  en: "This is a read-only %{category_name} from main config"
+error_reading_:
+  en: "Error reading %{path}"
+show_read_only_options:
+  en: "Show read-only options"
+this_is_a_read_write__from_your_profile:
+  en: "This is a read-write %{category_name} (from your profile)"
