@@ -141,7 +141,7 @@ impl ConfigGUI {
         let profile_dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
         profile_dropdown.set_halign(gtk::Align::End);
         profile_dropdown.set_width_request(100);
-        let current_profile_label = Label::new(Some(&format!("{}:", t!("profile"))));
+        let current_profile_label = Label::new(Some(&t!("profile")));
 
         header_bar.pack_end(&save_button);
         header_bar.pack_end(&undo_button);
@@ -193,7 +193,7 @@ impl ConfigGUI {
                 let gui = Rc::clone(&gui_clone);
 
                 let dialog_window = Window::builder()
-                    .title("Create New Profile")
+                    .title(t!("create_new_profile").to_string())
                     .modal(true)
                     .transient_for(&gui.borrow().window)
                     .destroy_with_parent(true)
@@ -248,7 +248,7 @@ impl ConfigGUI {
                     if hyprviz_path.exists() {
                         gui_clone.borrow().custom_error_popup(
                             &t!("profile_exists"),
-                            &format!("'{}' {}", profile_name, &t!("already_exists")),
+                            &t!("profile__already_exists", name = profile_name),
                         );
                         return;
                     }
@@ -259,11 +259,7 @@ impl ConfigGUI {
                         Err(e) => {
                             gui_clone.borrow().custom_error_popup_critical(
                                 &t!("reading_failed"),
-                                &format!(
-                                    "{}: {}",
-                                    &t!("failed_to_read_the_default_configuration_file"),
-                                    e
-                                ),
+                                &t!("failed_to_read_the_default_configuration_file_", error = e),
                             );
                             return;
                         }
@@ -272,7 +268,7 @@ impl ConfigGUI {
                     if let Err(e) = atomic_write(&hyprviz_path, &config_str) {
                         gui_clone.borrow().custom_error_popup(
                             &t!("failed_to_create_profile"),
-                            &format!("{}: {}", &t!("failed_to_create_profile_file"), e),
+                            &t!("failed_to_create_profile_file_", error = e),
                         );
                         return;
                     }
@@ -340,10 +336,9 @@ impl ConfigGUI {
                 dialog_box.set_margin_start(10);
                 dialog_box.set_margin_end(10);
 
-                let label = Label::new(Some(&format!(
-                    "{} '{}'?",
-                    &t!("are_you_sure_you_want_to_delete_the_profile"),
-                    profile_name
+                let label = Label::new(Some(&t!(
+                    "are_you_sure_you_want_to_delete_the_profile_",
+                    name = profile_name
                 )));
                 label.set_wrap(true);
                 label.set_width_chars(45);
@@ -400,7 +395,7 @@ impl ConfigGUI {
                         Err(e) => {
                             gui_clone.borrow().custom_error_popup(
                                 &t!("failed_to_delete_profile"),
-                                &format!("{}: {}", &t!("failed_to_delete_profile_file"), e),
+                                &t!("failed_to_delete_profile_file_", error = e),
                             );
                         }
                     }
@@ -454,7 +449,7 @@ impl ConfigGUI {
             dialog_box.set_margin_end(10);
 
             let label = Label::new(Some(&format!(
-                "{}?\n{}.",
+                "{}\n{}.",
                 &t!(
                     "are_you_sure_you_want_to_delete__backup_files",
                     n = backup_files.len()
@@ -496,12 +491,12 @@ impl ConfigGUI {
                     match fs::remove_file(file_path) {
                         Ok(_) => deleted_count += 1,
                         Err(e) => {
-                            error_message.push_str(&format!(
-                                "{} {}: {}\n",
-                                &t!("failed_to_delete"),
-                                file_path.display(),
-                                e
+                            error_message.push_str(&t!(
+                                "failed_to_delete__",
+                                file = file_path.display(),
+                                error = e
                             ));
+                            error_message.push('\n');
                         }
                     }
                 }
@@ -512,14 +507,13 @@ impl ConfigGUI {
                     gui_clone.borrow().custom_error_popup(
                         &t!("partial_success"),
                         &format!(
-                            "{}.\n{}:\n{}",
+                            "{}.\n{}",
                             &t!(
                                 "deleted__of__backup_files",
                                 n = deleted_count,
                                 all = backup_files_clone.len()
                             ),
-                            &t!("errors"),
-                            error_message
+                            &t!("errors_", errors = error_message),
                         ),
                     );
                 } else {
@@ -641,7 +635,7 @@ along with this program; if not, see
             Err(e) => {
                 self.custom_error_popup(
                     &t!("loading_failed"),
-                    &format!("{}: {}", &t!("failed_to_read_the_configuration_file"), e),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
                 );
             }
         }
@@ -666,14 +660,14 @@ along with this program; if not, see
                 Err(e) => {
                     self.custom_error_popup(
                         &t!("saving_failed"),
-                        &format!("{}: {}", &t!("failed_to_write_the_configuration_file"), e),
+                        &t!("failed_to_write_the_configuration_file_", error = e),
                     );
                 }
             },
             Err(e) => {
                 self.custom_error_popup(
                     &t!("serialization_failed"),
-                    &format!("{}: {}", &t!("failed_to_serialize_the_configuration"), e),
+                    &t!("failed_to_serialize_the_configuration_", error = e),
                 );
             }
         }
@@ -749,7 +743,7 @@ along with this program; if not, see
         {
             self.custom_error_popup_critical(
                 &t!("failed_to_create_hyprviz_config_file"),
-                &format!("{}: {}", &t!("failed_to_create_hyprviz_config_file"), e),
+                &t!("failed_to_create_hyprviz_config_file_", error = e),
             );
         }
 
@@ -758,7 +752,7 @@ along with this program; if not, see
             Err(e) => {
                 self.custom_error_popup_critical(
                     &t!("reading_failed"),
-                    &format!("{}: {}", &t!("failed_to_read_the_configuration_file"), e),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
                 );
                 return;
             }
@@ -771,7 +765,7 @@ along with this program; if not, see
             if let Err(e) = fs::copy(&path, &backup_path) {
                 self.custom_error_popup(
                     &t!("backup_failed"),
-                    &format!("{}: {}", &t!("failed_to_create_backup"), e),
+                    &t!("failed_to_create_backup_", error = e),
                 );
             }
 
@@ -804,22 +798,14 @@ along with this program; if not, see
 
             match result {
                 Ok(()) => {
-                    println!(
-                        "{}: {:?}",
-                        &t!("configuration_saved_automatically_to"),
-                        path
-                    );
+                    println!("Configuration saved automatically to: {:?}", path);
                     reload_hyprland();
                 }
                 Err(e) => {
                     let _ = fs::remove_file(&temp_path);
                     self.custom_error_popup(
                         &t!("saving_failed"),
-                        &format!(
-                            "{}: {}",
-                            &t!("failed_to_save_the_configuration_automatically"),
-                            e
-                        ),
+                        &t!("failed_to_save_the_configuration_automatically_", error = e),
                     );
                 }
             }
@@ -869,7 +855,7 @@ along with this program; if not, see
                 Err(e) => {
                     self.custom_error_popup(
                         &t!("undo_failed"),
-                        &format!("{}: {}", &t!("failed_to_restore_from_backup"), e),
+                        &t!("failed_to_restore_from_backup_", error = e),
                     );
                 }
             }

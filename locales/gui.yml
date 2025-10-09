@@ -18,7 +18,9 @@ save:
 undo:
   en: "Undo"
 profile:
-  en: "Profile"
+  en: "Profile:"
+create_new_profile:
+  en: "Create New Profile"
 enter_profile_name:
   en: "Enter Profile Name"
 new_profile:
@@ -34,26 +36,26 @@ profile_name_cannot_be_empty_or_default:
   en: "Profile name cannot be empty or 'Default'"
 profile_exists:
   en: "Profile Exists"
-already_exists:
-  en: "already exists"
+profile__already_exists:
+  en: "Profile '%{name}' already exists"
 reading_failed:
   en: "Reading failed"
-failed_to_read_the_default_configuration_file:
-  en: "Failed to read the default configuration file"
+failed_to_read_the_default_configuration_file_:
+  en: "Failed to read the default configuration file: %{error}"
 failed_to_create_profile:
   en: "Failed to create profile"
-failed_to_create_profile_file:
-  en: "Failed to create profile file"
+failed_to_create_profile_file_:
+  en: "Failed to create profile file: %{error}"
 cannot_delete_profile:
   en: "Cannot delete profile"
 the_default_profile_cannot_be_deleted:
   en: "The 'Default' profile cannot be deleted"
-are_you_sure_you_want_to_delete_the_profile:
-  en: "Are you sure you want to delete the profile"
+are_you_sure_you_want_to_delete_the_profile_:
+  en: "Are you sure you want to delete the profile '%{name}'?"
 failed_to_delete_profile:
   en: "Failed to delete profile"
-failed_to_delete_profile_file:
-  en: "Failed to delete profile file"
+failed_to_delete_profile_file_:
+  en: "Failed to delete profile file: %{error}"
 no_backup_files:
   en: "No backup files"
 no_backup_files_found_to_delete:
@@ -61,17 +63,17 @@ no_backup_files_found_to_delete:
 clear_backup_files:
   en: "Clear Backup Files"
 are_you_sure_you_want_to_delete__backup_files:
-  en: Are you sure you want to delete %{n} backup file(s)
+  en: "Are you sure you want to delete %{n} backup file(s)?"
 this_operation_cannot_be_undone:
   en: "This operation cannot be undone"
-failed_to_delete:
-  en: "Failed to delete"
+failed_to_delete__:
+  en: "Failed to delete %{file}: %{error}"
 partial_success:
   en: "Partial Success"
 deleted__of__backup_files:
   en: "Deleted %{n} of %{all} backup files"
-errors:
-  en: "Errors"
+errors_:
+  en: "Errors:\n%{errors}"
 success:
   en: "Success"
 successfully_deleted__backup_files:
@@ -88,30 +90,30 @@ failed_to_parse_the_configuration_file:
   en: "Failed to parse the configuration file."
 loading_failed:
   en: "Loading Failed"
-failed_to_read_the_configuration_file:
-  en: "Failed to read the configuration file"
+failed_to_read_the_configuration_file_:
+  en: "Failed to read the configuration file: %{error}"
 config_saved:
   en: "Config Saved"
 hyprviz_configuration_saved_successfully:
   en: "HyprViz configuration saved successfully."
 saving_failed:
   en: "Saving Failed"
-failed_to_write_the_configuration_file:
-  en: "Failed to write the configuration file"
+failed_to_write_the_configuration_file_:
+  en: "Failed to write the configuration file: %{error}"
 serialization_failed:
   en: "Serialization Failed"
-failed_to_serialize_the_configuration:
-  en: "Failed to serialize the configuration"
+failed_to_serialize_the_configuration_:
+  en: "Failed to serialize the configuration: %{error}"
 failed_to_create_hyprviz_config_file:
   en: "Failed to create hyprviz config file"
+failed_to_create_hyprviz_config_file_:
+  en: "Failed to create hyprviz config file: %{error}"
 backup_failed:
   en: "Backup Failed"
-failed_to_create_backup:
-  en: "Failed to create backup"
-configuration_saved_automatically_to:
-  en: "Configuration saved automatically to"
-failed_to_save_the_configuration_automatically:
-  en: "Failed to save the configuration automatically"
+failed_to_create_backup_:
+  en: "Failed to create backup: %{error}"
+failed_to_save_the_configuration_automatically_:
+  en: "Failed to save the configuration automatically: %{error}"
 no_changes_to_save:
   en: "No changes to save"
 configuration_restored_from_backup:
@@ -122,8 +124,8 @@ failed_to_reload_the_configuration_after_undo:
   en: "Failed to reload the configuration after undo."
 undo_failed:
   en: "Undo Failed"
-failed_to_restore_from_backup:
-  en: "Failed to restore from backup"
+failed_to_restore_from_backup_:
+  en: "Failed to restore from backup: %{error}"
 no_backup_file_found_save_changes_to_create_a_backup:
   en: "No backup file found. Save changes to create a backup."
 general:

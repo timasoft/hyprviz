@@ -1,0 +1,9 @@
+_version: 2
+version_parse_failed:
+  en: "Version parse failed"
+json_parse_error:
+  en: "JSON parse error"
+http_error:
+  en: "HTTP error: %{status_code}"
+request_failed:
+  en: "Request failed: %{error}"

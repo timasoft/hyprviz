@@ -38,7 +38,7 @@ fn build_ui(app: &Application) {
     if !config_path_full.exists() {
         gui.borrow().custom_error_popup_critical(
             &t!("file_not_found"),
-            &format!("{}: ~/{}", t!("file_not_found"), CONFIG_PATH),
+            &t!("file_not_found_~/_", file = CONFIG_PATH),
         );
     } else {
         let hyprviz_profile_none_path = get_config_path(true, "None");
@@ -51,7 +51,7 @@ fn build_ui(app: &Application) {
                 Err(e) => {
                     gui.borrow().custom_error_popup_critical(
                         &t!("creating_failed"),
-                        &format!("{}: {}", t!("failed_to_create_the_profile_directory"), e),
+                        &t!("failed_to_create_the_profile_directory_", error = e),
                     );
                     return;
                 }
@@ -69,7 +69,7 @@ fn build_ui(app: &Application) {
             Err(e) => {
                 gui.borrow().custom_error_popup_critical(
                     &t!("reading_failed"),
-                    &format!("{}: {}", t!("failed_to_read_the_configuration_file"), e),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
                 );
                 String::new()
             }
@@ -92,10 +92,9 @@ fn build_ui(app: &Application) {
                 if !hyprviz_path.is_file() {
                     gui.borrow().custom_error_popup_critical(
                         &t!("creating_included_file_failed"),
-                        &format!(
-                            "{}: {}",
-                            t!("path_for_included_file_exists_but_is_not_a_regular_file"),
-                            hyprviz_path.display()
+                        &t!(
+                            "path_for_included_file_exists_but_is_not_a_regular_file_",
+                            file = hyprviz_path.display()
                         ),
                     );
                 }
@@ -105,11 +104,10 @@ fn build_ui(app: &Application) {
                 {
                     gui.borrow().custom_error_popup_critical(
                         &t!("creating_included_file_failed"),
-                        &format!(
-                            "{} {}: {}",
-                            t!("failed_to_create_parent_directory_for"),
-                            hyprviz_path.display(),
-                            e
+                        &t!(
+                            "failed_to_create_parent_directory_for__",
+                            file = hyprviz_path.display(),
+                            error = e
                         ),
                     );
                 }
@@ -118,11 +116,10 @@ fn build_ui(app: &Application) {
                 if let Err(e) = atomic_write(&hyprviz_path, default) {
                     gui.borrow().custom_error_popup_critical(
                         &t!("creating_included_file_failed"),
-                        &format!(
-                            "{} {}: {}",
-                            t!("failed_to_create"),
-                            hyprviz_path.display(),
-                            e
+                        &t!(
+                            "failed_to_create__",
+                            file = hyprviz_path.display(),
+                            error = e
                         ),
                     );
                 }
@@ -130,17 +127,16 @@ fn build_ui(app: &Application) {
 
             match atomic_write(&config_path_full, &updated_config_str) {
                 Ok(_) => {
-                    println!("{}: ~/{}", t!("added_source_line_to"), CONFIG_PATH);
+                    println!("Added 'source = ./hyprviz.conf' to ~/{}", CONFIG_PATH);
                     reload_hyprland();
                 }
                 Err(e) => {
                     gui.borrow().custom_error_popup_critical(
                         &t!("saving_failed"),
-                        &format!(
-                            "{}: ~/{}: {}",
-                            t!("failed_to_add_source_line_to"),
-                            CONFIG_PATH,
-                            e
+                        &t!(
+                            "failed_to_add_source_line_to__",
+                            file = CONFIG_PATH,
+                            error = e
                         ),
                     );
                 }
@@ -154,7 +150,7 @@ fn build_ui(app: &Application) {
             Err(e) => {
                 gui.borrow().custom_error_popup_critical(
                     &t!("reading_failed"),
-                    &format!("{}: {}", t!("failed_to_read_the_configuration_file"), e),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
                 );
                 String::new()
             }
@@ -165,9 +161,9 @@ fn build_ui(app: &Application) {
         gui.borrow_mut().load_config(&parsed_config, &profile);
 
         let profiles = find_all_profiles();
-        println!("{}: {:?}", t!("available_profiles"), profiles);
+        println!("Available profiles: {:?}", profiles);
 
-        println!("{}: {}", t!("loading_config_for_profile"), profile);
+        println!("Loading config for profile: {}", profile);
         match gui.borrow().profile_dropdown.model() {
             Some(model) => match model.downcast::<StringList>() {
                 Ok(string_list) => {
@@ -195,11 +191,10 @@ fn build_ui(app: &Application) {
 
                             gui.borrow().custom_error_popup(
                                 &t!("profile_not_found"),
-                                &format!(
-                                    "'{}' {}: {}",
-                                    profile,
-                                    t!("was_not_found_in_config_folder"),
-                                    config_dir
+                                &t!(
+                                    "profile__was_not_found_in_the_config_folder_",
+                                    name = profile,
+                                    path = config_dir
                                 ),
                             );
                         }
@@ -239,11 +234,10 @@ fn build_ui(app: &Application) {
                         Err(e) => {
                             gui_clone.borrow().custom_error_popup(
                                 &t!("profile_switch_failed"),
-                                &format!(
-                                    "{} '{}': {}",
-                                    t!("failed_to_update_config_for_profile"),
-                                    profile_name,
-                                    e
+                                &t!(
+                                    "failed_to_update_config_for_profile__",
+                                    profile = profile_name,
+                                    error = e
                                 ),
                             );
                         }
@@ -255,7 +249,7 @@ fn build_ui(app: &Application) {
                         Err(e) => {
                             gui.borrow().custom_error_popup_critical(
                                 &t!("reading_failed"),
-                                &format!("{}: {}", t!("failed_to_read_the_configuration_file"), e),
+                                &t!("failed_to_read_the_configuration_file_", error = e),
                             );
                             String::new()
                         }

@@ -1,3 +1,4 @@
+use rust_i18n::t;
 use std::{
     cmp::Ordering,
     collections::HashSet,
@@ -55,17 +56,15 @@ pub fn get_latest_version(repo: &str) -> String {
                         {
                             return version.to_string();
                         }
-                        "Version parse failed".to_string()
+                        t!("version_parse_failed").to_string()
                     }
-                    Err(_) => "JSON parse error".to_string(),
+                    Err(_) => t!("json_parse_error").to_string(),
                 }
             } else {
-                format!("HTTP error: {}", response.status_code)
+                t!("http_error", status_code = response.status_code).to_string()
             }
         }
-        Err(e) => {
-            format!("Request failed: {}", e)
-        }
+        Err(e) => t!("request_failed", error = e).to_string(),
     }
 }
 

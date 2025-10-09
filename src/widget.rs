@@ -879,27 +879,27 @@ fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
 fn update_version_label(label: &Label, repo: &str, version: &str) {
     let latest_version = get_latest_version(repo);
     let version_str = if !latest_version.starts_with("v") {
-        format!("{} ({})", version, &t!("unable_to_get_latest_version"))
+        format!("{} ( {} )", version, &t!("unable_to_get_latest_version"))
     } else {
         match compare_versions(version, &latest_version) {
             Ordering::Greater => {
                 format!(
-                    "{} ({} ({}) )",
+                    "{} ( {} )",
                     version,
-                    &t!("your_version_is_greater_than_latest"),
-                    latest_version
+                    &t!("your_version_is_greater_than_latest_()", v = latest_version),
+                    // &t!("your_version_is_greater_than_latest"),
+                    // latest_version
                 )
             }
             Ordering::Less => {
                 format!(
-                    "{} ({} ({}) )",
+                    "{} ( {} )",
                     version,
-                    &t!("new_version_available"),
-                    latest_version
+                    &t!("new_version_available_()", v = latest_version),
                 )
             }
             Ordering::Equal => {
-                format!("{} ({})", version, &t!("your_version_is_up_to_date"))
+                format!("{} ( {} )", version, &t!("your_version_is_up_to_date"))
             }
         }
     };
@@ -1087,11 +1087,11 @@ impl ConfigWidget {
                     &t!("general_category.resize_corner_label"),
                     &t!("general_category.resize_corner_description"),
                     &[
-                        "Disabled",
-                        "Top Left",
-                        "Top Right",
-                        "Bottom Right",
-                        "Bottom Left",
+                        &t!("general_category.resize_corner_disabled"),
+                        &t!("general_category.resize_corner_top_left"),
+                        &t!("general_category.resize_corner_top_right"),
+                        &t!("general_category.resize_corner_bottom_right"),
+                        &t!("general_category.resize_corner_bottom_left"),
                     ],
                     "0",
                 );
@@ -1115,24 +1115,24 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("general_category.snap_section_title"),
-                    &t!("general_category.snap_section_description"),
+                    &t!("general_category.snap.section_title"),
+                    &t!("general_category.snap.section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "snap:enabled",
-                    &t!("general_category.snap_enabled_label"),
-                    &t!("general_category.snap_enabled_description"),
+                    &t!("general_category.snap.enabled_label"),
+                    &t!("general_category.snap.enabled_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "snap:window_gap",
-                    &t!("general_category.snap_window_gap_label"),
-                    &t!("general_category.snap_window_gap_description"),
+                    &t!("general_category.snap.window_gap_label"),
+                    &t!("general_category.snap.window_gap_description"),
                     "10",
                     (0.0, 100.0, 1.0),
                 );
@@ -1140,8 +1140,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "snap:monitor_gap",
-                    &t!("general_category.snap_monitor_gap_label"),
-                    &t!("general_category.snap_monitor_gap_description"),
+                    &t!("general_category.snap.monitor_gap_label"),
+                    &t!("general_category.snap.monitor_gap_description"),
                     "10",
                     (0.0, 100.0, 1.0),
                 );
@@ -1149,16 +1149,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "snap:border_overlap",
-                    &t!("general_category.snap_border_overlap_label"),
-                    &t!("general_category.snap_border_overlap_description"),
+                    &t!("general_category.snap.border_overlap_label"),
+                    &t!("general_category.snap.border_overlap_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "snap:respect_gaps",
-                    &t!("general_category.snap_respect_gaps_label"),
-                    &t!("general_category.snap_respect_gaps_description"),
+                    &t!("general_category.snap.respect_gaps_label"),
+                    &t!("general_category.snap.respect_gaps_description"),
                     "false",
                 );
 
@@ -1330,24 +1330,24 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("decoration_category.blur_section_title"),
-                    &t!("decoration_category.blur_section_description"),
+                    &t!("decoration_category.blur.section_title"),
+                    &t!("decoration_category.blur.section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:enabled",
-                    &t!("decoration_category.blur_enabled_label"),
-                    &t!("decoration_category.blur_enabled_description"),
+                    &t!("decoration_category.blur.enabled_label"),
+                    &t!("decoration_category.blur.enabled_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "blur:size",
-                    &t!("decoration_category.blur_size_label"),
-                    &t!("decoration_category.blur_size_description"),
+                    &t!("decoration_category.blur.size_label"),
+                    &t!("decoration_category.blur.size_description"),
                     "8",
                     (1.0, 100.0, 1.0),
                 );
@@ -1355,8 +1355,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:passes",
-                    &t!("decoration_category.blur_passes_label"),
-                    &t!("decoration_category.blur_passes_description"),
+                    &t!("decoration_category.blur.passes_label"),
+                    &t!("decoration_category.blur.passes_description"),
                     "1",
                     (1.0, 10.0, 1.0),
                 );
@@ -1364,32 +1364,32 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:ignore_opacity",
-                    &t!("decoration_category.blur_ignore_opacity_label"),
-                    &t!("decoration_category.blur_ignore_opacity_description"),
+                    &t!("decoration_category.blur.ignore_opacity_label"),
+                    &t!("decoration_category.blur.ignore_opacity_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:new_optimizations",
-                    &t!("decoration_category.blur_new_optimizations_label"),
-                    &t!("decoration_category.blur_new_optimizations_description"),
+                    &t!("decoration_category.blur.new_optimizations_label"),
+                    &t!("decoration_category.blur.new_optimizations_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:xray",
-                    &t!("decoration_category.blur_xray_label"),
-                    &t!("decoration_category.blur_xray_description"),
+                    &t!("decoration_category.blur.xray_label"),
+                    &t!("decoration_category.blur.xray_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "blur:noise",
-                    &t!("decoration_category.blur_noise_label"),
-                    &t!("decoration_category.blur_noise_description"),
+                    &t!("decoration_category.blur.noise_label"),
+                    &t!("decoration_category.blur.noise_description"),
                     "0.0117",
                     (0.0, 1.0, 0.01),
                 );
@@ -1397,8 +1397,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:contrast",
-                    &t!("decoration_category.blur_contrast_label"),
-                    &t!("decoration_category.blur_contrast_description"),
+                    &t!("decoration_category.blur.contrast_label"),
+                    &t!("decoration_category.blur.contrast_description"),
                     "0.8916",
                     (0.0, 2.0, 0.01),
                 );
@@ -1406,8 +1406,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:brightness",
-                    &t!("decoration_category.blur_brightness_label"),
-                    &t!("decoration_category.blur_brightness_description"),
+                    &t!("decoration_category.blur.brightness_label"),
+                    &t!("decoration_category.blur.brightness_description"),
                     "0.8172",
                     (0.0, 2.0, 0.01),
                 );
@@ -1415,8 +1415,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:vibrancy",
-                    &t!("decoration_category.blur_vibrancy_label"),
-                    &t!("decoration_category.blur_vibrancy_description"),
+                    &t!("decoration_category.blur.vibrancy_label"),
+                    &t!("decoration_category.blur.vibrancy_description"),
                     "0.1696",
                     (0.0, 1.0, 0.01),
                 );
@@ -1424,8 +1424,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:vibrancy_darkness",
-                    &t!("decoration_category.blur_vibrancy_darkness_label"),
-                    &t!("decoration_category.blur_vibrancy_darkness_description"),
+                    &t!("decoration_category.blur.vibrancy_darkness_label"),
+                    &t!("decoration_category.blur.vibrancy_darkness_description"),
                     "0.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1433,24 +1433,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:special",
-                    &t!("decoration_category.blur_special_label"),
-                    &t!("decoration_category.blur_special_description"),
+                    &t!("decoration_category.blur.special_label"),
+                    &t!("decoration_category.blur.special_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:popups",
-                    &t!("decoration_category.blur_popups_label"),
-                    &t!("decoration_category.blur_popups_description"),
+                    &t!("decoration_category.blur.popups_label"),
+                    &t!("decoration_category.blur.popups_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "blur:popups_ignorealpha",
-                    &t!("decoration_category.blur_popups_ignorealpha_label"),
-                    &t!("decoration_category.blur_popups_ignorealpha_description"),
+                    &t!("decoration_category.blur.popups_ignorealpha_label"),
+                    &t!("decoration_category.blur.popups_ignorealpha_description"),
                     "0.2",
                     (0.0, 1.0, 0.01),
                 );
@@ -1458,8 +1458,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:input_methods",
-                    &t!("decoration_category.blur_input_methods_label"),
-                    &t!("decoration_category.blur_input_methods_description"),
+                    &t!("decoration_category.blur.input_methods_label"),
+                    &t!("decoration_category.blur.input_methods_description"),
                     "false",
                 );
                 add_float_option(
@@ -1474,24 +1474,24 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("decoration_category.shadow_section_title"),
-                    &t!("decoration_category.shadow_section_description"),
+                    &t!("decoration_category.shadow.section_title"),
+                    &t!("decoration_category.shadow.section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "shadow:enabled",
-                    &t!("decoration_category.shadow_enabled_label"),
-                    &t!("decoration_category.shadow_enabled_description"),
+                    &t!("decoration_category.shadow.enabled_label"),
+                    &t!("decoration_category.shadow.enabled_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "shadow:range",
-                    &t!("decoration_category.shadow_range_label"),
-                    &t!("decoration_category.shadow_range_description"),
+                    &t!("decoration_category.shadow.range_label"),
+                    &t!("decoration_category.shadow.range_description"),
                     "4",
                     (0.0, 100.0, 1.0),
                 );
@@ -1499,8 +1499,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "shadow:render_power",
-                    &t!("decoration_category.shadow_render_power_label"),
-                    &t!("decoration_category.shadow_render_power_description"),
+                    &t!("decoration_category.shadow.render_power_label"),
+                    &t!("decoration_category.shadow.render_power_description"),
                     "3",
                     (1.0, 4.0, 1.0),
                 );
@@ -1508,48 +1508,48 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "shadow:sharp",
-                    &t!("decoration_category.shadow_sharp_label"),
-                    &t!("decoration_category.shadow_sharp_description"),
+                    &t!("decoration_category.shadow.sharp_label"),
+                    &t!("decoration_category.shadow.sharp_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "shadow:ignore_window",
-                    &t!("decoration_category.shadow_ignore_window_label"),
-                    &t!("decoration_category.shadow_ignore_window_description"),
+                    &t!("decoration_category.shadow.ignore_window_label"),
+                    &t!("decoration_category.shadow.ignore_window_description"),
                     "true",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "shadow:color",
-                    &t!("decoration_category.shadow_color_label"),
-                    &t!("decoration_category.shadow_color_description"),
+                    &t!("decoration_category.shadow.color_label"),
+                    &t!("decoration_category.shadow.color_description"),
                     "#1A1A1AEE",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "shadow:color_inactive",
-                    &t!("decoration_category.shadow_color_inactive_label"),
-                    &t!("decoration_category.shadow_color_inactive_description"),
+                    &t!("decoration_category.shadow.color_inactive_label"),
+                    &t!("decoration_category.shadow.color_inactive_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "shadow:offset",
-                    &t!("decoration_category.shadow_offset_label"),
-                    &t!("decoration_category.shadow_offset_description"),
+                    &t!("decoration_category.shadow.offset_label"),
+                    &t!("decoration_category.shadow.offset_description"),
                     "[0, 0]",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "shadow:scale",
-                    &t!("decoration_category.shadow_scale_label"),
-                    &t!("decoration_category.shadow_scale_description"),
+                    &t!("decoration_category.shadow.scale_label"),
+                    &t!("decoration_category.shadow.scale_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1762,7 +1762,12 @@ impl ConfigWidget {
                     "follow_mouse",
                     &t!("input_category.follow_mouse_label"),
                     &t!("input_category.follow_mouse_description"),
-                    &["Ignore", "Always", "Detach", "Separate"],
+                    &[
+                        &t!("input_category.follow_mouse_ignore"),
+                        &t!("input_category.follow_mouse_always"),
+                        &t!("input_category.follow_mouse_detach"),
+                        &t!("input_category.follow_mouse_separate"),
+                    ],
                     "1",
                 );
                 add_float_option(
@@ -1795,7 +1800,10 @@ impl ConfigWidget {
                     "focus_on_close",
                     &t!("input_category.focus_on_close_label"),
                     &t!("input_category.focus_on_close_description"),
-                    &["Next window candidate", "Window under cursor"],
+                    &[
+                        &t!("input_category.focus_on_close_next_window_candidate"),
+                        &t!("input_category.focus_on_close_window_under_cursor"),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -1812,7 +1820,11 @@ impl ConfigWidget {
                     "float_switch_override_focus",
                     &t!("input_category.float_switch_override_focus_label"),
                     &t!("input_category.float_switch_override_focus_description"),
-                    &["Disabled", "Enabled", "Focus follows mouse"],
+                    &[
+                        &t!("input_category.float_switch_override_focus_disabled"),
+                        &t!("input_category.float_switch_override_focus_enabled"),
+                        &t!("input_category.float_switch_override_focus_focus_follow_mouse"),
+                    ],
                     "1",
                 );
                 add_bool_option(
@@ -1826,32 +1838,32 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("input_category.touchpad_settings_section_title"),
-                    &t!("input_category.touchpad_settings_section_description"),
+                    &t!("input_category.touchpad.settings_section_title"),
+                    &t!("input_category.touchpad.settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:disable_while_typing",
-                    &t!("input_category.touchpad_disable_while_typing_label"),
-                    &t!("input_category.touchpad_disable_while_typing_description"),
+                    &t!("input_category.touchpad.disable_while_typing_label"),
+                    &t!("input_category.touchpad.disable_while_typing_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:natural_scroll",
-                    &t!("input_category.touchpad_natural_scroll_label"),
-                    &t!("input_category.touchpad_natural_scroll_description"),
+                    &t!("input_category.touchpad.natural_scroll_label"),
+                    &t!("input_category.touchpad.natural_scroll_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "touchpad:scroll_factor",
-                    &t!("input_category.touchpad_scroll_factor_label"),
-                    &t!("input_category.touchpad_scroll_factor_description"),
+                    &t!("input_category.touchpad.scroll_factor_label"),
+                    &t!("input_category.touchpad.scroll_factor_description"),
                     "1.0",
                     (0.0, 2.0, 0.02),
                 );
@@ -1859,74 +1871,82 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "touchpad:middle_button_emulation",
-                    &t!("input_category.touchpad_middle_button_emulation_label"),
-                    &t!("input_category.touchpad_middle_button_emulation_description"),
+                    &t!("input_category.touchpad.middle_button_emulation_label"),
+                    &t!("input_category.touchpad.middle_button_emulation_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "touchpad:tap_button_map",
-                    &t!("input_category.touchpad_tap_button_map_label"),
-                    &t!("input_category.touchpad_tap_button_map_description"),
+                    &t!("input_category.touchpad.tap_button_map_label"),
+                    &t!("input_category.touchpad.tap_button_map_description"),
                     "lrm",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:clickfinger_behavior",
-                    &t!("input_category.touchpad_clickfinger_behavior_label"),
-                    &t!("input_category.touchpad_clickfinger_behavior_description"),
+                    &t!("input_category.touchpad.clickfinger_behavior_label"),
+                    &t!("input_category.touchpad.clickfinger_behavior_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:tap-to-click",
-                    &t!("input_category.touchpad_tap_to_click_label"),
-                    &t!("input_category.touchpad_tap_to_click_description"),
+                    &t!("input_category.touchpad.tap_to_click_label"),
+                    &t!("input_category.touchpad.tap_to_click_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "touchpad:drag_lock",
-                    &t!("input_category.touchpad_drag_lock_label"),
-                    &t!("input_category.touchpad_drag_lock_description"),
-                    &["Disabled", "Enabled with timeout", "Enabled sticky"],
+                    &t!("input_category.touchpad.drag_lock_label"),
+                    &t!("input_category.touchpad.drag_lock_description"),
+                    &[
+                        &t!("input_category.touchpad.drag_lock_disabled"),
+                        &t!("input_category.touchpad.drag_lock_enabled_with_timeout"),
+                        &t!("input_category.touchpad.drag_lock_enabled_sticky"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:tap-and-drag",
-                    &t!("input_category.touchpad_tap_and_drag_label"),
-                    &t!("input_category.touchpad_tap_and_drag_description"),
+                    &t!("input_category.touchpad.tap_and_drag_label"),
+                    &t!("input_category.touchpad.tap_and_drag_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:flip_x",
-                    &t!("input_category.touchpad_flip_x_label"),
-                    &t!("input_category.touchpad_flip_x_description"),
+                    &t!("input_category.touchpad.flip_x_label"),
+                    &t!("input_category.touchpad.flip_x_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:flip_y",
-                    &t!("input_category.touchpad_flip_y_label"),
-                    &t!("input_category.touchpad_flip_y_description"),
+                    &t!("input_category.touchpad.flip_y_label"),
+                    &t!("input_category.touchpad.flip_y_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "touchpad:drag_3fg",
-                    &t!("input_category.touchpad_drag_3fg_label"),
-                    &t!("input_category.touchpad_drag_3fg_description"),
-                    &["Disabled", "3 fingers", "4 fingers"],
+                    &t!("input_category.touchpad.drag_3fg_label"),
+                    &t!("input_category.touchpad.drag_3fg_description"),
+                    &[
+                        &t!("input_category.touchpad.drag_3fg_disabled"),
+                        &t!("input_category.touchpad.drag_3fg_3_fingers"),
+                        &t!("input_category.touchpad.drag_3fg_4_fingers"),
+                    ],
                     "0",
                 );
 
@@ -1940,8 +1960,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "touchdevice:transform",
-                    &t!("input_category.touchdevice_transform_label"),
-                    &t!("input_category.touchdevice_transform_description"),
+                    &t!("input_category.touchdevice.transform_label"),
+                    &t!("input_category.touchdevice.transform_description"),
                     "-1",
                     (-1.0, 7.0, 1.0),
                 );
@@ -1949,16 +1969,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "touchdevice:output",
-                    &t!("input_category.touchdevice_output_label"),
-                    &t!("input_category.touchdevice_output_description"),
+                    &t!("input_category.touchdevice.output_label"),
+                    &t!("input_category.touchdevice.output_description"),
                     "[[Auto]]",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchdevice:enabled",
-                    &t!("input_category.touchdevice_enabled_label"),
-                    &t!("input_category.touchdevice_enabled_description"),
+                    &t!("input_category.touchdevice.enabled_label"),
+                    &t!("input_category.touchdevice.enabled_description"),
                     "true",
                 );
 
@@ -1972,32 +1992,36 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "virtualkeyboard:share_states",
-                    &t!("input_category.virtualkeyboard_share_states_label"),
-                    &t!("input_category.virtualkeyboard_share_states_description"),
-                    &["No", "Yes", "Yes unless IME client"],
+                    &t!("input_category.virtualkeyboard.share_states_label"),
+                    &t!("input_category.virtualkeyboard.share_states_description"),
+                    &[
+                        &t!("input_category.virtualkeyboard.share_states_no"),
+                        &t!("input_category.virtualkeyboard.share_states_yes"),
+                        &t!("input_category.virtualkeyboard.share_states_yes_unless_ime_client"),
+                    ],
                     "2",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "virtualkeyboard:release_pressed_on_close",
-                    &t!("input_category.virtualkeyboard_release_pressed_on_close_label"),
-                    &t!("input_category.virtualkeyboard_release_pressed_on_close_description"),
+                    &t!("input_category.virtualkeyboard.release_pressed_on_close_label"),
+                    &t!("input_category.virtualkeyboard.release_pressed_on_close_description"),
                     "false",
                 );
 
                 add_section(
                     &container,
-                    &t!("input_category.tablet_settings_section_title"),
-                    &t!("input_category.tablet_settings_section_description"),
+                    &t!("input_category.tablet.settings_section_title"),
+                    &t!("input_category.tablet.settings_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "tablet:transform",
-                    &t!("input_category.tablet_transform_label"),
-                    &t!("input_category.tablet_transform_description"),
+                    &t!("input_category.tablet.transform_label"),
+                    &t!("input_category.tablet.transform_description"),
                     "-1",
                     (-1.0, 7.0, 1.0),
                 );
@@ -2005,64 +2029,64 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "tablet:output",
-                    &t!("input_category.tablet_output_label"),
-                    &t!("input_category.tablet_output_description"),
+                    &t!("input_category.tablet.output_label"),
+                    &t!("input_category.tablet.output_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:region_position",
-                    &t!("input_category.tablet_region_position_label"),
-                    &t!("input_category.tablet_region_position_description"),
+                    &t!("input_category.tablet.region_position_label"),
+                    &t!("input_category.tablet.region_position_description"),
                     "[0, 0]",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "tablet:absolute_position",
-                    &t!("input_category.tablet_absolute_position_label"),
-                    &t!("input_category.tablet_absolute_position_description"),
+                    &t!("input_category.tablet.absolute_position_label"),
+                    &t!("input_category.tablet.absolute_position_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:region_size",
-                    &t!("input_category.tablet_region_size_label"),
-                    &t!("input_category.tablet_region_size_description"),
+                    &t!("input_category.tablet.region_size_label"),
+                    &t!("input_category.tablet.region_size_description"),
                     "[0, 0]",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "tablet:relative_input",
-                    &t!("input_category.tablet_relative_input_label"),
-                    &t!("input_category.tablet_relative_input_description"),
+                    &t!("input_category.tablet.relative_input_label"),
+                    &t!("input_category.tablet.relative_input_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "tablet:left_handed",
-                    &t!("input_category.tablet_left_handed_label"),
-                    &t!("input_category.tablet_left_handed_description"),
+                    &t!("input_category.tablet.left_handed_label"),
+                    &t!("input_category.tablet.left_handed_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:active_area_size",
-                    &t!("input_category.tablet_active_area_size_label"),
-                    &t!("input_category.tablet_active_area_size_description"),
+                    &t!("input_category.tablet.active_area_size_label"),
+                    &t!("input_category.tablet.active_area_size_description"),
                     "[0, 0]",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:active_area_position",
-                    &t!("input_category.tablet_active_area_position_label"),
-                    &t!("input_category.tablet_active_area_position_description"),
+                    &t!("input_category.tablet.active_area_position_label"),
+                    &t!("input_category.tablet.active_area_position_description"),
                     "[0, 0]",
                 );
 
@@ -2079,10 +2103,10 @@ impl ConfigWidget {
                     &t!("input_category.off_window_axis_events_label"),
                     &t!("input_category.off_window_axis_events_description"),
                     &[
-                        "Ignores axis events",
-                        "Sends out-of-bound coordinates",
-                        "Fakes pointer coordinates",
-                        "Warps the cursor",
+                        &t!("input_category.off_window_axis_events_ignore_axis_events"),
+                        &t!("input_category.off_window_axis_events_sends_out-of-bound_coordinates"),
+                        &t!("input_category.off_window_axis_events_fakes_pointer_coordinates"),
+                        &t!("input_category.off_window_axis_events_warps_the_cursor"),
                     ],
                     "1",
                 );
@@ -2093,9 +2117,9 @@ impl ConfigWidget {
                     &t!("input_category.emulate_discrete_scroll_label"),
                     &t!("input_category.emulate_discrete_scroll_description"),
                     &[
-                        "Disables it",
-                        "Non-standard events only",
-                        "Force enable all events",
+                        &t!("input_category.emulate_discrete_scroll_disables_it"),
+                        &t!("input_category.emulate_discrete_scroll_non-standard_events_only"),
+                        &t!("input_category.emulate_discrete_scroll_force"),
                     ],
                     "1",
                 );
@@ -2246,7 +2270,11 @@ impl ConfigWidget {
                     "drag_into_group",
                     &t!("group_category.drag_into_group_label"),
                     &t!("group_category.drag_into_group_description"),
-                    &["Disabled", "Enabled", "Only into groupbar"],
+                    &[
+                        &t!("group_category.drag_into_group_disabled"),
+                        &t!("group_category.drag_into_group_enabled"),
+                        &t!("group_category.drag_into_group_only_into_groupbar"),
+                    ],
                     "1",
                 );
                 add_bool_option(
@@ -2316,65 +2344,65 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("group_category.groupbar_settings_section_title"),
-                    &t!("group_category.groupbar_settings_section_description"),
+                    &t!("group_category.groupbar.settings_section_title"),
+                    &t!("group_category.groupbar.settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "groupbar:enabled",
-                    &t!("group_category.groupbar_enabled_label"),
-                    &t!("group_category.groupbar_enabled_description"),
+                    &t!("group_category.groupbar.enabled_label"),
+                    &t!("group_category.groupbar.enabled_description"),
                     "true",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "groupbar:font_family",
-                    &t!("group_category.groupbar_font_family_label"),
-                    &t!("group_category.groupbar_font_family_description"),
+                    &t!("group_category.groupbar.font_family_label"),
+                    &t!("group_category.groupbar.font_family_description"),
                     "",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:font_size",
-                    &t!("group_category.groupbar_font_size_label"),
-                    &t!("group_category.groupbar_font_size_description"),
+                    &t!("group_category.groupbar.font_size_label"),
+                    &t!("group_category.groupbar.font_size_description"),
                     "8",
                     (2.0, 64.0, 1.0),
                 );
                 add_string_option(
                     &container,
                     &mut options,
-                    "font_weight_active",
-                    &t!("group_category.font_weight_active_label"),
-                    &t!("group_category.font_weight_active_description"),
+                    "groupbar:font_weight_active",
+                    &t!("group_category.groupbar.font_weight_active_label"),
+                    &t!("group_category.groupbar.font_weight_active_description"),
                     "normal",
                 );
                 add_string_option(
                     &container,
                     &mut options,
-                    "font_weight_inactive",
-                    &t!("group_category.font_weight_inactive_label"),
-                    &t!("group_category.font_weight_inactive_description"),
+                    "groupbar:font_weight_inactive",
+                    &t!("group_category.groupbar.font_weight_inactive_label"),
+                    &t!("group_category.groupbar.font_weight_inactive_description"),
                     "normal",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "groupbar:gradients",
-                    &t!("group_category.groupbar_gradients_label"),
-                    &t!("group_category.groupbar_gradients_description"),
+                    &t!("group_category.groupbar.gradients_label"),
+                    &t!("group_category.groupbar.gradients_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:height",
-                    &t!("group_category.groupbar_height_label"),
-                    &t!("group_category.groupbar_height_description"),
+                    &t!("group_category.groupbar.height_label"),
+                    &t!("group_category.groupbar.height_description"),
                     "14",
                     (1.0, 64.0, 1.0),
                 );
@@ -2382,8 +2410,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:indicator_gap",
-                    &t!("group_category.groupbar_indicator_gap_label"),
-                    &t!("group_category.groupbar_indicator_gap_description"),
+                    &t!("group_category.groupbar.indicator_gap_label"),
+                    &t!("group_category.groupbar.indicator_gap_description"),
                     "0",
                     (0.0, 64.0, 1.0),
                 );
@@ -2391,8 +2419,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:indicator_height",
-                    &t!("group_category.groupbar_indicator_height_label"),
-                    &t!("group_category.groupbar_indicator_height_description"),
+                    &t!("group_category.groupbar.indicator_height_label"),
+                    &t!("group_category.groupbar.indicator_height_description"),
                     "3",
                     (1.0, 64.0, 1.0),
                 );
@@ -2400,16 +2428,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:stacked",
-                    &t!("group_category.groupbar_stacked_label"),
-                    &t!("group_category.groupbar_stacked_description"),
+                    &t!("group_category.groupbar.stacked_label"),
+                    &t!("group_category.groupbar.stacked_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:priority",
-                    &t!("group_category.groupbar_priority_label"),
-                    &t!("group_category.groupbar_priority_description"),
+                    &t!("group_category.groupbar.priority_label"),
+                    &t!("group_category.groupbar.priority_description"),
                     "3",
                     (0.0, 6.0, 1.0),
                 );
@@ -2417,16 +2445,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:render_titles",
-                    &t!("group_category.groupbar_render_titles_label"),
-                    &t!("group_category.groupbar_render_titles_description"),
+                    &t!("group_category.groupbar.render_titles_label"),
+                    &t!("group_category.groupbar.render_titles_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:text_offset",
-                    &t!("group_category.groupbar_text_offset_label"),
-                    &t!("group_category.groupbar_text_offset_description"),
+                    &t!("group_category.groupbar.text_offset_label"),
+                    &t!("group_category.groupbar.text_offset_description"),
                     "0",
                     (-20.0, 20.0, 1.0),
                 );
@@ -2434,16 +2462,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:scrolling",
-                    &t!("group_category.groupbar_scrolling_label"),
-                    &t!("group_category.groupbar_scrolling_description"),
+                    &t!("group_category.groupbar.scrolling_label"),
+                    &t!("group_category.groupbar.scrolling_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:rounding",
-                    &t!("group_category.groupbar_rounding_label"),
-                    &t!("group_category.groupbar_rounding_description"),
+                    &t!("group_category.groupbar.rounding_label"),
+                    &t!("group_category.groupbar.rounding_description"),
                     "1",
                     (0.0, 20.0, 1.0),
                 );
@@ -2451,8 +2479,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:rounding_power",
-                    &t!("group_category.groupbar_rounding_power_label"),
-                    &t!("group_category.groupbar_rounding_power_description"),
+                    &t!("group_category.groupbar.rounding_power_label"),
+                    &t!("group_category.groupbar.rounding_power_description"),
                     "2",
                     (2.0, 10.0, 0.1),
                 );
@@ -2460,8 +2488,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:gradient_rounding",
-                    &t!("group_category.groupbar_gradient_rounding_label"),
-                    &t!("group_category.groupbar_gradient_rounding_description"),
+                    &t!("group_category.groupbar.gradient_rounding_label"),
+                    &t!("group_category.groupbar.gradient_rounding_description"),
                     "1",
                     (0.0, 20.0, 1.0),
                 );
@@ -2469,88 +2497,88 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:round_only_edges",
-                    &t!("group_category.groupbar_round_only_edges_label"),
-                    &t!("group_category.groupbar_round_only_edges_description"),
+                    &t!("group_category.groupbar.round_only_edges_label"),
+                    &t!("group_category.groupbar.round_only_edges_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "groupbar:gradient_round_only_edges",
-                    &t!("group_category.groupbar_gradient_round_only_edges_label"),
-                    &t!("group_category.groupbar_gradient_round_only_edges_description"),
+                    &t!("group_category.groupbar.gradient_round_only_edges_label"),
+                    &t!("group_category.groupbar.gradient_round_only_edges_description"),
                     "true",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color",
-                    &t!("group_category.groupbar_text_color_label"),
-                    &t!("group_category.groupbar_text_color_description"),
+                    &t!("group_category.groupbar.text_color_label"),
+                    &t!("group_category.groupbar.text_color_description"),
                     "#FFFFFFFF",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color_inactive",
-                    &t!("group_category.groupbar_text_color_inactive_label"),
-                    &t!("group_category.groupbar_text_color_inactive_description"),
+                    &t!("group_category.groupbar.text_color_inactive_label"),
+                    &t!("group_category.groupbar.text_color_inactive_description"),
                     "",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color_locked_active",
-                    &t!("group_category.groupbar_text_color_locked_active_label"),
-                    &t!("group_category.groupbar_text_color_locked_active_description"),
+                    &t!("group_category.groupbar.text_color_locked_active_label"),
+                    &t!("group_category.groupbar.text_color_locked_active_description"),
                     "",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color_locked_inactive",
-                    &t!("group_category.groupbar_text_color_locked_inactive_label"),
-                    &t!("group_category.groupbar_text_color_locked_inactive_description"),
+                    &t!("group_category.groupbar.text_color_locked_inactive_label"),
+                    &t!("group_category.groupbar.text_color_locked_inactive_description"),
                     "",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.active",
-                    &t!("group_category.groupbar_col_active_label"),
-                    &t!("group_category.groupbar_col_active_description"),
+                    &t!("group_category.groupbar.col_active_label"),
+                    &t!("group_category.groupbar.col_active_description"),
                     "#66FFFF00",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.inactive",
-                    &t!("group_category.groupbar_col_inactive_label"),
-                    &t!("group_category.groupbar_col_inactive_description"),
+                    &t!("group_category.groupbar.col_inactive_label"),
+                    &t!("group_category.groupbar.col_inactive_description"),
                     "#77770066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.locked_active",
-                    &t!("group_category.groupbar_col_locked_active_label"),
-                    &t!("group_category.groupbar_col_locked_active_description"),
+                    &t!("group_category.groupbar.col_locked_active_label"),
+                    &t!("group_category.groupbar.col_locked_active_description"),
                     "#FF550066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.locked_inactive",
-                    &t!("group_category.groupbar_col_locked_inactive_label"),
-                    &t!("group_category.groupbar_col_locked_inactive_description"),
+                    &t!("group_category.groupbar.col_locked_inactive_label"),
+                    &t!("group_category.groupbar.col_locked_inactive_description"),
                     "#77550066",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:gaps_in",
-                    &t!("group_category.groupbar_gaps_in_label"),
-                    &t!("group_category.groupbar_gaps_in_description"),
+                    &t!("group_category.groupbar.gaps_in_label"),
+                    &t!("group_category.groupbar.gaps_in_description"),
                     "2",
                     (0.0, 20.0, 1.0),
                 );
@@ -2558,8 +2586,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:gaps_out",
-                    &t!("group_category.groupbar_gaps_out_label"),
-                    &t!("group_category.groupbar_gaps_out_description"),
+                    &t!("group_category.groupbar.gaps_out_label"),
+                    &t!("group_category.groupbar.gaps_out_description"),
                     "2",
                     (0.0, 20.0, 1.0),
                 );
@@ -2567,8 +2595,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:keep_upper_gap",
-                    &t!("group_category.groupbar_keep_upper_gap_label"),
-                    &t!("group_category.groupbar_keep_upper_gap_description"),
+                    &t!("group_category.groupbar.keep_upper_gap_label"),
+                    &t!("group_category.groupbar.keep_upper_gap_description"),
                     "true",
                 );
             }
@@ -2642,7 +2670,12 @@ impl ConfigWidget {
                     "vrr",
                     &t!("misc_category.vrr_label"),
                     &t!("misc_category.vrr_description"),
-                    &["Off", "On", "Fullscreen only", "Fullscreen with video/game"],
+                    &[
+                        &t!("misc_category.vrr_off"),
+                        &t!("misc_category.vrr_on"),
+                        &t!("misc_category.vrr_fullscreen_only"),
+                        &t!("misc_category.vrr_fullscreen_with_video/game"),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -2787,7 +2820,13 @@ impl ConfigWidget {
                     "new_window_takes_over_fullscreen",
                     &t!("misc_category.new_window_takes_over_fullscreen_label"),
                     &t!("misc_category.new_window_takes_over_fullscreen_description"),
-                    &["Behind", "Takes over", "Unfullscreen/unmaximize"],
+                    &[
+                        &t!("misc_category.new_window_takes_over_fullscreen_behind"),
+                        &t!("misc_category.new_window_takes_over_fullscreen_takes_over"),
+                        &t!(
+                            "misc_category.new_window_takes_over_fullscreen_unfullscreen/unmaximize"
+                        ),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -2804,7 +2843,11 @@ impl ConfigWidget {
                     "initial_workspace_tracking",
                     &t!("misc_category.initial_workspace_tracking_label"),
                     &t!("misc_category.initial_workspace_tracking_description"),
-                    &["Disabled", "Single-shot", "Persistent"],
+                    &[
+                        &t!("misc_category.initial_workspace_tracking_disabled"),
+                        &t!("misc_category.initial_workspace_tracking_single-shot"),
+                        &t!("misc_category.initial_workspace_tracking_persistent"),
+                    ],
                     "1",
                 );
                 add_bool_option(
@@ -2945,7 +2988,10 @@ impl ConfigWidget {
                     "focus_preferred_method",
                     &t!("binds_category.focus_preferred_method_label"),
                     &t!("binds_category.focus_preferred_method_description"),
-                    &["History", "Length"],
+                    &[
+                        &t!("binds_category.focus_preferred_method_history"),
+                        &t!("binds_category.focus_preferred_method_length"),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -3075,7 +3121,11 @@ impl ConfigWidget {
                     "direct_scanout",
                     &t!("render_category.direct_scanout_label"),
                     &t!("render_category.direct_scanout_description"),
-                    &["Off", "On", "Auto"],
+                    &[
+                        &t!("render_category.direct_scanout_off"),
+                        &t!("render_category.direct_scanout_on"),
+                        &t!("render_category.direct_scanout_auto"),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -3100,7 +3150,11 @@ impl ConfigWidget {
                     "ctm_animation",
                     &t!("render_category.ctm_animation_label"),
                     &t!("render_category.ctm_animation_description"),
-                    &["Off", "On", "Auto"],
+                    &[
+                        &t!("render_category.ctm_animation_off"),
+                        &t!("render_category.ctm_animation_on"),
+                        &t!("render_category.ctm_animation_auto"),
+                    ],
                     "2",
                 );
                 add_dropdown_option(
@@ -3109,7 +3163,11 @@ impl ConfigWidget {
                     "cm_fs_passthrough",
                     &t!("render_category.cm_fs_passthrough_label"),
                     &t!("render_category.cm_fs_passthrough_description"),
-                    &["Off", "Always", "HDR only"],
+                    &[
+                        &t!("render_category.cm_fs_passthrough_off"),
+                        &t!("render_category.cm_fs_passthrough_always"),
+                        &t!("render_category.cm_fs_passthrough_hdr_only"),
+                    ],
                     "2",
                 );
                 add_bool_option(
@@ -3134,7 +3192,11 @@ impl ConfigWidget {
                     "cm_auto_hdr",
                     &t!("render_category.cm_auto_hdr_label"),
                     &t!("render_category.cm_auto_hdr_description"),
-                    &["Off", "HDR", "HDREDID"],
+                    &[
+                        &t!("render_category.cm_auto_hdr_off"),
+                        &t!("render_category.cm_auto_hdr_hdr"),
+                        &t!("render_category.cm_auto_hdr_hdredid"),
+                    ],
                     "1",
                 );
                 add_bool_option(
@@ -3175,7 +3237,11 @@ impl ConfigWidget {
                     "no_hardware_cursors",
                     &t!("cursor_category.no_hardware_cursors_label"),
                     &t!("cursor_category.no_hardware_cursors_description"),
-                    &["Use HWC if possible", "Don't use HWC", "Auto"],
+                    &[
+                        &t!("cursor_category.no_hardware_cursors_use_hwc_if_possible"),
+                        &t!("cursor_category.no_hardware_cursors_dont_use_hwc"),
+                        &t!("cursor_category.no_hardware_cursors_auto"),
+                    ],
                     "2",
                 );
                 add_dropdown_option(
@@ -3184,7 +3250,11 @@ impl ConfigWidget {
                     "no_break_fs_vrr",
                     &t!("cursor_category.no_break_fs_vrr_label"),
                     &t!("cursor_category.no_break_fs_vrr_description"),
-                    &["Off", "On", "Auto"],
+                    &[
+                        &t!("cursor_category.no_break_fs_vrr_off"),
+                        &t!("cursor_category.no_break_fs_vrr_on"),
+                        &t!("cursor_category.no_break_fs_vrr_auto"),
+                    ],
                     "2",
                 );
                 add_int_option(
@@ -3236,7 +3306,11 @@ impl ConfigWidget {
                     "warp_on_change_workspace",
                     &t!("cursor_category.warp_on_change_workspace_label"),
                     &t!("cursor_category.warp_on_change_workspace_description"),
-                    &["Disabled", "Enabled", "Force"],
+                    &[
+                        &t!("cursor_category.warp_on_change_workspace_disabled"),
+                        &t!("cursor_category.warp_on_change_workspace_enabled"),
+                        &t!("cursor_category.warp_on_change_workspace_force"),
+                    ],
                     "0",
                 );
                 add_dropdown_option(
@@ -3245,7 +3319,11 @@ impl ConfigWidget {
                     "warp_on_toggle_special",
                     &t!("cursor_category.warp_on_toggle_special_label"),
                     &t!("cursor_category.warp_on_toggle_special_description"),
-                    &["Disabled", "Enabled", "Force"],
+                    &[
+                        &t!("cursor_category.warp_on_toggle_special_disabled"),
+                        &t!("cursor_category.warp_on_toggle_special_enabled"),
+                        &t!("cursor_category.warp_on_toggle_special_force"),
+                    ],
                     "0",
                 );
                 add_string_option(
@@ -3303,7 +3381,11 @@ impl ConfigWidget {
                     "use_cpu_buffer",
                     &t!("cursor_category.use_cpu_buffer_label"),
                     &t!("cursor_category.use_cpu_buffer_description"),
-                    &["Off", "On", "Auto"],
+                    &[
+                        &t!("cursor_category.use_cpu_buffer_off"),
+                        &t!("cursor_category.use_cpu_buffer_on"),
+                        &t!("cursor_category.use_cpu_buffer_auto"),
+                    ],
                     "2",
                 );
                 add_bool_option(
@@ -3408,7 +3490,11 @@ impl ConfigWidget {
                     "damage_tracking",
                     &t!("debug_category.damage_tracking_label"),
                     &t!("debug_category.damage_tracking_description"),
-                    &["None", "Monitor", "Full"],
+                    &[
+                        &t!("debug_category.damage_tracking_none"),
+                        &t!("debug_category.damage_tracking_monitor"),
+                        &t!("debug_category.damage_tracking_full"),
+                    ],
                     "2",
                 );
                 add_bool_option(
@@ -3458,7 +3544,10 @@ impl ConfigWidget {
                     "error_position",
                     &t!("debug_category.error_position_label"),
                     &t!("debug_category.error_position_description"),
-                    &["Top", "Bottom"],
+                    &[
+                        &t!("debug_category.error_position_top"),
+                        &t!("debug_category.error_position_bottom"),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -3496,8 +3585,8 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("layouts_category.dwindle_layout_section_title"),
-                    &t!("layouts_category.dwindle_layout_section_description"),
+                    &t!("layouts_category.dwindle.layout_section_title"),
+                    &t!("layouts_category.dwindle.layout_section_description"),
                     first_section.clone(),
                 );
                 add_guide(&container, "Dwindle-Layout", false);
@@ -3505,20 +3594,20 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:pseudotile",
-                    &t!("layouts_category.dwindle_pseudotile_label"),
-                    &t!("layouts_category.dwindle_pseudotile_description"),
+                    &t!("layouts_category.dwindle.pseudotile_label"),
+                    &t!("layouts_category.dwindle.pseudotile_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "dwindle:force_split",
-                    &t!("layouts_category.dwindle_force_split_label"),
-                    &t!("layouts_category.dwindle_force_split_description"),
+                    &t!("layouts_category.dwindle.force_split_label"),
+                    &t!("layouts_category.dwindle.force_split_description"),
                     &[
-                        "Split follows mouse",
-                        "Always split left/top",
-                        "Always split right/bottom",
+                        &t!("layouts_category.dwindle.force_split_split_follows_mouse"),
+                        &t!("layouts_category.dwindle.force_split_always_split_left/top"),
+                        &t!("layouts_category.dwindle.force_split_always_split_right/bottom"),
                     ],
                     "0",
                 );
@@ -3526,40 +3615,40 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:preserve_split",
-                    &t!("layouts_category.dwindle_preserve_split_label"),
-                    &t!("layouts_category.dwindle_preserve_split_description"),
+                    &t!("layouts_category.dwindle.preserve_split_label"),
+                    &t!("layouts_category.dwindle.preserve_split_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "dwindle:smart_split",
-                    &t!("layouts_category.dwindle_smart_split_label"),
-                    &t!("layouts_category.dwindle_smart_split_description"),
+                    &t!("layouts_category.dwindle.smart_split_label"),
+                    &t!("layouts_category.dwindle.smart_split_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "dwindle:smart_resizing",
-                    &t!("layouts_category.dwindle_smart_resizing_label"),
-                    &t!("layouts_category.dwindle_smart_resizing_description"),
+                    &t!("layouts_category.dwindle.smart_resizing_label"),
+                    &t!("layouts_category.dwindle.smart_resizing_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "dwindle:permanent_direction_override",
-                    &t!("layouts_category.dwindle_permanent_direction_override_label"),
-                    &t!("layouts_category.dwindle_permanent_direction_override_description"),
+                    &t!("layouts_category.dwindle.permanent_direction_override_label"),
+                    &t!("layouts_category.dwindle.permanent_direction_override_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "dwindle:special_scale_factor",
-                    &t!("layouts_category.dwindle_special_scale_factor_label"),
-                    &t!("layouts_category.dwindle_special_scale_factor_description"),
+                    &t!("layouts_category.dwindle.special_scale_factor_label"),
+                    &t!("layouts_category.dwindle.special_scale_factor_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -3567,8 +3656,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:split_width_multiplier",
-                    &t!("layouts_category.dwindle_split_width_multiplier_label"),
-                    &t!("layouts_category.dwindle_split_width_multiplier_description"),
+                    &t!("layouts_category.dwindle.split_width_multiplier_label"),
+                    &t!("layouts_category.dwindle.split_width_multiplier_description"),
                     "1.0",
                     (0.1, 3.0, 0.1),
                 );
@@ -3576,16 +3665,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:use_active_for_splits",
-                    &t!("layouts_category.dwindle_use_active_for_splits_label"),
-                    &t!("layouts_category.dwindle_use_active_for_splits_description"),
+                    &t!("layouts_category.dwindle.use_active_for_splits_label"),
+                    &t!("layouts_category.dwindle.use_active_for_splits_description"),
                     "true",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "dwindle:default_split_ratio",
-                    &t!("layouts_category.dwindle_default_split_ratio_label"),
-                    &t!("layouts_category.dwindle_default_split_ratio_description"),
+                    &t!("layouts_category.dwindle.default_split_ratio_label"),
+                    &t!("layouts_category.dwindle.default_split_ratio_description"),
                     "1.0",
                     (0.1, 1.9, 0.02),
                 );
@@ -3593,9 +3682,12 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:split_bias",
-                    &t!("layouts_category.dwindle_split_bias_label"),
-                    &t!("layouts_category.dwindle_split_bias_description"),
-                    &["Directional", "Current window"],
+                    &t!("layouts_category.dwindle.split_bias_label"),
+                    &t!("layouts_category.dwindle.split_bias_description"),
+                    &[
+                        &t!("layouts_category.dwindle.split_bias_directional"),
+                        &t!("layouts_category.dwindle.split_bias_current_window"),
+                    ],
                     "0",
                 );
                 add_bool_option(
@@ -3626,8 +3718,8 @@ impl ConfigWidget {
 
                 add_section(
                     &container,
-                    &t!("layouts_category.master_layout_section_title"),
-                    &t!("layouts_category.master_layout_section_description"),
+                    &t!("layouts_category.master.layout_section_title"),
+                    &t!("layouts_category.master.layout_section_description"),
                     first_section.clone(),
                 );
                 add_guide(&container, "Master-Layout", true);
@@ -3635,16 +3727,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:allow_small_split",
-                    &t!("layouts_category.master_allow_small_split_label"),
-                    &t!("layouts_category.master_allow_small_split_description"),
+                    &t!("layouts_category.master.allow_small_split_label"),
+                    &t!("layouts_category.master.allow_small_split_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "master:special_scale_factor",
-                    &t!("layouts_category.master_special_scale_factor_label"),
-                    &t!("layouts_category.master_special_scale_factor_description"),
+                    &t!("layouts_category.master.special_scale_factor_label"),
+                    &t!("layouts_category.master.special_scale_factor_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -3652,8 +3744,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:mfact",
-                    &t!("layouts_category.master_mfact_label"),
-                    &t!("layouts_category.master_mfact_description"),
+                    &t!("layouts_category.master.mfact_label"),
+                    &t!("layouts_category.master.mfact_description"),
                     "0.55",
                     (0.0, 1.0, 0.01),
                 );
@@ -3661,8 +3753,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:new_status",
-                    &t!("layouts_category.master_new_status_label"),
-                    &t!("layouts_category.master_new_status_description"),
+                    &t!("layouts_category.master.new_status_label"),
+                    &t!("layouts_category.master.new_status_description"),
                     &["master", "slave", "inherit"],
                     "slave",
                 );
@@ -3670,16 +3762,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:new_on_top",
-                    &t!("layouts_category.master_new_on_top_label"),
-                    &t!("layouts_category.master_new_on_top_description"),
+                    &t!("layouts_category.master.new_on_top_label"),
+                    &t!("layouts_category.master.new_on_top_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "master:new_on_active",
-                    &t!("layouts_category.master_new_on_active_label"),
-                    &t!("layouts_category.master_new_on_active_description"),
+                    &t!("layouts_category.master.new_on_active_label"),
+                    &t!("layouts_category.master.new_on_active_description"),
                     &["before", "after", "none"],
                     "none",
                 );
@@ -3687,8 +3779,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:orientation",
-                    &t!("layouts_category.master_orientation_label"),
-                    &t!("layouts_category.master_orientation_description"),
+                    &t!("layouts_category.master.orientation_label"),
+                    &t!("layouts_category.master.orientation_description"),
                     &["left", "right", "top", "bottom", "center"],
                     "left",
                 );
@@ -3696,25 +3788,25 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:inherit_fullscreen",
-                    &t!("layouts_category.master_inherit_fullscreen_label"),
-                    &t!("layouts_category.master_inherit_fullscreen_description"),
+                    &t!("layouts_category.master.inherit_fullscreen_label"),
+                    &t!("layouts_category.master.inherit_fullscreen_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "master:slave_count_for_center_master",
-                    &t!("layouts_category.master_slave_count_for_center_master_label"),
-                    &t!("layouts_category.master_slave_count_for_center_master_description"),
+                    &t!("layouts_category.master.slave_count_for_center_master_label"),
+                    &t!("layouts_category.master.slave_count_for_center_master_description"),
                     "2",
                     (0.0, 10.0, 1.0),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
-                    "center_master_fallback",
-                    &t!("layouts_category.center_master_fallback_label"),
-                    &t!("layouts_category.center_master_fallback_description"),
+                    "master:center_master_fallback",
+                    &t!("layouts_category.master.center_master_fallback_label"),
+                    &t!("layouts_category.master.center_master_fallback_description"),
                     &["left", "right", "top", "bottom"],
                     "left",
                 );
@@ -3722,24 +3814,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:smart_resizing",
-                    &t!("layouts_category.master_smart_resizing_label"),
-                    &t!("layouts_category.master_smart_resizing_description"),
+                    &t!("layouts_category.master.smart_resizing_label"),
+                    &t!("layouts_category.master.smart_resizing_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "master:drop_at_cursor",
-                    &t!("layouts_category.master_drop_at_cursor_label"),
-                    &t!("layouts_category.master_drop_at_cursor_description"),
+                    &t!("layouts_category.master.drop_at_cursor_label"),
+                    &t!("layouts_category.master.drop_at_cursor_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "master:always_keep_position",
-                    &t!("layouts_category.master_always_keep_position_label"),
-                    &t!("layouts_category.master_always_keep_position_description"),
+                    &t!("layouts_category.master.always_keep_position_label"),
+                    &t!("layouts_category.master.always_keep_position_description"),
                     "false",
                 )
             }
@@ -3772,7 +3864,12 @@ impl ConfigWidget {
 
                 let os_text_box = Box::new(Orientation::Vertical, 10);
 
-                let (os_label, os_refresh) = add_info_row(&os_text_box, "OS:", &get_os_info());
+                // let (os_label, os_refresh) = add_info_row(&os_text_box, "OS:", &get_os_info());
+                let (os_label, os_refresh) = add_info_row(
+                    &os_text_box,
+                    &t!("system_info_category.os_label"),
+                    &get_os_info(),
+                );
                 os_refresh.connect_clicked(move |_| {
                     os_label.set_label(&get_os_info());
                 });

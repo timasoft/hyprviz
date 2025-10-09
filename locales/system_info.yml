@@ -1,0 +1,25 @@
+_version: 2
+failed_to_get_version:
+  en: "Failed to get version"
+failed_to_parse_version:
+  en: "Failed to parse version"
+os_information_not_available:
+  en: "OS information not available"
+failed_to_get_kernel_info:
+  en: "Failed to get kernel info"
+cpu_with__cores__model_unknown:
+  en: "CPU with %{n} cores (model unknown)"
+cpu_information_not_available:
+  en: "CPU information not available"
+failed_to_parse_gpu_info:
+  en: "Failed to parse GPU info"
+failed_to_get_gpu_info:
+  en: "Failed to get GPU info"
+failed_to_parse_memory_info:
+  en: "Failed to parse memory info"
+failed_to_get_memory_info_from_/proc/meminfo:
+  en: "Failed to get memory info from /proc/meminfo"
+failed_to_get_memory_info:
+  en: "Failed to get memory info"
+failed_to_get_monitor_info:
+  en: "Failed to get monitor info"
