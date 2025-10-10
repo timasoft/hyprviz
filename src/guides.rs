@@ -62,40 +62,40 @@ pub fn create_guide(name: &str) -> Box {
 fn get_content(name: &str) -> Vec<ContentBlock> {
     let content = match name {
         "Dispatchers" => match locale() {
-            _ => include_str!("../guides/Dispatchers.md"),
+            _ => include_str!("../guides/en/Dispatchers.md"),
         },
         "Dwindle-Layout" => match locale() {
-            _ => include_str!("../guides/Dwindle-Layout.md"),
+            _ => include_str!("../guides/en/Dwindle-Layout.md"),
         },
         "Master-Layout" => match locale() {
-            _ => include_str!("../guides/Master-Layout.md"),
+            _ => include_str!("../guides/en/Master-Layout.md"),
         },
         "Monitors" => match locale() {
-            _ => include_str!("../guides/Monitors.md"),
+            _ => include_str!("../guides/en/Monitors.md"),
         },
         "Workspace-Rules" => match locale() {
-            _ => include_str!("../guides/Workspace-Rules.md"),
+            _ => include_str!("../guides/en/Workspace-Rules.md"),
         },
         "Animations" => match locale() {
-            _ => include_str!("../guides/Animations.md"),
+            _ => include_str!("../guides/en/Animations.md"),
         },
         "Binds" => match locale() {
-            _ => include_str!("../guides/Binds.md"),
+            _ => include_str!("../guides/en/Binds.md"),
         },
         "Gestures" => match locale() {
-            _ => include_str!("../guides/Gestures.md"),
+            _ => include_str!("../guides/en/Gestures.md"),
         },
         "Window-Rules" => match locale() {
-            _ => include_str!("../guides/Window-Rules.md"),
+            _ => include_str!("../guides/en/Window-Rules.md"),
         },
         "Layer-Rules" => match locale() {
-            _ => include_str!("../guides/Layer-Rules.md"),
+            _ => include_str!("../guides/en/Layer-Rules.md"),
         },
         "Execs" => match locale() {
-            _ => include_str!("../guides/Execs.md"),
+            _ => include_str!("../guides/en/Execs.md"),
         },
         "Envs" => match locale() {
-            _ => include_str!("../guides/Envs.md"),
+            _ => include_str!("../guides/en/Envs.md"),
         },
         name => panic!("Invalid content name: {name}"),
     };
