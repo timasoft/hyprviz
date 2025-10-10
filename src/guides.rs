@@ -1,5 +1,6 @@
 use crate::utils::markdown_to_pango;
 use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
+use rust_i18n::locale;
 
 enum ContentBlock {
     Text(String),
@@ -59,69 +60,47 @@ pub fn create_guide(name: &str) -> Box {
 }
 
 fn get_content(name: &str) -> Vec<ContentBlock> {
-    match name {
-        "Dispatchers" => {
-            let content = include_str!("../guides/Dispatchers.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Dwindle-Layout" => {
-            let content = include_str!("../guides/Dwindle-Layout.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Master-Layout" => {
-            let content = include_str!("../guides/Master-Layout.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Monitors" => {
-            let content = include_str!("../guides/Monitors.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Workspace-Rules" => {
-            let content = include_str!("../guides/Workspace-Rules.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Animations" => {
-            let content = include_str!("../guides/Animations.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Binds" => {
-            let content = include_str!("../guides/Binds.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Gestures" => {
-            let content = include_str!("../guides/Gestures.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Window-Rules" => {
-            let content = include_str!("../guides/Window-Rules.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Layer-Rules" => {
-            let content = include_str!("../guides/Layer-Rules.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Execs" => {
-            let content = include_str!("../guides/Execs.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Envs" => {
-            let content = include_str!("../guides/Envs.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
+    let content = match name {
+        "Dispatchers" => match locale() {
+            _ => include_str!("../guides/Dispatchers.md"),
+        },
+        "Dwindle-Layout" => match locale() {
+            _ => include_str!("../guides/Dwindle-Layout.md"),
+        },
+        "Master-Layout" => match locale() {
+            _ => include_str!("../guides/Master-Layout.md"),
+        },
+        "Monitors" => match locale() {
+            _ => include_str!("../guides/Monitors.md"),
+        },
+        "Workspace-Rules" => match locale() {
+            _ => include_str!("../guides/Workspace-Rules.md"),
+        },
+        "Animations" => match locale() {
+            _ => include_str!("../guides/Animations.md"),
+        },
+        "Binds" => match locale() {
+            _ => include_str!("../guides/Binds.md"),
+        },
+        "Gestures" => match locale() {
+            _ => include_str!("../guides/Gestures.md"),
+        },
+        "Window-Rules" => match locale() {
+            _ => include_str!("../guides/Window-Rules.md"),
+        },
+        "Layer-Rules" => match locale() {
+            _ => include_str!("../guides/Layer-Rules.md"),
+        },
+        "Execs" => match locale() {
+            _ => include_str!("../guides/Execs.md"),
+        },
+        "Envs" => match locale() {
+            _ => include_str!("../guides/Envs.md"),
+        },
         name => panic!("Invalid content name: {name}"),
-    }
+    };
+    let lines: Vec<&str> = content.lines().collect();
+    parse_lines(&lines, name)
 }
 
 fn parse_lines(lines: &[&str], guide_name: &str) -> Vec<ContentBlock> {
