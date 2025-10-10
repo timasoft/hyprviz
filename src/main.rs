@@ -1,7 +1,7 @@
 use gtk::{Application, StringList, StringObject, glib, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
-use rust_i18n::{i18n, t};
+use rust_i18n::{available_locales, i18n, t};
 use std::{
     path::{Path, PathBuf},
     {cell::RefCell, fs, rc::Rc},
@@ -21,7 +21,17 @@ mod widget;
 i18n!("locales", fallback = "en");
 
 fn main() {
-    rust_i18n::set_locale(&get_system_locale());
+    {
+        let locale = get_system_locale();
+        if available_locales!().iter().any(|s| &locale == s) {
+            println!("Using locale: {}", locale);
+            rust_i18n::set_locale(&locale);
+        } else {
+            println!("Using default locale: en");
+            rust_i18n::set_locale("en");
+        }
+    }
+
     let app = Application::builder()
         .application_id("io.github.timasoft.hyprviz")
         .build();
