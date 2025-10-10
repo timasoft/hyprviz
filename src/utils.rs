@@ -702,6 +702,14 @@ fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {
     url.to_string()
 }
 
+pub fn get_system_locale() -> String {
+    std::env::var("LC_ALL")
+        .or_else(|_| std::env::var("LC_MESSAGES"))
+        .or_else(|_| std::env::var("LANG"))
+        .map(|s| s.split('_').next().unwrap_or("en").to_string())
+        .unwrap_or_else(|_| "en".to_string())
+}
+
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";

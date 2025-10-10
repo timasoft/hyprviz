@@ -11,7 +11,7 @@ use gtk::{
     Stack, StackSidebar, StringList, StringObject, Switch, Widget, Window, gdk, glib, prelude::*,
 };
 use hyprparser::{HyprlandConfig, parse_config};
-use rust_i18n::t;
+use rust_i18n::{available_locales, locale, set_locale, t};
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -23,9 +23,11 @@ use std::{
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
     config_widgets: HashMap<String, ConfigWidget>,
+    title_label: Label,
     save_button: Button,
     undo_button: Button,
     pub profile_dropdown: DropDown,
+    current_profile_label: Label,
     create_profile_button: Button,
     delete_profile_button: Button,
     clear_backups_button: Button,
@@ -33,6 +35,7 @@ pub struct ConfigGUI {
     load_config_button: Button,
     copy_button: Button,
     search_entry: SearchEntry,
+    locale_dropdown: DropDown,
     changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
     content_box: Box,
     stack: Stack,
@@ -47,9 +50,11 @@ impl ConfigGUI {
             .default_height(600)
             .build();
 
+        let title_label = Label::new(Some(&t!("hyprland_configuration")));
+
         let header_bar = HeaderBar::builder()
             .show_title_buttons(false)
-            .title_widget(&gtk::Label::new(Some(&t!("hyprland_configuration"))))
+            .title_widget(&title_label)
             .build();
 
         let gear_button = Button::from_icon_name("emblem-system-symbolic");
@@ -76,8 +81,8 @@ impl ConfigGUI {
         let create_profile_button = Button::with_label(&t!("create_profile"));
         let delete_profile_button = Button::with_label(&t!("delete_profile"));
         let clear_backups_button = Button::with_label(&t!("clear_backups_files"));
-        let save_config_button = Button::with_label(&t!("save_hyprviz_config"));
         let load_config_button = Button::with_label(&t!("load_hyprviz_config"));
+        let save_config_button = Button::with_label(&t!("save_hyprviz_config"));
         let copy_button = Button::with_label(&t!("copyright"));
 
         gear_menu_box.append(&create_profile_button);
@@ -121,6 +126,19 @@ impl ConfigGUI {
         search_entry.add_controller(key_controller);
 
         header_bar.pack_start(&search_button);
+
+        let locales = available_locales!();
+        let locales_string_list = StringList::new(available_locales!().as_slice());
+        let locale_dropdown =
+            DropDown::new(Some(locales_string_list.clone()), None::<gtk::Expression>);
+
+        let selected_locale_id = locales
+            .iter()
+            .position(|s| &locale().to_string() == s)
+            .unwrap() as u32;
+        locale_dropdown.set_selected(selected_locale_id);
+
+        header_bar.pack_start(&locale_dropdown);
 
         let save_button = Button::with_label(&t!("save"));
         let undo_button = Button::with_label(&t!("undo"));
@@ -168,9 +186,11 @@ impl ConfigGUI {
         ConfigGUI {
             window,
             config_widgets,
+            title_label,
             save_button,
             undo_button,
             profile_dropdown,
+            current_profile_label,
             create_profile_button,
             delete_profile_button,
             clear_backups_button,
@@ -178,6 +198,7 @@ impl ConfigGUI {
             load_config_button,
             copy_button,
             search_entry,
+            locale_dropdown,
             content_box,
             changed_options: Rc::new(RefCell::new(HashMap::new())),
             stack,
@@ -583,6 +604,29 @@ along with this program; if not, see
 <https://www.gnu.org/licenses/old-licenses/gpl-2.0>.",
             );
         });
+
+        let gui_clone = Rc::clone(&gui);
+        gui.borrow()
+            .locale_dropdown
+            .connect_selected_notify(move |dd| {
+                if let Some(selected) = dd.selected_item()
+                    && let Some(string_object) = selected.downcast_ref::<StringObject>()
+                {
+                    let new_locale = string_object.string().to_string();
+                    set_locale(&new_locale);
+
+                    gui_clone.borrow_mut().reload_ui();
+                    gui_clone.borrow().custom_info_popup(
+                        &t!("language_changed"),
+                        &t!("language_changed_to_", language = new_locale),
+                    )
+                } else {
+                    gui_clone.borrow().custom_error_popup(
+                        &t!("failed_to_get_selected_language"),
+                        &t!("failed_to_get_selected_language"),
+                    )
+                }
+            });
 
         let gui_clone = Rc::clone(&gui);
         gui.borrow()
@@ -1146,5 +1190,58 @@ along with this program; if not, see
 
         let new_config = parse_config(&lines.join("\n"));
         *config = new_config;
+    }
+
+    fn reload_ui(&mut self) {
+        let current_profile = {
+            let selected_index = self.profile_dropdown.selected();
+            let model = self.profile_dropdown.model().unwrap();
+
+            if let Some(item) = model.item(selected_index)
+                && let Some(string_object) = item.downcast_ref::<StringObject>()
+            {
+                string_object.string().as_str().to_string()
+            } else {
+                "Default".to_string()
+            }
+        };
+
+        let current_page = self.stack.visible_child_name().map(|n| n.to_string());
+
+        let path = get_config_path(false, "Default");
+        let config_str = match expand_source(&path) {
+            Ok(config) => config,
+            Err(e) => {
+                self.custom_error_popup(
+                    &t!("reading_failed"),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
+                );
+                return;
+            }
+        };
+
+        let parsed_config = parse_config(&config_str);
+        self.load_config(&parsed_config, &current_profile);
+
+        if let Some(page) = current_page
+            && let Some(child) = self.stack.child_by_name(&page)
+        {
+            self.stack.set_visible_child(&child);
+        }
+
+        self.title_label.set_label(&t!("hyprland_configuration"));
+        self.current_profile_label.set_label(&t!("profile"));
+        self.undo_button.set_label(&t!("undo"));
+        self.save_button.set_label(&t!("save"));
+
+        self.create_profile_button.set_label(&t!("create_profile"));
+        self.delete_profile_button.set_label(&t!("delete_profile"));
+        self.clear_backups_button
+            .set_label(&t!("clear_backups_files"));
+        self.load_config_button
+            .set_label(&t!("load_hyprviz_config"));
+        self.save_config_button
+            .set_label(&t!("save_hyprviz_config"));
+        self.copy_button.set_label(&t!("copyright"));
     }
 }

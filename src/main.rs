@@ -9,7 +9,7 @@ use std::{
 use utils::{
     CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
     check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
-    get_current_profile, reload_hyprland, update_source_line,
+    get_current_profile, get_system_locale, reload_hyprland, update_source_line,
 };
 
 mod gui;
@@ -21,6 +21,7 @@ mod widget;
 i18n!("locales", fallback = "en");
 
 fn main() {
+    rust_i18n::set_locale(&get_system_locale());
     let app = Application::builder()
         .application_id("io.github.timasoft.hyprviz")
         .build();

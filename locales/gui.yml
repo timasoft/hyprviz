@@ -80,6 +80,12 @@ successfully_deleted__backup_files:
   en: "Successfully deleted %{n} backup file(s)"
 open:
   en: "Open"
+language_changed:
+  en: "Language Changed"
+language_changed_to_:
+  en: "Language changed to %{language}"
+failed_to_get_selected_language:
+  en: "Failed to get selected language"
 config_loaded:
   en: "Config Loaded"
 hyprviz_configuration_loaded_successfully:
