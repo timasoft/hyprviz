@@ -1,186 +1,275 @@
 _version: 2
 hyprland_configuration:
   en: "Hyprland Configuration"
+  ru: "Конфигурация Hyprland"
 create_profile:
   en: "Create Profile"
+  ru: "Создать профиль"
 delete_profile:
   en: "Delete Profile"
+  ru: "Удалить профиль"
 clear_backups_files:
   en: "Clear Backup Files"
+  ru: "Очистить резервные копии"
 save_hyprviz_config:
   en: "Save HyprViz Config"
+  ru: "Сохранить конфигурацию HyprViz"
 load_hyprviz_config:
   en: "Load HyprViz Config"
+  ru: "Загрузить конфигурацию HyprViz"
 copyright:
   en: "Copyright"
+  ru: "Авторские права"
 save:
   en: "Save"
+  ru: "Сохранить"
 undo:
   en: "Undo"
+  ru: "Отменить"
 profile:
   en: "Profile:"
+  ru: "Профиль:"
 create_new_profile:
   en: "Create New Profile"
+  ru: "Создать новый профиль"
 enter_profile_name:
   en: "Enter Profile Name"
+  ru: "Введите имя профиля"
 new_profile:
   en: "New Profile"
+  ru: "Новый профиль"
 cancel:
   en: "Cancel"
+  ru: "Отмена"
 # create is for gui.rs and widget.rs
 create:
   en: "Create"
+  ru: "Создать"
 invalid_profile_name:
   en: "Invalid Profile Name"
+  ru: "Неверное имя профиля"
 profile_name_cannot_be_empty_or_default:
   en: "Profile name cannot be empty or 'Default'"
+  ru: "Имя профиля не может быть пустым или 'Default'"
 profile_exists:
   en: "Profile Exists"
+  ru: "Профиль существует"
 profile__already_exists:
   en: "Profile '%{name}' already exists"
+  ru: "Профиль '%{name}' уже существует"
 reading_failed:
   en: "Reading failed"
+  ru: "Ошибка чтения"
 failed_to_read_the_default_configuration_file_:
   en: "Failed to read the default configuration file: %{error}"
+  ru: "Не удалось прочитать файл конфигурации по умолчанию: %{error}"
 failed_to_create_profile:
   en: "Failed to create profile"
+  ru: "Не удалось создать профиль"
 failed_to_create_profile_file_:
   en: "Failed to create profile file: %{error}"
+  ru: "Не удалось создать файл профиля: %{error}"
 cannot_delete_profile:
   en: "Cannot delete profile"
+  ru: "Невозможно удалить профиль"
 the_default_profile_cannot_be_deleted:
   en: "The 'Default' profile cannot be deleted"
+  ru: "Профиль 'Default' не может быть удален"
 are_you_sure_you_want_to_delete_the_profile_:
   en: "Are you sure you want to delete the profile '%{name}'?"
+  ru: "Вы уверены, что хотите удалить профиль '%{name}'?"
 failed_to_delete_profile:
   en: "Failed to delete profile"
+  ru: "Не удалось удалить профиль"
 failed_to_delete_profile_file_:
   en: "Failed to delete profile file: %{error}"
+  ru: "Не удалось удалить файл профиля: %{error}"
 no_backup_files:
   en: "No backup files"
+  ru: "Нет файлов резервных копий"
 no_backup_files_found_to_delete:
   en: "No backup files found to delete"
-clear_backup_files:
-  en: "Clear Backup Files"
+  ru: "Файлы резервных копий для удаления не найдены"
 are_you_sure_you_want_to_delete__backup_files:
   en: "Are you sure you want to delete %{n} backup file(s)?"
+  ru: "Вы уверены, что хотите удалить %{n} файл(ов) резервных копий?"
 this_operation_cannot_be_undone:
   en: "This operation cannot be undone"
+  ru: "Эта операция не может быть отменена"
 failed_to_delete__:
   en: "Failed to delete %{file}: %{error}"
+  ru: "Не удалось удалить %{file}: %{error}"
 partial_success:
   en: "Partial Success"
+  ru: "Частичный успех"
 deleted__of__backup_files:
   en: "Deleted %{n} of %{all} backup files"
+  ru: "Удалено %{n} из %{all} файлов резервных копий"
 errors_:
   en: "Errors:\n%{errors}"
+  ru: "Ошибки:\n%{errors}"
 success:
   en: "Success"
+  ru: "Успех"
 successfully_deleted__backup_files:
   en: "Successfully deleted %{n} backup file(s)"
+  ru: "Успешно удалено %{n} файл(ов) резервных копий"
 open:
   en: "Open"
+  ru: "Открыть"
 language_changed:
   en: "Language Changed"
+  ru: "Язык изменен"
 language_changed_to_:
   en: "Language changed to %{language}"
+  ru: "Язык изменен на %{language}"
 failed_to_get_selected_language:
   en: "Failed to get selected language"
+  ru: "Не удалось получить выбранный язык"
 config_loaded:
   en: "Config Loaded"
+  ru: "Конфигурация загружена"
 hyprviz_configuration_loaded_successfully:
   en: "HyprViz configuration loaded successfully."
+  ru: "Конфигурация HyprViz успешно загружена."
 invalid_config:
   en: "Invalid Config"
+  ru: "Неверная конфигурация"
 failed_to_parse_the_configuration_file:
   en: "Failed to parse the configuration file."
+  ru: "Не удалось разобрать файл конфигурации."
 loading_failed:
   en: "Loading Failed"
+  ru: "Загрузка не удалась"
 failed_to_read_the_configuration_file_:
   en: "Failed to read the configuration file: %{error}"
+  ru: "Не удалось прочитать файл конфигурации: %{error}"
 config_saved:
   en: "Config Saved"
+  ru: "Конфигурация сохранена"
 hyprviz_configuration_saved_successfully:
   en: "HyprViz configuration saved successfully."
+  ru: "Конфигурация HyprViz успешно сохранена."
 saving_failed:
   en: "Saving Failed"
+  ru: "Сохранение не удалось"
 failed_to_write_the_configuration_file_:
   en: "Failed to write the configuration file: %{error}"
+  ru: "Не удалось записать файл конфигурации: %{error}"
 serialization_failed:
   en: "Serialization Failed"
+  ru: "Сериализация не удалась"
 failed_to_serialize_the_configuration_:
   en: "Failed to serialize the configuration: %{error}"
+  ru: "Не удалось сериализовать конфигурацию: %{error}"
 failed_to_create_hyprviz_config_file:
   en: "Failed to create hyprviz config file"
+  ru: "Не удалось создать файл конфигурации hyprviz"
 failed_to_create_hyprviz_config_file_:
   en: "Failed to create hyprviz config file: %{error}"
+  ru: "Не удалось создать файл конфигурации hyprviz: %{error}"
 backup_failed:
   en: "Backup Failed"
+  ru: "Резервное копирование не удалось"
 failed_to_create_backup_:
   en: "Failed to create backup: %{error}"
+  ru: "Не удалось создать резервную копию: %{error}"
 failed_to_save_the_configuration_automatically_:
   en: "Failed to save the configuration automatically: %{error}"
+  ru: "Не удалось автоматически сохранить конфигурацию: %{error}"
 no_changes_to_save:
   en: "No changes to save"
+  ru: "Нет изменений для сохранения"
 configuration_restored_from_backup:
   en: "Configuration restored from backup"
+  ru: "Конфигурация восстановлена из резервной копии"
 reload_failed:
   en: "Reload Failed"
+  ru: "Перезагрузка не удалась"
 failed_to_reload_the_configuration_after_undo:
   en: "Failed to reload the configuration after undo."
+  ru: "Не удалось перезагрузить конфигурацию после отмены."
 undo_failed:
   en: "Undo Failed"
+  ru: "Отмена не удалась"
 failed_to_restore_from_backup_:
   en: "Failed to restore from backup: %{error}"
+  ru: "Не удалось восстановить из резервной копии: %{error}"
 no_backup_file_found_save_changes_to_create_a_backup:
   en: "No backup file found. Save changes to create a backup."
+  ru: "Файл резервной копии не найден. Сохраните изменения, чтобы создать резервную копию."
 general:
   en: "General"
+  ru: "Основные"
 decoration:
   en: "Decoration"
+  ru: "Оформление"
 animations_settings:
   en: "Animations Settings"
+  ru: "Настройки анимации"
 input:
   en: "Input"
+  ru: "Ввод"
 gestures_settings:
   en: "Gestures Settings"
+  ru: "Настройки жестов"
 misc:
   en: "Misc"
+  ru: "Разное"
 bind_settings:
   en: "Bind Settings"
+  ru: "Настройки привязок"
 group:
   en: "Group"
+  ru: "Группа"
 layouts:
   en: "Layouts"
+  ru: "Раскладки"
 render:
   en: "Render"
+  ru: "Отрисовка"
 cursor:
   en: "Cursor"
+  ru: "Курсор"
 ecosystem:
   en: "Ecosystem"
+  ru: "Экосистема"
 experimental:
   en: "Experimental"
+  ru: "Экспериментальные"
 debug:
   en: "Debug"
+  ru: "Отладка"
 monitors:
   en: "Monitors"
+  ru: "Мониторы"
 workspaces:
   en: "Workspaces"
+  ru: "Рабочие пространства"
 animations:
   en: "Animations"
+  ru: "Анимации"
 binds:
   en: "Binds"
+  ru: "Привязки"
 gestures:
   en: "Gestures"
+  ru: "Жесты"
 window_rules:
   en: "Window Rules"
+  ru: "Правила окон"
 layer_rules:
   en: "Layer Rules"
+  ru: "Правила слоев"
 execs:
   en: "Execs"
+  ru: "Автозапуск"
 envs:
   en: "Envs"
+  ru: "Переменные окружения"
 all_top_level:
-  en: "All Top Level"
+  en: "Top Level Options"
+  ru: "Опции верхнего уровня"
 system_info:
   en: "System Info"
+  ru: "Системная информация"

@@ -1,47 +1,67 @@
 _version: 2
 file_not_found_~/_:
   en: "File not found: ~/%{file}"
+  ru: "Файл не найден: ~/%{file}"
 creating_failed:
   en: "Creating failed"
+  ru: "Не удалось создать"
 failed_to_create_the_profile_directory_:
   en: "Failed to create the profile directory: %{error}"
+  ru: "Не удалось создать каталог для профилей: %{error}"
 the_profile_directory_is_not_a_directory:
   en: "The profile directory is not a directory"
+  ru: "Каталог для профилей не является каталогом"
 reading_failed:
   en: "Reading failed"
+  ru: "Не удалось прочитать"
 failed_to_read_the_configuration_file_:
   en: "Failed to read the configuration file: %{error}"
+  ru: "Не удалось прочитать конфигурационный файл: %{error}"
 creating_included_file_failed:
   en: "Creating included file failed"
+  ru: "Не удалось создать включаемый файл"
 path_for_included_file_exists_but_is_not_a_regular_file_:
   en: "Path for included file exists but is not a regular file: %{file}"
+  ru: "Путь для включаемого файла существует, но не является обычным файлом: %{file}"
 failed_to_create_parent_directory_for__:
   en: "Failed to create parent directory for %{file}: %{error}"
+  ru: "Не удалось создать родительский каталог для %{file}: %{error}"
 failed_to_create__:
   en: "Failed to create %{file}: %{error}"
-added_source_line_to:
-  en: "Added 'source = ./hyprviz.conf' to"
+  ru: "Не удалось создать %{file}: %{error}"
 saving_failed:
   en: "Saving failed"
+  ru: "Не удалось сохранить"
 failed_to_add_source_line_to__:
   en: "Failed to add 'source = ./hyprviz.conf' to %{file}: %{error}"
+  ru: "Не удалось добавить 'source = ./hyprviz.conf' в %{file}: %{error}"
 available_profiles:
   en: "Available profiles"
+  ru: "Доступные профили"
 loading_config_for_profile:
   en: "Loading config for profile"
+  ru: "Загрузка конфигурации профиля"
 profile_not_found:
   en: "Profile not found"
+  ru: "Профиль не найден"
 profile__was_not_found_in_the_config_folder_:
   en: "Profile '%{name}' was not found in the config folder: %{path}"
+  ru: "Профиль '%{name}' не найден в папке конфигурации: %{path}"
 model_type_error:
   en: "Model type error"
+  ru: "Ошибка типа модели"
 the_dropdown_model_is_not_a_string_list:
   en: "The dropdown model is not a StringList."
+  ru: "Модель выпадающего списка не является StringList."
 missing_model:
   en: "Missing model"
+  ru: "Отсутствует модель"
 the_dropdown_widget_has_no_model_assigned:
   en: "The dropdown widget has no model assigned."
+  ru: "Выпадающему виджету не назначена модель."
 profile_switch_failed:
   en: "Profile switch failed"
+  ru: "Не удалось переключить профиль"
 failed_to_update_config_for_profile__:
   en: "Failed to update config for profile %{profile}: %{error}"
+  ru: "Не удалось обновить конфигурацию для профиля %{profile}: %{error}"

@@ -60,41 +60,54 @@ pub fn create_guide(name: &str) -> Box {
 }
 
 fn get_content(name: &str) -> Vec<ContentBlock> {
+    let current_locale = locale().to_string();
     let content = match name {
-        "Dispatchers" => match locale() {
+        "Dispatchers" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Dispatchers.md"),
             _ => include_str!("../guides/en/Dispatchers.md"),
         },
-        "Dwindle-Layout" => match locale() {
+        "Dwindle-Layout" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Dwindle-Layout.md"),
             _ => include_str!("../guides/en/Dwindle-Layout.md"),
         },
-        "Master-Layout" => match locale() {
+        "Master-Layout" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Master-Layout.md"),
             _ => include_str!("../guides/en/Master-Layout.md"),
         },
-        "Monitors" => match locale() {
+        "Monitors" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Monitors.md"),
             _ => include_str!("../guides/en/Monitors.md"),
         },
-        "Workspace-Rules" => match locale() {
+        "Workspace-Rules" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Workspace-Rules.md"),
             _ => include_str!("../guides/en/Workspace-Rules.md"),
         },
-        "Animations" => match locale() {
+        "Animations" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Animations.md"),
             _ => include_str!("../guides/en/Animations.md"),
         },
-        "Binds" => match locale() {
+        "Binds" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Binds.md"),
             _ => include_str!("../guides/en/Binds.md"),
         },
-        "Gestures" => match locale() {
+        "Gestures" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Gestures.md"),
             _ => include_str!("../guides/en/Gestures.md"),
         },
-        "Window-Rules" => match locale() {
+        "Window-Rules" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Window-Rules.md"),
             _ => include_str!("../guides/en/Window-Rules.md"),
         },
-        "Layer-Rules" => match locale() {
+        "Layer-Rules" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Layer-Rules.md"),
             _ => include_str!("../guides/en/Layer-Rules.md"),
         },
-        "Execs" => match locale() {
+        "Execs" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Execs.md"),
             _ => include_str!("../guides/en/Execs.md"),
         },
-        "Envs" => match locale() {
+        "Envs" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Envs.md"),
             _ => include_str!("../guides/en/Envs.md"),
         },
         name => panic!("Invalid content name: {name}"),

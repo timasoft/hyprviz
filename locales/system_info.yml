@@ -1,25 +1,37 @@
 _version: 2
 failed_to_get_version:
   en: "Failed to get version"
+  ru: "Не удалось получить версию"
 failed_to_parse_version:
   en: "Failed to parse version"
+  ru: "Не удалось распарсить версию"
 os_information_not_available:
   en: "OS information not available"
+  ru: "Информация об ОС недоступна"
 failed_to_get_kernel_info:
   en: "Failed to get kernel info"
+  ru: "Не удалось получить информацию о ядре"
 cpu_with__cores__model_unknown:
   en: "CPU with %{n} cores (model unknown)"
+  ru: "Процессор с %{n} ядрами (модель неизвестна)"
 cpu_information_not_available:
   en: "CPU information not available"
+  ru: "Информация о процессоре недоступна"
 failed_to_parse_gpu_info:
   en: "Failed to parse GPU info"
+  ru: "Не удалось распарсить информацию о GPU"
 failed_to_get_gpu_info:
   en: "Failed to get GPU info"
+  ru: "Не удалось получить информацию о GPU"
 failed_to_parse_memory_info:
   en: "Failed to parse memory info"
+  ru: "Не удалось распарсить информацию о памяти"
 failed_to_get_memory_info_from_/proc/meminfo:
   en: "Failed to get memory info from /proc/meminfo"
+  ru: "Не удалось получить информацию о памяти из /proc/meminfo"
 failed_to_get_memory_info:
   en: "Failed to get memory info"
+  ru: "Не удалось получить информацию о памяти"
 failed_to_get_monitor_info:
   en: "Failed to get monitor info"
+  ru: "Не удалось получить информацию о мониторе"
