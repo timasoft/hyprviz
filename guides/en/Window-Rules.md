@@ -72,22 +72,22 @@ The supported fields for parameters are:
 
 | Field | Description |
 | -------------- | --------------- |
-| class:\[RegEx\] | Windows with `class` matching `RegEx`. |
-| title:\[RegEx\] | Windows with `title` matching `RegEx`. |
-| initialClass:\[RegEx\] | Windows with `initialClass` matching `RegEx`. |
-| initialTitle:\[RegEx\] | Windows with `initialTitle` matching `RegEx`. |
-| tag:\[name\] | Windows with matching `tag`. |
-| xwayland:\[0/1\] | Xwayland windows. |
-| floating:\[0/1\] | Floating windows. |
-| fullscreen:\[0/1\] | Fullscreen windows. |
-| pinned:\[0/1\] | Pinned windows. |
-| focus:\[0/1\] | Currently focused window. |
-| group:\[0/1\] | Grouped windows. |
-| fullscreenstate:\[internal\] \[client\] | Windows with matching `fullscreenstate`. `internal` and `client` can be `*` - any, `0` - none, `1` - maximize, `2` - fullscreen, `3` - maximize and fullscreen. |
-| workspace:\[w\] | Windows on matching workspace. `w` can be `id` or `name:string`. |
-| onworkspace:\[w\] | Windows on matching workspace. `w` can be `id`, `name:string` or `workspace selector`. |
-| content:\[none\|photo\|video\|game\] | Windows with specified content type |
-| xdgtag:\[string\] | Match a window by its xdgTag (see `hyprctl clients` to check if it has one) |
+| class:[RegEx] | Windows with `class` matching `RegEx`. |
+| title:[RegEx] | Windows with `title` matching `RegEx`. |
+| initialClass:[RegEx] | Windows with `initialClass` matching `RegEx`. |
+| initialTitle:[RegEx] | Windows with `initialTitle` matching `RegEx`. |
+| tag:[name] | Windows with matching `tag`. |
+| xwayland:[0/1] | Xwayland windows. |
+| floating:[0/1] | Floating windows. |
+| fullscreen:[0/1] | Fullscreen windows. |
+| pinned:[0/1] | Pinned windows. |
+| focus:[0/1] | Currently focused window. |
+| group:[0/1] | Grouped windows. |
+| fullscreenstate:[internal] [client] | Windows with matching `fullscreenstate`. `internal` and `client` can be `*` - any, `0` - none, `1` - maximize, `2` - fullscreen, `3` - maximize and fullscreen. |
+| workspace:[w] | Windows on matching workspace. `w` can be `id` or `name:string`. |
+| onworkspace:[w] | Windows on matching workspace. `w` can be `id`, `name:string` or `workspace selector`. |
+| content:[none|photo|video|game] | Windows with specified content type |
+| xdgtag:[string] | Match a window by its xdgTag (see `hyprctl clients` to check if it has one) |
 
 Keep in mind that you _have_ to declare at least one field, but not all.
 
@@ -133,22 +133,22 @@ It is not possible to `float` (or any other static rule) a window based on a cha
 | fullscreen | Fullscreens a window. |
 | maximize | Maximizes a window. |
 | persistentsize | Allows size persistence between application launches for floating windows. |
-| fullscreenstate \[internal\] \[client\] | Sets the focused window's fullscreen mode and the one sent to the client, where internal and client can be `0` - none, `1` - maximize, `2` - fullscreen, `3` - maximize and fullscreen. |
-| move \[x\] \[y\] | Moves a floating window (`x, y` -> int or %, e.g. `100` or `20%`.<br>You are also allowed to do `100%-` for the right/bottom anchor, e.g. `100%-20`. In addition, the option supports the subtraction of the window's size with `100%-w-`, e.g. `100%-w-20`. This results in a gap at the right/bottom edge of the screen to the window with the defined subtracted size). <br> Additionally, you can also do `cursor [x] [y]` where x and y are either pixels or percent. Percent is calculated from the window's size. Specify `onscreen` before other parameters to force the window into the screen (e.g. `move onscreen cursor 50% 50%`) |
-| size \[w\] \[h\] | Resizes a floating window (`w, h` -> int or %, e.g. `1280, 720` or `50%, 50%`.<br>`<` and `>` may also be prefixed in conjunction, to specify respectively the maximum or minimum allowed size. (e.g. `<1280` or `<40%` -> maximum size, `>300` or `>10%` -> minimum size).<br>Note that int values in pixels will be scaled by your monitor's scaling factor. |
-| center (\[opt\]) | If the window is floating, will center it on the monitor. Set opt to `1` to respect monitor reserved area. |
+| fullscreenstate [internal] [client] | Sets the focused window's fullscreen mode and the one sent to the client, where internal and client can be `0` - none, `1` - maximize, `2` - fullscreen, `3` - maximize and fullscreen. |
+| move [x] [y] | Moves a floating window (`x, y` -> int or %, e.g. `100` or `20%`.<br>You are also allowed to do `100%-` for the right/bottom anchor, e.g. `100%-20`. In addition, the option supports the subtraction of the window's size with `100%-w-`, e.g. `100%-w-20`. This results in a gap at the right/bottom edge of the screen to the window with the defined subtracted size). <br> Additionally, you can also do `cursor [x] [y]` where x and y are either pixels or percent. Percent is calculated from the window's size. Specify `onscreen` before other parameters to force the window into the screen (e.g. `move onscreen cursor 50% 50%`) |
+| size [w] [h] | Resizes a floating window (`w, h` -> int or %, e.g. `1280, 720` or `50%, 50%`.<br>`<` and `>` may also be prefixed in conjunction, to specify respectively the maximum or minimum allowed size. (e.g. `<1280` or `<40%` -> maximum size, `>300` or `>10%` -> minimum size).<br>Note that int values in pixels will be scaled by your monitor's scaling factor. |
+| center ([opt]) | If the window is floating, will center it on the monitor. Set opt to `1` to respect monitor reserved area. |
 | pseudo | Pseudotiles a window. |
-| monitor \[id\] | Sets the monitor on which a window should open. `id` can be either the id number or the name (e.g. `1` or `DP-1`). |
-| workspace \[w\] | Sets the workspace on which a window should open (for workspace syntax, see [dispatchers->workspaces](../Dispatchers#workspaces)). <br> You can also set \[w\] to `unset`. This will unset all previous workspace rules applied to this window. Additionally you can add `silent` after the workspace to make the window open silently. |
+| monitor [id] | Sets the monitor on which a window should open. `id` can be either the id number or the name (e.g. `1` or `DP-1`). |
+| workspace [w] | Sets the workspace on which a window should open (for workspace syntax, see [dispatchers->workspaces](../Dispatchers#workspaces)). <br> You can also set [w] to `unset`. This will unset all previous workspace rules applied to this window. Additionally you can add `silent` after the workspace to make the window open silently. |
 | noinitialfocus | Disables the initial focus to the window |
 | pin | Pins the window  (i.e. show it on all workspaces). _Note: floating only_. |
-| unset \[rule\] | Unset rules for the matching `PARAMETERS` (exact match required) or a specific `RULE`. No rule defaults to `all`. |
+| unset [rule] | Unset rules for the matching `PARAMETERS` (exact match required) or a specific `RULE`. No rule defaults to `all`. |
 | nomaxsize | Removes max size limitations. Especially useful with windows that report invalid max sizes (e.g. winecfg). |
 | stayfocused | Forces focus on the window as long as it's visible. |
-| group \[options\] | Sets window group properties. See the note below. |
-| suppressevent \[types...\] | Ignores specific events from the window. Events are space separated, and can be: `fullscreen`, `maximize`, `activate`, `activatefocus`, `fullscreenoutput`. |
-| content \[none\|photo\|video\|game\] | Sets content type. |
-| noclosefor \[ms\] | Makes the window uncloseable with the `killactive` dispatcher for a given amount of ms on open. |
+| group [options] | Sets window group properties. See the note below. |
+| suppressevent [types...] | Ignores specific events from the window. Events are space separated, and can be: `fullscreen`, `maximize`, `activate`, `activatefocus`, `fullscreenoutput`. |
+| content [none|photo|video|game] | Sets content type. |
+| noclosefor [ms] | Makes the window uncloseable with the `killactive` dispatcher for a given amount of ms on open. |
 
 ### Dynamic rules
 
@@ -156,70 +156,70 @@ Dynamic rules are re-evaluated every time a property changes.
 
 | Rule | Description |
 | ---- | ----------- |
-| animation \[style\] (\[opt\]) | Forces an animation onto a window, with a selected opt. Opt is optional. |
-| bordercolor \[c\] | Force the bordercolor of the window. <br> Options for c: `color`/`color ... color angle` -> sets the active border color/gradient OR `color color`/`color ... color angle color ... color [angle]` -> sets the active and inactive border color/gradient of the window. See [variables->colors](../Variables#variable-types) for color definition. |
-| idleinhibit \[mode\] | Sets an idle inhibit rule for the window. If active, apps like `hypridle` will not fire. Modes: `none`, `always`, `focus`, `fullscreen`. |
-| opacity \[a\] | Additional opacity multiplier. Options for a: `float` -> sets an overall opacity, `float float` -> sets activeopacity and inactiveopacity respectively, `float float float` -> sets activeopacity, inactiveopacity and fullscreenopacity respectively. |
-| tag \[name\] | Applies the tag `name` to the window, use prefix `+`/`-` to set/unset flag, or no prefix to toggle the flag. |
-| maxsize \[w\] \[h\] | Sets the maximum size (x,y -> int). |
-| minsize \[w\] \[h\] | Sets the minimum size (x,y -> int).|
+| animation [style] ([opt]) | Forces an animation onto a window, with a selected opt. Opt is optional. |
+| bordercolor [c] | Force the bordercolor of the window. <br> Options for c: `color`/`color ... color angle` -> sets the active border color/gradient OR `color color`/`color ... color angle color ... color [angle]` -> sets the active and inactive border color/gradient of the window. See [variables->colors](../Variables#variable-types) for color definition. |
+| idleinhibit [mode] | Sets an idle inhibit rule for the window. If active, apps like `hypridle` will not fire. Modes: `none`, `always`, `focus`, `fullscreen`. |
+| opacity [a] | Additional opacity multiplier. Options for a: `float` -> sets an overall opacity, `float float` -> sets activeopacity and inactiveopacity respectively, `float float float` -> sets activeopacity, inactiveopacity and fullscreenopacity respectively. |
+| tag [name] | Applies the tag `name` to the window, use prefix `+`/`-` to set/unset flag, or no prefix to toggle the flag. |
+| maxsize [w] [h] | Sets the maximum size (x,y -> int). |
+| minsize [w] [h] | Sets the minimum size (x,y -> int).|
 
 The following rules can also be set with [`setprop`](../Dispatchers#setprop):
 
 | Rule | Description |
 | ---- | ----------- |
-| bordersize \[int\] | Sets the border size. |
-| rounding \[int\] | Forces the application to have X pixels of rounding, ignoring the set default (in `decoration:rounding`). Has to be an int. |
-| roundingpower \[float\] | Overrides the rounding power for the window (see `decoration:rounding_power`). |
-| allowsinput \[on\] | Forces an XWayland window to receive input, even if it requests not to do so. (Might fix issues like Game Launchers not receiving focus for some reason) |
-| dimaround \[on\] | Dims everything around the window. Please note that this rule is meant for floating windows and using it on tiled ones may result in strange behavior. |
-| decorate \[on\] | Whether to draw window decorations or not |
-| focusonactivate \[on\] | Whether Hyprland should focus an app that requests to be focused (an `activate` request). |
-| keepaspectratio \[on\] | Forces aspect ratio when resizing window with the mouse. |
-| nearestneighbor \[on\] | Forces the window to use [nearest neighbor](https://en.wikipedia.org/wiki/Image_scaling#Nearest-neighbor_interpolation) filtering. |
-| noanim \[on\] | Disables the animations for the window. |
-| noblur \[on\] | Disables blur for the window. |
-| noborder \[on\] | Disables borders for the window. |
-| nodim \[on\] | Disables window dimming for the window. |
-| nofocus \[on\] | Disables focus to the window. |
-| nofollowmouse \[on\] | Prevents the window from being focused when the mouse moves over it when `input:follow_mouse=1` is set. |
-| nomaxsize \[on\] | Disables max size for the window. |
-| norounding \[on\] | Disables rounding for the window. |
-| noshadow \[on\] | Disables shadows for the window. |
-| noshortcutsinhibit \[on\] | Disallows the app from [inhibiting your shortcuts](https://wayland.app/protocols/keyboard-shortcuts-inhibit-unstable-v1). |
-| opaque \[on\] | Forces the window to be opaque. |
-| forcergbx \[on\] | Forces Hyprland to ignore the alpha channel on the whole window's surfaces, effectively making it _actually, fully 100% opaque_. |
-| syncfullscreen \[on\] | Whether the fullscreen mode should always be the same as the one sent to the window (will only take effect on the next fullscreen mode change). |
-| immediate \[on\] | Forces the window to allow tearing. See [the Tearing page](../Tearing). |
-| xray \[on\] | Sets blur xray mode for the window. |
+| bordersize [int] | Sets the border size. |
+| rounding [int] | Forces the application to have X pixels of rounding, ignoring the set default (in `decoration:rounding`). Has to be an int. |
+| roundingpower [float] | Overrides the rounding power for the window (see `decoration:rounding_power`). |
+| allowsinput [on] | Forces an XWayland window to receive input, even if it requests not to do so. (Might fix issues like Game Launchers not receiving focus for some reason) |
+| dimaround [on] | Dims everything around the window. Please note that this rule is meant for floating windows and using it on tiled ones may result in strange behavior. |
+| decorate [on] | Whether to draw window decorations or not |
+| focusonactivate [on] | Whether Hyprland should focus an app that requests to be focused (an `activate` request). |
+| keepaspectratio [on] | Forces aspect ratio when resizing window with the mouse. |
+| nearestneighbor [on] | Forces the window to use [nearest neighbor](https://en.wikipedia.org/wiki/Image_scaling#Nearest-neighbor_interpolation) filtering. |
+| noanim [on] | Disables the animations for the window. |
+| noblur [on] | Disables blur for the window. |
+| noborder [on] | Disables borders for the window. |
+| nodim [on] | Disables window dimming for the window. |
+| nofocus [on] | Disables focus to the window. |
+| nofollowmouse [on] | Prevents the window from being focused when the mouse moves over it when `input:follow_mouse=1` is set. |
+| nomaxsize [on] | Disables max size for the window. |
+| norounding [on] | Disables rounding for the window. |
+| noshadow [on] | Disables shadows for the window. |
+| noshortcutsinhibit [on] | Disallows the app from [inhibiting your shortcuts](https://wayland.app/protocols/keyboard-shortcuts-inhibit-unstable-v1). |
+| opaque [on] | Forces the window to be opaque. |
+| forcergbx [on] | Forces Hyprland to ignore the alpha channel on the whole window's surfaces, effectively making it _actually, fully 100% opaque_. |
+| syncfullscreen [on] | Whether the fullscreen mode should always be the same as the one sent to the window (will only take effect on the next fullscreen mode change). |
+| immediate [on] | Forces the window to allow tearing. See [the Tearing page](../Tearing). |
+| xray [on] | Sets blur xray mode for the window. |
 | renderunfocused | Forces the window to think it's being rendered when it's not visible. See also [Variables - Misc](../Variables/#Misc) for setting `render_unfocused_fps`. |
-| scrollmouse \[float\] | Forces the window to override the variable `input:scroll_factor`. |
-| scrolltouchpad \[float\] | Forces the window to override the variable `input:touchpad:scroll_factor`. |
-| noscreenshare \[on\] | Hides the window and its popups from screen sharing by drawing black rectangles in their place. The rectangles are drawn even if other windows are above. |
-| novrr \[on\] | Disables VRR for the window. Only works when [`misc:vrr`](../Variables/#Misc) is set to `2` or `3`. |
+| scrollmouse [float] | Forces the window to override the variable `input:scroll_factor`. |
+| scrolltouchpad [float] | Forces the window to override the variable `input:touchpad:scroll_factor`. |
+| noscreenshare [on] | Hides the window and its popups from screen sharing by drawing black rectangles in their place. The rectangles are drawn even if other windows are above. |
+| novrr [on] | Disables VRR for the window. Only works when [`misc:vrr`](../Variables/#Misc) is set to `2` or `3`. |
 
 {{< callout type=info >}}
 
-When using window rules, \[on\] can be set to `0` for _disabled_, `1` for _enabled_, or left blank to use the default value.
+When using window rules, [on] can be set to `0` for _disabled_, `1` for _enabled_, or left blank to use the default value.
 
-When using `setprop`, \[on\] can be set to `0` for _disabled_, `1` for _enabled_,
+When using `setprop`, [on] can be set to `0` for _disabled_, `1` for _enabled_,
 `toggle` to toggle the state or `unset` to unset previous values.
 
-When using `setprop`, \[int\] can also be `unset` to unset previous
+When using `setprop`, [int] can also be `unset` to unset previous
 values.
 
 {{< /callout >}}
 
 ### `group` window rule options
 
-- `set` \[`always`\] - Open window as a group.
+- `set` [`always`] - Open window as a group.
 - `new` - Shorthand for `barred set`.
-- `lock` \[`always`\] - Lock the group that added this window. Use with `set` or
+- `lock` [`always`] - Lock the group that added this window. Use with `set` or
   `new` (e.g. `new lock`) to create a new locked group.
 - `barred` - Do not automatically group the window into the focused unlocked group.
 - `deny` - Do not allow the window to be toggled as or added to group (see `denywindowfromgroup` dispatcher).
 - `invade` - Force open window in the locked group.
-- `override` \[other options\] - Override other `group` rules, e.g. You can make all windows in a particular workspace open as a group, and use `group override barred` to make windows with specific titles open as normal windows.
+- `override` [other options] - Override other `group` rules, e.g. You can make all windows in a particular workspace open as a group, and use `group override barred` to make windows with specific titles open as normal windows.
 - `unset` - Clear all `group` rules.
 
 {{< callout type=info >}}

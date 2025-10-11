@@ -328,7 +328,7 @@ Let's take OBS as an example: the "Start/Stop Recording" keybind is set to
 <key>SUPER</key> + <key>F10</key>, to make it work globally, simply add:
 
 ```ini
-bind = SUPER, F10, pass, class:^(com\.obsproject\.Studio)$
+bind = SUPER, F10, pass, class:^(com.obsproject.Studio)$
 ```
 
 to your config and you're done.
@@ -343,7 +343,7 @@ bind = , mouse:276, pass, class:^(TeamSpeak 3)$  # Pass MOUSE5 to TeamSpeak3.
 You may also add shortcuts, where other keys are passed to the window.
 
 ```ini
-bind = SUPER, F10, sendshortcut, SUPER, F4, class:^(com\.obsproject\.Studio)$  # Send SUPER + F4 to OBS when SUPER + F10 is pressed.
+bind = SUPER, F10, sendshortcut, SUPER, F4, class:^(com.obsproject.Studio)$  # Send SUPER + F4 to OBS when SUPER + F10 is pressed.
 ```
 
 {{< callout type=warning >}}
@@ -464,6 +464,24 @@ submap = main_submap
 # /nested_two
 
 bind = , escape, submap, reset
+submap = reset
+```
+
+### Automatically close a submap on dispatch
+
+Submaps can be automatically closed or sent to another submap by appending ``,`` followed by a submap or _reset_.
+
+```ini
+bind = SUPER,a, submap, submapA
+
+# Sets the submap to submapB after pressing a.
+submap = submapA, submapB
+bind = ,a,exec, someCoolThing.sh
+submap = reset
+
+# Reset submap to default after pressing a.
+submap = submapB, reset
+bind = ,a,exec, someOtherCoolThing.sh
 submap = reset
 ```
 
