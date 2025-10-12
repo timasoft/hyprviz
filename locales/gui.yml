@@ -145,7 +145,7 @@ deleted__of__backup_files:
 errors_:
   en: "Errors:\n%{errors}"
   ru: "Ошибки:\n%{errors}"
-  zh-CN: "错误：\\n%{errors}"
+  zh-CN: "错误：\n%{errors}"
 success:
   en: "Success"
   ru: "Успех"
