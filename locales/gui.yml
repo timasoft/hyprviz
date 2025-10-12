@@ -300,7 +300,7 @@ group:
   zh-CN: "组"
 layouts:
   en: "Layouts"
-  ru: "Раскладки"
+  ru: "Лайауты"
   zh-CN: "布局"
 render:
   en: "Render"

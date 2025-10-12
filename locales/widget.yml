@@ -61,7 +61,7 @@ general_category.layout_label:
   zh-CN: "布局"
 general_category.layout_description:
   en: "Which layout to use (see the layouts section for information)."
-  ru: "Какой лайаут использовать (см. раздел раскладок для получения информации)."
+  ru: "Какой лайаут использовать (см. раздел лайаутов для получения информации)."
   zh-CN: "使用哪个布局（请参阅布局部分了解信息）。"
 
 general_category.gaps_section_title:
