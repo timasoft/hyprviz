@@ -1,5 +1,5 @@
 use crate::utils::markdown_to_pango;
-use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
+use gtk::{pango::WrapMode, prelude::*, Align, Box, Frame, Grid, Label, Orientation};
 use rust_i18n::locale;
 
 enum ContentBlock {
@@ -64,50 +64,62 @@ fn get_content(name: &str) -> Vec<ContentBlock> {
     let content = match name {
         "Dispatchers" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Dispatchers.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Dispatchers.md"),
             _ => include_str!("../guides/en/Dispatchers.md"),
         },
         "Dwindle-Layout" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Dwindle-Layout.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Dwindle-Layout.md"),
             _ => include_str!("../guides/en/Dwindle-Layout.md"),
         },
         "Master-Layout" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Master-Layout.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Master-Layout.md"),
             _ => include_str!("../guides/en/Master-Layout.md"),
         },
         "Monitors" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Monitors.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Monitors.md"),
             _ => include_str!("../guides/en/Monitors.md"),
         },
         "Workspace-Rules" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Workspace-Rules.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Workspace-Rules.md"),
             _ => include_str!("../guides/en/Workspace-Rules.md"),
         },
         "Animations" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Animations.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Animations.md"),
             _ => include_str!("../guides/en/Animations.md"),
         },
         "Binds" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Binds.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Binds.md"),
             _ => include_str!("../guides/en/Binds.md"),
         },
         "Gestures" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Gestures.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Gestures.md"),
             _ => include_str!("../guides/en/Gestures.md"),
         },
         "Window-Rules" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Window-Rules.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Window-Rules.md"),
             _ => include_str!("../guides/en/Window-Rules.md"),
         },
         "Layer-Rules" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Layer-Rules.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Layer-Rules.md"),
             _ => include_str!("../guides/en/Layer-Rules.md"),
         },
         "Execs" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Execs.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Execs.md"),
             _ => include_str!("../guides/en/Execs.md"),
         },
         "Envs" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Envs.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Envs.md"),
             _ => include_str!("../guides/en/Envs.md"),
         },
         name => panic!("Invalid content name: {name}"),
