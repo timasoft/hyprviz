@@ -1,3 +1,4 @@
+use rust_i18n::t;
 use std::{
     cmp::Ordering,
     collections::HashSet,
@@ -55,17 +56,15 @@ pub fn get_latest_version(repo: &str) -> String {
                         {
                             return version.to_string();
                         }
-                        "Version parse failed".to_string()
+                        t!("version_parse_failed").to_string()
                     }
-                    Err(_) => "JSON parse error".to_string(),
+                    Err(_) => t!("json_parse_error").to_string(),
                 }
             } else {
-                format!("HTTP error: {}", response.status_code)
+                t!("http_error", status_code = response.status_code).to_string()
             }
         }
-        Err(e) => {
-            format!("Request failed: {}", e)
-        }
+        Err(e) => t!("request_failed", error = e).to_string(),
     }
 }
 
@@ -675,6 +674,8 @@ fn escape_pango(text: &str) -> String {
         .replace("<<", "&lt;<")
         // HARDCODED PATTERNS
         .replace("<NAME>", "&lt;NAME&gt;")
+        .replace("<ИМЯ>", "&lt;ИМЯ&gt;")
+        .replace("<名称>", "&lt;名称&gt;")
         .replace("<1280", "&lt;1280")
         .replace("<40%", "&lt;40%")
         .replace(
@@ -701,6 +702,14 @@ fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {
     }
 
     url.to_string()
+}
+
+pub fn get_system_locale() -> String {
+    std::env::var("LC_ALL")
+        .or_else(|_| std::env::var("LC_MESSAGES"))
+        .or_else(|_| std::env::var("LANG"))
+        .map(|s| s.split('_').next().unwrap_or("en").to_string())
+        .unwrap_or_else(|_| "en".to_string())
 }
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";

@@ -4,6 +4,7 @@ use gtk::{
     StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
+use rust_i18n::t;
 use std::{
     cell::RefCell,
     cmp::Ordering,
@@ -84,9 +85,9 @@ pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button
 
     let refresh_button = Button::from_icon_name("view-refresh-symbolic");
     if label.to_lowercase().contains("version") {
-        refresh_button.set_tooltip_text(Some("Check if there is a new version available"));
+        refresh_button.set_tooltip_text(Some(&t!("check_if_there_is_a_new_version_available")));
     } else {
-        refresh_button.set_tooltip_text(Some("Refresh"));
+        refresh_button.set_tooltip_text(Some(&t!("refresh")));
     }
     refresh_button.set_valign(gtk::Align::Center);
     refresh_button.set_has_frame(false);
@@ -157,7 +158,7 @@ fn add_dropdown_option(
     dropdown.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -250,7 +251,7 @@ fn add_bool_option(
     switch.set_valign(gtk::Align::Center);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -334,7 +335,7 @@ fn add_bool_int_option(
     switch.set_valign(gtk::Align::Center);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -423,7 +424,7 @@ fn add_int_option(
     spin_button.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -510,7 +511,7 @@ fn add_float_option(
     spin_button.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -594,7 +595,7 @@ fn add_string_option(
     entry.set_width_request(100);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -695,7 +696,7 @@ fn add_color_option(
     }
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some("Reset to default"));
+    reset_button.set_tooltip_text(Some(&t!("reset_to_default")));
     reset_button.set_valign(gtk::Align::Center);
     reset_button.set_has_frame(false);
 
@@ -823,7 +824,7 @@ fn append_option_row(
     boxline.append(&value_entry);
 
     let delete_button = Button::from_icon_name("edit-delete-symbolic");
-    delete_button.set_tooltip_text(Some("Delete this option"));
+    delete_button.set_tooltip_text(Some(&t!("delete_this_option")));
     delete_button.set_valign(gtk::Align::Center);
     delete_button.set_has_frame(false);
 
@@ -859,7 +860,7 @@ fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
     let title_label = Label::new(None);
     title_label.set_halign(gtk::Align::Start);
     title_label.add_css_class("heading");
-    title_label.set_markup("Guide");
+    title_label.set_markup(&t!("guide"));
 
     expander.set_label_widget(Some(&title_label));
 
@@ -878,20 +879,27 @@ fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
 fn update_version_label(label: &Label, repo: &str, version: &str) {
     let latest_version = get_latest_version(repo);
     let version_str = if !latest_version.starts_with("v") {
-        format!("{} (Unable to get latest version)", version)
+        format!("{} ( {} )", version, &t!("unable_to_get_latest_version"))
     } else {
         match compare_versions(version, &latest_version) {
             Ordering::Greater => {
                 format!(
-                    "{} (Your version is greater than latest ({}) )",
-                    version, latest_version
+                    "{} ( {} )",
+                    version,
+                    &t!("your_version_is_greater_than_latest_()", v = latest_version),
+                    // &t!("your_version_is_greater_than_latest"),
+                    // latest_version
                 )
             }
             Ordering::Less => {
-                format!("{} (New version available ({}) )", version, latest_version)
+                format!(
+                    "{} ( {} )",
+                    version,
+                    &t!("new_version_available_()", v = latest_version),
+                )
             }
             Ordering::Equal => {
-                format!("{} (Your version is up to date)", version)
+                format!("{} ( {} )", version, &t!("your_version_is_up_to_date"))
             }
         }
     };
@@ -977,38 +985,39 @@ impl ConfigWidget {
             "general" => {
                 add_section(
                     &container,
-                    "General Settings",
-                    "Configure general behavior.",
+                    &t!("general_category.first_section_title"),
+                    &t!("general_category.first_section_description"),
                     first_section.clone(),
                 );
 
                 add_section(
                     &container,
-                    "Layout",
-                    "Choose the default layout.",
+                    &t!("general_category.layout_section_title"),
+                    &t!("general_category.layout_section_description"),
                     first_section.clone(),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "layout",
-                    "Layout",
-                    "Which layout to use (see the layouts section for information).",
+                    &t!("general_category.layout_label"),
+                    &t!("general_category.layout_description"),
                     &["dwindle", "master"],
                     "dwindle",
                 );
+
                 add_section(
                     &container,
-                    "Gaps",
-                    "Change gaps in & out, workspaces.",
+                    &t!("general_category.gaps_section_title"),
+                    &t!("general_category.gaps_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "gaps_in",
-                    "Gaps In",
-                    "Gaps between windows, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
+                    &t!("general_category.gaps_in_label"),
+                    &t!("general_category.gaps_in_description"),
                     "5",
                     (0.0, 500.0, 1.0),
                 );
@@ -1016,8 +1025,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "gaps_out",
-                    "Gaps Out",
-                    "Gaps between windows and monitor edges, also supports css style gaps (top, right, bottom, left -> 5,10,15,20)",
+                    &t!("general_category.gaps_out_label"),
+                    &t!("general_category.gaps_out_description"),
                     "20",
                     (0.0, 500.0, 1.0),
                 );
@@ -1025,8 +1034,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "float_gaps",
-                    "Float Gaps",
-                    "Gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20).\n-1 means default",
+                    &t!("general_category.float_gaps_label"),
+                    &t!("general_category.float_gaps_description"),
                     "0",
                     (0.0, 500.0, 1.0),
                 );
@@ -1034,24 +1043,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "gaps_workspaces",
-                    "Gaps Workspaces",
-                    "Gaps between workspaces.\nStacks with gaps_out.",
+                    &t!("general_category.gaps_workspaces_label"),
+                    &t!("general_category.gaps_workspaces_description"),
                     "0",
                     (0.0, 100.0, 1.0),
                 );
 
                 add_section(
                     &container,
-                    "Borders",
-                    "Size, resize, floating...",
+                    &t!("general_category.borders_section_title"),
+                    &t!("general_category.borders_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "border_size",
-                    "Border Size",
-                    "Size of the border around windows",
+                    &t!("general_category.border_size_label"),
+                    &t!("general_category.border_size_description"),
                     "1",
                     (0.0, 20.0, 1.0),
                 );
@@ -1059,30 +1068,30 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "no_border_on_floating",
-                    "No Border on Floating",
-                    "Disable borders for floating windows",
+                    &t!("general_category.no_border_on_floating_label"),
+                    &t!("general_category.no_border_on_floating_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "resize_on_border",
-                    "Resize on Border",
-                    "Enables resizing windows by clicking and dragging on borders and gaps",
+                    &t!("general_category.resize_on_border_label"),
+                    &t!("general_category.resize_on_border_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "resize_corner",
-                    "Resize Corner",
-                    "Force floating windows to use a specific corner when being resized.",
+                    &t!("general_category.resize_corner_label"),
+                    &t!("general_category.resize_corner_description"),
                     &[
-                        "Disabled",
-                        "Top Left",
-                        "Top Right",
-                        "Bottom Right",
-                        "Bottom Left",
+                        &t!("general_category.resize_corner_disabled"),
+                        &t!("general_category.resize_corner_top_left"),
+                        &t!("general_category.resize_corner_top_right"),
+                        &t!("general_category.resize_corner_bottom_right"),
+                        &t!("general_category.resize_corner_bottom_left"),
                     ],
                     "0",
                 );
@@ -1090,8 +1099,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "extend_border_grab_area",
-                    "Extend Border Grab Area",
-                    "Extends the area around the border where you can click and drag on, only used when general:resize_on_border is on.",
+                    &t!("general_category.extend_border_grab_area_label"),
+                    &t!("general_category.extend_border_grab_area_description"),
                     "15",
                     (0.0, 100.0, 1.0),
                 );
@@ -1099,31 +1108,31 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "hover_icon_on_border",
-                    "Hover Icon on Border",
-                    "Show a cursor icon when hovering over borders, only used when general:resize_on_border is on.",
+                    &t!("general_category.hover_icon_on_border_label"),
+                    &t!("general_category.hover_icon_on_border_description"),
                     "true",
                 );
 
                 add_section(
                     &container,
-                    "Snap",
-                    "Configure snap behavior.",
+                    &t!("general_category.snap.section_title"),
+                    &t!("general_category.snap.section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "snap:enabled",
-                    "Enabled",
-                    "Enable snapping for floating windows",
+                    &t!("general_category.snap.enabled_label"),
+                    &t!("general_category.snap.enabled_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "snap:window_gap",
-                    "Window Gap",
-                    "Minimum gap in pixels between windows before snapping",
+                    &t!("general_category.snap.window_gap_label"),
+                    &t!("general_category.snap.window_gap_description"),
                     "10",
                     (0.0, 100.0, 1.0),
                 );
@@ -1131,8 +1140,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "snap:monitor_gap",
-                    "Monitor Gap",
-                    "Minimum gap in pixels between window and monitor edges before snapping",
+                    &t!("general_category.snap.monitor_gap_label"),
+                    &t!("general_category.snap.monitor_gap_description"),
                     "10",
                     (0.0, 100.0, 1.0),
                 );
@@ -1140,94 +1149,94 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "snap:border_overlap",
-                    "Border Overlap",
-                    "If true, windows snap such that only one border’s worth of space is between them",
+                    &t!("general_category.snap.border_overlap_label"),
+                    &t!("general_category.snap.border_overlap_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "snap:respect_gaps",
-                    "Respect Gaps",
-                    "If true, snapping will respect gaps between windows(set in general:gaps_in)",
+                    &t!("general_category.snap.respect_gaps_label"),
+                    &t!("general_category.snap.respect_gaps_description"),
                     "false",
                 );
 
                 add_section(
                     &container,
-                    "Other stuff",
-                    "Some other settings.",
+                    &t!("general_category.other_stuff_section_title"),
+                    &t!("general_category.other_stuff_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "no_focus_fallback",
-                    "No Focus Fallback",
-                    "If true, will not fall back to the next available window when moving focus in a direction where no window was found.",
+                    &t!("general_category.no_focus_fallback_label"),
+                    &t!("general_category.no_focus_fallback_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "allow_tearing",
-                    "Allow Tearing",
-                    "Master switch for allowing tearing to occur.\nSee the Hyprland's Tearing page.",
+                    &t!("general_category.allow_tearing_label"),
+                    &t!("general_category.allow_tearing_description"),
                     "false",
                 );
 
                 add_section(
                     &container,
-                    "Colors",
-                    "Change borders colors.",
+                    &t!("general_category.colors_section_title"),
+                    &t!("general_category.colors_section_description"),
                     first_section.clone(),
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.inactive_border",
-                    "Inactive Border Color",
-                    "Border color for inactive windows",
+                    &t!("general_category.col_inactive_border_label"),
+                    &t!("general_category.col_inactive_border_description"),
                     "#444444FF",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.active_border",
-                    "Active Border Color",
-                    "Border color for the active window",
+                    &t!("general_category.col_active_border_label"),
+                    &t!("general_category.col_active_border_description"),
                     "#FFFFFFFF",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.nogroup_border",
-                    "No Group Border Color",
-                    "Inactive border color for window that cannot be added to a group (see denywindowfromgroup dispatcher)",
+                    &t!("general_category.col_nogroup_border_label"),
+                    &t!("general_category.col_nogroup_border_description"),
                     "#FFAAFFFF",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.nogroup_border_active",
-                    "No Group Active Border Color",
-                    "Active border color for window that cannot be added to a group",
+                    &t!("general_category.col_nogroup_border_active_label"),
+                    &t!("general_category.col_nogroup_border_active_description"),
                     "#FF00FFFF",
                 );
             }
             "decoration" => {
                 add_section(
                     &container,
-                    "Window Decoration",
-                    "Configure window appearance.",
+                    &t!("decoration_category.window_decoration_section_title"),
+                    &t!("decoration_category.window_decoration_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "rounding",
-                    "Rounding",
-                    "Rounded corners' radius (in layout px)",
+                    &t!("decoration_category.rounding_label"),
+                    &t!("decoration_category.rounding_description"),
                     "0",
                     (0.0, 20.0, 1.0),
                 );
@@ -1235,8 +1244,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "rounding_power",
-                    "Rounding Power",
-                    "Adjusts the curve used for rounding corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle.\n[2.0 - 10.0]",
+                    &t!("decoration_category.rounding_power_label"),
+                    &t!("decoration_category.rounding_power_description"),
                     "2.0",
                     (2.0, 10.0, 0.1),
                 );
@@ -1244,8 +1253,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "active_opacity",
-                    "Active Opacity",
-                    "Opacity of active windows.\n[0.0 - 1.0]",
+                    &t!("decoration_category.active_opacity_label"),
+                    &t!("decoration_category.active_opacity_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1253,8 +1262,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "inactive_opacity",
-                    "Inactive Opacity",
-                    "Opacity of inactive windows.\n[0.0 - 1.0]",
+                    &t!("decoration_category.inactive_opacity_label"),
+                    &t!("decoration_category.inactive_opacity_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1262,8 +1271,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "fullscreen_opacity",
-                    "Fullscreen Opacity",
-                    "Opacity of fullscreen windows.\n[0.0 - 1.0]",
+                    &t!("decoration_category.fullscreen_opacity_label"),
+                    &t!("decoration_category.fullscreen_opacity_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1271,16 +1280,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dim_inactive",
-                    "Dim Inactive",
-                    "Enables dimming of inactive windows",
+                    &t!("decoration_category.dim_inactive_label"),
+                    &t!("decoration_category.dim_inactive_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "dim_strength",
-                    "Dim Strength",
-                    "How much inactive windows should be dimmed.\n[0.0 - 1.0]",
+                    &t!("decoration_category.dim_strength_label"),
+                    &t!("decoration_category.dim_strength_description"),
                     "0.5",
                     (0.0, 1.0, 0.01),
                 );
@@ -1288,8 +1297,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dim_special",
-                    "Dim Special",
-                    "How much to dim the rest of the screen by when a special workspace is open.\n[0.0 - 1.0]",
+                    &t!("decoration_category.dim_special_label"),
+                    &t!("decoration_category.dim_special_description"),
                     "0.2",
                     (0.0, 1.0, 0.01),
                 );
@@ -1297,8 +1306,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dim_around",
-                    "Dim Around",
-                    "How much the dimaround window rule should dim by.\n[0.0 - 1.0]",
+                    &t!("decoration_category.dim_around_label"),
+                    &t!("decoration_category.dim_around_description"),
                     "0.4",
                     (0.0, 1.0, 0.01),
                 );
@@ -1306,39 +1315,39 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "screen_shader",
-                    "Screen Shader",
-                    "A path to a custom shader to be applied at the end of rendering.\nSee examples/screenShader.frag for an example.",
+                    &t!("decoration_category.screen_shader_label"),
+                    &t!("decoration_category.screen_shader_description"),
                     "",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "border_part_of_window",
-                    "Border Part of Window",
-                    "Whether the window border should be a part of the window",
+                    &t!("decoration_category.border_part_of_window_label"),
+                    &t!("decoration_category.border_part_of_window_description"),
                     "true",
                 );
 
                 add_section(
                     &container,
-                    "Blur",
-                    "Configure blur settings.",
+                    &t!("decoration_category.blur.section_title"),
+                    &t!("decoration_category.blur.section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:enabled",
-                    "Blur Enabled",
-                    "Enable kawase window background blur",
+                    &t!("decoration_category.blur.enabled_label"),
+                    &t!("decoration_category.blur.enabled_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "blur:size",
-                    "Blur Size",
-                    "Blur size (distance)",
+                    &t!("decoration_category.blur.size_label"),
+                    &t!("decoration_category.blur.size_description"),
                     "8",
                     (1.0, 100.0, 1.0),
                 );
@@ -1346,8 +1355,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:passes",
-                    "Blur Passes",
-                    "The amount of passes to perform",
+                    &t!("decoration_category.blur.passes_label"),
+                    &t!("decoration_category.blur.passes_description"),
                     "1",
                     (1.0, 10.0, 1.0),
                 );
@@ -1355,32 +1364,32 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:ignore_opacity",
-                    "Blur Ignore Opacity",
-                    "Make the blur layer ignore the opacity of the window",
+                    &t!("decoration_category.blur.ignore_opacity_label"),
+                    &t!("decoration_category.blur.ignore_opacity_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:new_optimizations",
-                    "Blur New Optimizations",
-                    "Whether to enable further optimizations to the blur.\nRecommended to leave on, as it will massively improve performance.",
+                    &t!("decoration_category.blur.new_optimizations_label"),
+                    &t!("decoration_category.blur.new_optimizations_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:xray",
-                    "Blur X-Ray",
-                    "If enabled, floating windows will ignore tiled windows in their blur.\nOnly available if blur_new_optimizations is true.\nWill reduce overhead on floating blur significantly.",
+                    &t!("decoration_category.blur.xray_label"),
+                    &t!("decoration_category.blur.xray_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "blur:noise",
-                    "Blur Noise",
-                    "How much noise to apply.\n[0.0 - 1.0]",
+                    &t!("decoration_category.blur.noise_label"),
+                    &t!("decoration_category.blur.noise_description"),
                     "0.0117",
                     (0.0, 1.0, 0.01),
                 );
@@ -1388,8 +1397,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:contrast",
-                    "Blur Contrast",
-                    "Contrast modulation for blur.\n[0.0 - 2.0]",
+                    &t!("decoration_category.blur.contrast_label"),
+                    &t!("decoration_category.blur.contrast_description"),
                     "0.8916",
                     (0.0, 2.0, 0.01),
                 );
@@ -1397,8 +1406,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:brightness",
-                    "Blur Brightness",
-                    "Brightness modulation for blur.\n[0.0 - 2.0]",
+                    &t!("decoration_category.blur.brightness_label"),
+                    &t!("decoration_category.blur.brightness_description"),
                     "0.8172",
                     (0.0, 2.0, 0.01),
                 );
@@ -1406,8 +1415,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:vibrancy",
-                    "Blur Vibrancy",
-                    "Increase saturation of blurred colors.\n[0.0 - 1.0]",
+                    &t!("decoration_category.blur.vibrancy_label"),
+                    &t!("decoration_category.blur.vibrancy_description"),
                     "0.1696",
                     (0.0, 1.0, 0.01),
                 );
@@ -1415,8 +1424,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:vibrancy_darkness",
-                    "Blur Vibrancy Darkness",
-                    "How strong the effect of vibrancy is on dark areas .\n[0.0 - 1.0]",
+                    &t!("decoration_category.blur.vibrancy_darkness_label"),
+                    &t!("decoration_category.blur.vibrancy_darkness_description"),
                     "0.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1424,24 +1433,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:special",
-                    "Blur Special",
-                    "Whether to blur behind the special workspace (note: expensive)",
+                    &t!("decoration_category.blur.special_label"),
+                    &t!("decoration_category.blur.special_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "blur:popups",
-                    "Blur Popups",
-                    "Whether to blur popups (e.g.\nright-click menus)",
+                    &t!("decoration_category.blur.popups_label"),
+                    &t!("decoration_category.blur.popups_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "blur:popups_ignorealpha",
-                    "Blur Popups Ignore Alpha",
-                    "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]",
+                    &t!("decoration_category.blur.popups_ignorealpha_label"),
+                    &t!("decoration_category.blur.popups_ignorealpha_description"),
                     "0.2",
                     (0.0, 1.0, 0.01),
                 );
@@ -1449,40 +1458,40 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "blur:input_methods",
-                    "Input Methods",
-                    "Whether to blur input methods (e.g.\nfcitx5)",
+                    &t!("decoration_category.blur.input_methods_label"),
+                    &t!("decoration_category.blur.input_methods_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "input_methods_ignorealpha",
-                    "Input Methods Ignore Alpha",
-                    "Works like ignorealpha in layer rules.\nIf pixel opacity is below set value, will not blur.\n[0.0 - 1.0]",
+                    &t!("decoration_category.input_methods_ignorealpha_label"),
+                    &t!("decoration_category.input_methods_ignorealpha_description"),
                     "0.2",
                     (0.0, 1.0, 0.01),
                 );
 
                 add_section(
                     &container,
-                    "Shadow",
-                    "Configure shadow settings.",
+                    &t!("decoration_category.shadow.section_title"),
+                    &t!("decoration_category.shadow.section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "shadow:enabled",
-                    "Shadow Enabled",
-                    "Enable drop shadows on windows",
+                    &t!("decoration_category.shadow.enabled_label"),
+                    &t!("decoration_category.shadow.enabled_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "shadow:range",
-                    "Shadow Range",
-                    "Shadow range (“size”) in layout px",
+                    &t!("decoration_category.shadow.range_label"),
+                    &t!("decoration_category.shadow.range_description"),
                     "4",
                     (0.0, 100.0, 1.0),
                 );
@@ -1490,8 +1499,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "shadow:render_power",
-                    "Shadow Render Power",
-                    "In what power to render the falloff (more power, the faster the falloff).\n[1 - 4]",
+                    &t!("decoration_category.shadow.render_power_label"),
+                    &t!("decoration_category.shadow.render_power_description"),
                     "3",
                     (1.0, 4.0, 1.0),
                 );
@@ -1499,48 +1508,48 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "shadow:sharp",
-                    "Shadow Sharp",
-                    "If enabled, will make the shadows sharp, akin to an infinite render power",
+                    &t!("decoration_category.shadow.sharp_label"),
+                    &t!("decoration_category.shadow.sharp_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "shadow:ignore_window",
-                    "Shadow Ignore Window",
-                    "If true, the shadow will not be rendered behind the window itself, only around it.",
+                    &t!("decoration_category.shadow.ignore_window_label"),
+                    &t!("decoration_category.shadow.ignore_window_description"),
                     "true",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "shadow:color",
-                    "Shadow Color",
-                    "Shadow’s color.\nAlpha dictates shadow’s opacity.",
+                    &t!("decoration_category.shadow.color_label"),
+                    &t!("decoration_category.shadow.color_description"),
                     "#1A1A1AEE",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "shadow:color_inactive",
-                    "Shadow Color Inactive",
-                    "Inactive shadow color.\n(if not set, will fall back to color)",
+                    &t!("decoration_category.shadow.color_inactive_label"),
+                    &t!("decoration_category.shadow.color_inactive_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "shadow:offset",
-                    "Shadow Offset",
-                    "Shadow’s rendering offset.\n[x, y]",
+                    &t!("decoration_category.shadow.offset_label"),
+                    &t!("decoration_category.shadow.offset_description"),
                     "[0, 0]",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "shadow:scale",
-                    "Shadow Scale",
-                    "Shadow’s scale.\n[0.0 - 1.0]",
+                    &t!("decoration_category.shadow.scale_label"),
+                    &t!("decoration_category.shadow.scale_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -1548,110 +1557,111 @@ impl ConfigWidget {
             "animations" => {
                 add_section(
                     &container,
-                    "Animation Settings",
-                    "Configure animation behavior.",
+                    &t!("animations_category.animation_settings_section_title"),
+                    &t!("animations_category.animation_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "enabled",
-                    "Enable Animations",
-                    "Enables animations.",
+                    &t!("animations_category.enabled_label"),
+                    &t!("animations_category.enabled_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "workspace_wraparound",
-                    "Workspace Wraparound",
-                    "Enable workspace wraparound, causing directional workspace animations to animate as if the first and last workspaces were adjacent",
+                    &t!("animations_category.workspace_wraparound_label"),
+                    &t!("animations_category.workspace_wraparound_description"),
                     "true",
                 );
             }
             "input" => {
                 add_section(
                     &container,
-                    "Input Settings",
-                    "Configure input devices.",
+                    &t!("input_category.input_settings_section_title"),
+                    &t!("input_category.input_settings_section_description"),
                     first_section.clone(),
                 );
+
                 add_section(
                     &container,
-                    "Keyboard Settings",
-                    "Configure keyboard behavior.",
+                    &t!("input_category.keyboard_settings_section_title"),
+                    &t!("input_category.keyboard_settings_section_description"),
                     first_section.clone(),
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "kb_model",
-                    "Keyboard Model",
-                    "Appropriate XKB keymap parameter.",
+                    &t!("input_category.kb_model_label"),
+                    &t!("input_category.kb_model_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "kb_layout",
-                    "Keyboard Layout",
-                    "Appropriate XKB keymap parameter",
+                    &t!("input_category.kb_layout_label"),
+                    &t!("input_category.kb_layout_description"),
                     "us",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "kb_variant",
-                    "Keyboard Variant",
-                    "Appropriate XKB keymap parameter",
+                    &t!("input_category.kb_variant_label"),
+                    &t!("input_category.kb_variant_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "kb_options",
-                    "Keyboard Options",
-                    "Appropriate XKB keymap parameter",
+                    &t!("input_category.kb_options_label"),
+                    &t!("input_category.kb_options_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "kb_rules",
-                    "Keyboard Rules",
-                    "Appropriate XKB keymap parameter",
+                    &t!("input_category.kb_rules_label"),
+                    &t!("input_category.kb_rules_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "kb_file",
-                    "Keyboard File",
-                    "If you prefer, you can use a path to your custom .xkb file.",
+                    &t!("input_category.kb_file_label"),
+                    &t!("input_category.kb_file_description"),
                     "",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "numlock_by_default",
-                    "Numlock by Default",
-                    "Engage numlock by default.",
+                    &t!("input_category.numlock_by_default_label"),
+                    &t!("input_category.numlock_by_default_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "resolve_binds_by_sym",
-                    "Resolve Binds by Symbol",
-                    "Determines how keybinds act when multiple layouts are used.\nIf false, keybinds will always act as if the first specified layout is active.\nIf true, keybinds specified by symbols are activated when you type the respective symbol with the current layout.",
+                    &t!("input_category.resolve_binds_by_sym_label"),
+                    &t!("input_category.resolve_binds_by_sym_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "repeat_rate",
-                    "Repeat Rate",
-                    "The repeat rate for held-down keys, in repeats per second.",
+                    &t!("input_category.repeat_rate_label"),
+                    &t!("input_category.repeat_rate_description"),
                     "25",
                     (0.0, 200.0, 1.0),
                 );
@@ -1659,24 +1669,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "repeat_delay",
-                    "Repeat Delay",
-                    "Delay before a held-down key is repeated, in milliseconds.",
+                    &t!("input_category.repeat_delay_label"),
+                    &t!("input_category.repeat_delay_description"),
                     "600",
                     (0.0, 2000.0, 20.0),
                 );
 
                 add_section(
                     &container,
-                    "Mouse Settings",
-                    "Configure mouse behavior.",
+                    &t!("input_category.mouse_settings_section_title"),
+                    &t!("input_category.mouse_settings_section_description"),
                     first_section.clone(),
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "sensitivity",
-                    "Sensitivity",
-                    "Sets the mouse input sensitivity.\nValue is clamped to the range -1.0 to 1.0.",
+                    &t!("input_category.sensitivity_label"),
+                    &t!("input_category.sensitivity_description"),
                     "0.0",
                     (-1.0, 1.0, 0.02),
                 );
@@ -1684,40 +1694,40 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "accel_profile",
-                    "Acceleration Profile",
-                    "Sets the cursor acceleration profile.\nCan be one of adaptive, flat.\nCan also be custom, see below.\nLeave empty to use libinput's default mode for your input device.",
+                    &t!("input_category.accel_profile_label"),
+                    &t!("input_category.accel_profile_description"),
                     "",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "force_no_accel",
-                    "Force No Acceleration",
-                    "Force no cursor acceleration.\nThis bypasses most of your pointer settings to get as raw of a signal as possible.\nEnabling this is not recommended due to potential cursor desynchronization.",
+                    &t!("input_category.force_no_accel_label"),
+                    &t!("input_category.force_no_accel_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "left_handed",
-                    "Left Handed",
-                    "Switches RMB and LMB",
+                    &t!("input_category.left_handed_label"),
+                    &t!("input_category.left_handed_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "scroll_method",
-                    "Scroll Method",
-                    "Sets the scroll method.\nCan be one of 2fg (2 fingers), edge, on_button_down, no_scroll.",
+                    &t!("input_category.scroll_method_label"),
+                    &t!("input_category.scroll_method_description"),
                     "",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "scroll_button",
-                    "Scroll Button",
-                    "Sets the scroll button.\nHas to be an int, cannot be a string.\nCheck wev if you have any doubts regarding the ID.\n0 means default.",
+                    &t!("input_category.scroll_button_label"),
+                    &t!("input_category.scroll_button_description"),
                     "0",
                     (0.0, 300.0, 1.0),
                 );
@@ -1725,16 +1735,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "scroll_button_lock",
-                    "Scroll Button Lock",
-                    "If the scroll button lock is enabled, the button does not need to be held down.\nPressing and releasing the button toggles the button lock, which logically holds the button down or releases it.\nWhile the button is logically held down, motion events are converted to scroll events.",
+                    &t!("input_category.scroll_button_lock_label"),
+                    &t!("input_category.scroll_button_lock_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "scroll_factor",
-                    "Scroll Factor",
-                    "Multiplier added to scroll movement for external mice.\nNote that there is a separate setting for touchpad scroll_factor.",
+                    &t!("input_category.scroll_factor_label"),
+                    &t!("input_category.scroll_factor_description"),
                     "1.0",
                     (0.1, 10.0, 0.1),
                 );
@@ -1742,25 +1752,30 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "natural_scroll",
-                    "Natural Scroll",
-                    "Inverts scrolling direction.\nWhen enabled, scrolling moves content directly, rather than manipulating a scrollbar.",
+                    &t!("input_category.natural_scroll_label"),
+                    &t!("input_category.natural_scroll_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "follow_mouse",
-                    "Follow Mouse",
-                    "Specify if and how cursor movement should affect window focus.\nIgnore - Cursor movement will not change focus,\nAlways - Cursor movement will always change focus to the window under the cursor,\nDetach - Cursor focus will be detached from keyboard focus,\nSeparate - Cursor focus will be completely separate from keyboard focus.",
-                    &["Ignore", "Always", "Detach", "Separate"],
+                    &t!("input_category.follow_mouse_label"),
+                    &t!("input_category.follow_mouse_description"),
+                    &[
+                        &t!("input_category.follow_mouse_ignore"),
+                        &t!("input_category.follow_mouse_always"),
+                        &t!("input_category.follow_mouse_detach"),
+                        &t!("input_category.follow_mouse_separate"),
+                    ],
                     "1",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "follow_mouse_threshold",
-                    "Follow Mouse Threshold",
-                    "The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused.\nWorks only with follow_mouse = 1.",
+                    &t!("input_category.follow_mouse_threshold_label"),
+                    &t!("input_category.follow_mouse_threshold_description"),
                     "0.0",
                     (0.0, 500.0, 0.25),
                 );
@@ -1768,80 +1783,87 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "scroll_points",
-                    "Scroll Points",
-                    "Sets the scroll acceleration profile, when accel_profile is set to custom.\nHas to be in the form <step> <points>.\nLeave empty to have a flat scroll curve.",
+                    &t!("input_category.scroll_points_label"),
+                    &t!("input_category.scroll_points_description"),
                     "",
                 );
 
                 add_section(
                     &container,
-                    "Focus Settings",
-                    "Configure focus behavior.",
+                    &t!("input_category.focus_settings_section_title"),
+                    &t!("input_category.focus_settings_section_description"),
                     first_section.clone(),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "focus_on_close",
-                    "Focus on Close",
-                    "Controls the window focus behavior when a window is closed.\nNext window candidate - focus will shift to the next window candidate,\nWindow under cursor - focus will shift to the window under the cursor.",
-                    &["Next window candidate", "Window under cursor"],
+                    &t!("input_category.focus_on_close_label"),
+                    &t!("input_category.focus_on_close_description"),
+                    &[
+                        &t!("input_category.focus_on_close_next_window_candidate"),
+                        &t!("input_category.focus_on_close_window_under_cursor"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "mouse_refocus",
-                    "Mouse Refocus",
-                    "If disabled, mouse focus won't switch to the hovered window unless the mouse crosses a window boundary when follow_mouse=1.",
+                    &t!("input_category.mouse_refocus_label"),
+                    &t!("input_category.mouse_refocus_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "float_switch_override_focus",
-                    "Float Switch Override Focus",
-                    "If enabled, focus will change to the window under the cursor when changing from tiled-to-floating and vice versa.\nFocus follows mouse - focus will also follow mouse on float-to-float switches.",
-                    &["Disabled", "Enabled", "Focus follows mouse"],
+                    &t!("input_category.float_switch_override_focus_label"),
+                    &t!("input_category.float_switch_override_focus_description"),
+                    &[
+                        &t!("input_category.float_switch_override_focus_disabled"),
+                        &t!("input_category.float_switch_override_focus_enabled"),
+                        &t!("input_category.float_switch_override_focus_focus_follow_mouse"),
+                    ],
                     "1",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "special_fallthrough",
-                    "Special Fallthrough",
-                    "If enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace.",
+                    &t!("input_category.special_fallthrough_label"),
+                    &t!("input_category.special_fallthrough_description"),
                     "false",
                 );
 
                 add_section(
                     &container,
-                    "Touchpad Settings",
-                    "Configure touchpad behavior.",
+                    &t!("input_category.touchpad.settings_section_title"),
+                    &t!("input_category.touchpad.settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:disable_while_typing",
-                    "Disable While Typing",
-                    "Disables the touchpad while typing.",
+                    &t!("input_category.touchpad.disable_while_typing_label"),
+                    &t!("input_category.touchpad.disable_while_typing_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:natural_scroll",
-                    "Natural Scroll",
-                    "Inverts scrolling direction.\nWhen enabled, scrolling moves content directly, rather than manipulating a scrollbar.",
+                    &t!("input_category.touchpad.natural_scroll_label"),
+                    &t!("input_category.touchpad.natural_scroll_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "touchpad:scroll_factor",
-                    "Scroll Factor",
-                    "Multiplier applied to the amount of scroll movement.",
+                    &t!("input_category.touchpad.scroll_factor_label"),
+                    &t!("input_category.touchpad.scroll_factor_description"),
                     "1.0",
                     (0.0, 2.0, 0.02),
                 );
@@ -1849,89 +1871,97 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "touchpad:middle_button_emulation",
-                    "Middle Button Emulation",
-                    "Sending LMB and RMB simultaneously will be interpreted as a middle click.\nThis disables any touchpad area that would normally send a middle click based on location.\nlibinput#middle-button-emulation",
+                    &t!("input_category.touchpad.middle_button_emulation_label"),
+                    &t!("input_category.touchpad.middle_button_emulation_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "touchpad:tap_button_map",
-                    "Tap Button Map",
-                    "Sets the tap button mapping for touchpad button emulation.\nCan be one of lrm (default) or lmr (Left, Middle, Right Buttons).\n[lrm/lmr]",
+                    &t!("input_category.touchpad.tap_button_map_label"),
+                    &t!("input_category.touchpad.tap_button_map_description"),
                     "lrm",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:clickfinger_behavior",
-                    "Clickfinger Behavior",
-                    "Button presses with 1, 2, or 3 fingers will be mapped to LMB, RMB, and MMB respectively.\nThis disables interpretation of clicks based on location on the touchpad.\nlibinput#clickfinger-behavior",
+                    &t!("input_category.touchpad.clickfinger_behavior_label"),
+                    &t!("input_category.touchpad.clickfinger_behavior_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:tap-to-click",
-                    "Tap to Click",
-                    "Tapping on the touchpad with 1, 2, or 3 fingers will send LMB, RMB, and MMB respectively.",
+                    &t!("input_category.touchpad.tap_to_click_label"),
+                    &t!("input_category.touchpad.tap_to_click_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "touchpad:drag_lock",
-                    "Drag Lock",
-                    "Drag_lock When enabled, lifting the finger off while dragging will not drop the dragged item.\nlibinput#tap-and-drag.",
-                    &["Disabled", "Enabled with timeout", "Enabled sticky"],
+                    &t!("input_category.touchpad.drag_lock_label"),
+                    &t!("input_category.touchpad.drag_lock_description"),
+                    &[
+                        &t!("input_category.touchpad.drag_lock_disabled"),
+                        &t!("input_category.touchpad.drag_lock_enabled_with_timeout"),
+                        &t!("input_category.touchpad.drag_lock_enabled_sticky"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:tap-and-drag",
-                    "Tap and Drag",
-                    "Sets the tap and drag mode for the touchpad",
+                    &t!("input_category.touchpad.tap_and_drag_label"),
+                    &t!("input_category.touchpad.tap_and_drag_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:flip_x",
-                    "Flip X",
-                    "Inverts the horizontal movement of the touchpad",
+                    &t!("input_category.touchpad.flip_x_label"),
+                    &t!("input_category.touchpad.flip_x_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchpad:flip_y",
-                    "Flip Y",
-                    "Inverts the vertical movement of the touchpad",
+                    &t!("input_category.touchpad.flip_y_label"),
+                    &t!("input_category.touchpad.flip_y_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "touchpad:drag_3fg",
-                    "Drag 3FG",
-                    "Enables three finger drag,\nlibinput#drag-3fg",
-                    &["Disabled", "3 fingers", "4 fingers"],
+                    &t!("input_category.touchpad.drag_3fg_label"),
+                    &t!("input_category.touchpad.drag_3fg_description"),
+                    &[
+                        &t!("input_category.touchpad.drag_3fg_disabled"),
+                        &t!("input_category.touchpad.drag_3fg_3_fingers"),
+                        &t!("input_category.touchpad.drag_3fg_4_fingers"),
+                    ],
                     "0",
                 );
 
                 add_section(
                     &container,
-                    "Touchscreen Settings",
-                    "Configure touchscreen behavior.",
+                    &t!("input_category.touchscreen_settings_section_title"),
+                    &t!("input_category.touchscreen_settings_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "touchdevice:transform",
-                    "Transform",
-                    "Transform the input from touchdevices.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees",
+                    &t!("input_category.touchdevice.transform_label"),
+                    &t!("input_category.touchdevice.transform_description"),
                     "-1",
                     (-1.0, 7.0, 1.0),
                 );
@@ -1939,55 +1969,59 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "touchdevice:output",
-                    "Output",
-                    "The monitor to bind touch devices.\nThe default is auto-detection.\nTo stop auto-detection, use an empty string or the “[[Empty]]” value.",
+                    &t!("input_category.touchdevice.output_label"),
+                    &t!("input_category.touchdevice.output_description"),
                     "[[Auto]]",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "touchdevice:enabled",
-                    "Enabled",
-                    "Whether input is enabled for touch devices.",
+                    &t!("input_category.touchdevice.enabled_label"),
+                    &t!("input_category.touchdevice.enabled_description"),
                     "true",
                 );
 
                 add_section(
                     &container,
-                    "Virtual Keyboard Settings",
-                    "Configure virtual keyboard behavior.",
+                    &t!("input_category.virtual_keyboard_settings_section_title"),
+                    &t!("input_category.virtual_keyboard_settings_section_description"),
                     first_section.clone(),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "virtualkeyboard:share_states",
-                    "Share States",
-                    "Unify key down states and modifier states with other keyboards.",
-                    &["No", "Yes", "Yes unless IME client"],
+                    &t!("input_category.virtualkeyboard.share_states_label"),
+                    &t!("input_category.virtualkeyboard.share_states_description"),
+                    &[
+                        &t!("input_category.virtualkeyboard.share_states_no"),
+                        &t!("input_category.virtualkeyboard.share_states_yes"),
+                        &t!("input_category.virtualkeyboard.share_states_yes_unless_ime_client"),
+                    ],
                     "2",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "virtualkeyboard:release_pressed_on_close",
-                    "Release Pressed on Close",
-                    "Release all pressed keys by virtual keyboard on close.",
+                    &t!("input_category.virtualkeyboard.release_pressed_on_close_label"),
+                    &t!("input_category.virtualkeyboard.release_pressed_on_close_description"),
                     "false",
                 );
 
                 add_section(
                     &container,
-                    "Tablet Settings",
-                    "Configure tablet behavior.",
+                    &t!("input_category.tablet.settings_section_title"),
+                    &t!("input_category.tablet.settings_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "tablet:transform",
-                    "Transform",
-                    "Transform the input from tablets.\n-1 means it’s unset.\n0 -> normal (no transforms)\n1 -> 90 degrees\n2 -> 180 degrees\n3 -> 270 degrees\n4 -> flipped\n5 -> flipped + 90 degrees\n6 -> flipped + 180 degrees\n7 -> flipped + 270 degrees",
+                    &t!("input_category.tablet.transform_label"),
+                    &t!("input_category.tablet.transform_description"),
                     "-1",
                     (-1.0, 7.0, 1.0),
                 );
@@ -1995,98 +2029,97 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "tablet:output",
-                    "Output",
-                    "The monitor to bind tablets.\nCan be current or a monitor name.\nLeave empty to map across all monitors.",
+                    &t!("input_category.tablet.output_label"),
+                    &t!("input_category.tablet.output_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:region_position",
-                    "Region Position",
-                    "Position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors.\n[x, y]",
+                    &t!("input_category.tablet.region_position_label"),
+                    &t!("input_category.tablet.region_position_description"),
                     "[0, 0]",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "tablet:absolute_position",
-                    "Absolute Position",
-                    "Whether to treat the region_position as an absolute position in monitor layout.\nOnly applies when output is empty.",
+                    &t!("input_category.tablet.absolute_position_label"),
+                    &t!("input_category.tablet.absolute_position_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:region_size",
-                    "Region Size",
-                    "Size of the mapped region.\nWhen this variable is set, tablet input will be mapped to the region.\n[0, 0] or invalid size means unset.\n[x, y]",
+                    &t!("input_category.tablet.region_size_label"),
+                    &t!("input_category.tablet.region_size_description"),
                     "[0, 0]",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "tablet:relative_input",
-                    "Relative Input",
-                    "Whether the input should be relative",
+                    &t!("input_category.tablet.relative_input_label"),
+                    &t!("input_category.tablet.relative_input_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "tablet:left_handed",
-                    "Left Handed",
-                    "If enabled, the tablet will be rotated 180 degrees",
+                    &t!("input_category.tablet.left_handed_label"),
+                    &t!("input_category.tablet.left_handed_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:active_area_size",
-                    "Active Area Size",
-                    "Size of tablet’s active area in mm\n[x, y]",
+                    &t!("input_category.tablet.active_area_size_label"),
+                    &t!("input_category.tablet.active_area_size_description"),
                     "[0, 0]",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "tablet:active_area_position",
-                    "Active Area Position",
-                    "Position of the active area in mm\n[x, y]",
+                    &t!("input_category.tablet.active_area_position_label"),
+                    &t!("input_category.tablet.active_area_position_description"),
                     "[0, 0]",
                 );
 
                 add_section(
                     &container,
-                    "Miscellaneous Input Settings",
-                    "Other input-related settings.",
+                    &t!("input_category.miscellaneous_input_settings_section_title"),
+                    &t!("input_category.miscellaneous_input_settings_section_description"),
                     first_section.clone(),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "off_window_axis_events",
-                    "Off Window Axis Events",
-                    "Handles axis events around a focused window.\nFakes pointer coordinates - fakes pointer coordinates to the closest point inside the window,\nWarps the cursor - warps the cursor to the closest point inside the window",
+                    &t!("input_category.off_window_axis_events_label"),
+                    &t!("input_category.off_window_axis_events_description"),
                     &[
-                        "Ignores axis events",
-                        "Sends out-of-bound coordinates",
-                        "Fakes pointer coordinates",
-                        "Warps the cursor",
+                        &t!("input_category.off_window_axis_events_ignore_axis_events"),
+                        &t!("input_category.off_window_axis_events_sends_out-of-bound_coordinates"),
+                        &t!("input_category.off_window_axis_events_fakes_pointer_coordinates"),
+                        &t!("input_category.off_window_axis_events_warps_the_cursor"),
                     ],
                     "1",
                 );
-
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "emulate_discrete_scroll",
-                    "Emulate Discrete Scroll",
-                    "Emulates discrete scrolling from high resolution scrolling events.\nNon-standard events only - enables handling of non-standard events only,\nForce enable all events - force enables all scroll wheel events to be handled",
+                    &t!("input_category.emulate_discrete_scroll_label"),
+                    &t!("input_category.emulate_discrete_scroll_description"),
                     &[
-                        "Disables it",
-                        "Non-standard events only",
-                        "Force enable all events",
+                        &t!("input_category.emulate_discrete_scroll_disables_it"),
+                        &t!("input_category.emulate_discrete_scroll_non-standard_events_only"),
+                        &t!("input_category.emulate_discrete_scroll_force"),
                     ],
                     "1",
                 );
@@ -2094,16 +2127,16 @@ impl ConfigWidget {
             "gestures" => {
                 add_section(
                     &container,
-                    "Gesture Settings",
-                    "Configure gesture behavior.",
+                    &t!("gestures_category.gesture_settings_section_title"),
+                    &t!("gestures_category.gesture_settings_section_description"),
                     first_section.clone(),
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "workspace_swipe_distance",
-                    "Workspace Swipe Distance",
-                    "In px, the distance of the touchpad gesture",
+                    &t!("gestures_category.workspace_swipe_distance_label"),
+                    &t!("gestures_category.workspace_swipe_distance_description"),
                     "300",
                     (0.0, 2000.0, 10.0),
                 );
@@ -2111,32 +2144,32 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "workspace_swipe_touch",
-                    "Workspace Swipe Touch",
-                    "Enable workspace swiping from the edge of a touchscreen",
+                    &t!("gestures_category.workspace_swipe_touch_label"),
+                    &t!("gestures_category.workspace_swipe_touch_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "workspace_swipe_invert",
-                    "Workspace Swipe Invert",
-                    "Invert the direction (touchpad only)",
+                    &t!("gestures_category.workspace_swipe_invert_label"),
+                    &t!("gestures_category.workspace_swipe_invert_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "workspace_swipe_touch_invert",
-                    "Workspace Swipe Touch Invert",
-                    "Invert the direction (touchscreen only)",
+                    &t!("gestures_category.workspace_swipe_touch_invert_label"),
+                    &t!("gestures_category.workspace_swipe_touch_invert_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "workspace_swipe_min_speed_to_force",
-                    "Workspace Swipe Min Speed to Force",
-                    "Minimum speed in px per timepoint to force the change ignoring cancel_ratio.\nSetting to 0 will disable this mechanic.",
+                    &t!("gestures_category.workspace_swipe_min_speed_to_force_label"),
+                    &t!("gestures_category.workspace_swipe_min_speed_to_force_description"),
                     "30",
                     (0.0, 200.0, 1.0),
                 );
@@ -2144,8 +2177,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "workspace_swipe_cancel_ratio",
-                    "Workspace Swipe Cancel Ratio",
-                    "How much the swipe has to proceed in order to commence it.\n(0.7 -> if > 0.7 * distance, switch, if less, revert)\n[0.0 - 1.0]",
+                    &t!("gestures_category.workspace_swipe_cancel_ratio_label"),
+                    &t!("gestures_category.workspace_swipe_cancel_ratio_description"),
                     "0.5",
                     (0.0, 1.0, 0.01),
                 );
@@ -2153,24 +2186,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "workspace_swipe_create_new",
-                    "Workspace Swipe Create New",
-                    "Whether a swipe right on the last workspace should create a new one.",
+                    &t!("gestures_category.workspace_swipe_create_new_label"),
+                    &t!("gestures_category.workspace_swipe_create_new_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "workspace_swipe_direction_lock",
-                    "Workspace Swipe Direction Lock",
-                    "If enabled, switching direction will be locked when you swipe past the direction_lock_threshold (touchpad only).",
+                    &t!("gestures_category.workspace_swipe_direction_lock_label"),
+                    &t!("gestures_category.workspace_swipe_direction_lock_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "workspace_swipe_direction_lock_threshold",
-                    "Workspace Swipe Direction Lock Threshold",
-                    "In px, the distance to swipe before direction lock activates (touchpad only).",
+                    &t!("gestures_category.workspace_swipe_direction_lock_threshold_label"),
+                    &t!("gestures_category.workspace_swipe_direction_lock_threshold_description"),
                     "10",
                     (0.0, 200.0, 1.0),
                 );
@@ -2178,194 +2211,198 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "workspace_swipe_forever",
-                    "Workspace Swipe Forever",
-                    "If enabled, swiping will not clamp at the neighboring workspaces but continue to the further ones.",
+                    &t!("gestures_category.workspace_swipe_forever_label"),
+                    &t!("gestures_category.workspace_swipe_forever_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "workspace_swipe_use_r",
-                    "Workspace Swipe Use R",
-                    "If enabled, swiping will use the r prefix instead of the m prefix for finding workspaces.",
+                    &t!("gestures_category.workspace_swipe_use_r_label"),
+                    &t!("gestures_category.workspace_swipe_use_r_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "close_max_timeout",
-                    "Close Max Timeout",
-                    "Timeout for closing windows with the close gesture, in ms.",
+                    &t!("gestures_category.close_max_timeout_label"),
+                    &t!("gestures_category.close_max_timeout_description"),
                     "1000",
                     (10.0, 2000.0, 10.0),
                 );
             }
-
             "group" => {
                 add_section(
                     &container,
-                    "Group Settings",
-                    "Configure group behavior.",
+                    &t!("group_category.group_settings_section_title"),
+                    &t!("group_category.group_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "auto_group",
-                    "Auto Group",
-                    "Whether new windows will be automatically grouped into the focused unlocked group.\nNote: if you want to disable auto_group only for specific windows, use the “group barred” window rule instead.",
+                    &t!("group_category.auto_group_label"),
+                    &t!("group_category.auto_group_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "insert_after_current",
-                    "Insert After Current",
-                    "Whether new windows in a group spawn after current or at group tail",
+                    &t!("group_category.insert_after_current_label"),
+                    &t!("group_category.insert_after_current_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "focus_removed_window",
-                    "Focus Removed Window",
-                    "Whether Hyprland should focus on the window that has just been moved out of the group",
+                    &t!("group_category.focus_removed_window_label"),
+                    &t!("group_category.focus_removed_window_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "drag_into_group",
-                    "Drag Into Group",
-                    "Whether dragging a window into a unlocked group will merge them.\nOnly into groupbar - only when dragging into the groupbar.",
-                    &["Disabled", "Enabled", "Only into groupbar"],
+                    &t!("group_category.drag_into_group_label"),
+                    &t!("group_category.drag_into_group_description"),
+                    &[
+                        &t!("group_category.drag_into_group_disabled"),
+                        &t!("group_category.drag_into_group_enabled"),
+                        &t!("group_category.drag_into_group_only_into_groupbar"),
+                    ],
                     "1",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "merge_groups_on_drag",
-                    "Merge Groups on Drag",
-                    "Whether window groups can be dragged into other groups",
+                    &t!("group_category.merge_groups_on_drag_label"),
+                    &t!("group_category.merge_groups_on_drag_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "merge_groups_on_groupbar",
-                    "Merge Groups on Groupbar",
-                    "Whether one group will be merged with another when dragged into its groupbar",
+                    &t!("group_category.merge_groups_on_groupbar_label"),
+                    &t!("group_category.merge_groups_on_groupbar_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "merge_floated_into_tiled_on_groupbar",
-                    "Merge Floated Into Tiled on Groupbar",
-                    "Whether dragging a floating window into a tiled window groupbar will merge them",
+                    &t!("group_category.merge_floated_into_tiled_on_groupbar_label"),
+                    &t!("group_category.merge_floated_into_tiled_on_groupbar_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "group_on_movetoworkspace",
-                    "Group On MoveToWorkspace",
-                    "Whether using movetoworkspace[silent] will merge the window into the workspace’s solitary unlocked group",
+                    &t!("group_category.group_on_movetoworkspace_label"),
+                    &t!("group_category.group_on_movetoworkspace_description"),
                     "false",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.border_active",
-                    "Active Border Color",
-                    "Active group border color",
+                    &t!("group_category.col_border_active_label"),
+                    &t!("group_category.col_border_active_description"),
                     "#FFFF0066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.border_inactive",
-                    "Inactive Border Color",
-                    "Inactive (out of focus) group border color",
+                    &t!("group_category.col_border_inactive_label"),
+                    &t!("group_category.col_border_inactive_description"),
                     "#77770066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.border_locked_active",
-                    "Locked Active Border Color",
-                    "Active locked group border color",
+                    &t!("group_category.col_border_locked_active_label"),
+                    &t!("group_category.col_border_locked_active_description"),
                     "#FF550066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.border_locked_inactive",
-                    "Locked Inactive Border Color",
-                    "Inactive locked group border color",
+                    &t!("group_category.col_border_locked_inactive_label"),
+                    &t!("group_category.col_border_locked_inactive_description"),
                     "#77550066",
                 );
+
                 add_section(
                     &container,
-                    "Groupbar Settings",
-                    "Configure groupbar behavior.",
+                    &t!("group_category.groupbar.settings_section_title"),
+                    &t!("group_category.groupbar.settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "groupbar:enabled",
-                    "Enabled",
-                    "Enables groupbars",
+                    &t!("group_category.groupbar.enabled_label"),
+                    &t!("group_category.groupbar.enabled_description"),
                     "true",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "groupbar:font_family",
-                    "Font Family",
-                    "Font used to display groupbar titles, use misc:font_family if not specified",
+                    &t!("group_category.groupbar.font_family_label"),
+                    &t!("group_category.groupbar.font_family_description"),
                     "",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:font_size",
-                    "Font Size",
-                    "Font size of groupbar title",
+                    &t!("group_category.groupbar.font_size_label"),
+                    &t!("group_category.groupbar.font_size_description"),
                     "8",
                     (2.0, 64.0, 1.0),
                 );
                 add_string_option(
                     &container,
                     &mut options,
-                    "font_weight_active",
-                    "Font Weight Active",
-                    "Font weight of active groupbar title.\nAn integer between 100 and 1000, or one of the following presets: thin\nultralight\nlight\nsemilight\nbook\nnormal\nmedium\nsemibold\nbold\nultrabold\nheavy\nultraheavy",
+                    "groupbar:font_weight_active",
+                    &t!("group_category.groupbar.font_weight_active_label"),
+                    &t!("group_category.groupbar.font_weight_active_description"),
                     "normal",
                 );
                 add_string_option(
                     &container,
                     &mut options,
-                    "font_weight_inactive",
-                    "Font Weight Inactive",
-                    "Font weight of inactive groupbar title.\nAn integer between 100 and 1000, or one of the following presets: thin\nultralight\nlight\nsemilight\nbook\nnormal\nmedium\nsemibold\nbold\nultrabold\nheavy\nultraheavy",
+                    "groupbar:font_weight_inactive",
+                    &t!("group_category.groupbar.font_weight_inactive_label"),
+                    &t!("group_category.groupbar.font_weight_inactive_description"),
                     "normal",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "groupbar:gradients",
-                    "Gradients",
-                    "Enables gradients",
+                    &t!("group_category.groupbar.gradients_label"),
+                    &t!("group_category.groupbar.gradients_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:height",
-                    "Height",
-                    "Height of the groupbar",
+                    &t!("group_category.groupbar.height_label"),
+                    &t!("group_category.groupbar.height_description"),
                     "14",
                     (1.0, 64.0, 1.0),
                 );
@@ -2373,8 +2410,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:indicator_gap",
-                    "Indicator Gap",
-                    "Height of gap between groupbar indicator and title",
+                    &t!("group_category.groupbar.indicator_gap_label"),
+                    &t!("group_category.groupbar.indicator_gap_description"),
                     "0",
                     (0.0, 64.0, 1.0),
                 );
@@ -2382,8 +2419,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:indicator_height",
-                    "Indicator Height",
-                    "Height of the groupbar indicator",
+                    &t!("group_category.groupbar.indicator_height_label"),
+                    &t!("group_category.groupbar.indicator_height_description"),
                     "3",
                     (1.0, 64.0, 1.0),
                 );
@@ -2391,16 +2428,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:stacked",
-                    "Stacked",
-                    "Render the groupbar as a vertical stack",
+                    &t!("group_category.groupbar.stacked_label"),
+                    &t!("group_category.groupbar.stacked_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:priority",
-                    "Priority",
-                    "Sets the decoration priority for groupbars",
+                    &t!("group_category.groupbar.priority_label"),
+                    &t!("group_category.groupbar.priority_description"),
                     "3",
                     (0.0, 6.0, 1.0),
                 );
@@ -2408,16 +2445,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:render_titles",
-                    "Render Titles",
-                    "Whether to render titles in the group bar decoration",
+                    &t!("group_category.groupbar.render_titles_label"),
+                    &t!("group_category.groupbar.render_titles_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:text_offset",
-                    "Text Offset",
-                    "Adjust vertical position for titles",
+                    &t!("group_category.groupbar.text_offset_label"),
+                    &t!("group_category.groupbar.text_offset_description"),
                     "0",
                     (-20.0, 20.0, 1.0),
                 );
@@ -2425,16 +2462,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:scrolling",
-                    "Scrolling",
-                    "Whether scrolling in the groupbar changes group active window",
+                    &t!("group_category.groupbar.scrolling_label"),
+                    &t!("group_category.groupbar.scrolling_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:rounding",
-                    "Rounding",
-                    "How much to round the indicator",
+                    &t!("group_category.groupbar.rounding_label"),
+                    &t!("group_category.groupbar.rounding_description"),
                     "1",
                     (0.0, 20.0, 1.0),
                 );
@@ -2442,8 +2479,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:rounding_power",
-                    "Rounding Power",
-                    "Rounding power of groupbar corners (2 is a circle).",
+                    &t!("group_category.groupbar.rounding_power_label"),
+                    &t!("group_category.groupbar.rounding_power_description"),
                     "2",
                     (2.0, 10.0, 0.1),
                 );
@@ -2451,8 +2488,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:gradient_rounding",
-                    "Gradient Rounding",
-                    "How much to round the gradients",
+                    &t!("group_category.groupbar.gradient_rounding_label"),
+                    &t!("group_category.groupbar.gradient_rounding_description"),
                     "1",
                     (0.0, 20.0, 1.0),
                 );
@@ -2460,88 +2497,88 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:round_only_edges",
-                    "Round Only Edges",
-                    "Round only the indicator edges of the entire groupbar",
+                    &t!("group_category.groupbar.round_only_edges_label"),
+                    &t!("group_category.groupbar.round_only_edges_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "groupbar:gradient_round_only_edges",
-                    "Gradient Round Only Edges",
-                    "Round only the gradient edges of the entire groupbar",
+                    &t!("group_category.groupbar.gradient_round_only_edges_label"),
+                    &t!("group_category.groupbar.gradient_round_only_edges_description"),
                     "true",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color",
-                    "Text Color",
-                    "Controls the group bar text color",
+                    &t!("group_category.groupbar.text_color_label"),
+                    &t!("group_category.groupbar.text_color_description"),
                     "#FFFFFFFF",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color_inactive",
-                    "Inactive Text Color",
-                    "Color for inactive windows’ titles in the groupbar (if unset, defaults to text_color)",
+                    &t!("group_category.groupbar.text_color_inactive_label"),
+                    &t!("group_category.groupbar.text_color_inactive_description"),
                     "",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color_locked_active",
-                    "Locked Active Text Color",
-                    "Color for the active window’s title in a locked group (if unset, defaults to text_color)",
+                    &t!("group_category.groupbar.text_color_locked_active_label"),
+                    &t!("group_category.groupbar.text_color_locked_active_description"),
                     "",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:text_color_locked_inactive",
-                    "Inactive Locked Text Color",
-                    "Color for inactive windows’ titles in locked groups (if unset, defaults to text_color_inactive)",
+                    &t!("group_category.groupbar.text_color_locked_inactive_label"),
+                    &t!("group_category.groupbar.text_color_locked_inactive_description"),
                     "",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.active",
-                    "Active Color",
-                    "Active group border color",
+                    &t!("group_category.groupbar.col_active_label"),
+                    &t!("group_category.groupbar.col_active_description"),
                     "#66FFFF00",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.inactive",
-                    "Inactive Color",
-                    "Inactive (out of focus) group border color",
+                    &t!("group_category.groupbar.col_inactive_label"),
+                    &t!("group_category.groupbar.col_inactive_description"),
                     "#77770066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.locked_active",
-                    "Locked Active Color",
-                    "Active locked group border color",
+                    &t!("group_category.groupbar.col_locked_active_label"),
+                    &t!("group_category.groupbar.col_locked_active_description"),
                     "#FF550066",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "groupbar:col.locked_inactive",
-                    "Locked Inactive Color",
-                    "Inactive locked group border color",
+                    &t!("group_category.groupbar.col_locked_inactive_label"),
+                    &t!("group_category.groupbar.col_locked_inactive_description"),
                     "#77550066",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "groupbar:gaps_in",
-                    "Gaps In",
-                    "Gap size between gradients",
+                    &t!("group_category.groupbar.gaps_in_label"),
+                    &t!("group_category.groupbar.gaps_in_description"),
                     "2",
                     (0.0, 20.0, 1.0),
                 );
@@ -2549,8 +2586,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:gaps_out",
-                    "Gaps Out",
-                    "Gap size between gradients and window",
+                    &t!("group_category.groupbar.gaps_out_label"),
+                    &t!("group_category.groupbar.gaps_out_description"),
                     "2",
                     (0.0, 20.0, 1.0),
                 );
@@ -2558,64 +2595,64 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "groupbar:keep_upper_gap",
-                    "Keep Upper Gap",
-                    "Add or remove upper gap",
+                    &t!("group_category.groupbar.keep_upper_gap_label"),
+                    &t!("group_category.groupbar.keep_upper_gap_description"),
                     "true",
                 );
             }
             "misc" => {
                 add_section(
                     &container,
-                    "Miscellaneous Settings",
-                    "Configure miscellaneous behavior.",
+                    &t!("misc_category.miscellaneous_settings_section_title"),
+                    &t!("misc_category.miscellaneous_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_hyprland_logo",
-                    "Disable Hyprland Logo",
-                    "Disables the random Hyprland logo / anime girl background.\n:(",
+                    &t!("misc_category.disable_hyprland_logo_label"),
+                    &t!("misc_category.disable_hyprland_logo_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_splash_rendering",
-                    "Disable Splash Rendering",
-                    "Disables the Hyprland splash rendering.\n(requires a monitor reload to take effect)",
+                    &t!("misc_category.disable_splash_rendering_label"),
+                    &t!("misc_category.disable_splash_rendering_description"),
                     "false",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "col.splash",
-                    "Splash Color",
-                    "Changes the color of the splash text (requires a monitor reload to take effect).",
+                    &t!("misc_category.col_splash_label"),
+                    &t!("misc_category.col_splash_description"),
                     "#FFFFFFFF",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "font_family",
-                    "Font Family",
-                    "Set the global default font to render the text including debug fps/notification, config error messages and etc., selected from system fonts.",
+                    &t!("misc_category.font_family_label"),
+                    &t!("misc_category.font_family_description"),
                     "Sans",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "splash_font_family",
-                    "Splash Font Family",
-                    "Changes the font used to render the splash text, selected from system fonts (requires a monitor reload to take effect).",
+                    &t!("misc_category.splash_font_family_label"),
+                    &t!("misc_category.splash_font_family_description"),
                     "",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "force_default_wallpaper",
-                    "Force Default Wallpaper",
-                    "Enforce any of the 3 default wallpapers.\n-1 - random, 0 or 1 - disables the anime background, 2 - enables anime background.\n[-1/0/1/2]",
+                    &t!("misc_category.force_default_wallpaper_label"),
+                    &t!("misc_category.force_default_wallpaper_description"),
                     "-1",
                     (-1.0, 2.0, 1.0),
                 );
@@ -2623,195 +2660,210 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "vfr",
-                    "VFR",
-                    "Controls the VFR status of Hyprland.\nHeavily recommended to leave enabled to conserve resources.",
+                    &t!("misc_category.vfr_label"),
+                    &t!("misc_category.vfr_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "vrr",
-                    "VRR",
-                    "Controls the VRR (Adaptive Sync) of your monitors.",
-                    &["Off", "On", "Fullscreen only", "Fullscreen with video/game"],
+                    &t!("misc_category.vrr_label"),
+                    &t!("misc_category.vrr_description"),
+                    &[
+                        &t!("misc_category.vrr_off"),
+                        &t!("misc_category.vrr_on"),
+                        &t!("misc_category.vrr_fullscreen_only"),
+                        &t!("misc_category.vrr_fullscreen_with_video/game"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "mouse_move_enables_dpms",
-                    "Mouse Move Enables DPMS",
-                    "If DPMS is set to off, wake up the monitors if the mouse moves.",
+                    &t!("misc_category.mouse_move_enables_dpms_label"),
+                    &t!("misc_category.mouse_move_enables_dpms_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "key_press_enables_dpms",
-                    "Key Press Enables DPMS",
-                    "If DPMS is set to off, wake up the monitors if a key is pressed.",
+                    &t!("misc_category.key_press_enables_dpms_label"),
+                    &t!("misc_category.key_press_enables_dpms_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "name_vk_after_proc",
-                    "Name VK After Proc",
-                    "Name virtual keyboards after the processes that create them. E.g. /usr/bin/fcitx5 will have hl-virtual-keyboard-fcitx5.",
+                    &t!("misc_category.name_vk_after_proc_label"),
+                    &t!("misc_category.name_vk_after_proc_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "always_follow_on_dnd",
-                    "Always Follow on DnD",
-                    "Will make mouse focus follow the mouse when drag and dropping.\nRecommended to leave it enabled, especially for people using focus follows mouse at 0.",
+                    &t!("misc_category.always_follow_on_dnd_label"),
+                    &t!("misc_category.always_follow_on_dnd_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "layers_hog_keyboard_focus",
-                    "Layers Hog Keyboard Focus",
-                    "If true, will make keyboard-interactive layers keep their focus on mouse move (e.g.\nwofi, bemenu)",
+                    &t!("misc_category.layers_hog_keyboard_focus_label"),
+                    &t!("misc_category.layers_hog_keyboard_focus_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "animate_manual_resizes",
-                    "Animate Manual Resizes",
-                    "If true, will animate manual window resizes/moves",
+                    &t!("misc_category.animate_manual_resizes_label"),
+                    &t!("misc_category.animate_manual_resizes_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "animate_mouse_windowdragging",
-                    "Animate Mouse Window Dragging",
-                    "If true, will animate windows being dragged by mouse, note that this can cause weird behavior on some curves",
+                    &t!("misc_category.animate_mouse_windowdragging_label"),
+                    &t!("misc_category.animate_mouse_windowdragging_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_autoreload",
-                    "Disable Autoreload",
-                    "If true, the config will not reload automatically on save, and instead needs to be reloaded with hyprctl reload.\nMight save on battery.",
+                    &t!("misc_category.disable_autoreload_label"),
+                    &t!("misc_category.disable_autoreload_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "enable_swallow",
-                    "Enable Swallow",
-                    "Enable window swallowing",
+                    &t!("misc_category.enable_swallow_label"),
+                    &t!("misc_category.enable_swallow_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "swallow_regex",
-                    "Swallow Regex",
-                    "The class regex to be used for windows that should be swallowed (usually, a terminal).\nTo know more about the list of regex which can be used use this cheatsheet.",
+                    &t!("misc_category.swallow_regex_label"),
+                    &t!("misc_category.swallow_regex_description"),
                     "",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "swallow_exception_regex",
-                    "Swallow Exception Regex",
-                    "The title regex to be used for windows that should not be swallowed by the windows specified in swallow_regex (e.g.\nwev).\nThe regex is matched against the parent (e.g.\nKitty) window's title on the assumption that it changes to whatever process it's running.",
+                    &t!("misc_category.swallow_exception_regex_label"),
+                    &t!("misc_category.swallow_exception_regex_description"),
                     "",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "focus_on_activate",
-                    "Focus on Activate",
-                    "Whether Hyprland should focus an app that requests to be focused (an activate request)",
+                    &t!("misc_category.focus_on_activate_label"),
+                    &t!("misc_category.focus_on_activate_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "mouse_move_focuses_monitor",
-                    "Mouse Move Focuses Monitor",
-                    "Whether mouse moving into a different monitor should focus it",
+                    &t!("misc_category.mouse_move_focuses_monitor_label"),
+                    &t!("misc_category.mouse_move_focuses_monitor_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "allow_session_lock_restore",
-                    "Allow Session Lock Restore",
-                    "If true, will allow you to restart a lockscreen app in case it crashes (red screen of death)",
+                    &t!("misc_category.allow_session_lock_restore_label"),
+                    &t!("misc_category.allow_session_lock_restore_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "session_lock_xray",
-                    "Session Lock Xray",
-                    "If true, keep rendering workspaces below your lockscreen",
+                    &t!("misc_category.session_lock_xray_label"),
+                    &t!("misc_category.session_lock_xray_description"),
                     "false",
                 );
                 add_color_option(
                     &container,
                     &mut options,
                     "background_color",
-                    "Background Color",
-                    "Change the background color.\n(requires enabled disable_hyprland_logo)",
+                    &t!("misc_category.background_color_label"),
+                    &t!("misc_category.background_color_description"),
                     "#111111",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "close_special_on_empty",
-                    "Close Special on Empty",
-                    "Close the special workspace if the last window is removed",
+                    &t!("misc_category.close_special_on_empty_label"),
+                    &t!("misc_category.close_special_on_empty_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "new_window_takes_over_fullscreen",
-                    "New Window Takes Over Fullscreen",
-                    "If there is a fullscreen or maximized window, decide whether a new tiled window opened should replace it, stay behind or disable the fullscreen/maximized state.",
-                    &["Behind", "Takes over", "Unfullscreen/unmaximize"],
+                    &t!("misc_category.new_window_takes_over_fullscreen_label"),
+                    &t!("misc_category.new_window_takes_over_fullscreen_description"),
+                    &[
+                        &t!("misc_category.new_window_takes_over_fullscreen_behind"),
+                        &t!("misc_category.new_window_takes_over_fullscreen_takes_over"),
+                        &t!(
+                            "misc_category.new_window_takes_over_fullscreen_unfullscreen/unmaximize"
+                        ),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "exit_window_retains_fullscreen",
-                    "Exit Window Retains Fullscreen",
-                    "If true, closing a fullscreen window makes the next focused window fullscreen.",
+                    &t!("misc_category.exit_window_retains_fullscreen_label"),
+                    &t!("misc_category.exit_window_retains_fullscreen_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "initial_workspace_tracking",
-                    "Initial Workspace Tracking",
-                    "If enabled, windows will open on the workspace they were invoked on.\nPersistent - all children too",
-                    &["Disabled", "Single-shot", "Persistent"],
+                    &t!("misc_category.initial_workspace_tracking_label"),
+                    &t!("misc_category.initial_workspace_tracking_description"),
+                    &[
+                        &t!("misc_category.initial_workspace_tracking_disabled"),
+                        &t!("misc_category.initial_workspace_tracking_single-shot"),
+                        &t!("misc_category.initial_workspace_tracking_persistent"),
+                    ],
                     "1",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "middle_click_paste",
-                    "Middle Click Paste",
-                    "Whether to enable middle-click-paste (aka primary selection)",
+                    &t!("misc_category.middle_click_paste_label"),
+                    &t!("misc_category.middle_click_paste_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "render_unfocused_fps",
-                    "Render Unfocused FPS",
-                    "The maximum limit for renderunfocused windows' fps in the background (see also Window-Rules - renderunfocused)",
+                    &t!("misc_category.render_unfocused_fps_label"),
+                    &t!("misc_category.render_unfocused_fps_description"),
                     "15",
                     (1.0, 120.0, 1.0),
                 );
@@ -2819,24 +2871,24 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "disable_xdg_env_checks",
-                    "Disable XDG Environment Checks",
-                    "Disable the warning if XDG environment is externally managed",
+                    &t!("misc_category.disable_xdg_env_checks_label"),
+                    &t!("misc_category.disable_xdg_env_checks_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_hyprland_qtutils_check",
-                    "Disable Hyprland Qtutils Check",
-                    "Disable the warning if hyprland-qtutils is not installed",
+                    &t!("misc_category.disable_hyprland_qtutils_check_label"),
+                    &t!("misc_category.disable_hyprland_qtutils_check_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "lockdead_screen_delay",
-                    "Lock Dead Screen Delay",
-                    "Delay after which the “lockdead” screen will appear in case a lockscreen app fails to cover all the outputs (5 seconds max)",
+                    &t!("misc_category.lockdead_screen_delay_label"),
+                    &t!("misc_category.lockdead_screen_delay_description"),
                     "1000",
                     (0.0, 5000.0, 100.0),
                 );
@@ -2844,16 +2896,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "enable_anr_dialog",
-                    "Enable ANR Dialog",
-                    "Whether to enable the ANR (app not responding) dialog when your apps hang",
+                    &t!("misc_category.enable_anr_dialog_label"),
+                    &t!("misc_category.enable_anr_dialog_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "anr_missed_pings",
-                    "ANR Missed Pings",
-                    "Number of missed pings before showing the ANR dialog",
+                    &t!("misc_category.anr_missed_pings_label"),
+                    &t!("misc_category.anr_missed_pings_description"),
                     "1",
                     (1.0, 10.0, 1.0),
                 );
@@ -2861,40 +2913,40 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "screencopy_force_8b",
-                    "Force 8-bit color for screencopy",
-                    "Forces 8 bit screencopy. (fixes apps that don't understand 10bit)",
+                    &t!("misc_category.screencopy_force_8b_label"),
+                    &t!("misc_category.screencopy_force_8b_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_scale_notification",
-                    "Disable Scale Notification",
-                    "Disables notification popup when a monitor fails to set a suitable scale and falls back to suggested.",
+                    &t!("misc_category.disable_scale_notification_label"),
+                    &t!("misc_category.disable_scale_notification_description"),
                     "false",
                 );
             }
             "binds" => {
                 add_section(
                     &container,
-                    "Bind Settings",
-                    "Configure keybinding behavior.",
+                    &t!("binds_category.bind_settings_section_title"),
+                    &t!("binds_category.bind_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "pass_mouse_when_bound",
-                    "Pass Mouse When Bound",
-                    "If disabled, will not pass the mouse events to apps / dragging windows around if a keybind has been triggered.",
+                    &t!("binds_category.pass_mouse_when_bound_label"),
+                    &t!("binds_category.pass_mouse_when_bound_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "scroll_event_delay",
-                    "Scroll Event Delay",
-                    "In ms, how many ms to wait after a scroll event to allow passing another one for the binds.",
+                    &t!("binds_category.scroll_event_delay_label"),
+                    &t!("binds_category.scroll_event_delay_description"),
                     "300",
                     (0.0, 2000.0, 20.0),
                 );
@@ -2902,97 +2954,100 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "workspace_back_and_forth",
-                    "Workspace Back and Forth",
-                    "If enabled, an attempt to switch to the currently focused workspace will instead switch to the previous workspace.",
+                    &t!("binds_category.workspace_back_and_forth_label"),
+                    &t!("binds_category.workspace_back_and_forth_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "hide_special_on_workspace_change",
-                    "Hide Special on Workspace Change",
-                    "If enabled, changing the active workspace (including to itself) will hide the special workspace on the monitor where the newly active workspace resides.",
+                    &t!("binds_category.hide_special_on_workspace_change_label"),
+                    &t!("binds_category.hide_special_on_workspace_change_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "allow_workspace_cycles",
-                    "Allow Workspace Cycles",
-                    "If enabled, workspaces don't forget their previous workspace, so cycles can be created.",
+                    &t!("binds_category.allow_workspace_cycles_label"),
+                    &t!("binds_category.allow_workspace_cycles_description"),
                     "false",
                 );
                 add_bool_int_option(
                     &container,
                     &mut options,
                     "workspace_center_on",
-                    "Workspace Center On",
-                    "Whether switching workspaces should center the cursor on the workspace (Off) or on the last active window for that workspace (On).",
+                    &t!("binds_category.workspace_center_on_label"),
+                    &t!("binds_category.workspace_center_on_description"),
                     "0",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "focus_preferred_method",
-                    "Focus Preferred Method",
-                    "Sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction.\nHistory - recent have priority,\nLength - longer shared edges have priority.",
-                    &["History", "Length"],
+                    &t!("binds_category.focus_preferred_method_label"),
+                    &t!("binds_category.focus_preferred_method_description"),
+                    &[
+                        &t!("binds_category.focus_preferred_method_history"),
+                        &t!("binds_category.focus_preferred_method_length"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "ignore_group_lock",
-                    "Ignore Group Lock",
-                    "If enabled, dispatchers like moveintogroup, moveoutofgroup and movewindoworgroup will ignore lock per group.",
+                    &t!("binds_category.ignore_group_lock_label"),
+                    &t!("binds_category.ignore_group_lock_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "movefocus_cycles_fullscreen",
-                    "Movefocus Cycles Fullscreen",
-                    "If enabled, when on a fullscreen window, movefocus will cycle fullscreen, if not, it will move the focus in a direction.",
+                    &t!("binds_category.movefocus_cycles_fullscreen_label"),
+                    &t!("binds_category.movefocus_cycles_fullscreen_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "movefocus_cycles_groupfirst",
-                    "Movefocus Cycles Groupfirst",
-                    "If enabled, when in a grouped window, movefocus will cycle windows in the groups first, then at each ends of tabs, it’ll move on to other windows/groups.",
+                    &t!("binds_category.movefocus_cycles_groupfirst_label"),
+                    &t!("binds_category.movefocus_cycles_groupfirst_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_keybind_grabbing",
-                    "Disable Keybind Grabbing",
-                    "If enabled, apps that request keybinds to be disabled (e.g.\nVMs) will not be able to do so.",
+                    &t!("binds_category.disable_keybind_grabbing_label"),
+                    &t!("binds_category.disable_keybind_grabbing_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "window_direction_monitor_fallback",
-                    "Window Direction Monitor Fallback",
-                    "If enabled, moving a window or focus over the edge of a monitor with a direction will move it to the next monitor in that direction.",
+                    &t!("binds_category.window_direction_monitor_fallback_label"),
+                    &t!("binds_category.window_direction_monitor_fallback_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "allow_pin_fullscreen",
-                    "Allow Pin Fullscreen",
-                    "If enabled, Allow fullscreen to pinned windows, and restore their pinned status afterwards.",
+                    &t!("binds_category.allow_pin_fullscreen_label"),
+                    &t!("binds_category.allow_pin_fullscreen_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "drag_threshold",
-                    "Drag Threshold",
-                    "Movement threshold in pixels for window dragging and c/g bind flags.\n0 to disable and grab on mousedown.",
+                    &t!("binds_category.drag_threshold_label"),
+                    &t!("binds_category.drag_threshold_description"),
                     "0",
                     (0.0, MAX_SAFE_INTEGER_F64, 1.0),
                 );
@@ -3000,190 +3055,214 @@ impl ConfigWidget {
             "xwayland" => {
                 add_section(
                     &container,
-                    "XWayland Settings",
-                    "Configure XWayland behavior.",
+                    &t!("xwayland_category.xwayland_settings_section_title"),
+                    &t!("xwayland_category.xwayland_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "enabled",
-                    "Enabled",
-                    "Allow running applications using X11.",
+                    &t!("xwayland_category.enabled_label"),
+                    &t!("xwayland_category.enabled_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "use_nearest_neighbor",
-                    "Use Nearest Neighbor",
-                    "Uses the nearest neighbor filtering for xwayland apps, making them pixelated rather than blurry.",
+                    &t!("xwayland_category.use_nearest_neighbor_label"),
+                    &t!("xwayland_category.use_nearest_neighbor_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "force_zero_scaling",
-                    "Force Zero Scaling",
-                    "Forces a scale of 1 on xwayland windows on scaled displays.",
+                    &t!("xwayland_category.force_zero_scaling_label"),
+                    &t!("xwayland_category.force_zero_scaling_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "create_abstract_socket",
-                    "Create Abstract Socket",
-                    "Create the abstract Unix domain socket for XWayland connections.\n(XWayland restart is required for changes to take effect; Linux only)",
+                    &t!("xwayland_category.create_abstract_socket_label"),
+                    &t!("xwayland_category.create_abstract_socket_description"),
                     "false",
                 );
             }
             "opengl" => {
                 add_section(
                     &container,
-                    "OpenGL Settings",
-                    "Configure OpenGL behavior.",
+                    &t!("opengl_category.opengl_settings_section_title"),
+                    &t!("opengl_category.opengl_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "nvidia_anti_flicker",
-                    "Nvidia Anti Flicker",
-                    "Reduces flickering on nvidia at the cost of possible frame drops on lower-end GPUs.\nOn non-nvidia, this is ignored.",
+                    &t!("opengl_category.nvidia_anti_flicker_label"),
+                    &t!("opengl_category.nvidia_anti_flicker_description"),
                     "true",
                 );
             }
             "render" => {
                 add_section(
                     &container,
-                    "Render Settings",
-                    "Configure render behavior.",
+                    &t!("render_category.render_settings_section_title"),
+                    &t!("render_category.render_settings_section_description"),
                     first_section.clone(),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "direct_scanout",
-                    "Direct Scanout",
-                    "Enables direct scanout.\nDirect scanout attempts to reduce lag when there is only one fullscreen application on a screen (e.g.\ngame).\nIt is also recommended to set this to false if the fullscreen application shows graphical glitches.\nAuto - on with content type 'game'",
-                    &["Off", "On", "Auto"],
+                    &t!("render_category.direct_scanout_label"),
+                    &t!("render_category.direct_scanout_description"),
+                    &[
+                        &t!("render_category.direct_scanout_off"),
+                        &t!("render_category.direct_scanout_on"),
+                        &t!("render_category.direct_scanout_auto"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "expand_undersized_textures",
-                    "Expand Undersized Textures",
-                    "Whether to expand undersized textures along the edge, or rather stretch the entire texture.",
+                    &t!("render_category.expand_undersized_textures_label"),
+                    &t!("render_category.expand_undersized_textures_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "xp_mode",
-                    "XP Mode",
-                    "Disables back buffer and bottom layer rendering.",
+                    &t!("render_category.xp_mode_label"),
+                    &t!("render_category.xp_mode_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "ctm_animation",
-                    "CTM Animation",
-                    "Whether to enable a fade animation for CTM changes (hyprsunset).\n'Auto' disables them on Nvidia.",
-                    &["Off", "On", "Auto"],
+                    &t!("render_category.ctm_animation_label"),
+                    &t!("render_category.ctm_animation_description"),
+                    &[
+                        &t!("render_category.ctm_animation_off"),
+                        &t!("render_category.ctm_animation_on"),
+                        &t!("render_category.ctm_animation_auto"),
+                    ],
                     "2",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "cm_fs_passthrough",
-                    "CM FS Passthrough",
-                    "Passthrough color settings for fullscreen apps when possible.",
-                    &["Off", "Always", "HDR only"],
+                    &t!("render_category.cm_fs_passthrough_label"),
+                    &t!("render_category.cm_fs_passthrough_description"),
+                    &[
+                        &t!("render_category.cm_fs_passthrough_off"),
+                        &t!("render_category.cm_fs_passthrough_always"),
+                        &t!("render_category.cm_fs_passthrough_hdr_only"),
+                    ],
                     "2",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "cm_enabled",
-                    "CM Enabled",
-                    "Whether the color management pipeline should be enabled or not (requires a restart of Hyprland to fully take effect)",
+                    &t!("render_category.cm_enabled_label"),
+                    &t!("render_category.cm_enabled_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "send_content_type",
-                    "Send Content Type",
-                    "Report content type to allow monitor profile autoswitch (may result in a black screen during the switch).",
+                    &t!("render_category.send_content_type_label"),
+                    &t!("render_category.send_content_type_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "cm_auto_hdr",
-                    "CM Auto HDR",
-                    "Auto-switch to hdr mode when fullscreen app is in hdr.\n'cm_fs_passthrough' can switch to hdr even when this setting is off.",
-                    &["Off", "HDR", "HDREDID"],
+                    &t!("render_category.cm_auto_hdr_label"),
+                    &t!("render_category.cm_auto_hdr_description"),
+                    &[
+                        &t!("render_category.cm_auto_hdr_off"),
+                        &t!("render_category.cm_auto_hdr_hdr"),
+                        &t!("render_category.cm_auto_hdr_hdredid"),
+                    ],
                     "1",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "new_render_scheduling",
-                    "New Render Scheduling",
-                    "Automatically uses triple buffering when needed, improves FPS on underpowered devices.",
+                    &t!("render_category.new_render_scheduling_label"),
+                    &t!("render_category.new_render_scheduling_description"),
                     "false",
                 );
             }
             "cursor" => {
                 add_section(
                     &container,
-                    "Cursor Settings",
-                    "Configure cursor behavior.",
+                    &t!("cursor_category.cursor_settings_section_title"),
+                    &t!("cursor_category.cursor_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "sync_gsettings_theme",
-                    "Sync GSettings Theme",
-                    "Sync xcursor theme with gsettings, it applies cursor-theme and cursor-size on theme load to gsettings making most CSD gtk based clients use same xcursor theme and size.",
+                    &t!("cursor_category.sync_gsettings_theme_label"),
+                    &t!("cursor_category.sync_gsettings_theme_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "invisible",
-                    "Invisible",
-                    "Don't render cursors.",
+                    &t!("cursor_category.invisible_label"),
+                    &t!("cursor_category.invisible_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "no_hardware_cursors",
-                    "No Hardware Cursors",
-                    "Disables hardware cursors.\nAuto - disable when tearing.",
-                    &["Use HWC if possible", "Don't use HWC", "Auto"],
+                    &t!("cursor_category.no_hardware_cursors_label"),
+                    &t!("cursor_category.no_hardware_cursors_description"),
+                    &[
+                        &t!("cursor_category.no_hardware_cursors_use_hwc_if_possible"),
+                        &t!("cursor_category.no_hardware_cursors_dont_use_hwc"),
+                        &t!("cursor_category.no_hardware_cursors_auto"),
+                    ],
                     "2",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "no_break_fs_vrr",
-                    "No Break FS VRR",
-                    "Disables scheduling new frames on cursor movement for fullscreen apps with VRR enabled to avoid framerate spikes (may require no_hardware_cursors enabled).\nauto - on with content type 'game'.",
-                    &["Off", "On", "Auto"],
+                    &t!("cursor_category.no_break_fs_vrr_label"),
+                    &t!("cursor_category.no_break_fs_vrr_description"),
+                    &[
+                        &t!("cursor_category.no_break_fs_vrr_off"),
+                        &t!("cursor_category.no_break_fs_vrr_on"),
+                        &t!("cursor_category.no_break_fs_vrr_auto"),
+                    ],
                     "2",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "min_refresh_rate",
-                    "Min Refresh Rate",
-                    "Minimum refresh rate for cursor movement when no_break_fs_vrr is active.\nSet to minimum supported refresh rate or higher.",
+                    &t!("cursor_category.min_refresh_rate_label"),
+                    &t!("cursor_category.min_refresh_rate_description"),
                     "24",
                     (10.0, 500.0, 1.0),
                 );
@@ -3191,8 +3270,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "hotspot_padding",
-                    "Hotspot Padding",
-                    "The padding, in logical px, between screen edges and the cursor.",
+                    &t!("cursor_category.hotspot_padding_label"),
+                    &t!("cursor_category.hotspot_padding_description"),
                     "1",
                     (0.0, 20.0, 1.0),
                 );
@@ -3200,8 +3279,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "inactive_timeout",
-                    "Inactive Timeout",
-                    "In seconds, after how many seconds of cursor's inactivity to hide it.\nSet to 0 for never.",
+                    &t!("cursor_category.inactive_timeout_label"),
+                    &t!("cursor_category.inactive_timeout_description"),
                     "0",
                     (0.0, 20.0, 1.0),
                 );
@@ -3209,50 +3288,58 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "no_warps",
-                    "No Warps",
-                    "If true, will not warp the cursor in many cases (focusing, keybinds, etc).",
+                    &t!("cursor_category.no_warps_label"),
+                    &t!("cursor_category.no_warps_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "persistent_warps",
-                    "Persistent Warps",
-                    "When a window is refocused, the cursor returns to its last position relative to that window.",
+                    &t!("cursor_category.persistent_warps_label"),
+                    &t!("cursor_category.persistent_warps_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "warp_on_change_workspace",
-                    "Warp on Change Workspace",
-                    "Move the cursor to the last focused window after changing the workspace.\nForce - ignores cursor:no_warps option.",
-                    &["Disabled", "Enabled", "Force"],
+                    &t!("cursor_category.warp_on_change_workspace_label"),
+                    &t!("cursor_category.warp_on_change_workspace_description"),
+                    &[
+                        &t!("cursor_category.warp_on_change_workspace_disabled"),
+                        &t!("cursor_category.warp_on_change_workspace_enabled"),
+                        &t!("cursor_category.warp_on_change_workspace_force"),
+                    ],
                     "0",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "warp_on_toggle_special",
-                    "Warp on Toggle Special",
-                    "Move the cursor to the last focused window when toggling a special workspace.\nForce - ignores cursor:no_warps option.",
-                    &["Disabled", "Enabled", "Force"],
+                    &t!("cursor_category.warp_on_toggle_special_label"),
+                    &t!("cursor_category.warp_on_toggle_special_description"),
+                    &[
+                        &t!("cursor_category.warp_on_toggle_special_disabled"),
+                        &t!("cursor_category.warp_on_toggle_special_enabled"),
+                        &t!("cursor_category.warp_on_toggle_special_force"),
+                    ],
                     "0",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "default_monitor",
-                    "Default Monitor",
-                    "The name of a default monitor for the cursor to be set to on startup.",
+                    &t!("cursor_category.default_monitor_label"),
+                    &t!("cursor_category.default_monitor_description"),
                     "[[EMPTY]]",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "zoom_factor",
-                    "Zoom Factor",
-                    "The factor to zoom by around the cursor.\nLike a magnifying glass.",
+                    &t!("cursor_category.zoom_factor_label"),
+                    &t!("cursor_category.zoom_factor_description"),
                     "1.0",
                     (1.0, 10.0, 0.1),
                 );
@@ -3260,186 +3347,194 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "zoom_rigid",
-                    "Zoom Rigid",
-                    "Whether the zoom should follow the cursor rigidly (cursor is always centered if it can be) or loosely.",
+                    &t!("cursor_category.zoom_rigid_label"),
+                    &t!("cursor_category.zoom_rigid_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "enable_hyprcursor",
-                    "Enable Hyprcursor",
-                    "Whether to enable hyprcursor support.",
+                    &t!("cursor_category.enable_hyprcursor_label"),
+                    &t!("cursor_category.enable_hyprcursor_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "hide_on_key_press",
-                    "Hide on Key Press",
-                    "Hides the cursor when you press any key until the mouse is moved.",
+                    &t!("cursor_category.hide_on_key_press_label"),
+                    &t!("cursor_category.hide_on_key_press_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "hide_on_touch",
-                    "Hide on Touch",
-                    "Hides the cursor when the last input was a touch input until a mouse input is done.",
+                    &t!("cursor_category.hide_on_touch_label"),
+                    &t!("cursor_category.hide_on_touch_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "use_cpu_buffer",
-                    "Use CPU Buffer",
-                    "Makes HW cursors use a CPU buffer.\nRequired on Nvidia to have HW cursors.\nAuto is nvidia only.",
-                    &["Off", "On", "Auto"],
+                    &t!("cursor_category.use_cpu_buffer_label"),
+                    &t!("cursor_category.use_cpu_buffer_description"),
+                    &[
+                        &t!("cursor_category.use_cpu_buffer_off"),
+                        &t!("cursor_category.use_cpu_buffer_on"),
+                        &t!("cursor_category.use_cpu_buffer_auto"),
+                    ],
                     "2",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "warp_back_after_non_mouse_input",
-                    "Warp Back After Non-Mouse Input",
-                    "Warp the cursor back to where it was after using a non-mouse input to move it, and then returning back to mouse.",
+                    &t!("cursor_category.warp_back_after_non_mouse_input_label"),
+                    &t!("cursor_category.warp_back_after_non_mouse_input_description"),
                     "false",
                 );
             }
             "ecosystem" => {
                 add_section(
                     &container,
-                    "Ecosystem Settings",
-                    "Configure ecosystem behavior.",
+                    &t!("ecosystem_category.ecosystem_settings_section_title"),
+                    &t!("ecosystem_category.ecosystem_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "no_update_news",
-                    "No Update News",
-                    "Disable the popup that shows up when you update hyprland to a new version.",
+                    &t!("ecosystem_category.no_update_news_label"),
+                    &t!("ecosystem_category.no_update_news_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "no_donation_nag",
-                    "No Donation Nag",
-                    "Disable the popup that shows up twice a year encouraging to donate.",
+                    &t!("ecosystem_category.no_donation_nag_label"),
+                    &t!("ecosystem_category.no_donation_nag_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "enforce_permissions",
-                    "Enforce Permissions",
-                    "Whether to enable Hyprland's permission control.",
+                    &t!("ecosystem_category.enforce_permissions_label"),
+                    &t!("ecosystem_category.enforce_permissions_description"),
                     "false",
                 );
             }
             "experimental" => {
                 add_section(
                     &container,
-                    "Experimental Settings",
-                    "Configure experimental behavior.",
+                    &t!("experimental_category.experimental_settings_section_title"),
+                    &t!("experimental_category.experimental_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "xx_color_management_v4",
-                    "XX Color Management v4",
-                    "Enable color management protocol",
+                    &t!("experimental_category.xx_color_management_v4_label"),
+                    &t!("experimental_category.xx_color_management_v4_description"),
                     "false",
                 );
             }
             "debug" => {
                 add_section(
                     &container,
-                    "Debug Settings",
-                    "Configure debug behavior.",
+                    &t!("debug_category.debug_settings_section_title"),
+                    &t!("debug_category.debug_settings_section_description"),
                     first_section.clone(),
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "overlay",
-                    "Overlay",
-                    "Print the debug performance overlay.\nDisable VFR for accurate results.",
+                    &t!("debug_category.overlay_label"),
+                    &t!("debug_category.overlay_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "damage_blink",
-                    "Damage Blink (epilepsy warning!) ",
-                    "Flash areas updated with damage tracking.",
+                    &t!("debug_category.damage_blink_label"),
+                    &t!("debug_category.damage_blink_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_logs",
-                    "Disable Logs",
-                    "Disable logging to a file.",
+                    &t!("debug_category.disable_logs_label"),
+                    &t!("debug_category.disable_logs_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_time",
-                    "Disable Time",
-                    "Disables time logging.",
+                    &t!("debug_category.disable_time_label"),
+                    &t!("debug_category.disable_time_description"),
                     "true",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "damage_tracking",
-                    "Damage Tracking. Do not change.",
-                    "Redraw only the needed bits of the display.\nDo not change.",
-                    &["None", "Monitor", "Full"],
+                    &t!("debug_category.damage_tracking_label"),
+                    &t!("debug_category.damage_tracking_description"),
+                    &[
+                        &t!("debug_category.damage_tracking_none"),
+                        &t!("debug_category.damage_tracking_monitor"),
+                        &t!("debug_category.damage_tracking_full"),
+                    ],
                     "2",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "enable_stdout_logs",
-                    "Enable Stdout Logs",
-                    "Enables logging to stdout.",
+                    &t!("debug_category.enable_stdout_logs_label"),
+                    &t!("debug_category.enable_stdout_logs_description"),
                     "false",
                 );
                 add_bool_int_option(
                     &container,
                     &mut options,
                     "manual_crash",
-                    "Manual Crash",
-                    "Set to 1 and then back to 0 to crash Hyprland.",
+                    &t!("debug_category.manual_crash_label"),
+                    &t!("debug_category.manual_crash_description"),
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "suppress_errors",
-                    "Suppress Errors",
-                    "If true, do not display config file parsing errors.",
+                    &t!("debug_category.suppress_errors_label"),
+                    &t!("debug_category.suppress_errors_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "disable_scale_checks",
-                    "Disable Scale Checks",
-                    "Disables verification of the scale factors.\nWill result in pixel alignment and rounding errors.",
+                    &t!("debug_category.disable_scale_checks_label"),
+                    &t!("debug_category.disable_scale_checks_description"),
                     "false",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "error_limit",
-                    "Error Limit",
-                    "Limits the number of displayed config file parsing errors.",
+                    &t!("debug_category.error_limit_label"),
+                    &t!("debug_category.error_limit_description"),
                     "5",
                     (0.0, 20.0, 1.0),
                 );
@@ -3447,48 +3542,51 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "error_position",
-                    "Error Position",
-                    "Sets the position of the error bar.",
-                    &["Top", "Bottom"],
+                    &t!("debug_category.error_position_label"),
+                    &t!("debug_category.error_position_description"),
+                    &[
+                        &t!("debug_category.error_position_top"),
+                        &t!("debug_category.error_position_bottom"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "colored_stdout_logs",
-                    "Colored Stdout Logs",
-                    "Enables colors in the stdout logs.",
+                    &t!("debug_category.colored_stdout_logs_label"),
+                    &t!("debug_category.colored_stdout_logs_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "pass",
-                    "Pass",
-                    "Enables render pass debugging.",
+                    &t!("debug_category.pass_label"),
+                    &t!("debug_category.pass_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "full_cm_proto",
-                    "Full CM Proto",
-                    "Claims support for all cm proto features (requires restart).",
+                    &t!("debug_category.full_cm_proto_label"),
+                    &t!("debug_category.full_cm_proto_description"),
                     "false",
                 );
             }
             "layouts" => {
                 add_section(
                     &container,
-                    "Layout Settings",
-                    "Configure layout behavior.",
+                    &t!("layouts_category.layout_settings_section_title"),
+                    &t!("layouts_category.layout_settings_section_description"),
                     first_section.clone(),
                 );
 
                 add_section(
                     &container,
-                    "Dwindle Layout",
-                    "Dwindle is a BSPWM-like layout, where every window on a workspace is a member of a binary tree.",
+                    &t!("layouts_category.dwindle.layout_section_title"),
+                    &t!("layouts_category.dwindle.layout_section_description"),
                     first_section.clone(),
                 );
                 add_guide(&container, "Dwindle-Layout", false);
@@ -3496,20 +3594,20 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:pseudotile",
-                    "Pseudotile",
-                    "Enable pseudotiling.\nPseudotiled windows retain their floating size when tiled.",
+                    &t!("layouts_category.dwindle.pseudotile_label"),
+                    &t!("layouts_category.dwindle.pseudotile_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "dwindle:force_split",
-                    "Force Split",
-                    "Dwindle layout split direction.",
+                    &t!("layouts_category.dwindle.force_split_label"),
+                    &t!("layouts_category.dwindle.force_split_description"),
                     &[
-                        "Split follows mouse",
-                        "Always split left/top",
-                        "Always split right/bottom",
+                        &t!("layouts_category.dwindle.force_split_split_follows_mouse"),
+                        &t!("layouts_category.dwindle.force_split_always_split_left/top"),
+                        &t!("layouts_category.dwindle.force_split_always_split_right/bottom"),
                     ],
                     "0",
                 );
@@ -3517,40 +3615,40 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:preserve_split",
-                    "Preserve Split",
-                    "If enabled, the split (side/top) will not change regardless of what happens to the container.",
+                    &t!("layouts_category.dwindle.preserve_split_label"),
+                    &t!("layouts_category.dwindle.preserve_split_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "dwindle:smart_split",
-                    "Smart Split",
-                    "If enabled, allows a more precise control over the window split direction based on the cursor’s position.\nThe window is conceptually divided into four triangles, and cursor’s triangle determines the split direction.\nThis feature also turns on preserve_split.",
+                    &t!("layouts_category.dwindle.smart_split_label"),
+                    &t!("layouts_category.dwindle.smart_split_description"),
                     "false",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "dwindle:smart_resizing",
-                    "Smart Resizing",
-                    "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner).\nElse, it is based on the window’s tiling position.",
+                    &t!("layouts_category.dwindle.smart_resizing_label"),
+                    &t!("layouts_category.dwindle.smart_resizing_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "dwindle:permanent_direction_override",
-                    "Permanent Direction Override",
-                    "If enabled, makes the preselect direction persist until either this mode is turned off, another direction is specified, or a non-direction is specified (anything other than l,r,u/t,d/b)",
+                    &t!("layouts_category.dwindle.permanent_direction_override_label"),
+                    &t!("layouts_category.dwindle.permanent_direction_override_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "dwindle:special_scale_factor",
-                    "Special Scale Factor",
-                    "Specifies the scale factor of windows on the special workspace.\n[0.0 - 1.0]",
+                    &t!("layouts_category.dwindle.special_scale_factor_label"),
+                    &t!("layouts_category.dwindle.special_scale_factor_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -3558,8 +3656,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:split_width_multiplier",
-                    "Split Width Multiplier",
-                    "Specifies the auto-split width multiplier.\nMultiplying window size is useful on widescreen monitors where window W > H even after several splits.",
+                    &t!("layouts_category.dwindle.split_width_multiplier_label"),
+                    &t!("layouts_category.dwindle.split_width_multiplier_description"),
                     "1.0",
                     (0.1, 3.0, 0.1),
                 );
@@ -3567,16 +3665,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:use_active_for_splits",
-                    "Use Active for Splits",
-                    "Whether to prefer the active window or the mouse position for splits",
+                    &t!("layouts_category.dwindle.use_active_for_splits_label"),
+                    &t!("layouts_category.dwindle.use_active_for_splits_description"),
                     "true",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "dwindle:default_split_ratio",
-                    "Default Split Ratio",
-                    "The default split ratio on window open.\n1 means even 50/50 split.\n[0.1 - 1.9]",
+                    &t!("layouts_category.dwindle.default_split_ratio_label"),
+                    &t!("layouts_category.dwindle.default_split_ratio_description"),
                     "1.0",
                     (0.1, 1.9, 0.02),
                 );
@@ -3584,41 +3682,44 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "dwindle:split_bias",
-                    "Split Bias",
-                    "Specifies which window will receive the split ratio.\nDirectional - the top or left window.",
-                    &["Directional", "Current window"],
+                    &t!("layouts_category.dwindle.split_bias_label"),
+                    &t!("layouts_category.dwindle.split_bias_description"),
+                    &[
+                        &t!("layouts_category.dwindle.split_bias_directional"),
+                        &t!("layouts_category.dwindle.split_bias_current_window"),
+                    ],
                     "0",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "precise_mouse_move",
-                    "Precise Mouse Move",
-                    "Bindm movewindow will drop the window more precisely depending on where your mouse is.",
+                    &t!("layouts_category.precise_mouse_move_label"),
+                    &t!("layouts_category.precise_mouse_move_description"),
                     "false",
                 );
                 add_string_option(
                     &container,
                     &mut options,
                     "single_window_aspect_ratio",
-                    "Single Window Aspect Ratio",
-                    "Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio.\nA value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with padding to the sides.\nx y",
+                    &t!("layouts_category.single_window_aspect_ratio_label"),
+                    &t!("layouts_category.single_window_aspect_ratio_description"),
                     "0 0",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "single_window_aspect_ratio_tolerance",
-                    "Single Window Aspect Ratio Tolerance",
-                    "Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to adjust the window size.\n[0.0 - 1.0]",
+                    &t!("layouts_category.single_window_aspect_ratio_tolerance_label"),
+                    &t!("layouts_category.single_window_aspect_ratio_tolerance_description"),
                     "0.1",
                     (0.0, 1.0, 0.01),
                 );
 
                 add_section(
                     &container,
-                    "Master Layout",
-                    "The master layout makes one (or more) window(s) be the “master”, taking (by default) the left part of the screen, and tiles the rest on the right.\nYou can change the orientation on a per-workspace basis if you want to use anything other than the default left/right split.",
+                    &t!("layouts_category.master.layout_section_title"),
+                    &t!("layouts_category.master.layout_section_description"),
                     first_section.clone(),
                 );
                 add_guide(&container, "Master-Layout", true);
@@ -3626,16 +3727,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:allow_small_split",
-                    "Allow Small Split",
-                    "Enable adding additional master windows in a horizontal split style",
+                    &t!("layouts_category.master.allow_small_split_label"),
+                    &t!("layouts_category.master.allow_small_split_description"),
                     "false",
                 );
                 add_float_option(
                     &container,
                     &mut options,
                     "master:special_scale_factor",
-                    "Special Scale Factor",
-                    "The scale of the special workspace windows.\n[0.0 - 1.0]",
+                    &t!("layouts_category.master.special_scale_factor_label"),
+                    &t!("layouts_category.master.special_scale_factor_description"),
                     "1.0",
                     (0.0, 1.0, 0.01),
                 );
@@ -3643,8 +3744,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:mfact",
-                    "Master Factor",
-                    "The size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave.\n[0.0 - 1.0]",
+                    &t!("layouts_category.master.mfact_label"),
+                    &t!("layouts_category.master.mfact_description"),
                     "0.55",
                     (0.0, 1.0, 0.01),
                 );
@@ -3652,8 +3753,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:new_status",
-                    "New Window Status",
-                    "Determines how new windows are added to the layout.\nmaster: new window becomes master;\nslave: new windows are added to slave stack;\ninherit: inherit from focused window",
+                    &t!("layouts_category.master.new_status_label"),
+                    &t!("layouts_category.master.new_status_description"),
                     &["master", "slave", "inherit"],
                     "slave",
                 );
@@ -3661,16 +3762,16 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:new_on_top",
-                    "New on Top",
-                    "Whether a newly open window should be on the top of the stack",
+                    &t!("layouts_category.master.new_on_top_label"),
+                    &t!("layouts_category.master.new_on_top_description"),
                     "false",
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
                     "master:new_on_active",
-                    "New on Active",
-                    "Before, after: place new window relative to the focused window;\nnone: place new window according to the value of New on Top.",
+                    &t!("layouts_category.master.new_on_active_label"),
+                    &t!("layouts_category.master.new_on_active_description"),
                     &["before", "after", "none"],
                     "none",
                 );
@@ -3678,8 +3779,8 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:orientation",
-                    "Orientation",
-                    "Default placement of the master area",
+                    &t!("layouts_category.master.orientation_label"),
+                    &t!("layouts_category.master.orientation_description"),
                     &["left", "right", "top", "bottom", "center"],
                     "left",
                 );
@@ -3687,25 +3788,25 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:inherit_fullscreen",
-                    "Inherit Fullscreen",
-                    "Inherit fullscreen status when cycling/swapping to another window",
+                    &t!("layouts_category.master.inherit_fullscreen_label"),
+                    &t!("layouts_category.master.inherit_fullscreen_description"),
                     "true",
                 );
                 add_int_option(
                     &container,
                     &mut options,
                     "master:slave_count_for_center_master",
-                    "Slave Count for Center Master",
-                    "When using orientation=center, make the master window centered only when at least this many slave windows are open.\n(Set 0 to always_center_master)",
+                    &t!("layouts_category.master.slave_count_for_center_master_label"),
+                    &t!("layouts_category.master.slave_count_for_center_master_description"),
                     "2",
                     (0.0, 10.0, 1.0),
                 );
                 add_dropdown_option(
                     &container,
                     &mut options,
-                    "center_master_fallback",
-                    "Center Master Fallback",
-                    "Set fallback for center master when slaves are less than slave_count_for_center_master.",
+                    "master:center_master_fallback",
+                    &t!("layouts_category.master.center_master_fallback_label"),
+                    &t!("layouts_category.master.center_master_fallback_description"),
                     &["left", "right", "top", "bottom"],
                     "left",
                 );
@@ -3713,32 +3814,32 @@ impl ConfigWidget {
                     &container,
                     &mut options,
                     "master:smart_resizing",
-                    "Smart Resizing",
-                    "If enabled, resizing direction will be determined by the mouse’s position on the window (nearest to which corner).\nElse, it is based on the window’s tiling position.",
+                    &t!("layouts_category.master.smart_resizing_label"),
+                    &t!("layouts_category.master.smart_resizing_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "master:drop_at_cursor",
-                    "Drop at Cursor",
-                    "When enabled, dragging and dropping windows will put them at the cursor position.\nOtherwise, when dropped at the stack side, they will go to the top/bottom of the stack depending on new_on_top.",
+                    &t!("layouts_category.master.drop_at_cursor_label"),
+                    &t!("layouts_category.master.drop_at_cursor_description"),
                     "true",
                 );
                 add_bool_option(
                     &container,
                     &mut options,
                     "master:always_keep_position",
-                    "Always keep position",
-                    "Whether to keep the master window in its configured position when there are no slave windows",
+                    &t!("layouts_category.master.always_keep_position_label"),
+                    &t!("layouts_category.master.always_keep_position_description"),
                     "false",
                 )
             }
             "systeminfo" => {
                 add_section(
                     &container,
-                    "System Info",
-                    "Displays information about the system.",
+                    &t!("layouts_category.system_info_section_title"),
+                    &t!("layouts_category.system_info_section_description"),
                     first_section.clone(),
                 );
 
@@ -3763,13 +3864,20 @@ impl ConfigWidget {
 
                 let os_text_box = Box::new(Orientation::Vertical, 10);
 
-                let (os_label, os_refresh) = add_info_row(&os_text_box, "OS:", &get_os_info());
+                let (os_label, os_refresh) = add_info_row(
+                    &os_text_box,
+                    &t!("system_info_category.os_label"),
+                    &get_os_info(),
+                );
                 os_refresh.connect_clicked(move |_| {
                     os_label.set_label(&get_os_info());
                 });
 
-                let (kernel_label, kernel_refresh) =
-                    add_info_row(&os_text_box, "Kernel:", &get_kernel_info());
+                let (kernel_label, kernel_refresh) = add_info_row(
+                    &os_text_box,
+                    &t!("system_info_category.kernel_label"),
+                    &get_kernel_info(),
+                );
                 kernel_refresh.connect_clicked(move |_| {
                     kernel_label.set_label(&get_kernel_info());
                 });
@@ -3782,8 +3890,11 @@ impl ConfigWidget {
 
                 let hyprland_version = get_hyprland_version();
 
-                let (hyprland_version_label, hyprland_version_refresh) =
-                    add_info_row(&info_box, "Hyprland Version:", &hyprland_version);
+                let (hyprland_version_label, hyprland_version_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.hyprland_version_label"),
+                    &hyprland_version,
+                );
                 hyprland_version_refresh.connect_clicked(move |_| {
                     update_version_label(
                         &hyprland_version_label,
@@ -3794,8 +3905,11 @@ impl ConfigWidget {
 
                 let hyprviz_version = get_hyprviz_version();
 
-                let (hyprviz_version_label, hyprviz_version_refresh) =
-                    add_info_row(&info_box, "Hyprviz Version:", &hyprviz_version);
+                let (hyprviz_version_label, hyprviz_version_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.hyprviz_version_label"),
+                    &hyprviz_version,
+                );
                 hyprviz_version_refresh.connect_clicked(move |_| {
                     update_version_label(
                         &hyprviz_version_label,
@@ -3806,34 +3920,56 @@ impl ConfigWidget {
 
                 // Section for other system info
 
-                let (user_label, user_refresh) = add_info_row(&info_box, "User:", &get_user_info());
+                let (user_label, user_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.user_label"),
+                    &get_user_info(),
+                );
                 user_refresh.connect_clicked(move |_| {
                     user_label.set_label(&get_user_info());
                 });
 
-                let (host_label, host_refresh) = add_info_row(&info_box, "Host:", &get_host_info());
+                let (host_label, host_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.host_label"),
+                    &get_host_info(),
+                );
                 host_refresh.connect_clicked(move |_| {
                     host_label.set_label(&get_host_info());
                 });
 
-                let (cpu_label, cpu_refresh) = add_info_row(&info_box, "CPU:", &get_cpu_info());
+                let (cpu_label, cpu_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.cpu_label"),
+                    &get_cpu_info(),
+                );
                 cpu_refresh.connect_clicked(move |_| {
                     cpu_label.set_label(&get_cpu_info());
                 });
 
-                let (gpu_label, gpu_refresh) = add_info_row(&info_box, "GPU:", &get_gpu_info());
+                let (gpu_label, gpu_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.gpu_label"),
+                    &get_gpu_info(),
+                );
                 gpu_refresh.connect_clicked(move |_| {
                     gpu_label.set_label(&get_gpu_info());
                 });
 
-                let (memory_label, memory_refresh) =
-                    add_info_row(&info_box, "Memory:", &get_memory_info());
+                let (memory_label, memory_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.memory_label"),
+                    &get_memory_info(),
+                );
                 memory_refresh.connect_clicked(move |_| {
                     memory_label.set_label(&get_memory_info());
                 });
 
-                let (monitors_label, monitors_refresh) =
-                    add_info_row(&info_box, "Monitors:", &get_monitor_info());
+                let (monitors_label, monitors_refresh) = add_info_row(
+                    &info_box,
+                    &t!("system_info_category.monitors_label"),
+                    &get_monitor_info(),
+                );
                 monitors_refresh.connect_clicked(move |_| {
                     monitors_label.set_label(&get_monitor_info());
                 });
@@ -3845,8 +3981,8 @@ impl ConfigWidget {
                     "monitor" => {
                         add_section(
                             &container,
-                            "Monitors",
-                            "Configure monitors.",
+                            &t!("monitor_category.monitors_section_title"),
+                            &t!("monitor_category.monitors_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Monitors", true);
@@ -3854,8 +3990,8 @@ impl ConfigWidget {
                     "workspace" => {
                         add_section(
                             &container,
-                            "Workspaces",
-                            "Configure workspaces.",
+                            &t!("workspace_category.workspaces_section_title"),
+                            &t!("workspace_category.workspaces_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Workspace-Rules", true);
@@ -3863,8 +3999,8 @@ impl ConfigWidget {
                     "animation" => {
                         add_section(
                             &container,
-                            "Animations",
-                            "Configure animations.",
+                            &t!("animation_category.animations_section_title"),
+                            &t!("animation_category.animations_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Animations", true);
@@ -3872,8 +4008,8 @@ impl ConfigWidget {
                     "bind" => {
                         add_section(
                             &container,
-                            "Bindings",
-                            "Configure keybindings.",
+                            &t!("bind_category.binds_section_title"),
+                            &t!("bind_category.binds_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Binds", true);
@@ -3881,8 +4017,8 @@ impl ConfigWidget {
                     "gesture" => {
                         add_section(
                             &container,
-                            "Gestures",
-                            "Configure gestures.",
+                            &t!("gesture_category.gestures_section_title"),
+                            &t!("gesture_category.gestures_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Gestures", true);
@@ -3890,8 +4026,8 @@ impl ConfigWidget {
                     "windowrule" => {
                         add_section(
                             &container,
-                            "Window Rules",
-                            "Configure window rules.",
+                            &t!("windowrule_category.window_rules_section_title"),
+                            &t!("windowrule_category.window_rules_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Window-Rules", true);
@@ -3899,8 +4035,8 @@ impl ConfigWidget {
                     "layerrule" => {
                         add_section(
                             &container,
-                            "Layer Rules",
-                            "Configure layer rules.",
+                            &t!("layerrule_category.layer_rules_section_title"),
+                            &t!("layerrule_category.layer_rules_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Layer-Rules", true);
@@ -3908,8 +4044,8 @@ impl ConfigWidget {
                     "exec" => {
                         add_section(
                             &container,
-                            "Execs",
-                            "Configure execs.",
+                            &t!("exec_category.execs_section_title"),
+                            &t!("exec_category.execs_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Execs", false);
@@ -3917,8 +4053,8 @@ impl ConfigWidget {
                     "env" => {
                         add_section(
                             &container,
-                            "Envs",
-                            "Configure environment variables.",
+                            &t!("env_category.envs_section_title"),
+                            &t!("env_category.envs_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Envs", false);
@@ -3926,16 +4062,22 @@ impl ConfigWidget {
                     "top_level" => {
                         add_section(
                             &container,
-                            "All top-level options",
-                            "Configure behavior for all top-level options.",
+                            &t!("top_level_category.top_level_section_title"),
+                            &t!("top_level_category.top_level_section_description"),
                             first_section.clone(),
                         );
                         add_guide(&container, "Dispatchers", true);
                     }
                     _ => add_section(
                         &container,
-                        &format!("{display_name} Settings"),
-                        &format!("Configure {display_name} behavior."),
+                        &t!(
+                            "none_category.none_section_title",
+                            category_name = display_name
+                        ),
+                        &t!(
+                            "none_category.none_section_description",
+                            category_name = display_name
+                        ),
                         first_section.clone(),
                     ),
                 }
@@ -4066,7 +4208,10 @@ impl ConfigWidget {
                     }
                 });
             } else if let Some(gtkbox) = widget.downcast_ref::<Box>() {
-                let read_only_str = &format!("This is a read-only {} (from main config)", name);
+                let read_only_str = &t!(
+                    "this_is_a_read_only__from_main_config",
+                    category_name = name
+                );
 
                 let read_only_label = Label::new(Some(read_only_str));
                 read_only_label.set_halign(gtk::Align::Start);
@@ -4114,9 +4259,9 @@ impl ConfigWidget {
                         .collect::<Vec<&str>>()
                         .join("\n"),
                     Err(_) => {
-                        let error_label = Label::new(Some(&format!(
-                            "Error reading {}",
-                            read_only_path.to_string_lossy()
+                        let error_label = Label::new(Some(&t!(
+                            "error_reading_",
+                            path = read_only_path.to_string_lossy()
                         )));
 
                         error_label.set_markup("<span foreground=\"red\">{read_only_path}</span>");
@@ -4135,9 +4280,9 @@ impl ConfigWidget {
                     match expand_source_str(&read_only_path, &read_only_config_raw) {
                         Ok(read_only_config) => read_only_config,
                         Err(_) => {
-                            let error_label = Label::new(Some(&format!(
-                                "Error reading {}",
-                                read_only_path.to_string_lossy()
+                            let error_label = Label::new(Some(&t!(
+                                "error_reading_",
+                                path = read_only_path.to_string_lossy()
                             )));
 
                             error_label
@@ -4191,7 +4336,7 @@ impl ConfigWidget {
                     options_grid.attach(&value_label, 2, row_num, 1, 1);
                 }
 
-                let expander = Expander::new(Some("Show read-only options"));
+                let expander = Expander::new(Some(&t!("show_read_only_options")));
                 expander.set_margin_top(10);
                 expander.set_margin_bottom(10);
                 expander.set_margin_start(5);
@@ -4201,7 +4346,10 @@ impl ConfigWidget {
 
                 gtkbox.append(&expander);
 
-                let rw_str = &format!("This is a read-write {} (from your profile)", name);
+                let rw_str = &t!(
+                    "this_is_a_read_write__from_your_profile",
+                    category_name = name
+                );
 
                 let rw_label = Label::new(Some(rw_str));
                 rw_label.set_halign(gtk::Align::Start);
@@ -4218,9 +4366,9 @@ impl ConfigWidget {
                 let rw_config = match expand_source(&rw_path) {
                     Ok(rw_config) => rw_config,
                     Err(_) => {
-                        let error_label = Label::new(Some(&format!(
-                            "Error reading {}",
-                            rw_path.to_string_lossy()
+                        let error_label = Label::new(Some(&t!(
+                            "error_reading_",
+                            path = rw_path.to_string_lossy()
                         )));
 
                         error_label.set_markup("<span foreground=\"red\">{rw_path}</span>");
@@ -4235,7 +4383,8 @@ impl ConfigWidget {
                     }
                 };
 
-                let create_button = Button::with_label("Create");
+                let create_button = Button::with_label(&t!("create"));
+
                 create_button.set_margin_top(10);
                 create_button.set_margin_bottom(10);
                 create_button.set_margin_start(5);

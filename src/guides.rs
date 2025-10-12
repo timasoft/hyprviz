@@ -1,5 +1,6 @@
 use crate::utils::markdown_to_pango;
 use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
+use rust_i18n::{locale, t};
 
 enum ContentBlock {
     Text(String),
@@ -59,69 +60,72 @@ pub fn create_guide(name: &str) -> Box {
 }
 
 fn get_content(name: &str) -> Vec<ContentBlock> {
-    match name {
-        "Dispatchers" => {
-            let content = include_str!("../guides/Dispatchers.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Dwindle-Layout" => {
-            let content = include_str!("../guides/Dwindle-Layout.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Master-Layout" => {
-            let content = include_str!("../guides/Master-Layout.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Monitors" => {
-            let content = include_str!("../guides/Monitors.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Workspace-Rules" => {
-            let content = include_str!("../guides/Workspace-Rules.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Animations" => {
-            let content = include_str!("../guides/Animations.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Binds" => {
-            let content = include_str!("../guides/Binds.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Gestures" => {
-            let content = include_str!("../guides/Gestures.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Window-Rules" => {
-            let content = include_str!("../guides/Window-Rules.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Layer-Rules" => {
-            let content = include_str!("../guides/Layer-Rules.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Execs" => {
-            let content = include_str!("../guides/Execs.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
-        "Envs" => {
-            let content = include_str!("../guides/Envs.md");
-            let lines: Vec<&str> = content.lines().collect();
-            parse_lines(&lines, name)
-        }
+    let current_locale = locale().to_string();
+    let content = match name {
+        "Dispatchers" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Dispatchers.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Dispatchers.md"),
+            _ => include_str!("../guides/en/Dispatchers.md"),
+        },
+        "Dwindle-Layout" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Dwindle-Layout.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Dwindle-Layout.md"),
+            _ => include_str!("../guides/en/Dwindle-Layout.md"),
+        },
+        "Master-Layout" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Master-Layout.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Master-Layout.md"),
+            _ => include_str!("../guides/en/Master-Layout.md"),
+        },
+        "Monitors" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Monitors.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Monitors.md"),
+            _ => include_str!("../guides/en/Monitors.md"),
+        },
+        "Workspace-Rules" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Workspace-Rules.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Workspace-Rules.md"),
+            _ => include_str!("../guides/en/Workspace-Rules.md"),
+        },
+        "Animations" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Animations.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Animations.md"),
+            _ => include_str!("../guides/en/Animations.md"),
+        },
+        "Binds" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Binds.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Binds.md"),
+            _ => include_str!("../guides/en/Binds.md"),
+        },
+        "Gestures" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Gestures.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Gestures.md"),
+            _ => include_str!("../guides/en/Gestures.md"),
+        },
+        "Window-Rules" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Window-Rules.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Window-Rules.md"),
+            _ => include_str!("../guides/en/Window-Rules.md"),
+        },
+        "Layer-Rules" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Layer-Rules.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Layer-Rules.md"),
+            _ => include_str!("../guides/en/Layer-Rules.md"),
+        },
+        "Execs" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Execs.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Execs.md"),
+            _ => include_str!("../guides/en/Execs.md"),
+        },
+        "Envs" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Envs.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Envs.md"),
+            _ => include_str!("../guides/en/Envs.md"),
+        },
         name => panic!("Invalid content name: {name}"),
-    }
+    };
+    let lines: Vec<&str> = content.lines().collect();
+    parse_lines(&lines, name)
 }
 
 fn parse_lines(lines: &[&str], guide_name: &str) -> Vec<ContentBlock> {
@@ -462,9 +466,9 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .build();
 
     let title = match callout_type {
-        "info" => "<b>Information</b>",
-        "warning" => "<b>Warning</b>",
-        "error" => "<b>Error</b>",
+        "info" => &format!("<b>{}</b>", t!("information")),
+        "warning" => &format!("<b>{}</b>", t!("warning")),
+        "error" => &format!("<b>{}</b>", t!("error")),
         _ => &format!("<b>{}</b>", callout_type),
     };
 

@@ -1,3 +1,4 @@
+use rust_i18n::t;
 use std::{
     io::Read,
     {env, fs},
@@ -12,7 +13,7 @@ pub fn get_hyprland_version() -> String {
     };
 
     if !output.status.success() {
-        return "Failed to get version".to_string();
+        return t!("failed_to_get_version").to_string();
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -23,7 +24,7 @@ pub fn get_hyprland_version() -> String {
         return version.strip_prefix('v').unwrap_or(version).to_string();
     }
 
-    "Failed to parse version".to_string()
+    t!("failed_to_parse_version").to_string()
 }
 
 pub fn get_hyprviz_version() -> String {
@@ -136,7 +137,7 @@ pub fn get_os_info() -> String {
         Ok(output) if output.status.success() => {
             String::from_utf8_lossy(&output.stdout).trim().to_string()
         }
-        _ => "OS information not available".to_string(),
+        _ => t!("os_information_not_available").to_string(),
     }
 }
 
@@ -145,7 +146,7 @@ pub fn get_kernel_info() -> String {
         Ok(output) if output.status.success() => {
             String::from_utf8_lossy(&output.stdout).trim().to_string()
         }
-        Ok(_) => "Failed to get kernel info".to_string(),
+        Ok(_) => t!("failed_to_get_kernel_info").to_string(),
         Err(e) => e,
     }
 }
@@ -220,9 +221,9 @@ pub fn get_cpu_info() -> String {
     match execute_command("nproc", &[]) {
         Ok(output) if output.status.success() => {
             let cores = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            format!("CPU with {} cores (model unknown)", cores)
+            t!("cpu_with__cores__model_unknown", n = cores).to_string()
         }
-        _ => "CPU information not available".to_string(),
+        _ => t!("cpu_information_not_available").to_string(),
     }
 }
 
@@ -239,12 +240,12 @@ pub fn get_gpu_info() -> String {
                 .collect();
 
             if gpu_lines.is_empty() {
-                "Failed to parse GPU info".to_string()
+                t!("failed_to_parse_gpu_info").to_string()
             } else {
                 gpu_lines.join("\n")
             }
         }
-        _ => "Failed to get GPU info".to_string(),
+        _ => t!("failed_to_get_gpu_info").to_string(),
     }
 }
 
@@ -266,13 +267,13 @@ pub fn get_memory_info() -> String {
                         let used_gb = total_gb - available_gb;
                         format!("{:.2} GB / {:.2} GB", used_gb, total_gb)
                     }
-                    _ => "Failed to parse memory info".to_string(),
+                    _ => t!("failed_to_parse_memory_info").to_string(),
                 }
             } else {
-                "Failed to get memory info from /proc/meminfo".to_string()
+                t!("failed_to_get_memory_info_from_/proc/meminfo").to_string()
             }
         }
-        _ => "Failed to get memory info".to_string(),
+        _ => t!("failed_to_get_memory_info").to_string(),
     }
 }
 
@@ -305,7 +306,7 @@ pub fn get_monitor_info() -> String {
                 result.join("\n")
             }
         }
-        Ok(_) => "Failed to get monitor info".to_string(),
+        Ok(_) => t!("failed_to_get_monitor_info").to_string(),
         Err(e) => e,
     }
 }

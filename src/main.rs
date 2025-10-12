@@ -1,6 +1,7 @@
 use gtk::{Application, StringList, StringObject, glib, prelude::*};
 use gui::ConfigGUI;
 use hyprparser::parse_config;
+use rust_i18n::{available_locales, i18n, t};
 use std::{
     path::{Path, PathBuf},
     {cell::RefCell, fs, rc::Rc},
@@ -8,7 +9,7 @@ use std::{
 use utils::{
     CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
     check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
-    get_current_profile, reload_hyprland, update_source_line,
+    get_current_profile, get_system_locale, reload_hyprland, update_source_line,
 };
 
 mod gui;
@@ -17,7 +18,20 @@ mod system_info;
 mod utils;
 mod widget;
 
+i18n!("locales", fallback = "en");
+
 fn main() {
+    {
+        let locale = get_system_locale();
+        if available_locales!().iter().any(|s| &locale == s) {
+            println!("Using locale: {}", locale);
+            rust_i18n::set_locale(&locale);
+        } else {
+            println!("Using default locale: en");
+            rust_i18n::set_locale("en");
+        }
+    }
+
     let app = Application::builder()
         .application_id("io.github.timasoft.hyprviz")
         .build();
@@ -34,8 +48,8 @@ fn build_ui(app: &Application) {
 
     if !config_path_full.exists() {
         gui.borrow().custom_error_popup_critical(
-            "File not found",
-            &format!("File not found: ~/{CONFIG_PATH}"),
+            &t!("file_not_found"),
+            &t!("file_not_found_~/_", file = CONFIG_PATH),
         );
     } else {
         let hyprviz_profile_none_path = get_config_path(true, "None");
@@ -47,16 +61,16 @@ fn build_ui(app: &Application) {
                 Ok(_) => {}
                 Err(e) => {
                     gui.borrow().custom_error_popup_critical(
-                        "Creating failed",
-                        &format!("Failed to create the profile directory: {e}"),
+                        &t!("creating_failed"),
+                        &t!("failed_to_create_the_profile_directory_", error = e),
                     );
                     return;
                 }
             }
         } else if !hyprviz_profiles_path.is_dir() {
             gui.borrow().custom_error_popup_critical(
-                "Creating failed",
-                "The profile directory is not a directory",
+                &t!("creating_failed"),
+                &t!("the_profile_directory_is_not_a_directory"),
             );
             return;
         }
@@ -65,8 +79,8 @@ fn build_ui(app: &Application) {
             Ok(s) => s,
             Err(e) => {
                 gui.borrow().custom_error_popup_critical(
-                    "Reading failed",
-                    &format!("Failed to read the configuration file: {e}"),
+                    &t!("reading_failed"),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
                 );
                 String::new()
             }
@@ -88,10 +102,10 @@ fn build_ui(app: &Application) {
             if hyprviz_path.exists() {
                 if !hyprviz_path.is_file() {
                     gui.borrow().custom_error_popup_critical(
-                        "Creating included file failed",
-                        &format!(
-                            "Path for included file exists but is not a regular file: {}",
-                            hyprviz_path.display()
+                        &t!("creating_included_file_failed"),
+                        &t!(
+                            "path_for_included_file_exists_but_is_not_a_regular_file_",
+                            file = hyprviz_path.display()
                         ),
                     );
                 }
@@ -100,12 +114,11 @@ fn build_ui(app: &Application) {
                     && let Err(e) = fs::create_dir_all(parent)
                 {
                     gui.borrow().custom_error_popup_critical(
-                        "Creating included file failed",
-                        &format!(
-                            "Failed to create parent directory {} for {}: {}",
-                            parent.display(),
-                            hyprviz_path.display(),
-                            e
+                        &t!("creating_included_file_failed"),
+                        &t!(
+                            "failed_to_create_parent_directory_for__",
+                            file = hyprviz_path.display(),
+                            error = e
                         ),
                     );
                 }
@@ -113,22 +126,28 @@ fn build_ui(app: &Application) {
                 let default = "# hyprviz configuration (created automatically)\n\n";
                 if let Err(e) = atomic_write(&hyprviz_path, default) {
                     gui.borrow().custom_error_popup_critical(
-                        "Creating included file failed",
-                        &format!("Failed to create {}: {}", hyprviz_path.display(), e),
+                        &t!("creating_included_file_failed"),
+                        &t!(
+                            "failed_to_create__",
+                            file = hyprviz_path.display(),
+                            error = e
+                        ),
                     );
                 }
             }
 
             match atomic_write(&config_path_full, &updated_config_str) {
                 Ok(_) => {
-                    println!("Added 'source = ./hyprviz.conf' to: ~/{CONFIG_PATH}");
+                    println!("Added 'source = ./hyprviz.conf' to ~/{}", CONFIG_PATH);
                     reload_hyprland();
                 }
                 Err(e) => {
                     gui.borrow().custom_error_popup_critical(
-                        "Saving failed",
-                        &format!(
-                            "Failed to add 'source = ./hyprviz.conf' to: ~/{CONFIG_PATH}: {e}"
+                        &t!("saving_failed"),
+                        &t!(
+                            "failed_to_add_source_line_to__",
+                            file = CONFIG_PATH,
+                            error = e
                         ),
                     );
                 }
@@ -141,8 +160,8 @@ fn build_ui(app: &Application) {
             Ok(s) => s,
             Err(e) => {
                 gui.borrow().custom_error_popup_critical(
-                    "Reading failed",
-                    &format!("Failed to read the configuration file: {e}"),
+                    &t!("reading_failed"),
+                    &t!("failed_to_read_the_configuration_file_", error = e),
                 );
                 String::new()
             }
@@ -153,9 +172,9 @@ fn build_ui(app: &Application) {
         gui.borrow_mut().load_config(&parsed_config, &profile);
 
         let profiles = find_all_profiles();
-        println!("Available profiles: {profiles:?}");
+        println!("Available profiles: {:?}", profiles);
 
-        println!("Loading config for profile: {profile}");
+        println!("Loading config for profile: {}", profile);
         match gui.borrow().profile_dropdown.model() {
             Some(model) => match model.downcast::<StringList>() {
                 Ok(string_list) => {
@@ -182,10 +201,11 @@ fn build_ui(app: &Application) {
                                 .unwrap_or("config directory");
 
                             gui.borrow().custom_error_popup(
-                                "Profile Not Found",
-                                &format!(
-                                    "Profile '{}' was not found in the config folder: {}",
-                                    profile, config_dir
+                                &t!("profile_not_found"),
+                                &t!(
+                                    "profile__was_not_found_in_the_config_folder_",
+                                    name = profile,
+                                    path = config_dir
                                 ),
                             );
                         }
@@ -193,15 +213,15 @@ fn build_ui(app: &Application) {
                 }
                 Err(_) => {
                     gui.borrow().custom_error_popup_critical(
-                        "Model Type Error",
-                        "The dropdown model is not a StringList.",
+                        &t!("model_type_error"),
+                        &t!("the_dropdown_model_is_not_a_stringlist"),
                     );
                 }
             },
             None => {
                 gui.borrow().custom_error_popup_critical(
-                    "Missing Model",
-                    "The dropdown widget has no model assigned.",
+                    &t!("missing_model"),
+                    &t!("the_dropdown_widget_has_no_model_assigned"),
                 );
             }
         }
@@ -224,10 +244,11 @@ fn build_ui(app: &Application) {
                         }
                         Err(e) => {
                             gui_clone.borrow().custom_error_popup(
-                                "Profile Switch Failed",
-                                &format!(
-                                    "Failed to update config for profile '{}': {}",
-                                    profile_name, e
+                                &t!("profile_switch_failed"),
+                                &t!(
+                                    "failed_to_update_config_for_profile__",
+                                    profile = profile_name,
+                                    error = e
                                 ),
                             );
                         }
@@ -238,8 +259,8 @@ fn build_ui(app: &Application) {
                         Ok(s) => s,
                         Err(e) => {
                             gui.borrow().custom_error_popup_critical(
-                                "Reading failed",
-                                &format!("Failed to read the configuration file: {e}"),
+                                &t!("reading_failed"),
+                                &t!("failed_to_read_the_configuration_file_", error = e),
                             );
                             String::new()
                         }

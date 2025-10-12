@@ -6,6 +6,9 @@ changelog:
     - title: '🐛 Bug Fixes'
       labels:
         - 'bug'
+    - title: '🌍 Translations'
+      labels:
+        - 'translation'
     - title: '📚 Documentation'
       labels:
         - 'documentation'
