@@ -3864,7 +3864,6 @@ impl ConfigWidget {
 
                 let os_text_box = Box::new(Orientation::Vertical, 10);
 
-                // let (os_label, os_refresh) = add_info_row(&os_text_box, "OS:", &get_os_info());
                 let (os_label, os_refresh) = add_info_row(
                     &os_text_box,
                     &t!("system_info_category.os_label"),

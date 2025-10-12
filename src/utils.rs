@@ -675,6 +675,7 @@ fn escape_pango(text: &str) -> String {
         // HARDCODED PATTERNS
         .replace("<NAME>", "&lt;NAME&gt;")
         .replace("<ИМЯ>", "&lt;ИМЯ&gt;")
+        .replace("<名称>", "&lt;名称&gt;")
         .replace("<1280", "&lt;1280")
         .replace("<40%", "&lt;40%")
         .replace(

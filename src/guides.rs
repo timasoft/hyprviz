@@ -1,6 +1,6 @@
 use crate::utils::markdown_to_pango;
-use gtk::{pango::WrapMode, prelude::*, Align, Box, Frame, Grid, Label, Orientation};
-use rust_i18n::locale;
+use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
+use rust_i18n::{locale, t};
 
 enum ContentBlock {
     Text(String),
@@ -466,9 +466,9 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .build();
 
     let title = match callout_type {
-        "info" => "<b>Information</b>",
-        "warning" => "<b>Warning</b>",
-        "error" => "<b>Error</b>",
+        "info" => &format!("<b>{}</b>", t!("information")),
+        "warning" => &format!("<b>{}</b>", t!("warning")),
+        "error" => &format!("<b>{}</b>", t!("error")),
         _ => &format!("<b>{}</b>", callout_type),
     };
 
