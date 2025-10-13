@@ -3838,8 +3838,8 @@ impl ConfigWidget {
             "systeminfo" => {
                 add_section(
                     &container,
-                    &t!("layouts_category.system_info_section_title"),
-                    &t!("layouts_category.system_info_section_description"),
+                    &t!("system_info_category.system_info_section_title"),
+                    &t!("system_info_category.system_info_section_description"),
                     first_section.clone(),
                 );
 
