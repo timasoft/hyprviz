@@ -37,7 +37,27 @@ paru -S <package>
 ```
 
 ### NixOS
-This project is packaged as a Nix flake.
+This project is packaged in multiple ways for Nix:
+
+#### From nixpkgs
+HyprViz is available in nixpkgs unstable. Recommended installation methods:
+
+For temporary usage:
+```bash
+nix run nixpkgs#hyprviz
+```
+
+For system-wide installation in your NixOS configuration:
+```nix
+{
+  environment.systemPackages = with pkgs; [
+    hyprviz
+  ];
+}
+```
+
+#### From GitHub flake
+Alternatively, you can use the GitHub flake directly.
 Make sure you have flakes enabled in Nix.
 
 You can run **hyprviz** directly with:
