@@ -4311,7 +4311,11 @@ impl ConfigWidget {
 
                 for (row_num, (name, value)) in parsed_headless_readonly_options.iter().enumerate()
                 {
-                    if !name.starts_with(category) && category != "top_level" {
+                    if !name.starts_with(category)
+                        && category != "top_level"
+                        && !((category == "bind" && name.starts_with("unbind"))
+                            || (category == "animation" && name.starts_with("bezier")))
+                    {
                         continue;
                     }
 
@@ -4426,10 +4430,8 @@ impl ConfigWidget {
                         continue;
                     }
 
-                    if (category == "bind"
-                        && (name.starts_with("unbind") || name.starts_with("bind")))
-                        || (category == "animation"
-                            && (name.starts_with("animation") || name.starts_with("bezier")))
+                    if (category == "bind" && (name.starts_with("unbind")))
+                        || (category == "animation" && (name.starts_with("bezier")))
                     {
                         append_option_row(gtkbox, raw, name, value, &changed_options, category);
                     }
