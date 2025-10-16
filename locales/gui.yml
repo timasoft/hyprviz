@@ -57,6 +57,10 @@ cancel:
   en: "Cancel"
   ru: "Отмена"
   zh-CN: "取消"
+clear:
+  en: "Clear"
+  ru: "Очистить"
+  zh-CN: "清除"
 # create is for gui.rs and widget.rs
 create:
   en: "Create"

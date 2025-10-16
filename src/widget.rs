@@ -14,6 +14,7 @@ use std::{
 };
 
 use crate::{
+    advanced_editors::create_curve_editor,
     guides::create_guide,
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
@@ -767,12 +768,25 @@ fn append_option_row(
     changed_options: &Rc<RefCell<HashMap<(String, String), String>>>,
     category: &str,
 ) {
+    let vbox = gtk::Box::new(gtk::Orientation::Vertical, 10);
+    vbox.set_margin_top(5);
+    vbox.set_margin_bottom(5);
+    vbox.set_margin_start(5);
+    vbox.set_margin_end(5);
+
     let boxline = Box::new(Orientation::Horizontal, 5);
     boxline.set_hexpand(true);
     boxline.set_margin_top(5);
     boxline.set_margin_bottom(5);
     boxline.set_margin_start(5);
     boxline.set_margin_end(5);
+
+    let value_entry = Entry::new();
+    let (editor_box, show_button) = match category {
+        "animation" => create_curve_editor(&value_entry),
+        _ => (Box::new(Orientation::Vertical, 5), Button::new()),
+    };
+    show_button.set_visible(false);
 
     let name_entry = Entry::new();
     name_entry.set_text(&name);
@@ -783,15 +797,23 @@ fn append_option_row(
 
     let changed_options_clone = changed_options.clone();
     let raw_clone = raw.clone();
+    let editor_box_clone = editor_box.clone();
+    let show_button_clone = show_button.clone();
     let category_str = category.to_string();
-
     name_entry.connect_changed(move |entry| {
         let mut changes = changed_options_clone.borrow_mut();
         let new_name = entry.text().to_string();
         changes.insert(
             (category_str.clone(), format!("{}_name", raw_clone)),
-            new_name,
+            new_name.clone(),
         );
+
+        if (category_str == "animation" && new_name == "bezier") {
+            show_button_clone.set_visible(true);
+        } else {
+            show_button_clone.set_visible(false);
+            editor_box_clone.set_visible(false);
+        }
     });
 
     boxline.append(&name_entry);
@@ -800,7 +822,6 @@ fn append_option_row(
     equals_label.set_xalign(0.5);
     boxline.append(&equals_label);
 
-    let value_entry = Entry::new();
     value_entry.set_text(&value);
     value_entry.set_margin_top(5);
     value_entry.set_margin_bottom(5);
@@ -823,6 +844,8 @@ fn append_option_row(
 
     boxline.append(&value_entry);
 
+    boxline.append(&show_button);
+
     let delete_button = Button::from_icon_name("edit-delete-symbolic");
     delete_button.set_tooltip_text(Some(&t!("delete_this_option")));
     delete_button.set_valign(gtk::Align::Center);
@@ -831,10 +854,10 @@ fn append_option_row(
     let gtkbox_clone = gtkbox.clone();
     let category_str = category.to_string();
     let changed_options_clone = changed_options.clone();
-    let boxline_clone = boxline.clone();
+    let vbox_clone = vbox.clone();
 
     delete_button.connect_clicked(move |_| {
-        gtkbox_clone.remove(&boxline_clone);
+        gtkbox_clone.remove(&vbox_clone);
 
         let mut changes = changed_options_clone.borrow_mut();
 
@@ -849,7 +872,10 @@ fn append_option_row(
 
     boxline.append(&delete_button);
 
-    gtkbox.append(&boxline);
+    vbox.append(&boxline);
+    vbox.append(&editor_box);
+
+    gtkbox.append(&vbox);
 }
 
 fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
@@ -887,8 +913,6 @@ fn update_version_label(label: &Label, repo: &str, version: &str) {
                     "{} ( {} )",
                     version,
                     &t!("your_version_is_greater_than_latest_()", v = latest_version),
-                    // &t!("your_version_is_greater_than_latest"),
-                    // latest_version
                 )
             }
             Ordering::Less => {

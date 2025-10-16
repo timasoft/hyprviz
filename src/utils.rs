@@ -1,3 +1,4 @@
+use crate::advanced_editors::Point;
 use rust_i18n::t;
 use std::{
     cmp::Ordering,
@@ -710,6 +711,40 @@ pub fn get_system_locale() -> String {
         .or_else(|_| std::env::var("LANG"))
         .map(|s| s.split('_').next().unwrap_or("en").to_string())
         .unwrap_or_else(|_| "en".to_string())
+}
+
+type NameWithCoords = (String, Result<(f64, f64, f64, f64), String>);
+
+pub fn parse_coordinates(input: &str) -> NameWithCoords {
+    let parts: Vec<&str> = input.split(',').map(|s| s.trim()).collect();
+
+    let name = parts.first().map(|s| s.to_string()).unwrap_or_default();
+
+    if parts.len() != 5 {
+        let error = format!(
+            "Error: expected 5 parts (NAME, X0, Y0, X1, Y1), got {}",
+            parts.len()
+        );
+        return (name, Err(error));
+    }
+
+    let x0 = parts[1].parse::<f64>().map_err(|e| format!("X0: {}", e));
+    let y0 = parts[2].parse::<f64>().map_err(|e| format!("Y0: {}", e));
+    let x1 = parts[3].parse::<f64>().map_err(|e| format!("X1: {}", e));
+    let y1 = parts[4].parse::<f64>().map_err(|e| format!("Y1: {}", e));
+
+    match (x0.clone(), y0.clone(), x1.clone(), y1.clone()) {
+        (Ok(x0), Ok(y0), Ok(x1), Ok(y1)) => (name, Ok((x0, y0, x1, y1))),
+        _ => {
+            let errors = [x0.err(), y0.err(), x1.err(), y1.err()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>()
+                .join("; ");
+
+            (name, Err(errors))
+        }
+    }
 }
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";

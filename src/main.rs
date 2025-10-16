@@ -12,6 +12,7 @@ use utils::{
     get_current_profile, get_system_locale, reload_hyprland, update_source_line,
 };
 
+mod advanced_editors;
 mod gui;
 mod guides;
 mod system_info;
