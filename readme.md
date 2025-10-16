@@ -116,7 +116,8 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add guides to some other sections
 - [x] Add hyprviz to nixpkgs
 - [x] Add i18n
-- [ ] Add curve editor
+- [x] Add curve editor
+- [ ] Add monitor layuot editor
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
