@@ -1,0 +1,33 @@
+_version: 2
+show_editor:
+  en: "Show Editor"
+  ru: "Показать редактор"
+  zh-CN: "显示编辑器"
+hide_editor:
+  en: "Hide Editor"
+  ru: "Скрыть редактор"
+  zh-CN: "隐藏编辑器"
+record_bind:
+  en: "Record Bind"
+  ru: "Записать привязку"
+  zh-CN: "记录绑定"
+stop_recording:
+  en: "Stop Recording"
+  ru: "Остановить запись"
+  zh-CN: "停止记录"
+active_combinations:
+  en: "Active Combinations:\n"
+  ru: "Активные комбинации:\n"
+  zh-CN: "激活组合:\n"
+active_modifiers:
+  en: "Active Modifiers:\n"
+  ru: "Активные модификаторы:\n"
+  zh-CN: "激活修饰符:\n"
+active_keys:
+  en: "Active Keys:\n"
+  ru: "Активные клавиши:\n"
+  zh-CN: "激活键:\n"
+no_active_inputs:
+  en: "No active inputs\n"
+  ru: "Нет активных клавиш\n"
+  zh-CN: "没有激活的输入\n"

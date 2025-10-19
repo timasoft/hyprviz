@@ -4,6 +4,7 @@ use gtk::{
     Align, ApplicationWindow, Box, Button, DrawingArea, Entry, EventControllerKey,
     EventControllerMotion, GestureClick, Orientation, TextBuffer, TextView, prelude::*,
 };
+use rust_i18n::t;
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -108,17 +109,19 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
         .visible(false)
         .build();
 
-    let toggle_button = Button::with_label("Show Editor");
+    let toggle_button = Button::with_label(&t!("show_editor"));
 
     let vbox_clone = vbox.clone();
     let button_clone = toggle_button.clone();
+    let show_editor = t!("show_editor");
+    let hide_editor = t!("hide_editor");
     toggle_button.connect_clicked(move |_| {
         let is_visible = vbox_clone.is_visible();
         vbox_clone.set_visible(!is_visible);
         button_clone.set_label(if is_visible {
-            "Show Editor"
+            &show_editor
         } else {
-            "Hide Editor"
+            &hide_editor
         });
     });
 
@@ -298,7 +301,7 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
 pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (Box, Button) {
     let container = Box::new(Orientation::Vertical, 5);
 
-    let toggle_button = Button::with_label("Record Bind");
+    let toggle_button = Button::with_label(&t!("record_bind"));
 
     let is_recording = Rc::new(RefCell::new(false));
 
@@ -331,7 +334,7 @@ pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (B
 
             key_controller_handlers_ids.borrow_mut().clear();
 
-            toggle_button_clone.set_label("Record Bind");
+            toggle_button_clone.set_label(&t!("record_bind"));
         } else {
             *is_recording_mut = true;
 
@@ -393,7 +396,7 @@ pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (B
 
             update_display(&active_inputs, &buffer, &value_entry_clone);
 
-            toggle_button_clone_clone.set_label("Stop Recording");
+            toggle_button_clone_clone.set_label(&t!("stop_recording"));
         }
     });
 
@@ -438,7 +441,7 @@ fn update_display(
     };
 
     if !modifiers.is_empty() && !regular_keys.is_empty() {
-        buffer.insert(&mut end_iter, "Active Combinations:\n");
+        buffer.insert(&mut end_iter, &t!("active_combinations"));
 
         let mut modifiers_vec: Vec<&str> = modifiers.into_iter().collect();
         modifiers_vec.sort_by_key(|&modifier| modifier_priority(&modifier));
@@ -449,7 +452,7 @@ fn update_display(
             buffer.insert(&mut end_iter, &format!("  {} + {}\n", modifiers_str, key));
         }
     } else if !modifiers.is_empty() {
-        buffer.insert(&mut end_iter, "Active Modifiers:\n");
+        buffer.insert(&mut end_iter, &t!("active_modifiers"));
 
         let mut modifiers_vec: Vec<&str> = modifiers.into_iter().collect();
         modifiers_vec.sort_by_key(|&modifier| modifier_priority(&modifier));
@@ -460,13 +463,13 @@ fn update_display(
             buffer.insert(&mut end_iter, &format!("  {}\n", modifier));
         }
     } else if !regular_keys.is_empty() {
-        buffer.insert(&mut end_iter, "Active Keys:\n");
+        buffer.insert(&mut end_iter, &t!("active_keys"));
 
         for key in &regular_keys {
             value_entry.set_text(&format!(", {}{}", key, bind_action));
             buffer.insert(&mut end_iter, &format!("  {}\n", key));
         }
     } else {
-        buffer.insert(&mut end_iter, "No active inputs\n");
+        buffer.insert(&mut end_iter, &t!("no_active_inputs"));
     }
 }

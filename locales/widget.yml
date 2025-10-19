@@ -3209,9 +3209,9 @@ none_category.none_section_description:
 
 
 this_is_a_read_only__from_main_config:
-  en: "This is a read-only %{category_name} from main config"
-  ru: "Это %{category_name} только для чтения из основной конфигурации"
-  zh-CN: "这是来自主配置的只读 %{category_name}"
+  en: "This is a read-only %{category_name} (from main config)"
+  ru: "Это %{category_name} только для чтения (из основной конфигурации)"
+  zh-CN: "这是 %{category_name} 的只读版本（来自主配置）"
 error_reading_:
   en: "Error reading %{path}"
   ru: "Ошибка чтения %{path}"
