@@ -1,9 +1,14 @@
-use crate::utils::parse_coordinates;
+use crate::utils::{after_second_comma, is_modifier, keycode_to_en_key, parse_coordinates};
+use gio::glib::SignalHandlerId;
 use gtk::{
-    Align, Box, Button, DrawingArea, Entry, EventControllerMotion, GestureClick, Orientation,
-    prelude::*,
+    Align, ApplicationWindow, Box, Button, DrawingArea, Entry, EventControllerKey,
+    EventControllerMotion, GestureClick, Orientation, TextBuffer, TextView, prelude::*,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 const SIZE: f64 = 300.0;
 
@@ -288,4 +293,180 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
     vbox.append(&drawing_area);
 
     (vbox, toggle_button)
+}
+
+pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (Box, Button) {
+    let container = Box::new(Orientation::Vertical, 5);
+
+    let toggle_button = Button::with_label("Record Bind");
+
+    let is_recording = Rc::new(RefCell::new(false));
+
+    let is_recording_clone = Rc::clone(&is_recording);
+    let window_clone = window.clone();
+    let value_entry_clone = value_entry.clone();
+    let container_clone = container.clone();
+
+    let toggle_button_clone = toggle_button.clone();
+
+    let key_controller = EventControllerKey::new();
+    let key_controller_handlers_ids: Rc<RefCell<Vec<SignalHandlerId>>> =
+        Rc::new(RefCell::new(Vec::new()));
+
+    toggle_button.connect_clicked(move |_| {
+        let mut is_recording_mut = is_recording_clone.borrow_mut();
+
+        if *is_recording_mut {
+            *is_recording_mut = false;
+
+            while let Some(child) = container_clone.first_child() {
+                container_clone.remove(&child);
+            }
+
+            window_clone.remove_controller(&key_controller);
+
+            for handler_id in key_controller_handlers_ids.replace(Vec::new()) {
+                key_controller.disconnect(handler_id);
+            }
+
+            key_controller_handlers_ids.borrow_mut().clear();
+
+            toggle_button_clone.set_label("Record Bind");
+        } else {
+            *is_recording_mut = true;
+
+            let vbox = Box::new(Orientation::Vertical, 5);
+
+            let text_view = TextView::new();
+            text_view.set_vexpand(true);
+            text_view.set_editable(false);
+            text_view.set_cursor_visible(false);
+
+            vbox.append(&text_view);
+
+            let buffer = text_view.buffer();
+
+            let active_inputs: Rc<RefCell<HashMap<u32, String>>> =
+                Rc::new(RefCell::new(HashMap::new()));
+
+            container_clone.append(&vbox);
+
+            let active_inputs_clone = Rc::clone(&active_inputs);
+            let buffer_clone = buffer.clone();
+            let value_entry_clone_clone = value_entry_clone.clone();
+            let toggle_button_clone_clone = toggle_button_clone.clone();
+
+            key_controller_handlers_ids
+                .borrow_mut()
+                .push(
+                    key_controller.connect_key_pressed(move |_, _keyval, keycode, _state| {
+                        let key_str = keycode_to_en_key(keycode);
+                        active_inputs_clone.borrow_mut().insert(keycode, key_str);
+                        update_display(
+                            &active_inputs_clone,
+                            &buffer_clone,
+                            &value_entry_clone_clone,
+                        );
+                        true.into()
+                    }),
+                );
+
+            let active_inputs_clone = Rc::clone(&active_inputs);
+            let buffer_clone = buffer.clone();
+            let value_entry_clone_clone = value_entry_clone.clone();
+            key_controller_handlers_ids
+                .borrow_mut()
+                .push(
+                    key_controller.connect_key_released(move |_, _keyval, keycode, _state| {
+                        active_inputs_clone.borrow_mut().remove(&keycode);
+                        update_display(
+                            &active_inputs_clone,
+                            &buffer_clone,
+                            &value_entry_clone_clone,
+                        );
+                    }),
+                );
+
+            let key_controller_clone = key_controller.clone();
+
+            window_clone.add_controller(key_controller_clone);
+
+            update_display(&active_inputs, &buffer, &value_entry_clone);
+
+            toggle_button_clone_clone.set_label("Stop Recording");
+        }
+    });
+
+    (container, toggle_button)
+}
+
+fn update_display(
+    active_inputs: &RefCell<HashMap<u32, String>>,
+    buffer: &TextBuffer,
+    value_entry: &Entry,
+) {
+    let value_entry_text = value_entry.text();
+    let bind_action = after_second_comma(value_entry_text.as_str());
+
+    let inputs = active_inputs.borrow();
+    buffer.set_text("");
+    let mut end_iter = buffer.end_iter();
+
+    let mut modifiers = HashSet::new();
+    let mut regular_keys = Vec::new();
+
+    for (_, key_str) in inputs.iter() {
+        if is_modifier(key_str) {
+            modifiers.insert(key_str.as_str());
+        } else {
+            regular_keys.push(key_str.clone());
+        }
+    }
+
+    let modifier_priority = |modifier: &&str| -> usize {
+        match *modifier {
+            "SHIFT" => 0,
+            "CAPS" => 1,
+            "CTRL" => 2,
+            "ALT" => 3,
+            "MOD2" => 4,
+            "MOD3" => 5,
+            "SUPER" => 6,
+            "MOD5" => 7,
+            _ => 8,
+        }
+    };
+
+    if !modifiers.is_empty() && !regular_keys.is_empty() {
+        buffer.insert(&mut end_iter, "Active Combinations:\n");
+
+        let mut modifiers_vec: Vec<&str> = modifiers.into_iter().collect();
+        modifiers_vec.sort_by_key(|&modifier| modifier_priority(&modifier));
+        let modifiers_str = modifiers_vec.join(" + ");
+
+        for key in &regular_keys {
+            value_entry.set_text(&format!("{}, {}{}", modifiers_str, key, bind_action));
+            buffer.insert(&mut end_iter, &format!("  {} + {}\n", modifiers_str, key));
+        }
+    } else if !modifiers.is_empty() {
+        buffer.insert(&mut end_iter, "Active Modifiers:\n");
+
+        let mut modifiers_vec: Vec<&str> = modifiers.into_iter().collect();
+        modifiers_vec.sort_by_key(|&modifier| modifier_priority(&modifier));
+        let modifiers_str = modifiers_vec.join(" + ");
+
+        for modifier in modifiers_vec {
+            value_entry.set_text(&format!("{}, {}", modifiers_str, bind_action));
+            buffer.insert(&mut end_iter, &format!("  {}\n", modifier));
+        }
+    } else if !regular_keys.is_empty() {
+        buffer.insert(&mut end_iter, "Active Keys:\n");
+
+        for key in &regular_keys {
+            value_entry.set_text(&format!(", {}{}", key, bind_action));
+            buffer.insert(&mut end_iter, &format!("  {}\n", key));
+        }
+    } else {
+        buffer.insert(&mut end_iter, "No active inputs\n");
+    }
 }

@@ -1,14 +1,14 @@
-use crate::advanced_editors::Point;
 use rust_i18n::t;
 use std::{
     cmp::Ordering,
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     env,
     error::Error,
     fs,
     io::{self, Write},
     path::{Path, PathBuf},
     process::Command,
+    sync::LazyLock,
 };
 
 pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
@@ -745,6 +745,177 @@ pub fn parse_coordinates(input: &str) -> NameWithCoords {
             (name, Err(errors))
         }
     }
+}
+
+pub fn after_second_comma(s: &str) -> &str {
+    let mut comma_indices = s.char_indices().filter(|&(_, c)| c == ',');
+
+    match (comma_indices.next(), comma_indices.next()) {
+        (Some((_, _)), Some((second_comma_pos, _))) => &s[second_comma_pos..],
+        _ => "",
+    }
+}
+
+static KEYCODE_MAP: LazyLock<HashMap<u32, &'static str>> = LazyLock::new(|| {
+    let mut map = HashMap::new();
+
+    map.insert(9, "Escape");
+    map.insert(67, "F1");
+    map.insert(68, "F2");
+    map.insert(69, "F3");
+    map.insert(70, "F4");
+    map.insert(71, "F5");
+    map.insert(72, "F6");
+    map.insert(73, "F7");
+    map.insert(74, "F8");
+    map.insert(75, "F9");
+    map.insert(76, "F10");
+    map.insert(95, "F11");
+    map.insert(96, "F12");
+    map.insert(127, "Pause");
+
+    map.insert(10, "1");
+    map.insert(11, "2");
+    map.insert(12, "3");
+    map.insert(13, "4");
+    map.insert(14, "5");
+    map.insert(15, "6");
+    map.insert(16, "7");
+    map.insert(17, "8");
+    map.insert(18, "9");
+    map.insert(19, "0");
+    map.insert(20, "minus");
+    map.insert(21, "equal");
+    map.insert(22, "BackSpace");
+    map.insert(23, "Tab");
+    map.insert(24, "Q");
+    map.insert(25, "W");
+    map.insert(26, "E");
+    map.insert(27, "R");
+    map.insert(28, "T");
+    map.insert(29, "Y");
+    map.insert(30, "U");
+    map.insert(31, "I");
+    map.insert(32, "O");
+    map.insert(33, "P");
+    map.insert(34, "bracketleft");
+    map.insert(35, "bracketright");
+    map.insert(36, "Return");
+
+    map.insert(38, "A");
+    map.insert(39, "S");
+    map.insert(40, "D");
+    map.insert(41, "F");
+    map.insert(42, "G");
+    map.insert(43, "H");
+    map.insert(44, "J");
+    map.insert(45, "K");
+    map.insert(46, "L");
+    map.insert(47, "semicolon");
+    map.insert(48, "apostrophe");
+    map.insert(49, "grave");
+
+    map.insert(52, "Z");
+    map.insert(53, "X");
+    map.insert(54, "C");
+    map.insert(55, "V");
+    map.insert(56, "B");
+    map.insert(57, "N");
+    map.insert(58, "M");
+    map.insert(59, "comma");
+    map.insert(60, "period");
+    map.insert(61, "slash");
+    map.insert(51, "backslash");
+
+    map.insert(50, "SHIFT");
+    map.insert(62, "SHIFT");
+    map.insert(37, "CTRL");
+    map.insert(105, "CTRL");
+    map.insert(64, "ALT");
+    map.insert(108, "ALT");
+    map.insert(133, "SUPER");
+    map.insert(134, "SUPER");
+    map.insert(66, "CAPS");
+    map.insert(77, "MOD2");
+    map.insert(78, "MOD3");
+
+    map.insert(65, "space");
+    map.insert(135, "Menu");
+
+    map.insert(110, "Home");
+    map.insert(111, "Up");
+    map.insert(112, "Page_Up");
+    map.insert(113, "Left");
+    map.insert(114, "Right");
+    map.insert(115, "End");
+    map.insert(116, "Down");
+    map.insert(117, "Page_Down");
+    map.insert(118, "Insert");
+    map.insert(119, "Delete");
+
+    map.insert(79, "KP_7");
+    map.insert(80, "KP_8");
+    map.insert(81, "KP_9");
+    map.insert(82, "KP_Subtract");
+    map.insert(83, "KP_4");
+    map.insert(84, "KP_5");
+    map.insert(85, "KP_6");
+    map.insert(86, "KP_Add");
+    map.insert(87, "KP_1");
+    map.insert(88, "KP_2");
+    map.insert(89, "KP_3");
+    map.insert(90, "KP_0");
+    map.insert(91, "KP_Decimal");
+    map.insert(104, "KP_Enter");
+    map.insert(63, "KP_Multiply");
+    map.insert(106, "KP_Divide");
+    map.insert(97, "KP_Equal");
+
+    map.insert(166, "LaunchA");
+    map.insert(167, "LaunchB");
+    map.insert(168, "LaunchC");
+    map.insert(170, "Calculator");
+    map.insert(178, "Sleep");
+    map.insert(179, "WakeUp");
+
+    map.insert(107, "Print");
+    map.insert(151, "Sys_Req");
+
+    map.insert(183, "XF86Tools");
+    map.insert(187, "XF86Mail");
+    map.insert(216, "XF86WWW");
+    map.insert(225, "XF86AudioMute");
+    map.insert(226, "XF86AudioLowerVolume");
+    map.insert(227, "XF86AudioRaiseVolume");
+    map.insert(228, "XF86AudioPlay");
+    map.insert(229, "XF86AudioStop");
+    map.insert(230, "XF86AudioPrev");
+    map.insert(231, "XF86AudioNext");
+    map.insert(232, "XF86HomePage");
+    map.insert(233, "XF86Refresh");
+    map.insert(234, "XF86Search");
+    map.insert(235, "XF86Favorites");
+    map.insert(236, "XF86Back");
+    map.insert(237, "XF86Forward");
+
+    map.insert(94, "asciitilde");
+    map.insert(102, "KP_Separator");
+
+    map
+});
+
+pub fn keycode_to_en_key(keycode: u32) -> String {
+    KEYCODE_MAP
+        .get(&keycode)
+        .map(|&s| s.to_string())
+        .unwrap_or_else(|| format!("code:{}", keycode))
+}
+
+pub fn is_modifier(key: &str) -> bool {
+    matches!(
+        key,
+        "SHIFT" | "CAPS" | "CTRL" | "ALT" | "MOD2" | "MOD3" | "SUPER" | "MOD5"
+    )
 }
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";

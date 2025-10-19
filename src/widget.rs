@@ -1,7 +1,7 @@
 use gtk::{
-    Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander, Frame, Grid,
-    Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton, StringList,
-    StringObject, Switch, Widget, gdk, glib, prelude::*,
+    ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander,
+    Frame, Grid, Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton,
+    StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
@@ -14,7 +14,7 @@ use std::{
 };
 
 use crate::{
-    advanced_editors::create_curve_editor,
+    advanced_editors::{create_bind_editor, create_curve_editor},
     guides::create_guide,
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
@@ -761,7 +761,8 @@ fn add_color_option(
 }
 
 fn append_option_row(
-    gtkbox: &gtk::Box,
+    window: &ApplicationWindow,
+    gtkbox: &Box,
     raw: String,
     name: String,
     value: String,
@@ -784,9 +785,13 @@ fn append_option_row(
     let value_entry = Entry::new();
     let (editor_box, show_button) = match category {
         "animation" => create_curve_editor(&value_entry),
+        "bind" => create_bind_editor(window, &value_entry),
         _ => (Box::new(Orientation::Vertical, 5), Button::new()),
     };
-    show_button.set_visible(false);
+
+    if category == "animation" {
+        show_button.set_visible(false)
+    }
 
     let name_entry = Entry::new();
     name_entry.set_text(&name);
@@ -808,7 +813,7 @@ fn append_option_row(
             new_name.clone(),
         );
 
-        if (category_str == "animation" && new_name == "bezier") {
+        if (category_str == "animation" && new_name == "bezier") || (category_str == "bind") {
             show_button_clone.set_visible(true);
         } else {
             show_button_clone.set_visible(false);
@@ -4127,6 +4132,7 @@ impl ConfigWidget {
 
     pub fn load_config(
         &self,
+        window: &ApplicationWindow,
         config: &HyprlandConfig,
         profile: &str,
         category: &str,
@@ -4421,6 +4427,7 @@ impl ConfigWidget {
 
                 let id_new = Rc::new(RefCell::new(0));
 
+                let window_clone = window.clone();
                 let gtkbox_clone = gtkbox.clone();
 
                 let changed_options_clone = changed_options.clone();
@@ -4430,6 +4437,7 @@ impl ConfigWidget {
                 create_button.connect_clicked(move |_| {
                     let mut id = id_new.borrow_mut();
                     append_option_row(
+                        &window_clone,
                         &gtkbox_clone,
                         id.to_string(),
                         "".to_string(),
@@ -4450,14 +4458,30 @@ impl ConfigWidget {
                     .zip(parsed_headless_options)
                 {
                     if name.starts_with(category) || category == "top_level" {
-                        append_option_row(gtkbox, raw, name, value, &changed_options, category);
+                        append_option_row(
+                            window,
+                            gtkbox,
+                            raw,
+                            name,
+                            value,
+                            &changed_options,
+                            category,
+                        );
                         continue;
                     }
 
                     if (category == "bind" && (name.starts_with("unbind")))
                         || (category == "animation" && (name.starts_with("bezier")))
                     {
-                        append_option_row(gtkbox, raw, name, value, &changed_options, category);
+                        append_option_row(
+                            window,
+                            gtkbox,
+                            raw,
+                            name,
+                            value,
+                            &changed_options,
+                            category,
+                        );
                     }
                     continue;
                 }

@@ -830,6 +830,7 @@ along with this program; if not, see
                         }
 
                         category_widget.load_config(
+                            &self.window,
                             &parsed_config,
                             &profile_name,
                             category,
@@ -1042,7 +1043,13 @@ along with this program; if not, see
 
         for (_, category) in &categories {
             if let Some(widget) = self.config_widgets.get(*category) {
-                widget.load_config(config, profile_name, category, self.changed_options.clone());
+                widget.load_config(
+                    &self.window,
+                    config,
+                    profile_name,
+                    category,
+                    self.changed_options.clone(),
+                );
             }
         }
 
