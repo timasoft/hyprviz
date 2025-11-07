@@ -918,6 +918,49 @@ pub fn is_modifier(key: &str) -> bool {
     )
 }
 
+pub fn parse_bezier(input: &str) -> (String, f64, f64, f64, f64) {
+    match parse_coordinates(input) {
+        (name, Ok((x0, y0, x1, y1))) => (name, x0, y0, x1, y1),
+        (name, Err(_)) => (name, 0.333, 0.333, 0.667, 0.667),
+    }
+}
+
+pub fn parse_animation(input: &str) -> (String, bool, f64, String, Option<String>) {
+    let values = input
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .collect::<Vec<_>>();
+    let animation_name = values.first().unwrap_or(&"global".to_string()).to_owned();
+    let animation_onoff = values
+        .get(1)
+        .unwrap_or(&"0".to_string())
+        .parse::<u8>()
+        .unwrap_or(0)
+        != 0;
+    let animation_speed = values
+        .get(2)
+        .unwrap_or(&"10".to_string())
+        .parse::<f64>()
+        .unwrap_or(10.0);
+    let animation_curve = values.get(3).unwrap_or(&"default".to_string()).to_owned();
+    match values.get(4) {
+        Some(s) => (
+            animation_name,
+            animation_onoff,
+            animation_speed,
+            animation_curve,
+            Some(s.to_owned()),
+        ),
+        None => (
+            animation_name,
+            animation_onoff,
+            animation_speed,
+            animation_curve,
+            None,
+        ),
+    }
+}
+
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";

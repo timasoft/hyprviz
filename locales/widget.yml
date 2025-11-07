@@ -17,6 +17,14 @@ delete_this_option:
   en: "Delete this option"
   ru: "Удалить эту опцию"
   zh-CN: "删除此选项"
+show_fancy_input:
+  en: "Show fancy input"
+  ru: "Показать красивый ввод"
+  zh-CN: "显示华丽的输入"
+show_simple_input:
+  en: "Show simple input"
+  ru: "Показать простой ввод"
+  zh-CN: "显示简单输入"
 guide:
   en: "Guide"
   ru: "Руководство"

@@ -31,3 +31,23 @@ no_active_inputs:
   en: "No active inputs\n"
   ru: "Нет активных клавиш\n"
   zh-CN: "没有激活的输入\n"
+name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+onoff:
+  en: "On/Off"
+  ru: "Вкл./Выкл."
+  zh-CN: "开/关"
+speed:
+  en: "Speed"
+  ru: "Скорость"
+  zh-CN: "速度"
+curve:
+  en: "Curve"
+  ru: "Кривая"
+  zh-CN: "曲线"
+style:
+  en: "Style"
+  ru: "Стиль"
+  zh-CN: "样式"

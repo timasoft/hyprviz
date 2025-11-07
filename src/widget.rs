@@ -1,7 +1,7 @@
 use gtk::{
     ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander,
-    Frame, Grid, Justification, Label, Orientation, Popover, ScrolledWindow, SpinButton,
-    StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
+    Frame, Grid, Justification, Label, Orientation, PolicyType, Popover, ScrolledWindow,
+    SpinButton, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
@@ -14,7 +14,7 @@ use std::{
 };
 
 use crate::{
-    advanced_editors::{create_bind_editor, create_curve_editor},
+    advanced_editors::{create_bind_editor, create_curve_editor, create_fancy_boxline},
     guides::create_guide,
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
@@ -775,6 +775,15 @@ fn append_option_row(
     vbox.set_margin_start(5);
     vbox.set_margin_end(5);
 
+    let scrolled_window = ScrolledWindow::new();
+    scrolled_window.set_vscrollbar_policy(PolicyType::Never);
+
+    let main_box = Box::new(Orientation::Horizontal, 5);
+    main_box.set_margin_top(5);
+    main_box.set_margin_bottom(5);
+    main_box.set_margin_start(5);
+    main_box.set_margin_end(5);
+
     let boxline = Box::new(Orientation::Horizontal, 5);
     boxline.set_hexpand(true);
     boxline.set_margin_top(5);
@@ -788,8 +797,12 @@ fn append_option_row(
         "bind" => create_bind_editor(window, &value_entry),
         _ => (Box::new(Orientation::Vertical, 5), Button::new()),
     };
+    show_button.set_margin_top(5);
+    show_button.set_margin_bottom(5);
+    show_button.set_margin_start(5);
+    show_button.set_margin_end(5);
 
-    if category == "animation" {
+    if category != "bind" {
         show_button.set_visible(false)
     }
 
@@ -849,8 +862,6 @@ fn append_option_row(
 
     boxline.append(&value_entry);
 
-    boxline.append(&show_button);
-
     let delete_button = Button::from_icon_name("edit-delete-symbolic");
     delete_button.set_tooltip_text(Some(&t!("delete_this_option")));
     delete_button.set_valign(gtk::Align::Center);
@@ -875,9 +886,47 @@ fn append_option_row(
         );
     });
 
-    boxline.append(&delete_button);
+    main_box.append(&boxline);
 
-    vbox.append(&boxline);
+    let fancy_boxline = create_fancy_boxline(category, &name_entry, &value_entry);
+    fancy_boxline.set_hexpand(true);
+    fancy_boxline.set_margin_top(5);
+    fancy_boxline.set_margin_bottom(5);
+    fancy_boxline.set_margin_start(5);
+    fancy_boxline.set_margin_end(5);
+    fancy_boxline.set_visible(false);
+
+    main_box.append(&fancy_boxline);
+
+    main_box.append(&show_button);
+
+    let toggle_fancy_input_button = Button::with_label(&t!("show_fancy_input"));
+    toggle_fancy_input_button.set_margin_top(10);
+    toggle_fancy_input_button.set_margin_bottom(10);
+    toggle_fancy_input_button.set_margin_start(5);
+    toggle_fancy_input_button.set_margin_end(5);
+
+    let boxline_clone = boxline.clone();
+    let fancy_boxline_clone = fancy_boxline.clone();
+    let button_clone = toggle_fancy_input_button.clone();
+    let show_fancy_input = t!("show_fancy_input");
+    let show_simple_input = t!("show_simple_input");
+    toggle_fancy_input_button.connect_clicked(move |_| {
+        let is_fancy = fancy_boxline_clone.is_visible();
+        boxline_clone.set_visible(is_fancy);
+        fancy_boxline_clone.set_visible(!is_fancy);
+        button_clone.set_label(if is_fancy {
+            &show_fancy_input
+        } else {
+            &show_simple_input
+        });
+    });
+
+    main_box.append(&toggle_fancy_input_button);
+    main_box.append(&delete_button);
+    scrolled_window.set_child(Some(&main_box));
+
+    vbox.append(&scrolled_window);
     vbox.append(&editor_box);
 
     gtkbox.append(&vbox);
