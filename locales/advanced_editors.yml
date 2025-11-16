@@ -31,10 +31,63 @@ no_active_inputs:
   en: "No active inputs\n"
   ru: "Нет активных клавиш\n"
   zh-CN: "没有激活的输入\n"
+
 name:
   en: "Name"
   ru: "Имя"
   zh-CN: "名称"
+resolution/mode:
+  en: "Resolution/Mode"
+  ru: "Разрешение/Режим"
+  zh-CN: "分辨率/模式"
+position:
+  en: "Position"
+  ru: "Расположение"
+  zh-CN: "位置"
+scale:
+  en: "Scale"
+  ru: "Масштаб"
+  zh-CN: "缩放"
+mirror:
+  en: "Mirror"
+  ru: "Копирование"
+  zh-CN: "镜像"
+bitdepth:
+  en: "Bitdepth"
+  ru: "Глубина цвета"
+  zh-CN: "位深度"
+color_management:
+  en: "Color Management"
+  ru: "Управление цветом"
+  zh-CN: "颜色管理"
+sdr_brightness:
+  en: "SDR Brightness"
+  ru: "Яркость SDR"
+  zh-CN: "SDR亮度"
+sdr_saturation:
+  en: "SDR Saturation"
+  ru: "Насыщенность SDR"
+  zh-CN: "SDR饱和度"
+vrr:
+  en: "VRR"
+  ru: "VRR"
+  zh-CN: "VRR"
+top:
+  en: "Top"
+  ru: "Сверху"
+  zh-CN: "顶部"
+bottom:
+  en: "Bottom"
+  ru: "Снизу"
+left:
+  en: "Left"
+  ru: "Слева"
+  zh-CN: "左边"
+right:
+  en: "Right"
+  ru: "Справа"
+  zh-CN: "右边"
+
 onoff:
   en: "On/Off"
   ru: "Вкл./Выкл."

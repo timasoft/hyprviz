@@ -1,13 +1,16 @@
 use rust_i18n::t;
+use serde_json::Value;
 use std::{
     cmp::Ordering,
     collections::{HashMap, HashSet},
     env,
     error::Error,
+    fmt::Display,
     fs,
     io::{self, Write},
     path::{Path, PathBuf},
     process::Command,
+    str::FromStr,
     sync::LazyLock,
 };
 
@@ -208,7 +211,7 @@ pub fn get_current_profile(file_content: &str) -> String {
     "Default".to_string()
 }
 
-/// Finds all files matching pattern `hyprviz_*.conf` in the same directory as default config file
+/// Finds all files matching pattern `*.conf` in the hyprviz profile directory
 pub fn find_all_profiles() -> Option<Vec<String>> {
     let config_path = get_config_path(true, "None");
 
@@ -961,8 +964,520 @@ pub fn parse_animation(input: &str) -> (String, bool, f64, String, Option<String
     }
 }
 
+pub enum Position {
+    Auto,
+    AutoRight,
+    AutoLeft,
+    AutoUp,
+    AutoDown,
+    AutoCenterRight,
+    AutoCenterLeft,
+    AutoCenterUp,
+    AutoCenterDown,
+    Coordinates(i64, i64),
+}
+
+impl Position {
+    pub fn get_fancy_list() -> [String; 10] {
+        [
+            t!("auto").to_string(),
+            t!("auto_right").to_string(),
+            t!("auto_left").to_string(),
+            t!("auto_up").to_string(),
+            t!("auto_down").to_string(),
+            t!("auto_center_right").to_string(),
+            t!("auto_center_left").to_string(),
+            t!("auto_center_up").to_string(),
+            t!("auto_center_down").to_string(),
+            t!("coordinates").to_string(),
+        ]
+    }
+
+    pub fn get_list() -> [&'static str; 10] {
+        [
+            "auto",
+            "auto-right",
+            "auto-left",
+            "auto-up",
+            "auto-down",
+            "auto-center-right",
+            "auto-center-left",
+            "auto-center-up",
+            "auto-center-down",
+            "coordinates",
+        ]
+    }
+
+    pub fn from_id(id: usize, x: Option<i64>, y: Option<i64>) -> Self {
+        match id {
+            0 => Position::Auto,
+            1 => Position::AutoRight,
+            2 => Position::AutoLeft,
+            3 => Position::AutoUp,
+            4 => Position::AutoDown,
+            5 => Position::AutoCenterRight,
+            6 => Position::AutoCenterLeft,
+            7 => Position::AutoCenterUp,
+            8 => Position::AutoCenterDown,
+            _ => Position::Coordinates(x.unwrap_or(0), y.unwrap_or(0)),
+        }
+    }
+}
+
+impl Display for Position {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Position::Auto => write!(f, "auto"),
+            Position::AutoRight => write!(f, "auto-right"),
+            Position::AutoLeft => write!(f, "auto-left"),
+            Position::AutoUp => write!(f, "auto-up"),
+            Position::AutoDown => write!(f, "auto-down"),
+            Position::AutoCenterRight => write!(f, "auto-center-right"),
+            Position::AutoCenterLeft => write!(f, "auto-center-left"),
+            Position::AutoCenterUp => write!(f, "auto-center-up"),
+            Position::AutoCenterDown => write!(f, "auto-center-down"),
+            Position::Coordinates(x, y) => write!(f, "{}x{}", x, y),
+        }
+    }
+}
+
+impl FromStr for Position {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "auto" => Ok(Position::Auto),
+            "auto-right" => Ok(Position::AutoRight),
+            "auto-left" => Ok(Position::AutoLeft),
+            "auto-up" => Ok(Position::AutoUp),
+            "auto-down" => Ok(Position::AutoDown),
+            "auto-center-right" => Ok(Position::AutoCenterRight),
+            "auto-center-left" => Ok(Position::AutoCenterLeft),
+            "auto-center-up" => Ok(Position::AutoCenterUp),
+            position => {
+                if let Some((x_str, y_str)) = position.split_once('x') {
+                    let x = x_str.parse::<i64>().map_err(|_| ())?;
+                    let y = y_str.parse::<i64>().map_err(|_| ())?;
+                    Ok(Position::Coordinates(x, y))
+                } else {
+                    Err(())
+                }
+            }
+        }
+    }
+}
+
+impl Clone for Position {
+    fn clone(&self) -> Self {
+        match self {
+            Position::Auto => Position::Auto,
+            Position::AutoRight => Position::AutoRight,
+            Position::AutoLeft => Position::AutoLeft,
+            Position::AutoUp => Position::AutoUp,
+            Position::AutoDown => Position::AutoDown,
+            Position::AutoCenterRight => Position::AutoCenterRight,
+            Position::AutoCenterLeft => Position::AutoCenterLeft,
+            Position::AutoCenterUp => Position::AutoCenterUp,
+            Position::AutoCenterDown => Position::AutoCenterDown,
+            _ => Position::Coordinates(0, 0),
+        }
+    }
+}
+
+pub enum Scale {
+    Auto,
+    Manual(f64),
+}
+
+impl Scale {
+    pub fn get_fancy_list() -> [String; 2] {
+        [t!("auto").to_string(), t!("manual").to_string()]
+    }
+
+    pub fn from_id(id: usize, value: Option<f64>) -> Self {
+        match id {
+            0 => Scale::Auto,
+            _ => Scale::Manual(value.unwrap_or(1.0)),
+        }
+    }
+}
+
+impl Display for Scale {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Scale::Auto => write!(f, "auto"),
+            Scale::Manual(scale) => write!(f, "{:.2}", scale),
+        }
+    }
+}
+
+impl FromStr for Scale {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "auto" => Ok(Scale::Auto),
+            scale => Ok(Scale::Manual(scale.parse::<f64>().map_err(|_| ())?)),
+        }
+    }
+}
+
+impl Clone for Scale {
+    fn clone(&self) -> Self {
+        match self {
+            Scale::Auto => Scale::Auto,
+            Scale::Manual(scale) => Scale::Manual(*scale),
+        }
+    }
+}
+
+pub enum Cm {
+    Auto,
+    Srgb,
+    Dcip3,
+    Dp3,
+    Adobe,
+    Wide,
+    Edid,
+    Hdr,
+    Hdredid,
+}
+
+impl Cm {
+    pub fn get_fancy_list() -> [&'static str; 9] {
+        [
+            "Auto",
+            "SRGB",
+            "CDI-P3",
+            "DP3",
+            "AdobeRGB",
+            "WideGamut",
+            "EDID",
+            "HDR",
+            "HDR-EDID",
+        ]
+    }
+
+    pub fn from_id(id: u32) -> Self {
+        match id {
+            0 => Cm::Auto,
+            1 => Cm::Srgb,
+            2 => Cm::Dcip3,
+            3 => Cm::Dp3,
+            4 => Cm::Adobe,
+            5 => Cm::Wide,
+            6 => Cm::Edid,
+            7 => Cm::Hdr,
+            8 => Cm::Hdredid,
+            _ => Cm::Auto,
+        }
+    }
+}
+
+impl Display for Cm {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Cm::Auto => write!(f, "auto"),
+            Cm::Srgb => write!(f, "srgb"),
+            Cm::Dcip3 => write!(f, "dcip3"),
+            Cm::Dp3 => write!(f, "dp3"),
+            Cm::Adobe => write!(f, "adobe"),
+            Cm::Wide => write!(f, "wide"),
+            Cm::Edid => write!(f, "edid"),
+            Cm::Hdr => write!(f, "hdr"),
+            Cm::Hdredid => write!(f, "hdredid"),
+        }
+    }
+}
+
+impl FromStr for Cm {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "auto" => Ok(Cm::Auto),
+            "srgb" => Ok(Cm::Srgb),
+            "dcip3" => Ok(Cm::Dcip3),
+            "dp3" => Ok(Cm::Dp3),
+            "adobe" => Ok(Cm::Adobe),
+            "wide" => Ok(Cm::Wide),
+            "edid" => Ok(Cm::Edid),
+            "hdr" => Ok(Cm::Hdr),
+            "hdredid" => Ok(Cm::Hdredid),
+            _ => Err(()),
+        }
+    }
+}
+
+pub struct MonitorState {
+    pub resolution: String,
+    pub position: Position,
+    pub scale: Scale,
+    pub mirror: Option<String>,
+    pub bitdepth: Option<u8>,
+    pub cm: Option<Cm>,
+    pub sdrbrightness: Option<f64>,
+    pub sdrsaturation: Option<f64>,
+    pub vrr: Option<u8>,
+    pub transform: Option<u8>,
+}
+
+impl Display for MonitorState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let resolution = self.resolution.clone();
+        let position = format!(", {}", self.position);
+        let scale = format!(", {}", self.scale);
+        let mirror = match &self.mirror {
+            Some(mirror) => format!(", mirror, {}", mirror),
+            None => "".to_string(),
+        };
+        let bitdepth = match &self.bitdepth {
+            Some(bitdepth) => format!(", bitdepth, {}", bitdepth),
+            None => "".to_string(),
+        };
+        let cm = match &self.cm {
+            Some(cm) => format!(", cm, {}", cm),
+            None => "".to_string(),
+        };
+        let sdrbrightness = match &self.sdrbrightness {
+            Some(sdrbrightness) => format!(", sdrbrightness, {}", sdrbrightness),
+            None => "".to_string(),
+        };
+        let sdrsaturation = match &self.sdrsaturation {
+            Some(sdrsaturation) => format!(", sdrsaturation, {}", sdrsaturation),
+            None => "".to_string(),
+        };
+        let vrr = match &self.vrr {
+            Some(vrr) => format!(", vrr, {}", vrr),
+            None => "".to_string(),
+        };
+        let transform = match &self.transform {
+            Some(transform) => format!(", transform, {}", transform),
+            None => "".to_string(),
+        };
+
+        write!(
+            f,
+            "{}{}{}{}{}{}{}{}{}{}",
+            resolution,
+            position,
+            scale,
+            mirror,
+            bitdepth,
+            cm,
+            sdrbrightness,
+            sdrsaturation,
+            vrr,
+            transform
+        )
+    }
+}
+
+pub enum Monitor {
+    Enabled(MonitorState),
+    Disabled,
+    AddReserved(i64, i64, i64, i64),
+}
+
+pub fn parse_monitor(input: &str) -> (String, Monitor) {
+    let values = input
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .collect::<Vec<_>>();
+    let monitor_name = values.first().unwrap_or(&"".to_string()).to_owned();
+
+    let state = values.get(1).unwrap_or(&"preferred".to_string()).to_owned();
+
+    match state.as_str() {
+        "disable" => (monitor_name, Monitor::Disabled),
+        "addreserved" => (
+            monitor_name,
+            Monitor::AddReserved(
+                values
+                    .get(2)
+                    .unwrap_or(&"0".to_string())
+                    .parse::<i64>()
+                    .unwrap_or(0),
+                values
+                    .get(3)
+                    .unwrap_or(&"0".to_string())
+                    .parse::<i64>()
+                    .unwrap_or(0),
+                values
+                    .get(4)
+                    .unwrap_or(&"0".to_string())
+                    .parse::<i64>()
+                    .unwrap_or(0),
+                values
+                    .get(5)
+                    .unwrap_or(&"0".to_string())
+                    .parse::<i64>()
+                    .unwrap_or(0),
+            ),
+        ),
+        resolution => {
+            let mut monitor_state = MonitorState {
+                resolution: resolution.to_string(),
+                position: {
+                    Position::from_str(values.get(2).unwrap_or(&"auto".to_string()).as_str())
+                        .unwrap_or(Position::Auto)
+                },
+                scale: {
+                    Scale::from_str(values.get(3).unwrap_or(&"auto".to_string()).as_str())
+                        .unwrap_or(Scale::Auto)
+                },
+                mirror: None,
+                bitdepth: None,
+                cm: None,
+                sdrbrightness: None,
+                sdrsaturation: None,
+                vrr: None,
+                transform: None,
+            };
+
+            for i in 4..values.len() {
+                match values.get(i).unwrap_or(&"".to_string()).as_str() {
+                    "mirror" => {
+                        monitor_state.mirror =
+                            Some(values.get(i + 1).unwrap_or(&"".to_string()).to_owned());
+                    }
+                    "bitdepth" => {
+                        monitor_state.bitdepth = Some(
+                            values
+                                .get(i + 1)
+                                .unwrap_or(&"10".to_string())
+                                .parse::<u8>()
+                                .unwrap_or(0),
+                        );
+                    }
+                    "cm" => {
+                        monitor_state.cm = Some(
+                            match values
+                                .get(i + 1)
+                                .unwrap_or(&"auto".to_string())
+                                .to_owned()
+                                .as_str()
+                            {
+                                "auto" => Cm::Auto,
+                                "srgb" => Cm::Srgb,
+                                "dcip3" => Cm::Dcip3,
+                                "dp3" => Cm::Dp3,
+                                "adobe" => Cm::Adobe,
+                                "wide" => Cm::Wide,
+                                "edid" => Cm::Edid,
+                                "hdr" => Cm::Hdr,
+                                "hdredid" => Cm::Hdredid,
+                                _ => Cm::Auto,
+                            },
+                        );
+                    }
+                    "sdrbrightness" => {
+                        monitor_state.sdrbrightness = Some(
+                            values
+                                .get(i + 1)
+                                .unwrap_or(&"1.0".to_string())
+                                .parse::<f64>()
+                                .unwrap_or(1.0),
+                        )
+                    }
+                    "sdrsaturation" => {
+                        monitor_state.sdrsaturation = Some(
+                            values
+                                .get(i + 1)
+                                .unwrap_or(&"1.0".to_string())
+                                .parse::<f64>()
+                                .unwrap_or(1.0),
+                        );
+                    }
+                    "vrr" => {
+                        monitor_state.vrr = Some(
+                            values
+                                .get(i + 1)
+                                .unwrap_or(&"0".to_string())
+                                .parse::<u8>()
+                                .unwrap_or(0),
+                        );
+                    }
+                    "transform" => {
+                        monitor_state.transform = Some(
+                            values
+                                .get(i + 1)
+                                .unwrap_or(&"0".to_string())
+                                .parse::<u8>()
+                                .unwrap_or(0),
+                        );
+                    }
+                    _ => {}
+                }
+            }
+
+            (monitor_name, Monitor::Enabled(monitor_state))
+        }
+    }
+}
+
+pub fn get_available_resolutions_for_monitor(monitor_selector: &str) -> Vec<String> {
+    let mut special_options = vec![
+        "disable".to_string(),
+        "addreserved".to_string(),
+        "preferred".to_string(),
+        "highres".to_string(),
+        "highrr".to_string(),
+        "maxwidth".to_string(),
+    ];
+
+    match Command::new("hyprctl").arg("monitors").arg("-j").output() {
+        Ok(output) => {
+            if let Ok(json_str) = String::from_utf8(output.stdout)
+                && let Ok(monitors) = serde_json::from_str::<Vec<Value>>(&json_str)
+            {
+                let target_monitor = monitors.iter().find(|monitor| {
+                    if let Some(name) = monitor.get("name").and_then(|n| n.as_str())
+                        && name == monitor_selector
+                    {
+                        true
+                    } else if let Some(desc) = monitor.get("description").and_then(|d| d.as_str())
+                        && format!("desc:{}", desc) == monitor_selector
+                    {
+                        true
+                    } else {
+                        false
+                    }
+                });
+
+                if let Some(monitor) = target_monitor
+                    && let Some(modes) = monitor.get("availableModes").and_then(|m| m.as_array())
+                {
+                    let mut unique_resolutions = HashSet::new();
+
+                    for mode in modes {
+                        if let Some(mode_str) = mode.as_str() {
+                            unique_resolutions.insert(mode_str.to_string());
+                        }
+                    }
+
+                    let mut res_vec: Vec<String> = unique_resolutions.into_iter().collect();
+                    res_vec.sort();
+                    special_options.extend(res_vec);
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to get monitor resolutions: {}", e);
+        }
+    }
+
+    special_options
+}
+
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";
 pub const BACKUP_SUFFIX: &str = "-bak";
+
+/// 9007199254740992.0
 pub const MAX_SAFE_INTEGER_F64: f64 = (1u64 << 53) as f64; // 2^53
+/// -9007199254740992.0
+pub const MIN_SAFE_INTEGER_F64: f64 = -MAX_SAFE_INTEGER_F64; // -2^53
+/// 140737488355328
+pub const MAX_SAFE_STEP_0_01_F64: f64 = (1u64 << 47) as f64; // 2^47

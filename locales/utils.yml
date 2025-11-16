@@ -17,3 +17,47 @@ request_failed:
   en: "Request failed: %{error}"
   ru: "Запрос не выполнен: %{error}"
   zh-CN: "请求失败: %{error}"
+auto:
+  en: "Auto"
+  ru: "Авто"
+  zh-CN: "自动"
+auto_right:
+  en: "Auto right"
+  ru: "Авто справа"
+  zh-CN: "自动右边"
+auto_left:
+  en: "Auto left"
+  ru: "Авто слева"
+  zh-CN: "自动左边"
+auto_up:
+  en: "Auto up"
+  ru: "Авто сверху"
+  zh-CN: "自动上边"
+auto_down:
+  en: "Auto down"
+  ru: "Авто снизу"
+  zh-CN: "自动下边"
+auto_center_right:
+  en: "Auto center right"
+  ru: "Авто справа от центра"
+  zh-CN: "自动右边从中心"
+auto_center_left:
+  en: "Auto center left"
+  ru: "Авто слева от центра"
+  zh-CN: "自动左边从中心"
+auto_center_up:
+  en: "Auto center up"
+  ru: "Авто сверху от центра"
+  zh-CN: "自动上边从中心"
+auto_center_down:
+  en: "Auto center down"
+  ru: "Авто снизу от центра"
+  zh-CN: "自动下边从中心"
+coordinates:
+  en: "Coordinates"
+  ru: "Координаты"
+  zh-CN: "坐标"
+manual:
+  en: "Manual"
+  ru: "Вручную"
+  zh-CN: "手动"
