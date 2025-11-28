@@ -120,6 +120,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add i18n
 - [ ] Add curve editor
 - [ ] Add symlink support
+- [ ] Replace hyprparser with hyprlang-rs
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
