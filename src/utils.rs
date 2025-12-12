@@ -1849,7 +1849,7 @@ impl Display for WorkspaceRules {
             rules.push(format!("defaultName:{}", default_name));
         }
         if let Some(layoutopt_orientation) = &self.layoutopt_orientation {
-            rules.push(format!("orientation:{}", layoutopt_orientation));
+            rules.push(format!("layoutopt:orientation:{}", layoutopt_orientation));
         }
 
         write!(f, "{}", rules.join(", "))
@@ -2073,6 +2073,10 @@ fn find_matching_bracket(input: &str, prefix: &str, closing: char) -> Option<usi
 }
 
 fn parse_workspace_rule(input: &str, rules: &mut WorkspaceRules) {
+    let input = match input.strip_prefix("layoutopt:") {
+        Some(value) => value,
+        None => return,
+    };
     let parts: Vec<&str> = input.splitn(2, ':').collect();
     if parts.len() != 2 {
         return;
@@ -2096,7 +2100,7 @@ fn parse_workspace_rule(input: &str, rules: &mut WorkspaceRules) {
         "defaultName" => rules.default_name = Some(rule_value.to_string()),
         "orientation" => {
             rules.layoutopt_orientation =
-                Some(Orientation::from_str(rule_value).unwrap_or_default())
+                Some(Orientation::from_str(rule_value).expect("Invalid orientation"))
         }
         _ => {}
     }

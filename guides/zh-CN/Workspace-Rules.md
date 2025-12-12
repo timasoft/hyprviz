@@ -97,6 +97,7 @@ windowrule = rounding 0, floating:0, onworkspace:f[1]s[false]
 | persistent:[b] | 即使工作区为空且非活动，也保持该工作区存活 | 布尔值 |
 | on-created-empty:[c] | 一旦工作区被创建为空（即不是通过移动窗口到它而创建的），要执行的命令。参见[命令语法](../Dispatchers#executing-with-rules) | 字符串 |
 | defaultName:[s] | 工作区的默认名称 | 字符串 |
+| layoutopt:orientation:[o] | 设置工作区的布局方向。可用方向请参见[布局->方向](../Master-Layout#orientation)。 | 字符串 |
 
 ### 示例规则
 
