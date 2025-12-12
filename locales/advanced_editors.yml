@@ -88,6 +88,63 @@ right:
   ru: "Справа"
   zh-CN: "右边"
 
+type:
+  en: "Type"
+  ru: "Тип"
+  zh-CN: "类型"
+workspace_rules:
+  en: "Workspace Rules"
+  ru: "Правила рабочих пространств"
+  zh-CN: "工作区规则"
+default:
+  en: "Default"
+  ru: "По умолчанию"
+  zh-CN: "默认"
+border:
+  en: "Border"
+  ru: "Граница"
+  zh-CN: "边框"
+shadow:
+  en: "Shadow"
+  ru: "Тень"
+  zh-CN: "阴影"
+rounding:
+  en: "Rounding"
+  ru: "Округление"
+  zh-CN: "圆角"
+decorate:
+  en: "Decorate"
+  ru: "Декорации"
+  zh-CN: "装饰"
+persistent:
+  en: "Persistent"
+  ru: "Постоянный"
+  zh-CN: "持续"
+on_created_empty:
+  en: "On Created Empty"
+  ru: "При создании пустого"
+  zh-CN: "创建空时"
+command_to_execute:
+  en: "Command to Execute"
+  ru: "Команда для выполнения"
+  zh-CN: "要执行的命令"
+default_name:
+  en: "Default Name"
+  ru: "Имя по умолчанию"
+  zh-CN: "默认名称"
+default_workspace_name:
+  en: "Default Workspace Name"
+  ru: "Имя рабочего пространства по умолчанию"
+  zh-CN: "默认工作区名称"
+layoutopt_orientation:
+  en: "Layoutopt Orientation"
+  ru: "Ориентация в Master лайауте"
+  zh-CN: "布局选项方向"
+center:
+  en: "Center"
+  ru: "Центр"
+  zh-CN: "中心"
+
 onoff:
   en: "On/Off"
   ru: "Вкл./Выкл."
@@ -104,3 +161,81 @@ style:
   en: "Style"
   ru: "Стиль"
   zh-CN: "样式"
+
+is_named:
+  en: "Is Named"
+  ru: "Имеет имя"
+  zh-CN: "有名称"
+starts_with:
+  en: "Starts With"
+  ru: "Начинается с"
+  zh-CN: "以开头"
+ends_with:
+  en: "Ends With"
+  ru: "Заканчивается на"
+  zh-CN: "以结尾"
+all:
+  en: "All"
+  ru: "Все"
+  zh-CN: "全部"
+single_count:
+  en: "Single Count"
+  ru: "Одиночный"
+  zh-CN: "单个"
+range_count:
+  en: "Range Count"
+  ru: "Диапазон"
+  zh-CN: "范围"
+count_flags:
+  en: "Count Flags"
+  ru: "Флаги"
+  zh-CN: "计数标志"
+tiled_windows:
+  en: "Tiled Windows"
+  ru: "Плиточные окна"
+  zh-CN: "平铺窗口"
+floating_windows:
+  en: "Floating Windows"
+  ru: "Плавающие окна"
+  zh-CN: "浮动窗口"
+groups_instead_of_windows:
+  en: "Groups Instead of Windows"
+  ru: "Группы вместо окон"
+  zh-CN: "组而不是窗口"
+visible_windows_only:
+  en: "Visible Windows Only"
+  ru: "Только видимые окна"
+  zh-CN: "仅可见窗口"
+pinned_windows_only:
+  en: "Pinned Windows Only"
+  ru: "Только закрепленные окна"
+  zh-CN: "仅固定窗口"
+window_count:
+  en: "Window Count"
+  ru: "Количество окон"
+  zh-CN: "窗口计数"
+range_start:
+  en: "Range Start"
+  ru: "Начало диапазона"
+  zh-CN: "范围开始"
+range_end:
+  en: "Range End"
+  ru: "Конец диапазона"
+  zh-CN: "范围结束"
+no_fullscreen:
+  en: "No Fullscreen"
+  ru: "Не в полном экране"
+  zh-CN: "不在全屏"
+fullscreen:
+  en: "Fullscreen"
+  ru: "Полный экран"
+  zh-CN: "全屏"
+maximized:
+  en: "Maximized"
+  ru: "Максимизировано"
+  zh-CN: "最大化"
+fullscreen_without_window_state:
+  en: "Fullscreen Without Window State"
+  ru: "Полный экран без состояния окна"
+  zh-CN: "全屏无窗口状态"
+

@@ -964,6 +964,41 @@ pub fn parse_animation(input: &str) -> (String, bool, f64, String, Option<String
     }
 }
 
+#[derive(Default, Debug, Clone)]
+pub enum MonitorSelector {
+    #[default]
+    All,
+    Name(String),
+    Description(String),
+}
+
+impl FromStr for MonitorSelector {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "" => Ok(MonitorSelector::All),
+            s => {
+                if let Some(stripped) = s.strip_prefix("desc:") {
+                    Ok(MonitorSelector::Description(stripped.to_string()))
+                } else {
+                    Ok(MonitorSelector::Name(s.to_string()))
+                }
+            }
+        }
+    }
+}
+
+impl Display for MonitorSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MonitorSelector::All => write!(f, ""),
+            MonitorSelector::Name(name) => write!(f, "{}", name),
+            MonitorSelector::Description(desc) => write!(f, "desc:{}", desc),
+        }
+    }
+}
+
 pub enum Position {
     Auto,
     AutoRight,
@@ -1279,19 +1314,21 @@ pub enum Monitor {
     AddReserved(i64, i64, i64, i64),
 }
 
-pub fn parse_monitor(input: &str) -> (String, Monitor) {
+pub fn parse_monitor(input: &str) -> (MonitorSelector, Monitor) {
     let values = input
         .split(',')
         .map(|s| s.trim().to_string())
         .collect::<Vec<_>>();
-    let monitor_name = values.first().unwrap_or(&"".to_string()).to_owned();
+    let monitor_selector =
+        MonitorSelector::from_str(values.first().unwrap_or(&"".to_string()).as_str())
+            .unwrap_or_default();
 
     let state = values.get(1).unwrap_or(&"preferred".to_string()).to_owned();
 
     match state.as_str() {
-        "disable" => (monitor_name, Monitor::Disabled),
+        "disable" => (monitor_selector, Monitor::Disabled),
         "addreserved" => (
-            monitor_name,
+            monitor_selector,
             Monitor::AddReserved(
                 values
                     .get(2)
@@ -1411,12 +1448,12 @@ pub fn parse_monitor(input: &str) -> (String, Monitor) {
                 }
             }
 
-            (monitor_name, Monitor::Enabled(monitor_state))
+            (monitor_selector, Monitor::Enabled(monitor_state))
         }
     }
 }
 
-pub fn get_available_resolutions_for_monitor(monitor_selector: &str) -> Vec<String> {
+pub fn get_available_resolutions_for_monitor(monitor_selector: &MonitorSelector) -> Vec<String> {
     let mut special_options = vec![
         "disable".to_string(),
         "addreserved".to_string(),
@@ -1428,38 +1465,50 @@ pub fn get_available_resolutions_for_monitor(monitor_selector: &str) -> Vec<Stri
 
     match Command::new("hyprctl").arg("monitors").arg("-j").output() {
         Ok(output) => {
+            let mut target_monitor = None;
             if let Ok(json_str) = String::from_utf8(output.stdout)
                 && let Ok(monitors) = serde_json::from_str::<Vec<Value>>(&json_str)
             {
-                let target_monitor = monitors.iter().find(|monitor| {
-                    if let Some(name) = monitor.get("name").and_then(|n| n.as_str())
-                        && name == monitor_selector
-                    {
-                        true
-                    } else if let Some(desc) = monitor.get("description").and_then(|d| d.as_str())
-                        && format!("desc:{}", desc) == monitor_selector
-                    {
-                        true
-                    } else {
-                        false
+                match monitor_selector {
+                    MonitorSelector::Name(monitor_name) => {
+                        target_monitor = monitors.iter().map(|m| m.to_owned()).find(|monitor| {
+                            if let Some(name) = monitor.get("name").and_then(|n| n.as_str()) {
+                                name == monitor_name
+                            } else {
+                                false
+                            }
+                        });
                     }
-                });
-
-                if let Some(monitor) = target_monitor
-                    && let Some(modes) = monitor.get("availableModes").and_then(|m| m.as_array())
-                {
-                    let mut unique_resolutions = HashSet::new();
-
-                    for mode in modes {
-                        if let Some(mode_str) = mode.as_str() {
-                            unique_resolutions.insert(mode_str.to_string());
-                        }
+                    MonitorSelector::Description(monitor_description) => {
+                        target_monitor = monitors.iter().map(|m| m.to_owned()).find(|monitor| {
+                            if let Some(desc) = monitor.get("description").and_then(|d| d.as_str())
+                                && desc == monitor_description
+                            {
+                                true
+                            } else {
+                                false
+                            }
+                        });
                     }
-
-                    let mut res_vec: Vec<String> = unique_resolutions.into_iter().collect();
-                    res_vec.sort();
-                    special_options.extend(res_vec);
+                    MonitorSelector::All => {
+                        target_monitor = None;
+                    } // _ => todo!(),
                 }
+            }
+            if let Some(monitor) = target_monitor
+                && let Some(modes) = monitor.get("availableModes").and_then(|m| m.as_array())
+            {
+                let mut unique_resolutions = HashSet::new();
+
+                for mode in modes {
+                    if let Some(mode_str) = mode.as_str() {
+                        unique_resolutions.insert(mode_str.to_string());
+                    }
+                }
+
+                let mut res_vec: Vec<String> = unique_resolutions.into_iter().collect();
+                res_vec.sort();
+                special_options.extend(res_vec);
             }
         }
         Err(e) => {
@@ -1468,6 +1517,601 @@ pub fn get_available_resolutions_for_monitor(monitor_selector: &str) -> Vec<Stri
     }
 
     special_options
+}
+
+pub fn get_available_monitors(only_names: bool) -> HashSet<String> {
+    let mut monitors = HashSet::new();
+
+    match Command::new("hyprctl").arg("monitors").arg("-j").output() {
+        Ok(output) => {
+            if let Ok(json_str) = String::from_utf8(output.stdout)
+                && let Ok(monitors_json) = serde_json::from_str::<Vec<Value>>(&json_str)
+            {
+                for monitor in monitors_json {
+                    if let Some(name) = monitor.get("name").and_then(|n| n.as_str()) {
+                        monitors.insert(name.to_string());
+                    }
+                    if !only_names
+                        && let Some(desc) = monitor.get("description").and_then(|d| d.as_str())
+                    {
+                        monitors.insert(format!("desc:{}", desc));
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to get monitor names: {}", e);
+        }
+    }
+
+    monitors
+}
+
+#[derive(Clone, Debug)]
+pub struct Range {
+    pub start: u32,
+    pub end: u32,
+}
+
+#[derive(Clone, Debug)]
+pub enum WorkspaceSelectorNamed {
+    IsNamed(bool),
+    Starts(String),
+    Ends(String),
+}
+
+impl Display for WorkspaceSelectorNamed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WorkspaceSelectorNamed::IsNamed(is_named) => write!(f, "n[{}]", is_named),
+            WorkspaceSelectorNamed::Starts(prefix) => write!(f, "n[s:{}]", prefix),
+            WorkspaceSelectorNamed::Ends(suffix) => write!(f, "n[e:{}]", suffix),
+        }
+    }
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct WorkspaceSelectorWindowCountFlags {
+    pub tiled: bool,
+    pub floating: bool,
+    pub groups: bool,
+    pub visible: bool,
+    pub pinned: bool,
+}
+
+impl Display for WorkspaceSelectorWindowCountFlags {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut flags = String::new();
+
+        if self.tiled {
+            flags.push('t');
+        }
+        if self.floating {
+            flags.push('f');
+        }
+        if self.groups {
+            flags.push('g');
+        }
+        if self.visible {
+            flags.push('v');
+        }
+        if self.pinned {
+            flags.push('p');
+        }
+        write!(f, "{}", flags)
+    }
+}
+
+impl FromStr for WorkspaceSelectorWindowCountFlags {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut flags = WorkspaceSelectorWindowCountFlags {
+            tiled: false,
+            floating: false,
+            groups: false,
+            visible: false,
+            pinned: false,
+        };
+
+        for c in s.chars() {
+            match c {
+                't' => flags.tiled = true,
+                'f' => flags.floating = true,
+                'g' => flags.groups = true,
+                'v' => flags.visible = true,
+                'p' => flags.pinned = true,
+                _ => return Err(format!("Invalid flag: {}", c)),
+            }
+        }
+
+        Ok(flags)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum WorkspaceSelectorWindowCount {
+    Range {
+        flags: WorkspaceSelectorWindowCountFlags,
+        range_start: u32,
+        range_end: u32,
+    },
+    Single {
+        flags: WorkspaceSelectorWindowCountFlags,
+        count: u32,
+    },
+}
+
+impl Display for WorkspaceSelectorWindowCount {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WorkspaceSelectorWindowCount::Range {
+                flags,
+                range_start,
+                range_end,
+            } => {
+                write!(f, "w[{}{}-{}]", flags, range_start, range_end)
+            }
+            WorkspaceSelectorWindowCount::Single { flags, count } => {
+                write!(f, "w[{}{}]", flags, count)
+            }
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum WorkspaceSelector {
+    None,
+    Range(Range),
+    Special(bool),
+    Named(WorkspaceSelectorNamed),
+    Monitor(MonitorSelector),
+    WindowCount(WorkspaceSelectorWindowCount),
+    Fullscreen(i32),
+}
+
+impl WorkspaceSelector {
+    pub fn get_fancy_list() -> [String; 7] {
+        [
+            t!("none").to_string(),
+            t!("range").to_string(),
+            t!("special").to_string(),
+            t!("named").to_string(),
+            t!("monitor").to_string(),
+            t!("window_count").to_string(),
+            t!("fullscreen").to_string(),
+        ]
+    }
+
+    pub fn get_id(&self) -> usize {
+        match self {
+            WorkspaceSelector::None => 0,
+            WorkspaceSelector::Range { .. } => 1,
+            WorkspaceSelector::Special(_) => 2,
+            WorkspaceSelector::Named(_) => 3,
+            WorkspaceSelector::Monitor(_) => 4,
+            WorkspaceSelector::WindowCount(_) => 5,
+            WorkspaceSelector::Fullscreen(_) => 6,
+        }
+    }
+}
+
+impl Display for WorkspaceSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WorkspaceSelector::None => write!(f, ""),
+            WorkspaceSelector::Range(Range { start, end }) => write!(f, "r[{}-{}]", start, end),
+            WorkspaceSelector::Special(is_special) => {
+                write!(f, "s[{}]", is_special)
+            }
+            WorkspaceSelector::Named(named) => {
+                write!(f, "{}", named)
+            }
+            WorkspaceSelector::Monitor(monitor) => write!(f, "m[{}]", monitor),
+            WorkspaceSelector::WindowCount(window_count) => {
+                write!(f, "{}", window_count)
+            }
+            WorkspaceSelector::Fullscreen(state) => write!(f, "f[{}]", state),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum WorkspaceType {
+    Named(String),
+    Special(String),
+    Numbered(u32),
+    Selector(Vec<WorkspaceSelector>),
+}
+
+impl WorkspaceType {
+    pub fn get_fancy_list() -> [String; 4] {
+        [
+            t!("named").to_string(),
+            t!("special").to_string(),
+            t!("numbered").to_string(),
+            t!("selector").to_string(),
+        ]
+    }
+}
+
+impl Display for WorkspaceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WorkspaceType::Named(name) => write!(f, "name:{}", name),
+            WorkspaceType::Special(name) => write!(f, "special:{}", name),
+            WorkspaceType::Numbered(num) => write!(f, "{}", num),
+            WorkspaceType::Selector(selector) => write!(
+                f,
+                "{}",
+                selector
+                    .iter()
+                    .map(|selector| selector.to_string())
+                    .collect::<Vec<String>>()
+                    .join("")
+            ),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub enum Orientation {
+    #[default]
+    Left,
+    Right,
+    Top,
+    Bottom,
+    Center,
+}
+
+impl Display for Orientation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Orientation::Left => write!(f, "left"),
+            Orientation::Right => write!(f, "right"),
+            Orientation::Top => write!(f, "top"),
+            Orientation::Bottom => write!(f, "bottom"),
+            Orientation::Center => write!(f, "center"),
+        }
+    }
+}
+
+impl FromStr for Orientation {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "left" => Ok(Orientation::Left),
+            "right" => Ok(Orientation::Right),
+            "top" => Ok(Orientation::Top),
+            "bottom" => Ok(Orientation::Bottom),
+            "center" => Ok(Orientation::Center),
+            _ => Err(format!("Invalid orientation: {}", s)),
+        }
+    }
+}
+
+#[derive(Default, Debug)]
+pub struct WorkspaceRules {
+    pub monitor: Option<String>,
+    pub default: Option<bool>,
+    pub gaps_in: Option<i32>,
+    pub gaps_out: Option<i32>,
+    pub border_size: Option<i32>,
+    pub border: Option<bool>,
+    pub shadow: Option<bool>,
+    pub rounding: Option<bool>,
+    pub decorate: Option<bool>,
+    pub persistent: Option<bool>,
+    pub on_created_empty: Option<String>,
+    pub default_name: Option<String>,
+    pub layoutopt_orientation: Option<Orientation>,
+}
+
+impl Display for WorkspaceRules {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut rules = Vec::new();
+
+        if let Some(monitor) = &self.monitor {
+            rules.push(format!("monitor:{}", monitor));
+        }
+        if let Some(default) = self.default {
+            rules.push(format!("default:{}", default));
+        }
+        if let Some(gaps_in) = self.gaps_in {
+            rules.push(format!("gapsin:{}", gaps_in));
+        }
+        if let Some(gaps_out) = self.gaps_out {
+            rules.push(format!("gapsout:{}", gaps_out));
+        }
+        if let Some(border_size) = self.border_size {
+            rules.push(format!("bordersize:{}", border_size));
+        }
+        if let Some(border) = self.border {
+            rules.push(format!("border:{}", border));
+        }
+        if let Some(shadow) = self.shadow {
+            rules.push(format!("shadow:{}", shadow));
+        }
+        if let Some(rounding) = self.rounding {
+            rules.push(format!("rounding:{}", rounding));
+        }
+        if let Some(decorate) = self.decorate {
+            rules.push(format!("decorate:{}", decorate));
+        }
+        if let Some(persistent) = self.persistent {
+            rules.push(format!("persistent:{}", persistent));
+        }
+        if let Some(on_created_empty) = &self.on_created_empty {
+            rules.push(format!("on-created-empty:{}", on_created_empty));
+        }
+        if let Some(default_name) = &self.default_name {
+            rules.push(format!("defaultName:{}", default_name));
+        }
+        if let Some(layoutopt_orientation) = &self.layoutopt_orientation {
+            rules.push(format!("orientation:{}", layoutopt_orientation));
+        }
+
+        write!(f, "{}", rules.join(", "))
+    }
+}
+
+#[derive(Debug)]
+pub struct Workspace {
+    pub workspace_type: WorkspaceType,
+    pub rules: WorkspaceRules,
+}
+
+impl Display for Workspace {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let workspace_type = &self.workspace_type;
+        let rules = &self.rules;
+        if rules.monitor.is_some()
+            || rules.default.is_some()
+            || rules.gaps_in.is_some()
+            || rules.gaps_out.is_some()
+            || rules.border_size.is_some()
+            || rules.border.is_some()
+            || rules.shadow.is_some()
+            || rules.rounding.is_some()
+            || rules.decorate.is_some()
+            || rules.persistent.is_some()
+            || rules.on_created_empty.is_some()
+            || rules.default_name.is_some()
+            || rules.layoutopt_orientation.is_some()
+        {
+            write!(f, "{}, {}", workspace_type, rules)
+        } else {
+            write!(f, "{}", workspace_type)
+        }
+    }
+}
+
+pub fn parse_workspace(input: &str) -> Workspace {
+    let values: Vec<String> = input.split(',').map(|s| s.trim().to_string()).collect();
+
+    if values.is_empty() {
+        return Workspace {
+            workspace_type: WorkspaceType::Selector(Vec::new()),
+            rules: WorkspaceRules::default(),
+        };
+    }
+
+    let workspace_str = values.first().expect("Workspace type not found").as_str();
+    let workspace_type = parse_workspace_type(workspace_str);
+    let mut rules = WorkspaceRules::default();
+
+    for rule_str in values.iter().skip(1) {
+        parse_workspace_rule(rule_str, &mut rules);
+    }
+
+    Workspace {
+        workspace_type,
+        rules,
+    }
+}
+
+pub fn parse_workspace_type(input: &str) -> WorkspaceType {
+    if input.starts_with("name:") {
+        let name = input.strip_prefix("name:").unwrap_or("").to_string();
+        return WorkspaceType::Named(name);
+    } else if input.starts_with("special:") {
+        let name = input.strip_prefix("special:").unwrap_or("").to_string();
+        return WorkspaceType::Special(name);
+    } else if let Ok(num) = input.parse::<u32>() {
+        return WorkspaceType::Numbered(num);
+    }
+
+    let mut selectors = Vec::new();
+    let mut remaining = input.trim();
+
+    while !remaining.is_empty() {
+        let selector_result = parse_single_selector(remaining);
+
+        match selector_result {
+            Some((selector, rest)) => {
+                selectors.push(selector);
+                remaining = rest.trim();
+            }
+            None => {
+                break;
+            }
+        }
+    }
+
+    if selectors.is_empty() {
+        WorkspaceType::Selector(Vec::new())
+    } else {
+        WorkspaceType::Selector(selectors)
+    }
+}
+
+pub fn parse_single_selector(input: &str) -> Option<(WorkspaceSelector, &str)> {
+    if input.starts_with("r[") {
+        if let Some(end_idx) = find_matching_bracket(input, "r[", ']') {
+            let content = &input[2..end_idx];
+            let rest = &input[end_idx + 1..];
+
+            if let Some((start_str, end_str)) = content.split_once('-')
+                && let (Ok(start), Ok(end)) = (start_str.parse::<u32>(), end_str.parse::<u32>())
+            {
+                return Some((WorkspaceSelector::Range(Range { start, end }), rest));
+            }
+        }
+    } else if input.starts_with("s[") {
+        if let Some(end_idx) = find_matching_bracket(input, "s[", ']') {
+            let content = &input[2..end_idx];
+            let rest = &input[end_idx + 1..];
+
+            let is_special = parse_bool(content).unwrap_or(false);
+            return Some((WorkspaceSelector::Special(is_special), rest));
+        }
+    } else if input.starts_with("n[") {
+        if let Some(end_idx) = find_matching_bracket(input, "n[", ']') {
+            let content = &input[2..end_idx];
+            let rest = &input[end_idx + 1..];
+
+            let selector = if content.starts_with("s:") {
+                let prefix = content.strip_prefix("s:").unwrap_or("").to_string();
+                WorkspaceSelector::Named(WorkspaceSelectorNamed::Starts(prefix))
+            } else if content.starts_with("e:") {
+                let suffix = content.strip_prefix("e:").unwrap_or("").to_string();
+                WorkspaceSelector::Named(WorkspaceSelectorNamed::Ends(suffix))
+            } else {
+                let is_named = parse_bool(content).unwrap_or(false);
+                WorkspaceSelector::Named(WorkspaceSelectorNamed::IsNamed(is_named))
+            };
+
+            return Some((selector, rest));
+        }
+    } else if input.starts_with("m[") {
+        if let Some(end_idx) = find_matching_bracket(input, "m[", ']') {
+            let content = &input[2..end_idx];
+            let rest = &input[end_idx + 1..];
+
+            let monitor = content.to_string();
+            return Some((
+                WorkspaceSelector::Monitor(MonitorSelector::from_str(&monitor).unwrap_or_default()),
+                rest,
+            ));
+        }
+    } else if input.starts_with("w[") {
+        if let Some(end_idx) = find_matching_bracket(input, "w[", ']') {
+            let content = &input[2..end_idx];
+            let rest = &input[end_idx + 1..];
+
+            let (flags_str, count_str) =
+                if let Some(pos) = content.find(|c: char| !c.is_alphabetic()) {
+                    (&content[..pos], &content[pos..])
+                } else {
+                    (content, "")
+                };
+
+            let flags = WorkspaceSelectorWindowCountFlags::from_str(flags_str).unwrap_or_default();
+
+            let selector = if count_str.contains('-') {
+                if let Some((start_str, end_str)) = count_str.split_once('-')
+                    && let (Ok(start), Ok(end)) = (start_str.parse::<u32>(), end_str.parse::<u32>())
+                {
+                    WorkspaceSelector::WindowCount(WorkspaceSelectorWindowCount::Range {
+                        flags,
+                        range_start: start,
+                        range_end: end,
+                    })
+                } else {
+                    return None;
+                }
+            } else if !count_str.is_empty()
+                && let Ok(count) = count_str.parse::<u32>()
+            {
+                WorkspaceSelector::WindowCount(WorkspaceSelectorWindowCount::Single {
+                    flags,
+                    count,
+                })
+            } else {
+                return None;
+            };
+
+            return Some((selector, rest));
+        }
+    } else if input.starts_with("f[")
+        && let Some(end_idx) = find_matching_bracket(input, "f[", ']')
+    {
+        let content = &input[2..end_idx];
+        let rest = &input[end_idx + 1..];
+
+        if let Ok(state) = content.parse::<i32>() {
+            return Some((WorkspaceSelector::Fullscreen(state), rest));
+        }
+    }
+
+    None
+}
+
+fn find_matching_bracket(input: &str, prefix: &str, closing: char) -> Option<usize> {
+    if !input.starts_with(prefix) {
+        return None;
+    }
+
+    let mut depth = 1;
+    let mut idx = prefix.len();
+
+    while idx < input.len() {
+        let c = input.chars().nth(idx)?;
+        if c == '[' {
+            depth += 1;
+        } else if c == closing {
+            depth -= 1;
+            if depth == 0 {
+                return Some(idx);
+            }
+        }
+        idx += 1;
+    }
+
+    None
+}
+
+fn parse_workspace_rule(input: &str, rules: &mut WorkspaceRules) {
+    let parts: Vec<&str> = input.splitn(2, ':').collect();
+    if parts.len() != 2 {
+        return;
+    }
+
+    let rule_name = parts[0].trim();
+    let rule_value = parts[1].trim();
+
+    match rule_name {
+        "monitor" => rules.monitor = Some(rule_value.to_string()),
+        "default" => rules.default = parse_bool(rule_value),
+        "gapsin" => rules.gaps_in = parse_int(rule_value),
+        "gapsout" => rules.gaps_out = parse_int(rule_value),
+        "bordersize" => rules.border_size = parse_int(rule_value),
+        "border" => rules.border = parse_bool(rule_value),
+        "shadow" => rules.shadow = parse_bool(rule_value),
+        "rounding" => rules.rounding = parse_bool(rule_value),
+        "decorate" => rules.decorate = parse_bool(rule_value),
+        "persistent" => rules.persistent = parse_bool(rule_value),
+        "on-created-empty" => rules.on_created_empty = Some(rule_value.to_string()),
+        "defaultName" => rules.default_name = Some(rule_value.to_string()),
+        "orientation" => {
+            rules.layoutopt_orientation =
+                Some(Orientation::from_str(rule_value).unwrap_or_default())
+        }
+        _ => {}
+    }
+}
+
+fn parse_bool(value: &str) -> Option<bool> {
+    match value.to_lowercase().as_str() {
+        "true" | "1" | "yes" | "on" => Some(true),
+        "false" | "0" | "no" | "off" => Some(false),
+        _ => None,
+    }
+}
+
+fn parse_int(value: &str) -> Option<i32> {
+    value.parse::<i32>().ok()
 }
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";

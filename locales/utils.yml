@@ -61,3 +61,30 @@ manual:
   en: "Manual"
   ru: "Вручную"
   zh-CN: "手动"
+
+none:
+  en: "None"
+  ru: "Ничего"
+  zh-CN: "无"
+range:
+  en: "Range"
+  ru: "Диапазон"
+  zh-CN: "范围"
+special:
+  en: "Special"
+  ru: "Специальный"
+  zh-CN: "特殊"
+named:
+  en: "Named"
+  ru: "Именованный"
+  zh-CN: "命名"
+
+numbered:
+  en: "Numbered"
+  ru: "Нумерованный"
+  zh-CN: "编号"
+selector:
+  en: "Selector"
+  ru: "Селектор"
+  zh-CN: "选择器"
+

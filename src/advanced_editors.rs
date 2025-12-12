@@ -1,19 +1,22 @@
 use crate::utils::{
-    Cm, MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Monitor, MonitorState,
-    Position, Scale, after_second_comma, get_available_resolutions_for_monitor, is_modifier,
-    keycode_to_en_key, parse_animation, parse_bezier, parse_coordinates, parse_monitor,
+    Cm, MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Monitor,
+    MonitorSelector, MonitorState, Orientation, Position, Range, Scale, Workspace,
+    WorkspaceSelector, WorkspaceSelectorNamed, WorkspaceSelectorWindowCount,
+    WorkspaceSelectorWindowCountFlags, WorkspaceType, after_second_comma, get_available_monitors,
+    get_available_resolutions_for_monitor, is_modifier, keycode_to_en_key, parse_animation,
+    parse_bezier, parse_coordinates, parse_monitor, parse_workspace,
 };
-use core::f64;
 use gio::glib::SignalHandlerId;
 use gtk::{
     Align, ApplicationWindow, Box, Button, DrawingArea, DropDown, Entry, EventControllerKey,
-    EventControllerMotion, GestureClick, Label, Orientation, SpinButton, StringList, StringObject,
-    Switch, TextBuffer, TextView, prelude::*,
+    EventControllerMotion, GestureClick, Grid, Label, Orientation as GtkOrientation, Separator,
+    SpinButton, StringList, StringObject, Switch, TextBuffer, TextView, prelude::*,
 };
 use rust_i18n::t;
 use std::{
     cell::{Cell, RefCell},
     collections::{HashMap, HashSet},
+    f64,
     rc::Rc,
     str::FromStr,
 };
@@ -107,7 +110,7 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
     };
 
     let vbox = Box::builder()
-        .orientation(Orientation::Vertical)
+        .orientation(GtkOrientation::Vertical)
         .spacing(10)
         .margin_start(10)
         .margin_end(10)
@@ -218,13 +221,7 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
                 1 | 2 => cr.set_source_rgb(1.0, 0.0, 0.0),
                 _ => {}
             }
-            cr.arc(
-                p.x,
-                p.y,
-                6.0 / scale_factor,
-                0.0,
-                2.0 * std::f64::consts::PI,
-            );
+            cr.arc(p.x, p.y, 6.0 / scale_factor, 0.0, 2.0 * f64::consts::PI);
             cr.fill().unwrap();
         }
     });
@@ -306,7 +303,7 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
 }
 
 pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (Box, Button) {
-    let container = Box::new(Orientation::Vertical, 5);
+    let container = Box::new(GtkOrientation::Vertical, 5);
 
     let toggle_button = Button::with_label(&t!("record_bind"));
 
@@ -345,7 +342,7 @@ pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (B
         } else {
             *is_recording_mut = true;
 
-            let vbox = Box::new(Orientation::Vertical, 5);
+            let vbox = Box::new(GtkOrientation::Vertical, 5);
 
             let text_view = TextView::new();
             text_view.set_vexpand(true);
@@ -482,9 +479,9 @@ fn update_display(
 }
 
 pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &Entry) -> Box {
-    let fancy_boxline = Box::new(Orientation::Horizontal, 5);
+    let fancy_boxline = Box::new(GtkOrientation::Horizontal, 5);
 
-    let fancy_name_entry = Box::new(Orientation::Horizontal, 5);
+    let fancy_name_entry = Box::new(GtkOrientation::Horizontal, 5);
     match category {
         "monitor" => {
             let label = Label::new(Some("monitor"));
@@ -492,6 +489,16 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             label.set_selectable(true);
             fancy_name_entry.append(&label);
             name_entry.set_text("monitor");
+            name_entry.connect_changed(move |entry| {
+                label.set_text(&entry.text());
+            });
+        }
+        "workspace" => {
+            let label = Label::new(Some("workspace"));
+            label.set_width_request(100);
+            label.set_selectable(true);
+            fancy_name_entry.append(&label);
+            name_entry.set_text("workspace");
             name_entry.connect_changed(move |entry| {
                 label.set_text(&entry.text());
             });
@@ -539,7 +546,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
     equals_label.set_xalign(0.5);
     fancy_boxline.append(&equals_label);
 
-    let fancy_value_entry = Box::new(Orientation::Horizontal, 5);
+    let fancy_value_entry = Box::new(GtkOrientation::Horizontal, 5);
 
     fill_fancy_value_entry(
         &fancy_value_entry,
@@ -691,6 +698,7 @@ macro_rules! optional_widget_connector {
         );
     }};
 }
+
 fn create_entry() -> Entry {
     Entry::builder()
         .width_request(100)
@@ -749,19 +757,24 @@ fn fill_fancy_value_entry(
 
     match category {
         "monitor" => {
-            let (monitor_name, monitor) = parse_monitor(&value_entry.text());
+            let (monitor_selector, monitor) = parse_monitor(&value_entry.text());
 
-            let name_box = Box::new(Orientation::Horizontal, 5);
+            let name_box = Box::new(GtkOrientation::Horizontal, 5);
             name_box.append(&Label::new(Some(&t!("name"))));
-            let monitor_name_entry = create_entry();
-            monitor_name_entry.set_text(&monitor_name);
-            name_box.append(&monitor_name_entry);
+            let monitors = get_available_monitors(false);
+            let mut monitor_selector_list =
+                monitors.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
+            let all = t!("all");
+            monitor_selector_list.insert(0, &all);
+            let monitor_selector_string_list = StringList::new(&monitor_selector_list);
+            let monitor_selector_dropdown = create_dropdown(&monitor_selector_string_list);
+            name_box.append(&monitor_selector_dropdown);
             fancy_value_entry.append(&name_box);
 
-            let resolution_box = Box::new(Orientation::Horizontal, 5);
+            let resolution_box = Box::new(GtkOrientation::Horizontal, 5);
             resolution_box.append(&Label::new(Some(&t!("resolution/mode"))));
             let resolution_string_list = StringList::new(
-                &get_available_resolutions_for_monitor(&monitor_name)
+                &get_available_resolutions_for_monitor(&monitor_selector)
                     .iter()
                     .map(|s| s.as_str())
                     .collect::<Vec<&str>>(),
@@ -770,9 +783,9 @@ fn fill_fancy_value_entry(
             resolution_box.append(&monitor_resolution_dropdown);
             fancy_value_entry.append(&resolution_box);
 
-            let enabled_box = Box::new(Orientation::Vertical, 5);
+            let enabled_box = Box::new(GtkOrientation::Vertical, 5);
 
-            let position_box = Box::new(Orientation::Horizontal, 5);
+            let position_box = Box::new(GtkOrientation::Horizontal, 5);
             position_box.append(&Label::new(Some(&t!("position"))));
             let position_str_list = Position::get_list();
             let position_string_list =
@@ -791,7 +804,7 @@ fn fill_fancy_value_entry(
             position_box.append(&monitor_position_y_spin);
             enabled_box.append(&position_box);
 
-            let monitor_scale_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_scale_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_scale_box.append(&Label::new(Some(&t!("scale"))));
             let scale_string_list =
                 StringList::new(&Scale::get_fancy_list().each_ref().map(|s| s.as_str()));
@@ -803,15 +816,22 @@ fn fill_fancy_value_entry(
             monitor_scale_box.append(&monitor_scale_spin);
             enabled_box.append(&monitor_scale_box);
 
-            let monitor_mirror_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_mirror_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_mirror_box.append(&Label::new(Some(&t!("mirror"))));
             let monitor_mirror_onoff_switch = create_switch();
             monitor_mirror_box.append(&monitor_mirror_onoff_switch);
-            let monitor_mirror_entry = create_entry();
-            monitor_mirror_box.append(&monitor_mirror_entry);
+            let monitor_mirror_selector_string_list = StringList::new(
+                &get_available_monitors(true)
+                    .iter()
+                    .map(|s| s.as_str())
+                    .collect::<Vec<&str>>(),
+            );
+            let monitor_mirror_selector_dropdown =
+                create_dropdown(&monitor_mirror_selector_string_list);
+            monitor_mirror_box.append(&monitor_mirror_selector_dropdown);
             enabled_box.append(&monitor_mirror_box);
 
-            let monitor_bitdepth_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_bitdepth_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_bitdepth_box.append(&Label::new(Some(&t!("bitdepth"))));
             let monitor_bitdepth_onoff_switch = create_switch();
             monitor_bitdepth_box.append(&monitor_bitdepth_onoff_switch);
@@ -820,7 +840,7 @@ fn fill_fancy_value_entry(
             monitor_bitdepth_box.append(&monitor_bitdepth_spin);
             enabled_box.append(&monitor_bitdepth_box);
 
-            let monitor_cm_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_cm_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_cm_box.append(&Label::new(Some(&t!("color_management"))));
             let monitor_cm_onoff_switch = create_switch();
             monitor_cm_box.append(&monitor_cm_onoff_switch);
@@ -829,7 +849,7 @@ fn fill_fancy_value_entry(
             monitor_cm_box.append(&monitor_cm_dropdown);
             enabled_box.append(&monitor_cm_box);
 
-            let monitor_sdrbrightness_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_sdrbrightness_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_sdrbrightness_box.append(&Label::new(Some(&t!("sdr_brightness"))));
             let monitor_sdrbrightness_onoff_switch = create_switch();
             monitor_sdrbrightness_box.append(&monitor_sdrbrightness_onoff_switch);
@@ -838,7 +858,7 @@ fn fill_fancy_value_entry(
             monitor_sdrbrightness_box.append(&monitor_sdrbrightness_spin);
             enabled_box.append(&monitor_sdrbrightness_box);
 
-            let monitor_sdrsaturation_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_sdrsaturation_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_sdrsaturation_box.append(&Label::new(Some(&t!("sdr_saturation"))));
             let monitor_sdrsaturation_onoff_switch = create_switch();
             monitor_sdrsaturation_box.append(&monitor_sdrsaturation_onoff_switch);
@@ -847,7 +867,7 @@ fn fill_fancy_value_entry(
             monitor_sdrsaturation_box.append(&monitor_sdrsaturation_spin);
             enabled_box.append(&monitor_sdrsaturation_box);
 
-            let monitor_vrr_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_vrr_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_vrr_box.append(&Label::new(Some(&t!("vrr"))));
             let monitor_vrr_onoff_switch = create_switch();
             monitor_vrr_box.append(&monitor_vrr_onoff_switch);
@@ -861,7 +881,7 @@ fn fill_fancy_value_entry(
             monitor_vrr_box.append(&monitor_vrr_dropdown);
             enabled_box.append(&monitor_vrr_box);
 
-            let monitor_transform_box = Box::new(Orientation::Horizontal, 5);
+            let monitor_transform_box = Box::new(GtkOrientation::Horizontal, 5);
             monitor_transform_box.append(&Label::new(Some(&t!("transform"))));
             let monitor_transform_onoff_switch = create_switch();
             monitor_transform_box.append(&monitor_transform_onoff_switch);
@@ -881,7 +901,7 @@ fn fill_fancy_value_entry(
 
             fancy_value_entry.append(&enabled_box);
 
-            let monitor_addreserved_box = Box::new(Orientation::Vertical, 5);
+            let monitor_addreserved_box = Box::new(GtkOrientation::Vertical, 5);
 
             monitor_addreserved_box.append(&Label::new(Some(&t!("top"))));
             let monitor_addreserved_up_spin = create_spin_button(0.0, MAX_SAFE_INTEGER_F64, 1.0);
@@ -901,7 +921,8 @@ fn fill_fancy_value_entry(
 
             fancy_value_entry.append(&monitor_addreserved_box);
 
-            let monitor_name_entry_clone = monitor_name_entry.clone();
+            let monitor_selector_string_list_clone = monitor_selector_string_list.clone();
+            let monitor_selector_dropdown_clone = monitor_selector_dropdown.clone();
             let monitor_resolution_dropdown_clone = monitor_resolution_dropdown.clone();
             let monitor_position_dropdown_clone = monitor_position_dropdown.clone();
             let monitor_position_x_spin_clone = monitor_position_x_spin.clone();
@@ -909,7 +930,7 @@ fn fill_fancy_value_entry(
             let monitor_scale_dropdown_clone = monitor_scale_dropdown.clone();
             let monitor_scale_spin_clone = monitor_scale_spin.clone();
             let monitor_mirror_onoff_switch_clone = monitor_mirror_onoff_switch.clone();
-            let monitor_mirror_entry_clone = monitor_mirror_entry.clone();
+            let monitor_mirror_selector_dropdown_clone = monitor_mirror_selector_dropdown.clone();
             let monitor_bitdepth_onoff_switch_clone = monitor_bitdepth_onoff_switch.clone();
             let monitor_bitdepth_spin_clone = monitor_bitdepth_spin.clone();
             let monitor_cm_onoff_switch_clone = monitor_cm_onoff_switch.clone();
@@ -930,20 +951,59 @@ fn fill_fancy_value_entry(
             let monitor_addreserved_left_spin_clone = monitor_addreserved_left_spin.clone();
             let monitor_addreserved_right_spin_clone = monitor_addreserved_right_spin.clone();
 
-            let load_monitor_values = move |monitor_name: &str, monitor: &Monitor, skip: &str| {
-                if skip != "name" {
-                    monitor_name_entry_clone.set_text(monitor_name);
+            let load_monitor_values = move |monitor_selector: &MonitorSelector,
+                                            monitor: &Monitor,
+                                            skip: &str| {
+                if skip != "selector" {
+                    match monitor_selector {
+                        MonitorSelector::All => {
+                            monitor_selector_dropdown_clone.set_selected(0);
+                        }
+                        MonitorSelector::Name(name) => {
+                            let mut selected = false;
+                            for idx in 0..monitor_selector_string_list_clone.n_items() {
+                                if let Some(item) = monitor_selector_string_list_clone.item(idx) {
+                                    let item_str = item.property::<String>("string");
+                                    if &item_str == name {
+                                        monitor_selector_dropdown_clone.set_selected(idx);
+                                        selected = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if !selected {
+                                monitor_selector_dropdown_clone.set_selected(0);
+                            }
+                        }
+                        MonitorSelector::Description(desc) => {
+                            let mut selected = false;
+                            for idx in 0..monitor_selector_string_list_clone.n_items() {
+                                if let Some(item) = monitor_selector_string_list_clone.item(idx) {
+                                    let item_str = item.property::<String>("string");
+                                    if &item_str == desc {
+                                        monitor_selector_dropdown_clone.set_selected(idx);
+                                        selected = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if !selected {
+                                monitor_selector_dropdown_clone.set_selected(0);
+                            }
+                        }
+                    }
                 }
 
                 if skip != "resolution" {
                     let resolution_string_list = StringList::new(
-                        &get_available_resolutions_for_monitor(monitor_name)
+                        &get_available_resolutions_for_monitor(monitor_selector)
                             .iter()
                             .map(|s| s.as_str())
                             .collect::<Vec<&str>>(),
                     );
                     monitor_resolution_dropdown_clone.set_model(Some(&resolution_string_list));
                 }
+
                 match &monitor {
                     Monitor::Enabled(monitor_state) => {
                         if skip != "resolution" {
@@ -1013,12 +1073,23 @@ fn fill_fancy_value_entry(
                             match &monitor_state.mirror {
                                 Some(mirror) => {
                                     monitor_mirror_onoff_switch_clone.set_active(true);
-                                    monitor_mirror_entry_clone.set_text(mirror);
-                                    monitor_mirror_entry_clone.set_visible(true);
+                                    for idx in 0..monitor_mirror_selector_string_list.n_items() {
+                                        if let Some(item) =
+                                            monitor_mirror_selector_string_list.item(idx)
+                                        {
+                                            let item_str = item.property::<String>("string");
+                                            if &item_str == mirror {
+                                                monitor_mirror_selector_dropdown_clone
+                                                    .set_selected(idx);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    monitor_mirror_selector_dropdown_clone.set_visible(true);
                                 }
                                 None => {
                                     monitor_mirror_onoff_switch_clone.set_active(false);
-                                    monitor_mirror_entry_clone.set_visible(false);
+                                    monitor_mirror_selector_dropdown_clone.set_visible(false);
                                 }
                             }
                         }
@@ -1154,23 +1225,41 @@ fn fill_fancy_value_entry(
                 }
             };
 
-            load_monitor_values(monitor_name_entry.text().as_ref(), &monitor, "");
+            load_monitor_values(&monitor_selector, &monitor, "");
 
             let load_monitor_values_clone = load_monitor_values.clone();
+            let monitor_selector_string_list_clone = monitor_selector_string_list.clone();
 
             widget_connector!(
                 is_updating,
                 value_entry,
-                monitor_name_entry,
-                connect_changed,
-                entry,
-                entry.text().to_string(),
+                monitor_selector_dropdown,
+                connect_selected_notify,
+                dropdown,
+                dropdown.selected(),
                 parse_monitor,
-                |(_name, monitor), new_name: String| {
-                    load_monitor_values_clone(&new_name, &monitor, "name");
+                |(_selector, monitor), new_selected: u32| {
+                    let monitor_selector = match new_selected {
+                        0 => MonitorSelector::All,
+                        id => {
+                            let item = monitor_selector_string_list_clone.item(id);
+                            if let Some(obj) = item
+                                && let Some(string_obj) = obj.downcast_ref::<gtk::StringObject>()
+                            {
+                                let string = string_obj.string();
+                                let monitor_name = string.as_str();
+                                MonitorSelector::from_str(monitor_name).unwrap_or_default()
+                            } else {
+                                MonitorSelector::All
+                            }
+                        }
+                    };
+
+                    load_monitor_values_clone(&monitor_selector, &monitor, "selector");
+
                     match monitor {
                         Monitor::Enabled(monitor_state) => {
-                            format!("{}, {}", new_name, monitor_state)
+                            format!("{}, {}", monitor_selector, monitor_state)
                         }
                         Monitor::AddReserved(
                             monitor_addreserved_up,
@@ -1179,17 +1268,16 @@ fn fill_fancy_value_entry(
                             monitor_addreserved_right,
                         ) => format!(
                             "{}, addreserved, {}, {}, {}, {}",
-                            new_name,
+                            monitor_selector,
                             monitor_addreserved_up,
                             monitor_addreserved_down,
                             monitor_addreserved_left,
                             monitor_addreserved_right
                         ),
-                        Monitor::Disabled => format!("{}, disable", new_name),
+                        Monitor::Disabled => format!("{}, disable", monitor_selector),
                     }
                 }
             );
-
             let load_monitor_values_clone = load_monitor_values.clone();
             let monitor_position_dropdown_clone = monitor_position_dropdown.clone();
             let monitor_position_x_spin_clone = monitor_position_x_spin.clone();
@@ -1197,7 +1285,7 @@ fn fill_fancy_value_entry(
             let monitor_scale_dropdown_clone = monitor_scale_dropdown.clone();
             let monitor_scale_spin_clone = monitor_scale_spin.clone();
             let monitor_mirror_onoff_switch_clone = monitor_mirror_onoff_switch.clone();
-            let monitor_mirror_entry_clone = monitor_mirror_entry.clone();
+            let monitor_mirror_selector_dropdown_clone = monitor_mirror_selector_dropdown.clone();
             let monitor_bitdepth_onoff_switch_clone = monitor_bitdepth_onoff_switch.clone();
             let monitor_bitdepth_spin_clone = monitor_bitdepth_spin.clone();
             let monitor_cm_onoff_switch_clone = monitor_cm_onoff_switch.clone();
@@ -1228,7 +1316,7 @@ fn fill_fancy_value_entry(
                     .map(|item| item.property::<String>("string"))
                     .unwrap_or("preferred".to_string()),
                 parse_monitor,
-                |(name, _monitor): (String, _), new_resolution: String| {
+                |(name, _monitor): (MonitorSelector, _), new_resolution: String| {
                     let new_monitor_state = match new_resolution.as_str() {
                         "disable" => Monitor::Disabled,
                         "addreserved" => {
@@ -1269,7 +1357,17 @@ fn fill_fancy_value_entry(
                                 _ => Scale::Manual(monitor_scale_spin_clone.value() as f64),
                             };
                             let mirror = match monitor_mirror_onoff_switch_clone.is_active() {
-                                true => Some(monitor_mirror_entry_clone.text().to_string()),
+                                true => {
+                                    if let Some(selected_item) =
+                                        monitor_mirror_selector_dropdown_clone.selected_item()
+                                        && let Some(string_obj) =
+                                            selected_item.downcast_ref::<gtk::StringObject>()
+                                    {
+                                        Some(string_obj.string().to_string())
+                                    } else {
+                                        None
+                                    }
+                                }
                                 false => None,
                             };
                             let bitdepth = match monitor_bitdepth_onoff_switch_clone.is_active() {
@@ -1552,19 +1650,23 @@ fn fill_fancy_value_entry(
                 is_updating,
                 value_entry,
                 monitor_mirror_onoff_switch,
-                monitor_mirror_entry,
-                connect_changed,
-                entry,
-                entry.text().to_string(),
+                monitor_mirror_selector_dropdown,
+                connect_selected_notify,
+                dropdown,
+                dropdown.selected(),
                 parse_monitor,
-                |(name, monitor), mirror_onoff: bool, mirror_value: String| {
+                |(name, monitor), mirror_onoff: bool, _mirror_id: u32| {
+                    let mirror = if let Some(selected_item) = dropdown.selected_item()
+                        && let Some(string_obj) = selected_item.downcast_ref::<gtk::StringObject>()
+                    {
+                        Some(string_obj.string().to_string())
+                    } else {
+                        None
+                    };
+
                     match monitor {
                         Monitor::Enabled(mut monitor_state) => {
-                            monitor_state.mirror = if mirror_onoff {
-                                Some(mirror_value)
-                            } else {
-                                None
-                            };
+                            monitor_state.mirror = if mirror_onoff { mirror } else { None };
                             format!("{}, {}", name, monitor_state)
                         }
                         Monitor::AddReserved(up, down, left, right) => {
@@ -1576,10 +1678,17 @@ fn fill_fancy_value_entry(
                         Monitor::Disabled => format!("{}, disable", name),
                     }
                 },
-                |(name, monitor), mirror_entry: String| {
+                |(name, monitor), _mirror_id: u32| {
+                    let mirror = if let Some(selected_item) = dropdown.selected_item()
+                        && let Some(string_obj) = selected_item.downcast_ref::<gtk::StringObject>()
+                    {
+                        Some(string_obj.string().to_string())
+                    } else {
+                        None
+                    };
                     match monitor {
                         Monitor::Enabled(mut monitor_state) => {
-                            monitor_state.mirror = Some(mirror_entry);
+                            monitor_state.mirror = mirror;
                             format!("{}, {}", name, monitor_state)
                         }
                         Monitor::AddReserved(up, down, left, right) => {
@@ -1969,6 +2078,764 @@ fn fill_fancy_value_entry(
                 });
             }
         }
+        "workspace" => {
+            let workspace_selector_box = Box::new(GtkOrientation::Horizontal, 5);
+
+            let workspace_selector_type_box = Box::new(GtkOrientation::Horizontal, 5);
+            workspace_selector_type_box.append(&Label::new(Some(&t!("type"))));
+            let workspace_selector_type_string_list = StringList::new(
+                &WorkspaceType::get_fancy_list()
+                    .each_ref()
+                    .map(|s| s.as_str()),
+            );
+            let workspace_selector_type_dropdown =
+                create_dropdown(&workspace_selector_type_string_list);
+            workspace_selector_type_dropdown.set_selected(0);
+            workspace_selector_type_box.append(&workspace_selector_type_dropdown);
+            workspace_selector_box.append(&workspace_selector_type_box);
+
+            let workspace_selector_name_entry = create_entry();
+            workspace_selector_box.append(&workspace_selector_name_entry);
+
+            let workspace_selector_number_spin = create_spin_button(1.0, i32::MAX as f64, 1.0);
+            workspace_selector_number_spin.set_visible(false);
+            workspace_selector_box.append(&workspace_selector_number_spin);
+
+            let workspace_selector_selector_box = Box::new(GtkOrientation::Vertical, 5);
+            workspace_selector_selector_box.set_visible(false);
+
+            fill_workspace_selector_selector_box(
+                &workspace_selector_selector_box,
+                value_entry,
+                is_updating.clone(),
+            );
+            workspace_selector_box.append(&workspace_selector_selector_box);
+
+            fancy_value_entry.append(&workspace_selector_box);
+
+            let is_updating_clone = is_updating.clone();
+            let value_entry_clone = value_entry.clone();
+            let workspace_selector_name_entry_clone = workspace_selector_name_entry.clone();
+            let workspace_selector_number_spin_clone = workspace_selector_number_spin.clone();
+            let workspace_selector_selector_box_clone = workspace_selector_selector_box.clone();
+            workspace_selector_type_dropdown.connect_selected_notify(move |dropdown| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+
+                let value = value_entry_clone.text().to_string();
+                let mut workspace = parse_workspace(&value);
+                workspace.workspace_type = match dropdown.selected() {
+                    0 => {
+                        workspace_selector_name_entry_clone.set_visible(true);
+                        workspace_selector_number_spin_clone.set_visible(false);
+                        workspace_selector_selector_box_clone.set_visible(false);
+
+                        WorkspaceType::Named(workspace_selector_name_entry_clone.text().to_string())
+                    }
+                    1 => {
+                        workspace_selector_name_entry_clone.set_visible(true);
+                        workspace_selector_number_spin_clone.set_visible(false);
+                        workspace_selector_selector_box_clone.set_visible(false);
+
+                        WorkspaceType::Special(
+                            workspace_selector_name_entry_clone.text().to_string(),
+                        )
+                    }
+                    2 => {
+                        workspace_selector_name_entry_clone.set_visible(false);
+                        workspace_selector_number_spin_clone.set_visible(true);
+                        workspace_selector_selector_box_clone.set_visible(false);
+
+                        WorkspaceType::Numbered(workspace_selector_number_spin_clone.value() as u32)
+                    }
+                    3 => {
+                        workspace_selector_name_entry_clone.set_visible(false);
+                        workspace_selector_number_spin_clone.set_visible(false);
+                        workspace_selector_selector_box_clone.set_visible(true);
+
+                        WorkspaceType::Selector(Vec::new())
+                    }
+                    _ => unreachable!(),
+                };
+
+                value_entry_clone.set_text(&workspace.to_string());
+
+                is_updating_clone.set(false);
+            });
+
+            let workspace_selector_selector_box_clone = workspace_selector_selector_box.clone();
+            let is_updating_clone = is_updating.clone();
+            let workspace_selector_name_entry_clone = workspace_selector_name_entry.clone();
+            let workspace_selector_number_spin_clone = workspace_selector_number_spin.clone();
+            let workspace_selector_type_dropdown_clone = workspace_selector_type_dropdown.clone();
+            value_entry.connect_changed(move |entry| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+
+                let value = entry.text().to_string();
+                let workspace = parse_workspace(&value);
+                match workspace.workspace_type {
+                    WorkspaceType::Named(name) => {
+                        workspace_selector_name_entry_clone.set_visible(true);
+                        workspace_selector_number_spin_clone.set_visible(false);
+                        workspace_selector_selector_box_clone.set_visible(false);
+
+                        workspace_selector_name_entry_clone.set_text(&name);
+
+                        workspace_selector_type_dropdown_clone.set_selected(0);
+                    }
+                    WorkspaceType::Special(name) => {
+                        workspace_selector_name_entry_clone.set_visible(true);
+                        workspace_selector_number_spin_clone.set_visible(false);
+                        workspace_selector_selector_box_clone.set_visible(false);
+
+                        workspace_selector_name_entry_clone.set_text(&name);
+
+                        workspace_selector_type_dropdown_clone.set_selected(1);
+                    }
+                    WorkspaceType::Numbered(number) => {
+                        workspace_selector_name_entry_clone.set_visible(false);
+                        workspace_selector_number_spin_clone.set_visible(true);
+                        workspace_selector_selector_box_clone.set_visible(false);
+
+                        workspace_selector_number_spin_clone.set_value(number as f64);
+
+                        workspace_selector_type_dropdown_clone.set_selected(2);
+                    }
+                    WorkspaceType::Selector(_) => {
+                        workspace_selector_name_entry_clone.set_visible(false);
+                        workspace_selector_number_spin_clone.set_visible(false);
+                        workspace_selector_selector_box_clone.set_visible(true);
+
+                        fill_workspace_selector_selector_box(
+                            &workspace_selector_selector_box_clone,
+                            entry,
+                            is_updating_clone.clone(),
+                        );
+
+                        workspace_selector_type_dropdown_clone.set_selected(3);
+                    }
+                }
+                is_updating_clone.set(false);
+            });
+
+            let workspace_rules_box = Box::new(GtkOrientation::Vertical, 5);
+            workspace_rules_box.set_margin_top(10);
+            fancy_value_entry.append(&workspace_rules_box);
+
+            let workspace_rules_label = Label::new(Some(&t!("workspace_rules")));
+            workspace_rules_label.set_markup(&format!("<b>{}</b>", t!("workspace_rules")));
+            workspace_rules_label.set_halign(gtk::Align::Start);
+            workspace_rules_label.set_margin_bottom(5);
+            workspace_rules_box.append(&workspace_rules_label);
+
+            let separator = Separator::new(GtkOrientation::Horizontal);
+            separator.set_margin_bottom(10);
+            workspace_rules_box.append(&separator);
+
+            let monitor_box = Box::new(GtkOrientation::Horizontal, 5);
+            monitor_box.append(&Label::new(Some(&t!("monitor"))));
+            let monitor_onoff_switch = create_switch();
+            monitor_box.append(&monitor_onoff_switch);
+            let available_monitors = get_available_monitors(true);
+            let monitor_list = available_monitors
+                .iter()
+                .map(|s| s.as_str())
+                .collect::<Vec<&str>>();
+            let monitor_string_list = StringList::new(&monitor_list);
+            let monitor_dropdown = create_dropdown(&monitor_string_list);
+            monitor_dropdown.set_visible(false);
+            monitor_box.append(&monitor_dropdown);
+            workspace_rules_box.append(&monitor_box);
+
+            let default_box = Box::new(GtkOrientation::Horizontal, 5);
+            default_box.append(&Label::new(Some(&t!("default"))));
+            let default_onoff_switch = create_switch();
+            default_box.append(&default_onoff_switch);
+            let default_value_switch = create_switch();
+            default_value_switch.set_visible(false);
+            default_box.append(&default_value_switch);
+            workspace_rules_box.append(&default_box);
+
+            let gaps_in_box = Box::new(GtkOrientation::Horizontal, 5);
+            gaps_in_box.append(&Label::new(Some(&t!("general_category.gaps_in_label"))));
+            let gaps_in_onoff_switch = create_switch();
+            gaps_in_box.append(&gaps_in_onoff_switch);
+            let gaps_in_spin = create_spin_button(0.0, 200.0, 1.0);
+            gaps_in_spin.set_visible(false);
+            gaps_in_box.append(&gaps_in_spin);
+            workspace_rules_box.append(&gaps_in_box);
+
+            let gaps_out_box = Box::new(GtkOrientation::Horizontal, 5);
+            gaps_out_box.append(&Label::new(Some(&t!("general_category.gaps_out_label"))));
+            let gaps_out_onoff_switch = create_switch();
+            gaps_out_box.append(&gaps_out_onoff_switch);
+            let gaps_out_spin = create_spin_button(0.0, 200.0, 1.0);
+            gaps_out_spin.set_visible(false);
+            gaps_out_box.append(&gaps_out_spin);
+            workspace_rules_box.append(&gaps_out_box);
+
+            let border_size_box = Box::new(GtkOrientation::Horizontal, 5);
+            border_size_box.append(&Label::new(Some(&t!("general_category.border_size_label"))));
+            let border_size_onoff_switch = create_switch();
+            border_size_box.append(&border_size_onoff_switch);
+            let border_size_spin = create_spin_button(0.0, 20.0, 1.0);
+            border_size_spin.set_visible(false);
+            border_size_box.append(&border_size_spin);
+            workspace_rules_box.append(&border_size_box);
+
+            let border_box = Box::new(GtkOrientation::Horizontal, 5);
+            border_box.append(&Label::new(Some(&t!("border"))));
+            let border_onoff_switch = create_switch();
+            border_box.append(&border_onoff_switch);
+            let border_value_switch = create_switch();
+            border_value_switch.set_visible(false);
+            border_box.append(&border_value_switch);
+            workspace_rules_box.append(&border_box);
+
+            let shadow_box = Box::new(GtkOrientation::Horizontal, 5);
+            shadow_box.append(&Label::new(Some(&t!("shadow"))));
+            let shadow_onoff_switch = create_switch();
+            shadow_box.append(&shadow_onoff_switch);
+            let shadow_value_switch = create_switch();
+            shadow_value_switch.set_visible(false);
+            shadow_box.append(&shadow_value_switch);
+            workspace_rules_box.append(&shadow_box);
+
+            let rounding_box = Box::new(GtkOrientation::Horizontal, 5);
+            rounding_box.append(&Label::new(Some(&t!("rounding"))));
+            let rounding_onoff_switch = create_switch();
+            rounding_box.append(&rounding_onoff_switch);
+            let rounding_value_switch = create_switch();
+            rounding_value_switch.set_visible(false);
+            rounding_box.append(&rounding_value_switch);
+            workspace_rules_box.append(&rounding_box);
+
+            let decorate_box = Box::new(GtkOrientation::Horizontal, 5);
+            decorate_box.append(&Label::new(Some(&t!("decorate"))));
+            let decorate_onoff_switch = create_switch();
+            decorate_box.append(&decorate_onoff_switch);
+            let decorate_value_switch = create_switch();
+            decorate_value_switch.set_visible(false);
+            decorate_box.append(&decorate_value_switch);
+            workspace_rules_box.append(&decorate_box);
+
+            let persistent_box = Box::new(GtkOrientation::Horizontal, 5);
+            persistent_box.append(&Label::new(Some(&t!("persistent"))));
+            let persistent_onoff_switch = create_switch();
+            persistent_box.append(&persistent_onoff_switch);
+            let persistent_value_switch = create_switch();
+            persistent_value_switch.set_visible(false);
+            persistent_box.append(&persistent_value_switch);
+            workspace_rules_box.append(&persistent_box);
+
+            let on_created_empty_box = Box::new(GtkOrientation::Horizontal, 5);
+            on_created_empty_box.append(&Label::new(Some(&t!("on_created_empty"))));
+            let on_created_empty_onoff_switch = create_switch();
+            on_created_empty_box.append(&on_created_empty_onoff_switch);
+            let on_created_empty_entry = create_entry();
+            on_created_empty_entry.set_placeholder_text(Some(&t!("command_to_execute")));
+            on_created_empty_entry.set_visible(false);
+            on_created_empty_box.append(&on_created_empty_entry);
+            workspace_rules_box.append(&on_created_empty_box);
+
+            let default_name_box = Box::new(GtkOrientation::Horizontal, 5);
+            default_name_box.append(&Label::new(Some(&t!("default_name"))));
+            let default_name_onoff_switch = create_switch();
+            default_name_box.append(&default_name_onoff_switch);
+            let default_name_entry = create_entry();
+            default_name_entry.set_placeholder_text(Some(&t!("default_workspace_name")));
+            default_name_entry.set_visible(false);
+            default_name_box.append(&default_name_entry);
+            workspace_rules_box.append(&default_name_box);
+
+            let layoutopt_orientation_box = Box::new(GtkOrientation::Horizontal, 5);
+            layoutopt_orientation_box.append(&Label::new(Some(&t!("layoutopt_orientation"))));
+            let layoutopt_orientation_onoff_switch = create_switch();
+            layoutopt_orientation_box.append(&layoutopt_orientation_onoff_switch);
+            let orientation_string_list = StringList::new(&[
+                &t!("left"),
+                &t!("right"),
+                &t!("top"),
+                &t!("bottom"),
+                &t!("center"),
+            ]);
+            let layoutopt_orientation_dropdown = create_dropdown(&orientation_string_list);
+            layoutopt_orientation_dropdown.set_visible(false);
+            layoutopt_orientation_box.append(&layoutopt_orientation_dropdown);
+            workspace_rules_box.append(&layoutopt_orientation_box);
+
+            let is_updating = Rc::new(Cell::new(false));
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                monitor_onoff_switch,
+                monitor_dropdown,
+                connect_selected_notify,
+                dropdown,
+                dropdown
+                    .selected_item()
+                    .and_then(|item| item
+                        .downcast_ref::<StringObject>()
+                        .map(|obj| obj.string().to_string()))
+                    .unwrap_or_default(),
+                parse_workspace,
+                |mut workspace: Workspace, monitor_onoff: bool, monitor_value: String| {
+                    if monitor_onoff && !monitor_value.is_empty() {
+                        workspace.rules.monitor = Some(monitor_value);
+                    } else {
+                        workspace.rules.monitor = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, monitor_value: String| {
+                    if !monitor_value.is_empty() {
+                        workspace.rules.monitor = Some(monitor_value);
+                    }
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                default_onoff_switch,
+                default_value_switch,
+                connect_state_notify,
+                switch,
+                switch.is_active(),
+                parse_workspace,
+                |mut workspace: Workspace, default_onoff: bool, default_value: bool| {
+                    if default_onoff {
+                        workspace.rules.default = Some(default_value);
+                    } else {
+                        workspace.rules.default = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, default_value: bool| {
+                    workspace.rules.default = Some(default_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                gaps_in_onoff_switch,
+                gaps_in_spin,
+                connect_value_changed,
+                spin,
+                spin.value() as i32,
+                parse_workspace,
+                |mut workspace: Workspace, gaps_in_onoff: bool, gaps_in_value: i32| {
+                    if gaps_in_onoff {
+                        workspace.rules.gaps_in = Some(gaps_in_value);
+                    } else {
+                        workspace.rules.gaps_in = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, gaps_in_value: i32| {
+                    workspace.rules.gaps_in = Some(gaps_in_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                gaps_out_onoff_switch,
+                gaps_out_spin,
+                connect_value_changed,
+                spin,
+                spin.value() as i32,
+                parse_workspace,
+                |mut workspace: Workspace, gaps_out_onoff: bool, gaps_out_value: i32| {
+                    if gaps_out_onoff {
+                        workspace.rules.gaps_out = Some(gaps_out_value);
+                    } else {
+                        workspace.rules.gaps_out = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, gaps_out_value: i32| {
+                    workspace.rules.gaps_out = Some(gaps_out_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                border_size_onoff_switch,
+                border_size_spin,
+                connect_value_changed,
+                spin,
+                spin.value() as i32,
+                parse_workspace,
+                |mut workspace: Workspace, border_size_onoff: bool, border_size_value: i32| {
+                    if border_size_onoff {
+                        workspace.rules.border_size = Some(border_size_value);
+                    } else {
+                        workspace.rules.border_size = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, border_size_value: i32| {
+                    workspace.rules.border_size = Some(border_size_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                border_onoff_switch,
+                border_value_switch,
+                connect_state_notify,
+                switch,
+                switch.is_active(),
+                parse_workspace,
+                |mut workspace: Workspace, border_onoff: bool, border_value: bool| {
+                    if border_onoff {
+                        workspace.rules.border = Some(border_value);
+                    } else {
+                        workspace.rules.border = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, border_value: bool| {
+                    workspace.rules.border = Some(border_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                shadow_onoff_switch,
+                shadow_value_switch,
+                connect_state_notify,
+                switch,
+                switch.is_active(),
+                parse_workspace,
+                |mut workspace: Workspace, shadow_onoff: bool, shadow_value: bool| {
+                    if shadow_onoff {
+                        workspace.rules.shadow = Some(shadow_value);
+                    } else {
+                        workspace.rules.shadow = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, shadow_value: bool| {
+                    workspace.rules.shadow = Some(shadow_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                rounding_onoff_switch,
+                rounding_value_switch,
+                connect_state_notify,
+                switch,
+                switch.is_active(),
+                parse_workspace,
+                |mut workspace: Workspace, rounding_onoff: bool, rounding_value: bool| {
+                    if rounding_onoff {
+                        workspace.rules.rounding = Some(rounding_value);
+                    } else {
+                        workspace.rules.rounding = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, rounding_value: bool| {
+                    workspace.rules.rounding = Some(rounding_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                decorate_onoff_switch,
+                decorate_value_switch,
+                connect_state_notify,
+                switch,
+                switch.is_active(),
+                parse_workspace,
+                |mut workspace: Workspace, decorate_onoff: bool, decorate_value: bool| {
+                    if decorate_onoff {
+                        workspace.rules.decorate = Some(decorate_value);
+                    } else {
+                        workspace.rules.decorate = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, decorate_value: bool| {
+                    workspace.rules.decorate = Some(decorate_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                persistent_onoff_switch,
+                persistent_value_switch,
+                connect_state_notify,
+                switch,
+                switch.is_active(),
+                parse_workspace,
+                |mut workspace: Workspace, persistent_onoff: bool, persistent_value: bool| {
+                    if persistent_onoff {
+                        workspace.rules.persistent = Some(persistent_value);
+                    } else {
+                        workspace.rules.persistent = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, persistent_value: bool| {
+                    workspace.rules.persistent = Some(persistent_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                on_created_empty_onoff_switch,
+                on_created_empty_entry,
+                connect_changed,
+                entry,
+                entry.text().to_string(),
+                parse_workspace,
+                |mut workspace: Workspace,
+                 on_created_empty_onoff: bool,
+                 on_created_empty_value: String| {
+                    if on_created_empty_onoff && !on_created_empty_value.is_empty() {
+                        workspace.rules.on_created_empty = Some(on_created_empty_value);
+                    } else {
+                        workspace.rules.on_created_empty = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, on_created_empty_value: String| {
+                    if !on_created_empty_value.is_empty() {
+                        workspace.rules.on_created_empty = Some(on_created_empty_value);
+                    }
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                default_name_onoff_switch,
+                default_name_entry,
+                connect_changed,
+                entry,
+                entry.text().to_string(),
+                parse_workspace,
+                |mut workspace: Workspace, default_name_onoff: bool, default_name_value: String| {
+                    if default_name_onoff && !default_name_value.is_empty() {
+                        workspace.rules.default_name = Some(default_name_value);
+                    } else {
+                        workspace.rules.default_name = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, default_name_value: String| {
+                    if !default_name_value.is_empty() {
+                        workspace.rules.default_name = Some(default_name_value);
+                    }
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                layoutopt_orientation_onoff_switch,
+                layoutopt_orientation_dropdown,
+                connect_selected_notify,
+                dropdown,
+                match dropdown.selected() {
+                    0 => Orientation::Left,
+                    1 => Orientation::Right,
+                    2 => Orientation::Top,
+                    3 => Orientation::Bottom,
+                    _ => Orientation::Center,
+                },
+                parse_workspace,
+                |mut workspace: Workspace,
+                 layoutopt_orientation_onoff: bool,
+                 layoutopt_orientation_value: Orientation| {
+                    if layoutopt_orientation_onoff {
+                        workspace.rules.layoutopt_orientation = Some(layoutopt_orientation_value);
+                    } else {
+                        workspace.rules.layoutopt_orientation = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, layoutopt_orientation_value: Orientation| {
+                    workspace.rules.layoutopt_orientation = Some(layoutopt_orientation_value);
+                    workspace.to_string()
+                }
+            );
+
+            value_entry.connect_changed(move |entry| {
+                if is_updating.get() {
+                    return;
+                }
+                is_updating.set(true);
+
+                let workspace = parse_workspace(&entry.text());
+
+                if let Some(monitor) = &workspace.rules.monitor {
+                    monitor_onoff_switch.set_active(true);
+                    monitor_dropdown.set_visible(true);
+                    for idx in 0..monitor_string_list.n_items() {
+                        if let Some(item) = monitor_string_list.item(idx)
+                            && let Some(string_object) = item.downcast_ref::<StringObject>()
+                            && &string_object.string() == monitor
+                        {
+                            monitor_dropdown.set_selected(idx);
+                            break;
+                        }
+                    }
+                } else {
+                    monitor_onoff_switch.set_active(false);
+                    monitor_dropdown.set_visible(false);
+                }
+
+                if let Some(default) = workspace.rules.default {
+                    default_onoff_switch.set_active(true);
+                    default_value_switch.set_visible(true);
+                    default_value_switch.set_active(default);
+                } else {
+                    default_onoff_switch.set_active(false);
+                    default_value_switch.set_visible(false);
+                }
+
+                if let Some(gaps_in) = workspace.rules.gaps_in {
+                    gaps_in_onoff_switch.set_active(true);
+                    gaps_in_spin.set_visible(true);
+                    gaps_in_spin.set_value(gaps_in as f64);
+                } else {
+                    gaps_in_onoff_switch.set_active(false);
+                    gaps_in_spin.set_visible(false);
+                }
+
+                if let Some(gaps_out) = workspace.rules.gaps_out {
+                    gaps_out_onoff_switch.set_active(true);
+                    gaps_out_spin.set_visible(true);
+                    gaps_out_spin.set_value(gaps_out as f64);
+                } else {
+                    gaps_out_onoff_switch.set_active(false);
+                    gaps_out_spin.set_visible(false);
+                }
+
+                if let Some(border_size) = workspace.rules.border_size {
+                    border_size_onoff_switch.set_active(true);
+                    border_size_spin.set_visible(true);
+                    border_size_spin.set_value(border_size as f64);
+                } else {
+                    border_size_onoff_switch.set_active(false);
+                    border_size_spin.set_visible(false);
+                }
+
+                if let Some(border) = workspace.rules.border {
+                    border_onoff_switch.set_active(true);
+                    border_value_switch.set_visible(true);
+                    border_value_switch.set_active(border);
+                } else {
+                    border_onoff_switch.set_active(false);
+                    border_value_switch.set_visible(false);
+                }
+
+                if let Some(shadow) = workspace.rules.shadow {
+                    shadow_onoff_switch.set_active(true);
+                    shadow_value_switch.set_visible(true);
+                    shadow_value_switch.set_active(shadow);
+                } else {
+                    shadow_onoff_switch.set_active(false);
+                    shadow_value_switch.set_visible(false);
+                }
+
+                if let Some(rounding) = workspace.rules.rounding {
+                    rounding_onoff_switch.set_active(true);
+                    rounding_value_switch.set_visible(true);
+                    rounding_value_switch.set_active(rounding);
+                } else {
+                    rounding_onoff_switch.set_active(false);
+                    rounding_value_switch.set_visible(false);
+                }
+
+                if let Some(decorate) = workspace.rules.decorate {
+                    decorate_onoff_switch.set_active(true);
+                    decorate_value_switch.set_visible(true);
+                    decorate_value_switch.set_active(decorate);
+                } else {
+                    decorate_onoff_switch.set_active(false);
+                    decorate_value_switch.set_visible(false);
+                }
+
+                if let Some(persistent) = workspace.rules.persistent {
+                    persistent_onoff_switch.set_active(true);
+                    persistent_value_switch.set_visible(true);
+                    persistent_value_switch.set_active(persistent);
+                } else {
+                    persistent_onoff_switch.set_active(false);
+                    persistent_value_switch.set_visible(false);
+                }
+
+                if let Some(on_created_empty) = &workspace.rules.on_created_empty {
+                    on_created_empty_onoff_switch.set_active(true);
+                    on_created_empty_entry.set_visible(true);
+                    on_created_empty_entry.set_text(on_created_empty);
+                } else {
+                    on_created_empty_onoff_switch.set_active(false);
+                    on_created_empty_entry.set_visible(false);
+                }
+
+                if let Some(default_name) = &workspace.rules.default_name {
+                    default_name_onoff_switch.set_active(true);
+                    default_name_entry.set_visible(true);
+                    default_name_entry.set_text(default_name);
+                } else {
+                    default_name_onoff_switch.set_active(false);
+                    default_name_entry.set_visible(false);
+                }
+
+                if let Some(layoutopt_orientation) = &workspace.rules.layoutopt_orientation {
+                    layoutopt_orientation_onoff_switch.set_active(true);
+                    layoutopt_orientation_dropdown.set_visible(true);
+                    let index = match layoutopt_orientation {
+                        Orientation::Left => 0,
+                        Orientation::Right => 1,
+                        Orientation::Top => 2,
+                        Orientation::Bottom => 3,
+                        Orientation::Center => 4,
+                    };
+                    layoutopt_orientation_dropdown.set_selected(index);
+                } else {
+                    layoutopt_orientation_onoff_switch.set_active(false);
+                    layoutopt_orientation_dropdown.set_visible(false);
+                }
+
+                is_updating.set(false);
+            });
+
+            value_entry.set_text(&value_entry.text());
+        }
         "animation" => {
             if name == "bezier" {
                 let (bezier_name, bezier_x0, bezier_y0, bezier_x1, bezier_y1) =
@@ -2281,4 +3148,1015 @@ fn fill_fancy_value_entry(
         }
         _ => {}
     }
+}
+
+fn fill_workspace_selector_selector_box(
+    workspace_selector_selector_box: &Box,
+    value_entry: &Entry,
+    is_updating: Rc<Cell<bool>>,
+) {
+    while let Some(child) = workspace_selector_selector_box.first_child() {
+        workspace_selector_selector_box.remove(&child);
+    }
+
+    let value = value_entry.text().to_string();
+    let workspace = parse_workspace(&value);
+
+    if let WorkspaceType::Selector(selectors) = &workspace.workspace_type {
+        if selectors.is_empty() {
+            add_selector_box(
+                workspace_selector_selector_box,
+                value_entry,
+                0,
+                is_updating,
+                None,
+            );
+        } else {
+            for (i, selector) in selectors.iter().enumerate() {
+                add_selector_box(
+                    workspace_selector_selector_box,
+                    value_entry,
+                    i,
+                    is_updating.clone(),
+                    Some(selector.to_owned()),
+                );
+            }
+            add_selector_box(
+                workspace_selector_selector_box,
+                value_entry,
+                selectors.len(),
+                is_updating.clone(),
+                None,
+            );
+        }
+    } else {
+        add_selector_box(
+            workspace_selector_selector_box,
+            value_entry,
+            0,
+            is_updating,
+            None,
+        );
+    }
+}
+
+fn add_selector_box(
+    workspace_selector_selector_box: &Box,
+    value_entry: &Entry,
+    id: usize,
+    is_updating: Rc<Cell<bool>>,
+    selector: Option<WorkspaceSelector>,
+) {
+    let selector_box = Box::new(GtkOrientation::Vertical, 5);
+
+    let selector_type_box = Box::new(GtkOrientation::Horizontal, 5);
+    selector_type_box.append(&Label::new(Some(&t!("type"))));
+    let selector_type_string_list = StringList::new(
+        &WorkspaceSelector::get_fancy_list()
+            .each_ref()
+            .map(|s| s.as_str()),
+    );
+    let selector_type_dropdown = create_dropdown(&selector_type_string_list);
+    selector_type_box.append(&selector_type_dropdown);
+    selector_box.append(&selector_type_box);
+
+    let child_selector_box = Box::new(GtkOrientation::Vertical, 5);
+    selector_box.append(&child_selector_box);
+
+    let is_last = match selector {
+        Some(_) => Rc::new(Cell::new(false)),
+        None => Rc::new(Cell::new(true)),
+    };
+    let is_updating_clone = is_updating.clone();
+    let workspace_selector_selector_box_clone = workspace_selector_selector_box.clone();
+    let value_entry_clone = value_entry.clone();
+    let child_selector_box_clone = child_selector_box.clone();
+    selector_type_dropdown.connect_selected_notify(move |dropdown| {
+        while let Some(child) = child_selector_box_clone.first_child() {
+            child_selector_box_clone.remove(&child);
+        }
+
+        let selector_type = dropdown.selected();
+        let selector = match selector_type {
+            0 => {
+                if !is_last.get() {
+                    let value = value_entry_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::None;
+                            }
+                        }
+                    }
+                    let value = workspace.to_string();
+                    value_entry_clone.set_text(&value);
+
+                    fill_workspace_selector_selector_box(
+                        &workspace_selector_selector_box_clone,
+                        &value_entry_clone,
+                        is_updating_clone.clone(),
+                    );
+                }
+                WorkspaceSelector::None
+            }
+            1 => {
+                let mut range: Option<Range> = None;
+                let value = value_entry_clone.text().to_string();
+                let workspace = parse_workspace(&value);
+                if let WorkspaceType::Selector(selectors) = workspace.workspace_type {
+                    for (i, selector) in selectors.iter().enumerate() {
+                        if i == id
+                            && let WorkspaceSelector::Range(selector_range) = selector
+                        {
+                            range = Some(selector_range.to_owned());
+                        }
+                    }
+                }
+
+                let range_box = Box::new(GtkOrientation::Horizontal, 5);
+                let range_start_spin = create_spin_button(1.0, i32::MAX as f64, 1.0);
+                range_box.append(&range_start_spin);
+                let range_end_spin = create_spin_button(1.0, i32::MAX as f64, 1.0);
+                range_box.append(&range_end_spin);
+                child_selector_box_clone.append(&range_box);
+
+                if let Some(range) = range {
+                    range_start_spin.set_value(range.start as f64);
+                    range_end_spin.set_value(range.end as f64);
+                }
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let range_end_spin_clone = range_end_spin.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                range_start_spin.connect_value_changed(move |spin| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Range(Range {
+                                    start: spin.value() as u32,
+                                    end: range_end_spin_clone.value() as u32,
+                                });
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let range_start_spin_clone = range_start_spin.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                range_end_spin.connect_value_changed(move |spin| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Range(Range {
+                                    start: range_start_spin_clone.value() as u32,
+                                    end: spin.value() as u32,
+                                });
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                WorkspaceSelector::Range(Range {
+                    start: range_start_spin.value() as u32,
+                    end: range_end_spin.value() as u32,
+                })
+            }
+            2 => {
+                let mut is_special: Option<bool> = None;
+                let value = value_entry_clone.text().to_string();
+                let workspace = parse_workspace(&value);
+                if let WorkspaceType::Selector(selectors) = workspace.workspace_type {
+                    for (i, selector) in selectors.iter().enumerate() {
+                        if i == id
+                            && let WorkspaceSelector::Special(selector_is_special) = selector
+                        {
+                            is_special = Some(selector_is_special.to_owned());
+                        }
+                    }
+                }
+
+                let is_special_box = Box::new(GtkOrientation::Horizontal, 5);
+                let is_special_switch = create_switch();
+                is_special_box.append(&is_special_switch);
+                child_selector_box_clone.append(&is_special_box);
+
+                if let Some(is_special) = is_special {
+                    is_special_switch.set_active(is_special);
+                }
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                is_special_switch.connect_state_notify(move |switch| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Special(switch.state());
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                WorkspaceSelector::Special(is_special_switch.state())
+            }
+            3 => {
+                let mut named: Option<WorkspaceSelectorNamed> = None;
+                let value = value_entry_clone.text().to_string();
+                let workspace = parse_workspace(&value);
+                if let WorkspaceType::Selector(selectors) = workspace.workspace_type {
+                    for (i, selector) in selectors.iter().enumerate() {
+                        if i == id
+                            && let WorkspaceSelector::Named(selector_named) = selector
+                        {
+                            named = Some(selector_named.to_owned());
+                        }
+                    }
+                }
+
+                let named_box = Box::new(GtkOrientation::Horizontal, 5);
+                let named_type_string_list =
+                    StringList::new(&[&t!("is_named"), &t!("starts_with"), &t!("ends_with")]);
+                let named_type_dropdown = create_dropdown(&named_type_string_list);
+                named_box.append(&named_type_dropdown);
+                let named_is_named_switch = create_switch();
+                named_box.append(&named_is_named_switch);
+                let named_stats_or_ends_with_entry = create_entry();
+                named_box.append(&named_stats_or_ends_with_entry);
+                child_selector_box_clone.append(&named_box);
+
+                if let Some(named) = named {
+                    match named {
+                        WorkspaceSelectorNamed::IsNamed(is_named) => {
+                            named_type_dropdown.set_selected(0);
+                            named_stats_or_ends_with_entry.set_visible(false);
+                            named_is_named_switch.set_visible(true);
+
+                            named_is_named_switch.set_active(is_named);
+                        }
+                        WorkspaceSelectorNamed::Starts(prefix) => {
+                            named_type_dropdown.set_selected(1);
+                            named_stats_or_ends_with_entry.set_visible(true);
+                            named_is_named_switch.set_visible(false);
+
+                            named_stats_or_ends_with_entry.set_text(&prefix);
+                        }
+                        WorkspaceSelectorNamed::Ends(suffix) => {
+                            named_type_dropdown.set_selected(2);
+                            named_stats_or_ends_with_entry.set_visible(true);
+                            named_is_named_switch.set_visible(false);
+
+                            named_stats_or_ends_with_entry.set_text(&suffix);
+                        }
+                    }
+                } else {
+                    named_type_dropdown.set_selected(0);
+                    named_stats_or_ends_with_entry.set_visible(false);
+                    named_is_named_switch.set_visible(true);
+                }
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let named_is_named_switch_clone = named_is_named_switch.clone();
+                let named_stats_or_ends_with_entry_clone = named_stats_or_ends_with_entry.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                named_type_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Named(match dropdown.selected() {
+                                    0 => {
+                                        named_stats_or_ends_with_entry_clone.set_visible(false);
+                                        named_is_named_switch_clone.set_visible(true);
+
+                                        WorkspaceSelectorNamed::IsNamed(
+                                            named_is_named_switch_clone.state(),
+                                        )
+                                    }
+                                    1 => {
+                                        named_stats_or_ends_with_entry_clone.set_visible(true);
+                                        named_is_named_switch_clone.set_visible(false);
+
+                                        WorkspaceSelectorNamed::Starts(
+                                            named_stats_or_ends_with_entry_clone.text().to_string(),
+                                        )
+                                    }
+                                    2 => {
+                                        named_stats_or_ends_with_entry_clone.set_visible(true);
+                                        named_is_named_switch_clone.set_visible(false);
+
+                                        WorkspaceSelectorNamed::Ends(
+                                            named_stats_or_ends_with_entry_clone.text().to_string(),
+                                        )
+                                    }
+                                    _ => unreachable!(),
+                                });
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let named_type_dropdown_clone = named_type_dropdown.clone();
+                let named_stats_or_ends_with_entry_clone = named_stats_or_ends_with_entry.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                named_is_named_switch.connect_state_notify(move |switch| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Named(
+                                    match named_type_dropdown_clone.selected() {
+                                        0 => WorkspaceSelectorNamed::IsNamed(switch.state()),
+                                        1 => WorkspaceSelectorNamed::Starts(
+                                            named_stats_or_ends_with_entry_clone.text().to_string(),
+                                        ),
+                                        2 => WorkspaceSelectorNamed::Ends(
+                                            named_stats_or_ends_with_entry_clone.text().to_string(),
+                                        ),
+                                        _ => unreachable!(),
+                                    },
+                                );
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let named_type_dropdown_clone = named_type_dropdown.clone();
+                let named_is_named_switch_clone = named_is_named_switch.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                named_stats_or_ends_with_entry.connect_changed(move |entry| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Named(
+                                    match named_type_dropdown_clone.selected() {
+                                        0 => WorkspaceSelectorNamed::IsNamed(
+                                            named_is_named_switch_clone.state(),
+                                        ),
+                                        1 => {
+                                            WorkspaceSelectorNamed::Starts(entry.text().to_string())
+                                        }
+                                        2 => WorkspaceSelectorNamed::Ends(entry.text().to_string()),
+                                        _ => unreachable!(),
+                                    },
+                                );
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                WorkspaceSelector::Named(match named_type_dropdown.selected() {
+                    0 => WorkspaceSelectorNamed::IsNamed(named_is_named_switch.state()),
+                    1 => WorkspaceSelectorNamed::Starts(
+                        named_stats_or_ends_with_entry.text().to_string(),
+                    ),
+                    2 => WorkspaceSelectorNamed::Ends(
+                        named_stats_or_ends_with_entry.text().to_string(),
+                    ),
+                    _ => unreachable!(),
+                })
+            }
+            4 => {
+                let mut monitor: Option<MonitorSelector> = None;
+                let value = value_entry_clone.text().to_string();
+                let workspace = parse_workspace(&value);
+                if let WorkspaceType::Selector(selectors) = workspace.workspace_type {
+                    for (i, selector) in selectors.iter().enumerate() {
+                        if i == id
+                            && let WorkspaceSelector::Monitor(selector_monitor) = selector
+                        {
+                            monitor = Some(selector_monitor.to_owned());
+                        }
+                    }
+                }
+
+                let monitor_box = Box::new(GtkOrientation::Horizontal, 5);
+                let monitors = get_available_monitors(false);
+                let mut monitor_selector_list =
+                    monitors.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
+                let all = t!("all");
+                monitor_selector_list.insert(0, &all);
+                let monitor_selector_string_list = StringList::new(&monitor_selector_list);
+                let monitor_selector_dropdown = create_dropdown(&monitor_selector_string_list);
+                monitor_box.append(&monitor_selector_dropdown);
+                child_selector_box_clone.append(&monitor_box);
+
+                if let Some(monitor) = monitor {
+                    monitor_selector_dropdown.set_selected(match monitor {
+                        MonitorSelector::All => 0,
+                        MonitorSelector::Name(name) => {
+                            let index = monitor_selector_list
+                                .iter()
+                                .position(|s| *s == name)
+                                .expect("Monitor not found");
+                            index as u32
+                        }
+                        MonitorSelector::Description(description) => {
+                            let index = monitor_selector_list
+                                .iter()
+                                .position(|s| *s == format!("desc:{}", description))
+                                .expect("Monitor not found");
+                            index as u32
+                        }
+                    });
+                }
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                monitor_selector_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                *selector = WorkspaceSelector::Monitor({
+                                    match dropdown.selected() {
+                                        0 => MonitorSelector::All,
+                                        _id => {
+                                            let monitor = if let Some(selected_item) =
+                                                dropdown.selected_item()
+                                                && let Some(string_obj) = selected_item
+                                                    .downcast_ref::<gtk::StringObject>(
+                                                ) {
+                                                string_obj.string().to_string()
+                                            } else {
+                                                "".to_string()
+                                            };
+
+                                            if let Some(stripped) = monitor.strip_prefix("desc:") {
+                                                MonitorSelector::Description(stripped.to_string())
+                                            } else if monitor == "all" {
+                                                MonitorSelector::All
+                                            } else {
+                                                MonitorSelector::Name(monitor)
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                WorkspaceSelector::Monitor(match monitor_selector_dropdown.selected() {
+                    0 => MonitorSelector::All,
+                    _id => {
+                        let monitor = if let Some(selected_item) = dropdown.selected_item()
+                            && let Some(string_obj) =
+                                selected_item.downcast_ref::<gtk::StringObject>()
+                        {
+                            string_obj.string().to_string()
+                        } else {
+                            "".to_string()
+                        };
+
+                        if let Some(stripped) = monitor.strip_prefix("desc:") {
+                            MonitorSelector::Description(stripped.to_string())
+                        } else if monitor == "all" {
+                            MonitorSelector::All
+                        } else {
+                            MonitorSelector::Name(monitor)
+                        }
+                    }
+                })
+            }
+            5 => {
+                let mut window_count: Option<WorkspaceSelectorWindowCount> = None;
+                let value = value_entry_clone.text().to_string();
+                let workspace = parse_workspace(&value);
+                if let WorkspaceType::Selector(selectors) = workspace.workspace_type {
+                    for (i, selector) in selectors.iter().enumerate() {
+                        if i == id
+                            && let WorkspaceSelector::WindowCount(selector_window_count) = selector
+                        {
+                            window_count = Some(selector_window_count.to_owned());
+                        }
+                    }
+                }
+
+                let window_count_box = Box::new(GtkOrientation::Vertical, 5);
+                let window_count_type_box = Box::new(GtkOrientation::Horizontal, 5);
+                window_count_type_box.append(&Label::new(Some(&t!("type"))));
+
+                let window_count_type_string_list =
+                    StringList::new(&[&t!("single_count"), &t!("range_count")]);
+                let window_count_type_dropdown = create_dropdown(&window_count_type_string_list);
+                window_count_type_dropdown.set_selected(0);
+                window_count_type_box.append(&window_count_type_dropdown);
+                window_count_box.append(&window_count_type_box);
+
+                let flags_box = Box::new(GtkOrientation::Vertical, 5);
+                flags_box.append(&Label::new(Some(&t!("count_flags"))));
+
+                let flags_grid = Grid::new();
+                flags_grid.set_column_spacing(10);
+                flags_grid.set_row_spacing(5);
+
+                let flag_labels = [
+                    ("t", t!("tiled_windows")),
+                    ("f", t!("floating_windows")),
+                    ("g", t!("groups_instead_of_windows")),
+                    ("v", t!("visible_windows_only")),
+                    ("p", t!("pinned_windows_only")),
+                ];
+
+                let mut flag_switches = Vec::new();
+                for (i, (flag, label)) in flag_labels.iter().enumerate() {
+                    let label_widget = Label::new(Some(label));
+                    label_widget.set_halign(Align::Start);
+
+                    let switch = Switch::new();
+                    switch.set_halign(Align::End);
+                    switch.set_valign(Align::Center);
+
+                    flags_grid.attach(&label_widget, 0, i as i32, 1, 1);
+                    flags_grid.attach(&switch, 1, i as i32, 1, 1);
+
+                    flag_switches.push((flag.to_string(), switch));
+                }
+
+                flags_box.append(&flags_grid);
+                window_count_box.append(&flags_box);
+
+                let count_values_box = Box::new(GtkOrientation::Vertical, 5);
+
+                let single_count_box = Box::new(GtkOrientation::Horizontal, 5);
+                single_count_box.append(&Label::new(Some(&t!("window_count"))));
+                let single_count_spin = create_spin_button(1.0, 100.0, 1.0);
+                single_count_box.append(&single_count_spin);
+                count_values_box.append(&single_count_box);
+
+                let range_count_box = Box::new(GtkOrientation::Horizontal, 5);
+                range_count_box.append(&Label::new(Some(&t!("range_start"))));
+                let range_start_spin = create_spin_button(1.0, 100.0, 1.0);
+                range_count_box.append(&range_start_spin);
+                range_count_box.append(&Label::new(Some(&t!("range_end"))));
+                let range_end_spin = create_spin_button(1.0, 100.0, 1.0);
+                range_end_spin.set_value(10.0);
+                range_count_box.append(&range_end_spin);
+                range_count_box.set_visible(false);
+                count_values_box.append(&range_count_box);
+
+                window_count_box.append(&count_values_box);
+                child_selector_box_clone.append(&window_count_box);
+
+                if let Some(count) = window_count {
+                    match count {
+                        WorkspaceSelectorWindowCount::Range {
+                            flags,
+                            range_start,
+                            range_end,
+                        } => {
+                            window_count_type_dropdown.set_selected(1);
+                            range_count_box.set_visible(true);
+                            single_count_box.set_visible(false);
+                            range_start_spin.set_value(range_start as f64);
+                            range_end_spin.set_value(range_end as f64);
+
+                            for (flag, switch) in &mut flag_switches {
+                                if flag == "t" {
+                                    switch.set_active(flags.tiled);
+                                } else if flag == "f" {
+                                    switch.set_active(flags.floating);
+                                } else if flag == "g" {
+                                    switch.set_active(flags.groups);
+                                } else if flag == "v" {
+                                    switch.set_active(flags.visible);
+                                } else if flag == "p" {
+                                    switch.set_active(flags.pinned);
+                                }
+                            }
+                        }
+                        WorkspaceSelectorWindowCount::Single { flags, count } => {
+                            window_count_type_dropdown.set_selected(0);
+                            range_count_box.set_visible(false);
+                            single_count_box.set_visible(true);
+                            single_count_spin.set_value(count as f64);
+
+                            for (flag, switch) in &mut flag_switches {
+                                if flag == "t" {
+                                    switch.set_active(flags.tiled);
+                                } else if flag == "f" {
+                                    switch.set_active(flags.floating);
+                                } else if flag == "g" {
+                                    switch.set_active(flags.groups);
+                                } else if flag == "v" {
+                                    switch.set_active(flags.visible);
+                                } else if flag == "p" {
+                                    switch.set_active(flags.pinned);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                let flag_switches_clone = flag_switches.clone();
+                let single_count_spin_clone = single_count_spin.clone();
+                let range_start_spin_clone = range_start_spin.clone();
+                let range_end_spin_clone = range_end_spin.clone();
+                window_count_type_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+                    range_count_box.set_visible(dropdown.selected() == 1);
+                    single_count_box.set_visible(dropdown.selected() == 0);
+
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                let flags = {
+                                    let mut flags = WorkspaceSelectorWindowCountFlags {
+                                        tiled: false,
+                                        floating: false,
+                                        groups: false,
+                                        visible: false,
+                                        pinned: false,
+                                    };
+                                    for (flag, switch) in &flag_switches_clone {
+                                        if flag == "t" {
+                                            flags.tiled = switch.is_active();
+                                        } else if flag == "f" {
+                                            flags.floating = switch.is_active();
+                                        } else if flag == "g" {
+                                            flags.groups = switch.is_active();
+                                        } else if flag == "v" {
+                                            flags.visible = switch.is_active();
+                                        } else if flag == "p" {
+                                            flags.pinned = switch.is_active();
+                                        }
+                                    }
+                                    flags
+                                };
+
+                                *selector =
+                                    WorkspaceSelector::WindowCount(if dropdown.selected() == 1 {
+                                        WorkspaceSelectorWindowCount::Range {
+                                            flags,
+                                            range_start: range_start_spin_clone.value() as u32,
+                                            range_end: range_end_spin_clone.value() as u32,
+                                        }
+                                    } else {
+                                        WorkspaceSelectorWindowCount::Single {
+                                            flags,
+                                            count: single_count_spin_clone.value() as u32,
+                                        }
+                                    });
+                            }
+                        }
+                    }
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                for (flag, switch) in flag_switches.iter() {
+                    let flag_clone = flag.clone();
+                    let value_entry_clone_clone = value_entry_clone.clone();
+                    let is_updating_clone_clone = is_updating_clone.clone();
+
+                    switch.connect_state_notify(move |_switch| {
+                        if is_updating_clone_clone.get() {
+                            return;
+                        }
+                        is_updating_clone_clone.set(true);
+
+                        let value = value_entry_clone_clone.text().to_string();
+                        let mut workspace = parse_workspace(&value);
+                        if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                            for (i, selector) in selectors.iter_mut().enumerate() {
+                                if i == id
+                                    && let WorkspaceSelector::WindowCount(count) = selector
+                                {
+                                    match count {
+                                        WorkspaceSelectorWindowCount::Range { flags, .. } => {
+                                            match flag_clone.as_str() {
+                                                "t" => flags.tiled = _switch.is_active(),
+                                                "f" => flags.floating = _switch.is_active(),
+                                                "g" => flags.groups = _switch.is_active(),
+                                                "v" => flags.visible = _switch.is_active(),
+                                                "p" => flags.pinned = _switch.is_active(),
+                                                _ => {}
+                                            }
+                                        }
+                                        WorkspaceSelectorWindowCount::Single { flags, .. } => {
+                                            match flag_clone.as_str() {
+                                                "t" => flags.tiled = _switch.is_active(),
+                                                "f" => flags.floating = _switch.is_active(),
+                                                "g" => flags.groups = _switch.is_active(),
+                                                "v" => flags.visible = _switch.is_active(),
+                                                "p" => flags.pinned = _switch.is_active(),
+                                                _ => {}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        let value = workspace.to_string();
+                        value_entry_clone_clone.set_text(&value);
+                        is_updating_clone_clone.set(false);
+                    });
+                }
+
+                let spin_connectors = [
+                    (single_count_spin.clone(), "single"),
+                    (range_start_spin.clone(), "start"),
+                    (range_end_spin.clone(), "end"),
+                ];
+
+                for (spin, _spin_type) in spin_connectors {
+                    let value_entry_clone_clone = value_entry_clone.clone();
+                    let is_updating_clone_clone = is_updating_clone.clone();
+                    let window_count_type_dropdown_clone = window_count_type_dropdown.clone();
+                    let single_count_spin_clone = single_count_spin.clone();
+                    let range_start_spin_clone = range_start_spin.clone();
+                    let range_end_spin_clone = range_end_spin.clone();
+
+                    spin.connect_value_changed(move |_spin_button| {
+                        if is_updating_clone_clone.get() {
+                            return;
+                        }
+                        is_updating_clone_clone.set(true);
+
+                        let value = value_entry_clone_clone.text().to_string();
+                        let mut workspace = parse_workspace(&value);
+                        if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                            for (i, selector) in selectors.iter_mut().enumerate() {
+                                if i == id
+                                    && let WorkspaceSelector::WindowCount(count) = selector
+                                {
+                                    let flags = match count {
+                                        WorkspaceSelectorWindowCount::Range { flags, .. } => {
+                                            flags.clone()
+                                        }
+                                        WorkspaceSelectorWindowCount::Single { flags, .. } => {
+                                            flags.clone()
+                                        }
+                                    };
+
+                                    let new_count =
+                                        if window_count_type_dropdown_clone.selected() == 1 {
+                                            WorkspaceSelectorWindowCount::Range {
+                                                flags,
+                                                range_start: range_start_spin_clone.value() as u32,
+                                                range_end: range_end_spin_clone.value() as u32,
+                                            }
+                                        } else {
+                                            WorkspaceSelectorWindowCount::Single {
+                                                flags,
+                                                count: single_count_spin_clone.value() as u32,
+                                            }
+                                        };
+
+                                    *selector = WorkspaceSelector::WindowCount(new_count);
+                                }
+                            }
+                        }
+                        let value = workspace.to_string();
+                        value_entry_clone_clone.set_text(&value);
+                        is_updating_clone_clone.set(false);
+                    });
+                }
+
+                WorkspaceSelector::WindowCount(if window_count_type_dropdown.selected() == 1 {
+                    WorkspaceSelectorWindowCount::Range {
+                        flags: {
+                            let mut flags = WorkspaceSelectorWindowCountFlags {
+                                tiled: false,
+                                floating: false,
+                                groups: false,
+                                visible: false,
+                                pinned: false,
+                            };
+                            for (flag, switch) in &flag_switches {
+                                if flag == "t" {
+                                    flags.tiled = switch.is_active();
+                                } else if flag == "f" {
+                                    flags.floating = switch.is_active();
+                                } else if flag == "g" {
+                                    flags.groups = switch.is_active();
+                                } else if flag == "v" {
+                                    flags.visible = switch.is_active();
+                                } else if flag == "p" {
+                                    flags.pinned = switch.is_active();
+                                }
+                            }
+                            flags
+                        },
+                        range_start: range_start_spin.value() as u32,
+                        range_end: range_end_spin.value() as u32,
+                    }
+                } else {
+                    WorkspaceSelectorWindowCount::Single {
+                        flags: {
+                            let mut flags = WorkspaceSelectorWindowCountFlags {
+                                tiled: false,
+                                floating: false,
+                                groups: false,
+                                visible: false,
+                                pinned: false,
+                            };
+                            for (flag, switch) in &flag_switches {
+                                if flag == "t" {
+                                    flags.tiled = switch.is_active();
+                                } else if flag == "f" {
+                                    flags.floating = switch.is_active();
+                                } else if flag == "g" {
+                                    flags.groups = switch.is_active();
+                                } else if flag == "v" {
+                                    flags.visible = switch.is_active();
+                                } else if flag == "p" {
+                                    flags.pinned = switch.is_active();
+                                }
+                            }
+                            flags
+                        },
+                        count: single_count_spin.value() as u32,
+                    }
+                })
+            }
+            6 => {
+                let mut fullscreen_state: Option<i32> = None;
+                let value = value_entry_clone.text().to_string();
+                let workspace = parse_workspace(&value);
+                if let WorkspaceType::Selector(selectors) = workspace.workspace_type {
+                    for (i, selector) in selectors.iter().enumerate() {
+                        if i == id
+                            && let WorkspaceSelector::Fullscreen(selector_state) = selector
+                        {
+                            fullscreen_state = Some(selector_state.to_owned());
+                        }
+                    }
+                }
+                let fullscreen_box = Box::new(GtkOrientation::Horizontal, 5);
+                let fullscreen_type_string_list = StringList::new(&[
+                    &t!("no_fullscreen"),
+                    &t!("fullscreen"),
+                    &t!("maximized"),
+                    &t!("fullscreen_without_window_state"),
+                ]);
+                let fullscreen_type_dropdown = create_dropdown(&fullscreen_type_string_list);
+                fullscreen_type_dropdown.set_selected(0);
+                fullscreen_box.append(&fullscreen_type_dropdown);
+                child_selector_box_clone.append(&fullscreen_box);
+
+                if let Some(state) = fullscreen_state {
+                    let index = match state {
+                        -1 => 0,
+                        0 => 1,
+                        1 => 2,
+                        2 => 3,
+                        _ => unreachable!(),
+                    };
+                    fullscreen_type_dropdown.set_selected(index as u32);
+                }
+
+                let value_entry_clone_clone = value_entry_clone.clone();
+                let is_updating_clone_clone = is_updating_clone.clone();
+                fullscreen_type_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone_clone.get() {
+                        return;
+                    }
+                    is_updating_clone_clone.set(true);
+                    let value = value_entry_clone_clone.text().to_string();
+                    let mut workspace = parse_workspace(&value);
+                    if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                        for (i, selector) in selectors.iter_mut().enumerate() {
+                            if i == id {
+                                let state = match dropdown.selected() {
+                                    0 => -1,
+                                    1 => 0,
+                                    2 => 1,
+                                    3 => 2,
+                                    _ => unreachable!(),
+                                };
+                                *selector = WorkspaceSelector::Fullscreen(state);
+                            }
+                        }
+                    }
+                    let value = workspace.to_string();
+                    value_entry_clone_clone.set_text(&value);
+                    is_updating_clone_clone.set(false);
+                });
+
+                WorkspaceSelector::Fullscreen(match fullscreen_type_dropdown.selected() {
+                    0 => -1,
+                    1 => 0,
+                    2 => 1,
+                    3 => 2,
+                    _ => unreachable!(),
+                })
+            }
+            _ => unreachable!(),
+        };
+
+        if is_last.get() && !is_updating_clone.get() {
+            is_updating_clone.set(true);
+
+            let value = value_entry_clone.text().to_string();
+            let mut workspace = parse_workspace(&value);
+            if let WorkspaceType::Selector(selectors) = &mut workspace.workspace_type {
+                selectors.push(selector);
+            }
+
+            let value = workspace.to_string();
+            value_entry_clone.set_text(&value);
+
+            add_selector_box(
+                &workspace_selector_selector_box_clone,
+                &value_entry_clone,
+                id + 1,
+                is_updating_clone.clone(),
+                None,
+            );
+            is_last.set(false);
+            is_updating_clone.set(false);
+        }
+    });
+
+    if let Some(s) = selector {
+        selector_type_dropdown.set_selected(s.get_id() as u32);
+    }
+
+    workspace_selector_selector_box.append(&selector_box);
 }
