@@ -1,8 +1,9 @@
 use crate::utils::{
-    Cm, MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Monitor,
-    MonitorSelector, MonitorState, Orientation, Position, Range, Scale, Workspace,
-    WorkspaceSelector, WorkspaceSelectorNamed, WorkspaceSelectorWindowCount,
-    WorkspaceSelectorWindowCountFlags, WorkspaceType, after_second_comma, get_available_monitors,
+    Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, Cm,
+    MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Monitor, MonitorSelector,
+    MonitorState, Orientation, Position, Range, Scale, Side, Workspace, WorkspaceSelector,
+    WorkspaceSelectorNamed, WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags,
+    WorkspaceType, after_second_comma, get_available_monitors,
     get_available_resolutions_for_monitor, is_modifier, keycode_to_en_key, parse_animation,
     parse_bezier, parse_coordinates, parse_monitor, parse_workspace,
 };
@@ -518,6 +519,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                 }
             });
             let dropdown_clone = dropdown.clone();
+            name_entry.set_text("animation");
             name_entry.connect_changed(move |entry| {
                 let new_name = entry.text().to_string();
 
@@ -2838,27 +2840,21 @@ fn fill_fancy_value_entry(
         }
         "animation" => {
             if name == "bezier" {
-                let (bezier_name, bezier_x0, bezier_y0, bezier_x1, bezier_y1) =
-                    parse_bezier(&value_entry.text());
-
+                let bezier = parse_bezier(&value_entry.text());
                 let bezier_name_entry = create_entry();
-                bezier_name_entry.set_text(&bezier_name);
-
+                bezier_name_entry.set_text(&bezier.name);
                 let bezier_x0_spin = create_spin_button(0.0, 1.0, 0.01);
-                bezier_x0_spin.set_value(bezier_x0);
-                bezier_x0_spin.set_digits(2);
-
+                bezier_x0_spin.set_value(bezier.x0);
+                bezier_x0_spin.set_digits(3);
                 let bezier_y0_spin = create_spin_button(-10.0, 10.0, 0.01);
-                bezier_y0_spin.set_value(bezier_y0);
-                bezier_y0_spin.set_digits(2);
-
+                bezier_y0_spin.set_value(bezier.y0);
+                bezier_y0_spin.set_digits(3);
                 let bezier_x1_spin = create_spin_button(0.0, 1.0, 0.01);
-                bezier_x1_spin.set_value(bezier_x1);
-                bezier_x1_spin.set_digits(2);
-
+                bezier_x1_spin.set_value(bezier.x1);
+                bezier_x1_spin.set_digits(3);
                 let bezier_y1_spin = create_spin_button(-10.0, 10.0, 0.01);
-                bezier_y1_spin.set_value(bezier_y1);
-                bezier_y1_spin.set_digits(2);
+                bezier_y1_spin.set_value(bezier.y1);
+                bezier_y1_spin.set_digits(3);
 
                 widget_connector!(
                     is_updating,
@@ -2868,11 +2864,12 @@ fn fill_fancy_value_entry(
                     entry,
                     entry.text().to_string(),
                     parse_bezier,
-                    |(_name, x0, y0, x1, y1), new_name: String| {
-                        format!("{}, {:.2}, {:.2}, {:.2}, {:.2}", new_name, x0, y0, x1, y1)
+                    |bezier, new_name: String| HyprBezierCurve {
+                        name: new_name,
+                        ..bezier
                     }
+                    .to_string()
                 );
-
                 widget_connector!(
                     is_updating,
                     value_entry,
@@ -2881,11 +2878,11 @@ fn fill_fancy_value_entry(
                     spin,
                     spin.value(),
                     parse_bezier,
-                    |(name, _x0, y0, x1, y1), new_x0: f64| {
-                        format!("{}, {:.2}, {:.2}, {:.2}, {:.2}", name, new_x0, y0, x1, y1)
+                    |mut bezier: HyprBezierCurve, new_x0: f64| {
+                        bezier.x0 = new_x0;
+                        bezier.to_string()
                     }
                 );
-
                 widget_connector!(
                     is_updating,
                     value_entry,
@@ -2894,11 +2891,11 @@ fn fill_fancy_value_entry(
                     spin,
                     spin.value(),
                     parse_bezier,
-                    |(name, x0, _y0, x1, y1), new_y0: f64| {
-                        format!("{}, {:.2}, {:.2}, {:.2}, {:.2}", name, x0, new_y0, x1, y1)
+                    |mut bezier: HyprBezierCurve, new_y0: f64| {
+                        bezier.y0 = new_y0;
+                        bezier.to_string()
                     }
                 );
-
                 widget_connector!(
                     is_updating,
                     value_entry,
@@ -2907,11 +2904,11 @@ fn fill_fancy_value_entry(
                     spin,
                     spin.value(),
                     parse_bezier,
-                    |(name, x0, y0, _x1, y1), new_x1: f64| {
-                        format!("{}, {:.2}, {:.2}, {:.2}, {:.2}", name, x0, y0, new_x1, y1)
+                    |mut bezier: HyprBezierCurve, new_x1: f64| {
+                        bezier.x1 = new_x1;
+                        bezier.to_string()
                     }
                 );
-
                 widget_connector!(
                     is_updating,
                     value_entry,
@@ -2920,8 +2917,9 @@ fn fill_fancy_value_entry(
                     spin,
                     spin.value(),
                     parse_bezier,
-                    |(name, x0, y0, x1, _y1), new_y1: f64| {
-                        format!("{}, {:.2}, {:.2}, {:.2}, {:.2}", name, x0, y0, x1, new_y1)
+                    |mut bezier: HyprBezierCurve, new_y1: f64| {
+                        bezier.y1 = new_y1;
+                        bezier.to_string()
                     }
                 );
 
@@ -2932,21 +2930,17 @@ fn fill_fancy_value_entry(
                     let bezier_y0_spin_clone = bezier_y0_spin.clone();
                     let bezier_x1_spin_clone = bezier_x1_spin.clone();
                     let bezier_y1_spin_clone = bezier_y1_spin.clone();
-
                     value_entry.connect_changed(move |entry| {
                         if is_updating_clone.get() {
                             return;
                         }
-
                         is_updating_clone.set(true);
-                        let (name, x0, y0, x1, y1) = parse_bezier(&entry.text());
-
-                        bezier_name_entry_clone.set_text(&name);
-                        bezier_x0_spin_clone.set_value(x0);
-                        bezier_y0_spin_clone.set_value(y0);
-                        bezier_x1_spin_clone.set_value(x1);
-                        bezier_y1_spin_clone.set_value(y1);
-
+                        let bezier = parse_bezier(&entry.text());
+                        bezier_name_entry_clone.set_text(&bezier.name);
+                        bezier_x0_spin_clone.set_value(bezier.x0);
+                        bezier_y0_spin_clone.set_value(bezier.y0);
+                        bezier_x1_spin_clone.set_value(bezier.x1);
+                        bezier_y1_spin_clone.set_value(bezier.y1);
                         is_updating_clone.set(false);
                     });
                 }
@@ -2962,54 +2956,303 @@ fn fill_fancy_value_entry(
                 fancy_value_entry.append(&Label::new(Some("Y1")));
                 fancy_value_entry.append(&bezier_y1_spin);
             } else {
-                let (
-                    animation_name,
-                    animation_onoff,
-                    animation_speed,
-                    animation_curve,
-                    animation_style,
-                ) = parse_animation(&value_entry.text());
+                let animation = parse_animation(&value_entry.text());
 
-                let is_updating = Rc::new(Cell::new(false));
+                let animation_names = AnimationName::get_list();
+                let fancy_animation_names = AnimationName::get_fancy_list();
+                let animation_name_string_list = StringList::new(
+                    &fancy_animation_names
+                        .iter()
+                        .map(|s| s.as_str())
+                        .collect::<Vec<&str>>(),
+                );
+                let animation_name_dropdown = create_dropdown(&animation_name_string_list);
 
-                let animation_name_entry = create_entry();
-                animation_name_entry.set_text(&animation_name);
+                let current_name_idx = animation_names
+                    .iter()
+                    .position(|&name| name == animation.name.to_string())
+                    .unwrap_or(0);
+                animation_name_dropdown.set_selected(current_name_idx as u32);
 
                 let animation_onoff_switch = create_switch();
-                animation_onoff_switch.set_active(animation_onoff);
+                animation_onoff_switch.set_active(animation.enabled);
 
                 let animation_speed_spin = create_spin_button(0.1, 100.0, 0.1);
-                animation_speed_spin.set_value(animation_speed);
+                animation_speed_spin.set_value(animation.speed);
                 animation_speed_spin.set_digits(1);
 
                 let animation_curve_entry = create_entry();
-                animation_curve_entry.set_text(&animation_curve);
+                animation_curve_entry.set_text(&animation.curve);
 
-                let animation_style_entry = create_entry();
-                if let Some(style) = &animation_style {
-                    animation_style_entry.set_text(style);
+                let style_label = Label::new(Some(&t!("style")));
+                style_label.set_visible(false);
+
+                let animation_style_box = Box::new(GtkOrientation::Vertical, 5);
+                animation_style_box.set_visible(false);
+
+                let available_styles = animation
+                    .name
+                    .get_fancy_available_styles()
+                    .unwrap_or_else(|| vec![t!("none").to_string()]);
+                let style_string_list = StringList::new(
+                    &available_styles
+                        .iter()
+                        .map(|s| s.as_str())
+                        .collect::<Vec<&str>>(),
+                );
+                let animation_style_dropdown = create_dropdown(&style_string_list);
+
+                let current_style_idx =
+                    animation.name.get_id_of_style(animation.style).unwrap_or(0);
+                animation_style_dropdown.set_selected(current_style_idx as u32);
+
+                animation_style_box.append(&animation_style_dropdown);
+
+                let style_params_box = Box::new(GtkOrientation::Vertical, 5);
+                style_params_box.set_margin_start(20);
+
+                let side_label = Label::new(Some(&t!("side")));
+                side_label.set_halign(Align::Start);
+                let side_string_list =
+                    StringList::new(&Side::get_fancy_list().each_ref().map(|s| s.as_str()));
+                let side_dropdown = create_dropdown(&side_string_list);
+
+                let percent_label = Label::new(Some(&t!("percentage")));
+                percent_label.set_halign(Align::Start);
+                let percent_spin = create_spin_button(0.0, 100.0, 1.0);
+                percent_spin.set_digits(1);
+
+                let side_label_clone = side_label.clone();
+                let side_dropdown_clone = side_dropdown.clone();
+                let percent_label_clone = percent_label.clone();
+                let percent_spin_clone = percent_spin.clone();
+                let style_params_box_clone = style_params_box.clone();
+
+                let update_style_params_visibility = move |style: &AnimationStyle| {
+                    side_dropdown_clone.set_visible(false);
+                    percent_spin_clone.set_visible(false);
+
+                    match style {
+                        AnimationStyle::SlideSide(_) => {
+                            side_label_clone.set_visible(true);
+                            side_dropdown_clone.set_visible(true);
+                            style_params_box_clone.set_visible(true);
+
+                            percent_label_clone.set_visible(false);
+                            percent_spin_clone.set_visible(false);
+                        }
+                        AnimationStyle::PopinPercent(_)
+                        | AnimationStyle::SlidePercent(_)
+                        | AnimationStyle::SlideVertPercent(_)
+                        | AnimationStyle::SlideFadePercent(_)
+                        | AnimationStyle::SlideFadeVertPercent(_) => {
+                            percent_label_clone.set_visible(true);
+                            percent_spin_clone.set_visible(true);
+                            style_params_box_clone.set_visible(true);
+
+                            side_label_clone.set_visible(false);
+                            side_dropdown_clone.set_visible(false);
+                        }
+                        _ => {
+                            style_params_box_clone.set_visible(false);
+                        }
+                    }
+                };
+
+                update_style_params_visibility(&animation.style);
+
+                style_params_box.append(&side_label);
+                style_params_box.append(&side_dropdown);
+                style_params_box.append(&percent_label);
+                style_params_box.append(&percent_spin);
+
+                animation_style_box.append(&style_params_box);
+
+                let style_label_clone = style_label.clone();
+                let animation_style_box_clone = animation_style_box.clone();
+                let animation_style_dropdown_clone = animation_style_dropdown.clone();
+                let update_style_params_visibility_clone = update_style_params_visibility.clone();
+
+                let update_available_styles =
+                    move |animation_name: AnimationName| match animation_name
+                        .get_fancy_available_styles()
+                    {
+                        Some(styles) => {
+                            let style_string_list = StringList::new(
+                                &styles.iter().map(|s| s.as_str()).collect::<Vec<&str>>(),
+                            );
+
+                            animation_style_dropdown_clone.set_model(Some(&style_string_list));
+                            animation_style_dropdown_clone.set_selected(0);
+
+                            if let Some(styles) = animation_name.get_available_styles()
+                                && let Some(first_style) = styles.first()
+                            {
+                                update_style_params_visibility_clone(first_style);
+                            }
+                            style_label_clone.set_visible(true);
+                            animation_style_box_clone.set_visible(true);
+                        }
+                        None => {
+                            style_label_clone.set_visible(false);
+                            animation_style_box_clone.set_visible(false);
+                        }
+                    };
+
+                if let AnimationStyle::SlideSide(side) = animation.style {
+                    side_dropdown.set_selected(side.get_id() as u32);
                 }
 
-                widget_connector!(
-                    is_updating,
-                    value_entry,
-                    animation_name_entry,
-                    connect_changed,
-                    entry,
-                    entry.text().to_string(),
-                    parse_animation,
-                    |(_name, onoff, speed, curve, style), new_name: String| {
-                        match style {
-                            Some(s) => format!(
-                                "{}, {}, {:.1}, {}, {}",
-                                new_name, onoff as u8, speed, curve, s
-                            ),
-                            None => {
-                                format!("{}, {}, {:.1}, {}", new_name, onoff as u8, speed, curve)
+                match animation.style {
+                    AnimationStyle::PopinPercent(percent)
+                    | AnimationStyle::SlidePercent(percent)
+                    | AnimationStyle::SlideVertPercent(percent)
+                    | AnimationStyle::SlideFadePercent(percent)
+                    | AnimationStyle::SlideFadeVertPercent(percent) => {
+                        percent_spin.set_value(percent);
+                    }
+                    _ => {}
+                }
+
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                let update_style_params_visibility_clone = update_style_params_visibility.clone();
+                let update_available_styles_clone = update_available_styles.clone();
+
+                animation_name_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+
+                    let selected_idx = dropdown.selected() as usize;
+                    if selected_idx < animation_names.len() {
+                        let selected_name = &animation_names[selected_idx];
+                        let animation_name =
+                            AnimationName::from_str(selected_name).unwrap_or_default();
+
+                        update_available_styles_clone(animation_name);
+
+                        let current_animation = parse_animation(&value_entry_clone.text());
+                        let mut new_animation = current_animation;
+                        new_animation.name = animation_name;
+
+                        if let Some(styles) = new_animation.name.get_available_styles()
+                            && let Some(first_style) = styles.first()
+                        {
+                            new_animation.style = *first_style;
+                            update_style_params_visibility_clone(&new_animation.style);
+                        }
+
+                        value_entry_clone.set_text(&new_animation.to_string());
+                    }
+
+                    is_updating_clone.set(false);
+                });
+
+                let animation_name_dropdown_clone = animation_name_dropdown.clone();
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                let side_dropdown_clone = side_dropdown.clone();
+                let percent_spin_clone = percent_spin.clone();
+                let update_style_params_visibility_clone = update_style_params_visibility.clone();
+
+                animation_style_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+
+                    let current_animation = parse_animation(&value_entry_clone.text());
+                    let mut new_animation = current_animation;
+
+                    let selected_name_idx = animation_name_dropdown_clone.selected() as usize;
+                    if selected_name_idx < animation_names.len() {
+                        let selected_name = &animation_names[selected_name_idx];
+                        let animation_name =
+                            AnimationName::from_str(selected_name).unwrap_or_default();
+                        new_animation.name = animation_name;
+
+                        if let Some(styles) = new_animation.name.get_available_styles() {
+                            let selected_style_idx = dropdown.selected() as usize;
+                            if selected_style_idx < styles.len() {
+                                new_animation.style = styles[selected_style_idx];
+                                update_style_params_visibility_clone(&new_animation.style);
+
+                                match &mut new_animation.style {
+                                    AnimationStyle::SlideSide(side) => {
+                                        side_dropdown_clone.set_selected(side.get_id() as u32);
+                                    }
+                                    AnimationStyle::PopinPercent(percent)
+                                    | AnimationStyle::SlidePercent(percent)
+                                    | AnimationStyle::SlideVertPercent(percent)
+                                    | AnimationStyle::SlideFadePercent(percent)
+                                    | AnimationStyle::SlideFadeVertPercent(percent) => {
+                                        percent_spin_clone.set_value(*percent);
+                                    }
+                                    _ => {}
+                                }
                             }
                         }
                     }
-                );
+
+                    value_entry_clone.set_text(&new_animation.to_string());
+                    is_updating_clone.set(false);
+                });
+
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                let update_style_params_visibility_clone = update_style_params_visibility.clone();
+
+                side_dropdown.connect_selected_notify(move |dropdown| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+
+                    let current_animation = parse_animation(&value_entry_clone.text());
+                    let mut new_animation = current_animation;
+
+                    if let AnimationStyle::SlideSide(_) = new_animation.style {
+                        let selected_side = Side::get_list()[dropdown.selected() as usize];
+                        new_animation.style =
+                            AnimationStyle::SlideSide(Side::from_str(selected_side).unwrap());
+                        update_style_params_visibility_clone(&new_animation.style);
+                        value_entry_clone.set_text(&new_animation.to_string());
+                    }
+
+                    is_updating_clone.set(false);
+                });
+
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                let update_style_params_visibility_clone = update_style_params_visibility.clone();
+
+                percent_spin.connect_value_changed(move |spin| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+
+                    let current_animation = parse_animation(&value_entry_clone.text());
+                    let mut new_animation = current_animation;
+                    let new_percent = spin.value();
+
+                    match &mut new_animation.style {
+                        AnimationStyle::PopinPercent(p)
+                        | AnimationStyle::SlidePercent(p)
+                        | AnimationStyle::SlideVertPercent(p)
+                        | AnimationStyle::SlideFadePercent(p)
+                        | AnimationStyle::SlideFadeVertPercent(p) => {
+                            *p = new_percent;
+                            update_style_params_visibility_clone(&new_animation.style);
+                            value_entry_clone.set_text(&new_animation.to_string());
+                        }
+                        _ => {}
+                    }
+
+                    is_updating_clone.set(false);
+                });
 
                 widget_connector!(
                     is_updating,
@@ -3020,18 +3263,9 @@ fn fill_fancy_value_entry(
                     state,
                     state,
                     parse_animation,
-                    |(name, _onoff, speed, curve, style), new_onoff: bool| {
-                        match style {
-                            Some(s) => {
-                                format!(
-                                    "{}, {}, {:.1}, {}, {}",
-                                    name, new_onoff as u8, speed, curve, s
-                                )
-                            }
-                            None => {
-                                format!("{}, {}, {:.1}, {}", name, new_onoff as u8, speed, curve)
-                            }
-                        }
+                    |mut animation: Animation, new_enabled: bool| {
+                        animation.enabled = new_enabled;
+                        animation.to_string()
                     }
                 );
 
@@ -3043,16 +3277,9 @@ fn fill_fancy_value_entry(
                     spin,
                     spin.value(),
                     parse_animation,
-                    |(name, onoff, _speed, curve, style), new_speed: f64| {
-                        match style {
-                            Some(s) => format!(
-                                "{}, {}, {:.1}, {}, {}",
-                                name, onoff as u8, new_speed, curve, s
-                            ),
-                            None => {
-                                format!("{}, {}, {:.1}, {}", name, onoff as u8, new_speed, curve)
-                            }
-                        }
+                    |mut animation: Animation, new_speed: f64| {
+                        animation.speed = new_speed;
+                        animation.to_string()
                     }
                 );
 
@@ -3064,83 +3291,79 @@ fn fill_fancy_value_entry(
                     entry,
                     entry.text().to_string(),
                     parse_animation,
-                    |(name, onoff, speed, _curve, style), new_curve: String| {
-                        match style {
-                            Some(s) => format!(
-                                "{}, {}, {:.1}, {}, {}",
-                                name, onoff as u8, speed, new_curve, s
-                            ),
-                            None => {
-                                format!("{}, {}, {:.1}, {}", name, onoff as u8, speed, new_curve)
-                            }
-                        }
+                    |mut animation: Animation, new_curve: String| {
+                        animation.curve = new_curve;
+                        animation.to_string()
                     }
                 );
 
-                widget_connector!(
-                    is_updating,
-                    value_entry,
-                    animation_style_entry,
-                    connect_changed,
-                    entry,
-                    entry.text().to_string(),
-                    parse_animation,
-                    |(name, onoff, speed, curve, _style), new_style: String| {
-                        if new_style.is_empty() {
-                            format!("{}, {}, {:.1}, {}", name, onoff as u8, speed, curve)
-                        } else {
-                            format!(
-                                "{}, {}, {:.1}, {}, {}",
-                                name, onoff as u8, speed, curve, new_style
-                            )
-                        }
+                let is_updating_clone = is_updating.clone();
+                let animation_name_dropdown_clone = animation_name_dropdown.clone();
+                let animation_onoff_switch_clone = animation_onoff_switch.clone();
+                let animation_speed_spin_clone = animation_speed_spin.clone();
+                let animation_curve_entry_clone = animation_curve_entry.clone();
+                let animation_style_dropdown_clone = animation_style_dropdown.clone();
+                let side_dropdown_clone = side_dropdown.clone();
+                let percent_spin_clone = percent_spin.clone();
+                let update_style_params_visibility_clone = update_style_params_visibility.clone();
+                let update_available_styles_clone = update_available_styles.clone();
+
+                value_entry.connect_changed(move |entry| {
+                    if is_updating_clone.get() {
+                        return;
                     }
-                );
+                    is_updating_clone.set(true);
 
-                {
-                    let is_updating_clone = is_updating.clone();
-                    let animation_name_entry_clone = animation_name_entry.clone();
-                    let animation_onoff_switch_clone = animation_onoff_switch.clone();
-                    let animation_speed_spin_clone = animation_speed_spin.clone();
-                    let animation_curve_entry_clone = animation_curve_entry.clone();
-                    let animation_style_entry_clone = animation_style_entry.clone();
+                    let animation = parse_animation(&entry.text());
 
-                    value_entry.connect_changed(move |entry| {
-                        if is_updating_clone.get() {
-                            return;
+                    let name_idx = animation_names
+                        .iter()
+                        .position(|&name| name == animation.name.to_string())
+                        .unwrap_or(0);
+                    animation_name_dropdown_clone.set_selected(name_idx as u32);
+                    animation_onoff_switch_clone.set_active(animation.enabled);
+                    animation_speed_spin_clone.set_value(animation.speed);
+                    animation_curve_entry_clone.set_text(&animation.curve);
+
+                    let style_idx = animation.name.get_id_of_style(animation.style).unwrap_or(0);
+                    animation_style_dropdown_clone.set_selected(style_idx as u32);
+
+                    update_style_params_visibility_clone(&animation.style);
+
+                    if let AnimationStyle::SlideSide(side) = animation.style {
+                        side_dropdown_clone.set_selected(side.get_id() as u32);
+                    }
+
+                    match animation.style {
+                        AnimationStyle::PopinPercent(percent)
+                        | AnimationStyle::SlidePercent(percent)
+                        | AnimationStyle::SlideVertPercent(percent)
+                        | AnimationStyle::SlideFadePercent(percent)
+                        | AnimationStyle::SlideFadeVertPercent(percent) => {
+                            percent_spin_clone.set_value(percent);
                         }
+                        _ => {}
+                    }
 
-                        is_updating_clone.set(true);
-                        let (name, onoff, speed, curve, style) = parse_animation(&entry.text());
+                    update_available_styles_clone(animation.name);
 
-                        animation_name_entry_clone.set_text(&name);
-                        animation_onoff_switch_clone.set_active(onoff);
-                        animation_speed_spin_clone.set_value(speed);
-                        animation_curve_entry_clone.set_text(&curve);
-
-                        match style {
-                            Some(s) => {
-                                animation_style_entry_clone.set_text(&s);
-                            }
-                            None => {
-                                animation_style_entry_clone.set_text("");
-                            }
-                        }
-
-                        is_updating_clone.set(false);
-                    });
-                }
+                    is_updating_clone.set(false);
+                });
 
                 fancy_value_entry.append(&Label::new(Some(&t!("name"))));
-                fancy_value_entry.append(&animation_name_entry);
+                fancy_value_entry.append(&animation_name_dropdown);
+
                 fancy_value_entry.append(&Label::new(Some(&t!("onoff"))));
                 fancy_value_entry.append(&animation_onoff_switch);
+
                 fancy_value_entry.append(&Label::new(Some(&t!("speed"))));
                 fancy_value_entry.append(&animation_speed_spin);
+
                 fancy_value_entry.append(&Label::new(Some(&t!("curve"))));
                 fancy_value_entry.append(&animation_curve_entry);
-                fancy_value_entry.append(&Label::new(Some(&t!("style"))));
-                fancy_value_entry.append(&animation_style_entry);
+
+                fancy_value_entry.append(&style_label);
+                fancy_value_entry.append(&animation_style_box);
             }
         }
         "bind" => {

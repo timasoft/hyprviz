@@ -921,49 +921,6 @@ pub fn is_modifier(key: &str) -> bool {
     )
 }
 
-pub fn parse_bezier(input: &str) -> (String, f64, f64, f64, f64) {
-    match parse_coordinates(input) {
-        (name, Ok((x0, y0, x1, y1))) => (name, x0, y0, x1, y1),
-        (name, Err(_)) => (name, 0.333, 0.333, 0.667, 0.667),
-    }
-}
-
-pub fn parse_animation(input: &str) -> (String, bool, f64, String, Option<String>) {
-    let values = input
-        .split(',')
-        .map(|s| s.trim().to_string())
-        .collect::<Vec<_>>();
-    let animation_name = values.first().unwrap_or(&"global".to_string()).to_owned();
-    let animation_onoff = values
-        .get(1)
-        .unwrap_or(&"0".to_string())
-        .parse::<u8>()
-        .unwrap_or(0)
-        != 0;
-    let animation_speed = values
-        .get(2)
-        .unwrap_or(&"10".to_string())
-        .parse::<f64>()
-        .unwrap_or(10.0);
-    let animation_curve = values.get(3).unwrap_or(&"default".to_string()).to_owned();
-    match values.get(4) {
-        Some(s) => (
-            animation_name,
-            animation_onoff,
-            animation_speed,
-            animation_curve,
-            Some(s.to_owned()),
-        ),
-        None => (
-            animation_name,
-            animation_onoff,
-            animation_speed,
-            animation_curve,
-            None,
-        ),
-    }
-}
-
 #[derive(Default, Debug, Clone)]
 pub enum MonitorSelector {
     #[default]
@@ -1492,7 +1449,7 @@ pub fn get_available_resolutions_for_monitor(monitor_selector: &MonitorSelector)
                     }
                     MonitorSelector::All => {
                         target_monitor = None;
-                    } // _ => todo!(),
+                    }
                 }
             }
             if let Some(monitor) = target_monitor
@@ -2104,6 +2061,637 @@ fn parse_workspace_rule(input: &str, rules: &mut WorkspaceRules) {
         }
         _ => {}
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum AnimationName {
+    #[default]
+    Global,
+    Windows,
+    WindowsIn,
+    WindowsOut,
+    WindowsMove,
+    Layers,
+    LayersIn,
+    LayersOut,
+    Fade,
+    FadeIn,
+    FadeOut,
+    FadeSwitch,
+    FadeShadow,
+    FadeDim,
+    FadeLayers,
+    FadeLayersIn,
+    FadeLayersOut,
+    FadePopups,
+    FadePopupsIn,
+    FadePopupsOut,
+    FadeDpms,
+    Border,
+    BorderAngle,
+    Workspaces,
+    WorkspacesIn,
+    WorkspacesOut,
+    SpecialWorkspace,
+    SpecialWorkspaceIn,
+    SpecialWorkspaceOut,
+    ZoomFactor,
+    MonitorAdded,
+}
+
+impl FromStr for AnimationName {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "global" => Ok(AnimationName::Global),
+            "windows" => Ok(AnimationName::Windows),
+            "windowsIn" => Ok(AnimationName::WindowsIn),
+            "windowsOut" => Ok(AnimationName::WindowsOut),
+            "windowsMove" => Ok(AnimationName::WindowsMove),
+            "layers" => Ok(AnimationName::Layers),
+            "layersIn" => Ok(AnimationName::LayersIn),
+            "layersOut" => Ok(AnimationName::LayersOut),
+            "fade" => Ok(AnimationName::Fade),
+            "fadeIn" => Ok(AnimationName::FadeIn),
+            "fadeOut" => Ok(AnimationName::FadeOut),
+            "fadeSwitch" => Ok(AnimationName::FadeSwitch),
+            "fadeShadow" => Ok(AnimationName::FadeShadow),
+            "fadeDim" => Ok(AnimationName::FadeDim),
+            "fadeLayers" => Ok(AnimationName::FadeLayers),
+            "fadeLayersIn" => Ok(AnimationName::FadeLayersIn),
+            "fadeLayersOut" => Ok(AnimationName::FadeLayersOut),
+            "fadePopups" => Ok(AnimationName::FadePopups),
+            "fadePopupsIn" => Ok(AnimationName::FadePopupsIn),
+            "fadePopupsOut" => Ok(AnimationName::FadePopupsOut),
+            "fadeDpms" => Ok(AnimationName::FadeDpms),
+            "border" => Ok(AnimationName::Border),
+            "borderangle" => Ok(AnimationName::BorderAngle),
+            "workspaces" => Ok(AnimationName::Workspaces),
+            "workspacesIn" => Ok(AnimationName::WorkspacesIn),
+            "workspacesOut" => Ok(AnimationName::WorkspacesOut),
+            "specialWorkspace" => Ok(AnimationName::SpecialWorkspace),
+            "specialWorkspaceIn" => Ok(AnimationName::SpecialWorkspaceIn),
+            "specialWorkspaceOut" => Ok(AnimationName::SpecialWorkspaceOut),
+            "zoomFactor" => Ok(AnimationName::ZoomFactor),
+            "monitorAdded" => Ok(AnimationName::MonitorAdded),
+            _ => Ok(AnimationName::Global),
+        }
+    }
+}
+
+impl Display for AnimationName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnimationName::Global => write!(f, "global"),
+            AnimationName::Windows => write!(f, "windows"),
+            AnimationName::WindowsIn => write!(f, "windowsIn"),
+            AnimationName::WindowsOut => write!(f, "windowsOut"),
+            AnimationName::WindowsMove => write!(f, "windowsMove"),
+            AnimationName::Layers => write!(f, "layers"),
+            AnimationName::LayersIn => write!(f, "layersIn"),
+            AnimationName::LayersOut => write!(f, "layersOut"),
+            AnimationName::Fade => write!(f, "fade"),
+            AnimationName::FadeIn => write!(f, "fadeIn"),
+            AnimationName::FadeOut => write!(f, "fadeOut"),
+            AnimationName::FadeSwitch => write!(f, "fadeSwitch"),
+            AnimationName::FadeShadow => write!(f, "fadeShadow"),
+            AnimationName::FadeDim => write!(f, "fadeDim"),
+            AnimationName::FadeLayers => write!(f, "fadeLayers"),
+            AnimationName::FadeLayersIn => write!(f, "fadeLayersIn"),
+            AnimationName::FadeLayersOut => write!(f, "fadeLayersOut"),
+            AnimationName::FadePopups => write!(f, "fadePopups"),
+            AnimationName::FadePopupsIn => write!(f, "fadePopupsIn"),
+            AnimationName::FadePopupsOut => write!(f, "fadePopupsOut"),
+            AnimationName::FadeDpms => write!(f, "fadeDpms"),
+            AnimationName::Border => write!(f, "border"),
+            AnimationName::BorderAngle => write!(f, "borderangle"),
+            AnimationName::Workspaces => write!(f, "workspaces"),
+            AnimationName::WorkspacesIn => write!(f, "workspacesIn"),
+            AnimationName::WorkspacesOut => write!(f, "workspacesOut"),
+            AnimationName::SpecialWorkspace => write!(f, "specialWorkspace"),
+            AnimationName::SpecialWorkspaceIn => write!(f, "specialWorkspaceIn"),
+            AnimationName::SpecialWorkspaceOut => write!(f, "specialWorkspaceOut"),
+            AnimationName::ZoomFactor => write!(f, "zoomFactor"),
+            AnimationName::MonitorAdded => write!(f, "monitorAdded"),
+        }
+    }
+}
+
+impl AnimationName {
+    pub fn get_list() -> [&'static str; 31] {
+        [
+            "global",
+            "windows",
+            "windowsIn",
+            "windowsOut",
+            "windowsMove",
+            "layers",
+            "layersIn",
+            "layersOut",
+            "fade",
+            "fadeIn",
+            "fadeOut",
+            "fadeSwitch",
+            "fadeShadow",
+            "fadeDim",
+            "fadeLayers",
+            "fadeLayersIn",
+            "fadeLayersOut",
+            "fadePopups",
+            "fadePopupsIn",
+            "fadePopupsOut",
+            "fadeDpms",
+            "border",
+            "borderangle",
+            "workspaces",
+            "workspacesIn",
+            "workspacesOut",
+            "specialWorkspace",
+            "specialWorkspaceIn",
+            "specialWorkspaceOut",
+            "zoomFactor",
+            "monitorAdded",
+        ]
+    }
+
+    pub fn get_fancy_list() -> [String; 31] {
+        [
+            t!("global").to_string(),
+            t!("windows").to_string(),
+            t!("windows_in").to_string(),
+            t!("windows_out").to_string(),
+            t!("windows_move").to_string(),
+            t!("layers").to_string(),
+            t!("layers_in").to_string(),
+            t!("layers_out").to_string(),
+            t!("fade").to_string(),
+            t!("fade_in").to_string(),
+            t!("fade_out").to_string(),
+            t!("fade_switch").to_string(),
+            t!("fade_shadow").to_string(),
+            t!("fade_dim").to_string(),
+            t!("fade_layers").to_string(),
+            t!("fade_layers_in").to_string(),
+            t!("fade_layers_out").to_string(),
+            t!("fade_popups").to_string(),
+            t!("fade_popups_in").to_string(),
+            t!("fade_popups_out").to_string(),
+            t!("fade_dpms").to_string(),
+            t!("border").to_string(),
+            t!("borderangle").to_string(),
+            t!("workspaces").to_string(),
+            t!("workspaces_in").to_string(),
+            t!("workspaces_out").to_string(),
+            t!("special_workspace").to_string(),
+            t!("special_workspace_in").to_string(),
+            t!("special_workspace_out").to_string(),
+            t!("zoom_factor").to_string(),
+            t!("monitor_added").to_string(),
+        ]
+    }
+
+    pub fn get_fancy_available_styles(&self) -> Option<Vec<String>> {
+        match self {
+            AnimationName::Windows | AnimationName::WindowsIn | AnimationName::WindowsOut => {
+                Some(vec![
+                    t!("none").to_string(),
+                    t!("slide").to_string(),
+                    t!("slide_with_side").to_string(),
+                    t!("popin").to_string(),
+                    t!("popin_with_percent").to_string(),
+                    t!("gnomed").to_string(),
+                ])
+            }
+            AnimationName::Layers | AnimationName::LayersIn | AnimationName::LayersOut => {
+                Some(vec![
+                    t!("none").to_string(),
+                    t!("slide").to_string(),
+                    t!("slide_with_side").to_string(),
+                    t!("popin").to_string(),
+                    t!("fade").to_string(),
+                ])
+            }
+            AnimationName::BorderAngle => Some(vec![
+                t!("none").to_string(),
+                t!("once").to_string(),
+                t!("loop").to_string(),
+            ]),
+            AnimationName::Workspaces
+            | AnimationName::WorkspacesIn
+            | AnimationName::WorkspacesOut
+            | AnimationName::SpecialWorkspace
+            | AnimationName::SpecialWorkspaceIn
+            | AnimationName::SpecialWorkspaceOut => Some(vec![
+                t!("none").to_string(),
+                t!("slide").to_string(),
+                t!("slide_with_percent").to_string(),
+                t!("slidevert").to_string(),
+                t!("slidevert_with_percent").to_string(),
+                t!("fade").to_string(),
+                t!("slidefade").to_string(),
+                t!("slidefade_with_percent").to_string(),
+                t!("slidefadevert").to_string(),
+                t!("slidefade_with_percent").to_string(),
+            ]),
+            _ => None,
+        }
+    }
+
+    pub fn get_available_styles(&self) -> Option<Vec<AnimationStyle>> {
+        match self {
+            AnimationName::Windows | AnimationName::WindowsIn | AnimationName::WindowsOut => {
+                Some(vec![
+                    AnimationStyle::None,
+                    AnimationStyle::Slide,
+                    AnimationStyle::SlideSide(Side::Left),
+                    AnimationStyle::Popin,
+                    AnimationStyle::PopinPercent(50.0),
+                    AnimationStyle::Gnomed,
+                ])
+            }
+            AnimationName::Layers | AnimationName::LayersIn | AnimationName::LayersOut => {
+                Some(vec![
+                    AnimationStyle::None,
+                    AnimationStyle::Slide,
+                    AnimationStyle::SlideSide(Side::Left),
+                    AnimationStyle::Popin,
+                    AnimationStyle::Fade,
+                ])
+            }
+            AnimationName::BorderAngle => Some(vec![
+                AnimationStyle::None,
+                AnimationStyle::Once,
+                AnimationStyle::Loop,
+            ]),
+            AnimationName::Workspaces
+            | AnimationName::WorkspacesIn
+            | AnimationName::WorkspacesOut
+            | AnimationName::SpecialWorkspace
+            | AnimationName::SpecialWorkspaceIn
+            | AnimationName::SpecialWorkspaceOut => Some(vec![
+                AnimationStyle::None,
+                AnimationStyle::Slide,
+                AnimationStyle::SlidePercent(50.0),
+                AnimationStyle::SlideVert,
+                AnimationStyle::SlideVertPercent(50.0),
+                AnimationStyle::Fade,
+                AnimationStyle::SlideFade,
+                AnimationStyle::SlideFadePercent(50.0),
+                AnimationStyle::SlideFadeVert,
+                AnimationStyle::SlideFadePercent(50.0),
+            ]),
+            _ => None,
+        }
+    }
+
+    pub fn get_id_of_style(&self, style: AnimationStyle) -> Option<usize> {
+        match self {
+            AnimationName::Windows | AnimationName::WindowsIn | AnimationName::WindowsOut => {
+                match style {
+                    AnimationStyle::None => Some(0),
+                    AnimationStyle::Slide => Some(1),
+                    AnimationStyle::SlideSide(_) => Some(2),
+                    AnimationStyle::Popin => Some(3),
+                    AnimationStyle::PopinPercent(_) => Some(4),
+                    AnimationStyle::Gnomed => Some(5),
+                    _ => None,
+                }
+            }
+            AnimationName::Layers | AnimationName::LayersIn | AnimationName::LayersOut => {
+                match style {
+                    AnimationStyle::None => Some(0),
+                    AnimationStyle::Slide => Some(1),
+                    AnimationStyle::SlideSide(_) => Some(2),
+                    AnimationStyle::Popin => Some(3),
+                    AnimationStyle::Fade => Some(4),
+                    _ => None,
+                }
+            }
+            AnimationName::BorderAngle => match style {
+                AnimationStyle::None => Some(0),
+                AnimationStyle::Once => Some(1),
+                AnimationStyle::Loop => Some(2),
+                _ => None,
+            },
+            AnimationName::Workspaces
+            | AnimationName::WorkspacesIn
+            | AnimationName::WorkspacesOut
+            | AnimationName::SpecialWorkspace
+            | AnimationName::SpecialWorkspaceIn
+            | AnimationName::SpecialWorkspaceOut => match style {
+                AnimationStyle::None => Some(0),
+                AnimationStyle::Slide => Some(1),
+                AnimationStyle::SlidePercent(_) => Some(2),
+                AnimationStyle::SlideVert => Some(3),
+                AnimationStyle::SlideVertPercent(_) => Some(4),
+                AnimationStyle::Fade => Some(5),
+                AnimationStyle::SlideFade => Some(6),
+                AnimationStyle::SlideFadePercent(_) => Some(7),
+                AnimationStyle::SlideFadeVert => Some(8),
+                AnimationStyle::SlideFadeVertPercent(_) => Some(9),
+                _ => None,
+            },
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Side {
+    Left,
+    Right,
+    Top,
+    Bottom,
+}
+
+impl FromStr for Side {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.split_whitespace()
+            .next()
+            .map_or(Ok(Side::Left), |first| match first {
+                "left" => Ok(Side::Left),
+                "right" => Ok(Side::Right),
+                "top" => Ok(Side::Top),
+                "bottom" => Ok(Side::Bottom),
+                _ => Err(()),
+            })
+    }
+}
+
+impl Display for Side {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Side::Left => write!(f, "left"),
+            Side::Right => write!(f, "right"),
+            Side::Top => write!(f, "top"),
+            Side::Bottom => write!(f, "bottom"),
+        }
+    }
+}
+
+impl Side {
+    pub fn get_list() -> [&'static str; 4] {
+        ["left", "right", "top", "bottom"]
+    }
+
+    pub fn get_fancy_list() -> [String; 4] {
+        [
+            t!("left").to_string(),
+            t!("right").to_string(),
+            t!("top").to_string(),
+            t!("bottom").to_string(),
+        ]
+    }
+
+    pub fn get_id(&self) -> usize {
+        match self {
+            Side::Left => 0,
+            Side::Right => 1,
+            Side::Top => 2,
+            Side::Bottom => 3,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub enum AnimationStyle {
+    #[default]
+    None,
+    Slide,
+    SlideSide(Side),
+    SlidePercent(f64),
+    Popin,
+    PopinPercent(f64),
+    Gnomed,
+    SlideVert,
+    SlideVertPercent(f64),
+    Fade,
+    SlideFade,
+    SlideFadePercent(f64),
+    SlideFadeVert,
+    SlideFadeVertPercent(f64),
+    Once,
+    Loop,
+}
+
+impl FromStr for AnimationStyle {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.split_whitespace()
+            .next()
+            .map_or(Ok(AnimationStyle::None), |first| match first {
+                "slide" => {
+                    let remainder = s.strip_prefix("slide").map(str::trim).unwrap_or("");
+                    if remainder.is_empty() {
+                        Ok(AnimationStyle::Slide)
+                    } else {
+                        match Side::from_str(remainder) {
+                            Ok(side) => Ok(AnimationStyle::SlideSide(side)),
+                            Err(_) => match f64::from_str(remainder.trim_end_matches('%')) {
+                                Ok(percent) => Ok(AnimationStyle::SlidePercent(percent)),
+                                Err(_) => Ok(AnimationStyle::None),
+                            },
+                        }
+                    }
+                }
+                "popin" => {
+                    let remainder = s.strip_prefix("popin").map(str::trim).unwrap_or("");
+                    if remainder.is_empty() {
+                        Ok(AnimationStyle::Popin)
+                    } else {
+                        let percent = remainder.trim_end_matches('%');
+                        match percent.parse::<f64>() {
+                            Ok(percent) => Ok(AnimationStyle::PopinPercent(percent)),
+                            Err(_) => Err(()),
+                        }
+                    }
+                }
+                "gnomed" => Ok(AnimationStyle::Gnomed),
+                "slidevert" => {
+                    let remainder = s.strip_prefix("slidevert").map(str::trim).unwrap_or("");
+                    if remainder.is_empty() {
+                        Ok(AnimationStyle::SlideVert)
+                    } else {
+                        let percent = remainder.trim_end_matches('%');
+                        match percent.parse::<f64>() {
+                            Ok(percent) => Ok(AnimationStyle::SlideVertPercent(percent)),
+                            Err(_) => Err(()),
+                        }
+                    }
+                }
+                "fade" => Ok(AnimationStyle::Fade),
+                "slidefade" => {
+                    let remainder = s.strip_prefix("slidefade").map(str::trim).unwrap_or("");
+                    if remainder.is_empty() {
+                        Ok(AnimationStyle::SlideFade)
+                    } else {
+                        let percent = remainder.trim_end_matches('%');
+                        match percent.parse::<f64>() {
+                            Ok(percent) => Ok(AnimationStyle::SlideFadePercent(percent)),
+                            Err(_) => Err(()),
+                        }
+                    }
+                }
+                "slidefadevert" => {
+                    let remainder = s.strip_prefix("slidefadevert").map(str::trim).unwrap_or("");
+                    if remainder.is_empty() {
+                        Ok(AnimationStyle::SlideFadeVert)
+                    } else {
+                        let percent = remainder.trim_end_matches('%');
+                        match percent.parse::<f64>() {
+                            Ok(percent) => Ok(AnimationStyle::SlideFadeVertPercent(percent)),
+                            Err(_) => Err(()),
+                        }
+                    }
+                }
+                "once" => Ok(AnimationStyle::Once),
+                "loop" => Ok(AnimationStyle::Loop),
+                _ => Err(()),
+            })
+    }
+}
+
+impl Display for AnimationStyle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnimationStyle::None => write!(f, ""),
+            AnimationStyle::Slide => write!(f, "slide"),
+            AnimationStyle::SlideSide(side) => write!(f, "slide {}", side),
+            AnimationStyle::SlidePercent(percent) => write!(f, "slide {}%", percent),
+            AnimationStyle::Popin => write!(f, "popin"),
+            AnimationStyle::PopinPercent(percent) => write!(f, "popin {}%", percent),
+            AnimationStyle::Gnomed => write!(f, "gnomed"),
+            AnimationStyle::SlideVert => write!(f, "slidevert"),
+            AnimationStyle::SlideVertPercent(percent) => write!(f, "slidevert {}%", percent),
+            AnimationStyle::Fade => write!(f, "fade"),
+            AnimationStyle::SlideFade => write!(f, "slidefade"),
+            AnimationStyle::SlideFadePercent(percent) => write!(f, "slidefade {}%", percent),
+            AnimationStyle::SlideFadeVert => write!(f, "slidefadevert"),
+            AnimationStyle::SlideFadeVertPercent(percent) => {
+                write!(f, "slidefadevert {}%", percent)
+            }
+            AnimationStyle::Once => write!(f, "once"),
+            AnimationStyle::Loop => write!(f, "loop"),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Animation {
+    pub name: AnimationName,
+    pub enabled: bool,
+    pub speed: f64,
+    pub curve: String,
+    pub style: AnimationStyle,
+}
+
+impl FromStr for Animation {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let values: Vec<String> = s.split(',').map(|s| s.trim().to_string()).collect();
+        if values.is_empty() | values.first().is_none_or(|v| v.is_empty()) {
+            return Err(());
+        }
+
+        let name = AnimationName::from_str(&values[0]).unwrap_or_default();
+        let enabled = values.get(1).is_none_or(|v| parse_bool(v).unwrap_or(true));
+        let speed = values
+            .get(2)
+            .map_or(10.0, |v| v.parse::<f64>().unwrap_or(10.0));
+        let curve = values.get(3).map_or("default".to_string(), |v| v.clone());
+        let style = values.get(4).map_or(AnimationStyle::None, |v| {
+            AnimationStyle::from_str(v).unwrap_or_default()
+        });
+
+        Ok(Animation {
+            name,
+            enabled,
+            speed,
+            curve,
+            style,
+        })
+    }
+}
+
+impl Display for Animation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}, {}, {:.1}, {}",
+            self.name,
+            if self.enabled { 1 } else { 0 },
+            self.speed,
+            self.curve
+        )?;
+        if !matches!(self.style, AnimationStyle::None) {
+            write!(f, ", {}", self.style)?;
+        }
+        Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct BezierCurve {
+    pub name: String,
+    pub x0: f64,
+    pub y0: f64,
+    pub x1: f64,
+    pub y1: f64,
+}
+
+impl FromStr for BezierCurve {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let values: Vec<String> = s.split(',').map(|s| s.trim().to_string()).collect();
+        if values.len() < 5 {
+            return Err(());
+        }
+
+        let name = values[0].clone();
+        let x0 = values[1].parse::<f64>().unwrap_or(0.333);
+        let y0 = values[2].parse::<f64>().unwrap_or(0.333);
+        let x1 = values[3].parse::<f64>().unwrap_or(0.667);
+        let y1 = values[4].parse::<f64>().unwrap_or(0.667);
+
+        Ok(BezierCurve {
+            name,
+            x0,
+            y0,
+            x1,
+            y1,
+        })
+    }
+}
+
+impl Display for BezierCurve {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}, {:.3}, {:.3}, {:.3}, {:.3}",
+            self.name, self.x0, self.y0, self.x1, self.y1
+        )
+    }
+}
+
+pub fn parse_animation(input: &str) -> Animation {
+    Animation::from_str(input).unwrap_or(Animation {
+        name: AnimationName::Global,
+        enabled: true,
+        speed: 10.0,
+        curve: "default".to_string(),
+        style: AnimationStyle::None,
+    })
+}
+
+pub fn parse_bezier(input: &str) -> BezierCurve {
+    BezierCurve::from_str(input).unwrap_or(BezierCurve {
+        name: "default".to_string(),
+        x0: 0.333,
+        y0: 0.333,
+        x1: 0.667,
+        y1: 0.667,
+    })
 }
 
 fn parse_bool(value: &str) -> Option<bool> {

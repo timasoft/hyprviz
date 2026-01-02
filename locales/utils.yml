@@ -88,3 +88,199 @@ selector:
   ru: "Селектор"
   zh-CN: "选择器"
 
+global:
+  en: "Global"
+  ru: "Глобально"
+  zh-CN: "全局"
+windows:
+  en: "Windows"
+  ru: "Окна"
+  zh-CN: "窗口"
+windows_in:
+  en: "Window In"
+  ru: "Появление окна"
+  zh-CN: "窗口进入"
+windows_out:
+  en: "Window Out"
+  ru: "Исчезание окна"
+  zh-CN: "窗口退出"
+windows_move:
+  en: "Window Move"
+  ru: "Перемещение окна"
+  zh-CN: "窗口移动"
+layers:
+  en: "Layers"
+  ru: "Слои"
+  zh-CN: "图层"
+layers_in:
+  en: "Layer In"
+  ru: "Появление слоя"
+  zh-CN: "图层进入"
+layers_out:
+  en: "Layer Out"
+  ru: "Исчезание слоя"
+  zh-CN: "图层出退"
+fade:
+  en: "Fade"
+  ru: "Затухание"
+  zh-CN: "淡入淡出"
+fade_in:
+  en: "Fade In"
+  ru: "Появление с затуханием"
+  zh-CN: "淡入"
+fade_out:
+  en: "Fade Out"
+  ru: "Исчезание с затуханием"
+  zh-CN: "淡出"
+fade_switch:
+  en: "Fade Switch"
+  ru: "Переключение с затуханием"
+  zh-CN: "淡入淡出切换"
+fade_shadow:
+  en: "Fade Shadow"
+  ru: "Затухание тени"
+  zh-CN: "阴影淡入淡出"
+fade_dim:
+  en: "Fade Dim"
+  ru: "Затемнение"
+  zh-CN: "暗化淡入淡出"
+fade_layers:
+  en: "Fade Layers"
+  ru: "Затухание слоёв"
+  zh-CN: "图层淡入淡出"
+fade_layers_in:
+  en: "Fade Layers In"
+  ru: "Появление слоёв с затуханием"
+  zh-CN: "图层淡入"
+fade_layers_out:
+  en: "Fade Layers Out"
+  ru: "Исчезание слоёв с затуханием"
+  zh-CN: "图层淡出"
+fade_popups:
+  en: "Fade Popups"
+  ru: "Затухание всплывающих окон"
+  zh-CN: "弹窗淡入淡出"
+fade_popups_in:
+  en: "Fade Popups In"
+  ru: "Появление всплывающих окон"
+  zh-CN: "弹窗淡入"
+fade_popups_out:
+  en: "Fade Popups Out"
+  ru: "Исчезание всплывающих окон"
+  zh-CN: "弹窗淡出"
+fade_dpms:
+  en: "Fade DPMS"
+  ru: "Затухание DPMS"
+  zh-CN: "DPMS淡入淡出"
+border:
+  en: "Border"
+  ru: "Граница"
+  zh-CN: "边框"
+borderangle:
+  en: "Border Angle"
+  ru: "Угол границы"
+  zh-CN: "边框角度"
+workspaces:
+  en: "Workspaces"
+  ru: "Рабочие пространства"
+  zh-CN: "工作区"
+workspaces_in:
+  en: "Workspace In"
+  ru: "Появление рабочего пространства"
+  zh-CN: "工作区进入"
+workspaces_out:
+  en: "Workspace Out"
+  ru: "Исчезание рабочего пространства"
+  zh-CN: "工作区退出"
+special_workspace:
+  en: "Special Workspace"
+  ru: "Специальное рабочее пространство"
+  zh-CN: "特殊工作区"
+special_workspace_in:
+  en: "Special Workspace In"
+  ru: "Появление специального рабочего пространства"
+  zh-CN: "特殊工作区进入"
+special_workspace_out:
+  en: "Special Workspace Out"
+  ru: "Исчезание специального рабочего пространства"
+  zh-CN: "特殊工作区退出"
+zoom_factor:
+  en: "Zoom Factor"
+  ru: "Коэффициент масштабирования"
+  zh-CN: "缩放因子"
+monitor_added:
+  en: "Monitor Added"
+  ru: "Добавление монитора"
+  zh-CN: "显示器已添加"
+slide:
+  en: "Slide"
+  ru: "Скольжение"
+  zh-CN: "滑动"
+slide_with_side:
+  en: "Slide with Side"
+  ru: "Скольжение со стороны"
+  zh-CN: "带侧边滑动"
+popin:
+  en: "Popin"
+  ru: "Появление"
+  zh-CN: "弹出"
+popin_with_percent:
+  en: "Popin with Percent"
+  ru: "Появление с процентом"
+  zh-CN: "带百分比弹出"
+gnomed:
+  en: "Gnomed"
+  ru: "Гномовский стиль"
+  zh-CN: "Gnome风格"
+slide_with_percent:
+  en: "Slide with Percent"
+  ru: "Скольжение с процентом"
+  zh-CN: "带百分比滑动"
+slidevert:
+  en: "Slide Vertical"
+  ru: "Вертикальное скольжение"
+  zh-CN: "垂直滑动"
+slidevert_with_percent:
+  en: "Slide Vertical with Percent"
+  ru: "Вертикальное скольжение с процентом"
+  zh-CN: "带百分比垂直滑动"
+slidefade:
+  en: "Slidefade"
+  ru: "Скольжение с затуханием"
+  zh-CN: "滑动淡入淡出"
+slidefade_with_percent:
+  en: "Slidefade with Percent"
+  ru: "Скольжение с затуханием и процентом"
+  zh-CN: "带百分比滑动淡入淡出"
+slidefadevert:
+  en: "Slidefade Vertical"
+  ru: "Вертикальное скольжение с затуханием"
+  zh-CN: "垂直滑动淡入淡出"
+slidefadevert_with_percent:
+  en: "Slidefade Vertical with Percent"
+  ru: "Вертикальное скольжение с затуханием и процентом"
+  zh-CN: "带百分比垂直滑动淡入淡出"
+once:
+  en: "Once"
+  ru: "Один раз"
+  zh-CN: "一次"
+loop:
+  en: "Loop"
+  ru: "Цикл"
+  zh-CN: "循环"
+left:
+  en: "Left"
+  ru: "Слева"
+  zh-CN: "左边"
+right:
+  en: "Right"
+  ru: "Справа"
+  zh-CN: "右边"
+top:
+  en: "Top"
+  ru: "Сверху"
+  zh-CN: "上面"
+bottom:
+  en: "Bottom"
+  ru: "Снизу"
+  zh-CN: "下面"

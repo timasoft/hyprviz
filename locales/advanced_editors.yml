@@ -239,3 +239,11 @@ fullscreen_without_window_state:
   ru: "Полный экран без состояния окна"
   zh-CN: "全屏无窗口状态"
 
+side:
+  en: "Side"
+  ru: "Сторона"
+  zh-CN: "侧面"
+percentage:
+  en: "Percentage"
+  ru: "Процент"
+  zh-CN: "百分比"
