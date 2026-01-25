@@ -1,11 +1,14 @@
-use crate::utils::{
-    Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, Cm,
-    MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Monitor, MonitorSelector,
-    MonitorState, Orientation, Position, Range, Scale, Side, Workspace, WorkspaceSelector,
-    WorkspaceSelectorNamed, WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags,
-    WorkspaceType, after_second_comma, get_available_monitors,
-    get_available_resolutions_for_monitor, is_modifier, keycode_to_en_key, parse_animation,
-    parse_bezier, parse_coordinates, parse_monitor, parse_workspace,
+use crate::{
+    gtk_converters::ToGtkBox,
+    utils::{
+        Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
+        BindFlagsEnum, BindLeft, Cm, Dispatcher,
+        MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor,
+        MonitorSelector, MonitorState, Orientation, Position, Range, Scale, Side, UnbindRight, Workspace, WorkspaceSelector,
+        WorkspaceSelectorNamed, WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags, WorkspaceType, after_second_comma, get_available_monitors,
+        get_available_resolutions_for_monitor, is_modifier, keycode_to_en_key, parse_animation,
+        parse_bezier, parse_bind_right, parse_coordinates, parse_monitor, parse_workspace,
+    },
 };
 use gio::glib::SignalHandlerId;
 use gtk::{
@@ -483,6 +486,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
     let fancy_boxline = Box::new(GtkOrientation::Horizontal, 5);
 
     let fancy_name_entry = Box::new(GtkOrientation::Horizontal, 5);
+
+    let is_updating = Rc::new(Cell::new(false));
+
     match category {
         "monitor" => {
             let label = Label::new(Some("monitor"));
@@ -537,9 +543,169 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             fancy_name_entry.append(&dropdown);
         }
         "bind" => {
+            let bind_left_box = Box::new(GtkOrientation::Horizontal, 5);
+
+            let bind_type_string_list = StringList::new(&[&t!("bind"), &t!("unbind")]);
+            let bind_type_dropdown = create_dropdown(&bind_type_string_list);
+            bind_left_box.append(&Label::new(Some(&t!("type"))));
+            bind_left_box.append(&bind_type_dropdown);
+
+            let flags_box = Box::new(GtkOrientation::Vertical, 5);
+            flags_box.set_margin_start(10);
+
+            let flag_names = BindFlagsEnum::get_all();
+
+            let mut switches = Vec::new();
+            for flag_name in flag_names {
+                let flag_box = Box::new(GtkOrientation::Horizontal, 5);
+                let switch = create_switch();
+                flag_box.append(&Label::new(Some(&t!(flag_name.as_str()))));
+                flag_box.append(&switch);
+                flags_box.append(&flag_box);
+                switches.push((flag_name, switch));
+            }
+
+            bind_left_box.append(&flags_box);
+            fancy_name_entry.append(&bind_left_box);
+
+            let flags_box_clone = flags_box.clone();
+            let name_entry_clone = name_entry.clone();
+            let is_updating_clone = is_updating.clone();
+            bind_type_dropdown.connect_selected_notify(move |dropdown| {
+                if is_updating_clone.get() {
+                    return;
+                }
+
+                is_updating_clone.set(true);
+                flags_box_clone.set_visible(dropdown.selected() == 0);
+
+                let new_text = if dropdown.selected() == 0 {
+                    "bind"
+                } else {
+                    "unbind"
+                };
+                name_entry_clone.set_text(new_text);
+                is_updating_clone.set(false);
+            });
+            name_entry.set_text("bind");
+
+            let switches_clone = switches.clone();
+            for (flag_name, switch) in switches_clone {
+                let name_entry_clone = name_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                let dropdown_clone = bind_type_dropdown.clone();
+
+                switch.connect_state_notify(move |switch| {
+                    if is_updating_clone.get() || dropdown_clone.selected() != 0 {
+                        return;
+                    }
+
+                    is_updating_clone.set(true);
+
+                    if let Ok(mut bind_left) = BindLeft::from_str(&name_entry_clone.text())
+                        && let BindLeft::Bind(flags) = &mut bind_left
+                    {
+                        match flag_name {
+                            BindFlagsEnum::Locked => flags.locked = switch.is_active(),
+                            BindFlagsEnum::Release => flags.release = switch.is_active(),
+                            BindFlagsEnum::Click => flags.click = switch.is_active(),
+                            BindFlagsEnum::Drag => flags.drag = switch.is_active(),
+                            BindFlagsEnum::LongPress => flags.long_press = switch.is_active(),
+                            BindFlagsEnum::Repeat => flags.repeat = switch.is_active(),
+                            BindFlagsEnum::NonConsuming => flags.non_consuming = switch.is_active(),
+                            BindFlagsEnum::Mouse => flags.mouse = switch.is_active(),
+                            BindFlagsEnum::Transparent => flags.transparent = switch.is_active(),
+                            BindFlagsEnum::IgnoreMods => flags.ignore_mods = switch.is_active(),
+                            BindFlagsEnum::Separate => flags.separate = switch.is_active(),
+                            BindFlagsEnum::HasDescription => {
+                                flags.has_description = switch.is_active()
+                            }
+                            BindFlagsEnum::Bypass => flags.bypass = switch.is_active(),
+                        }
+
+                        name_entry_clone.set_text(&bind_left.to_string());
+                    }
+
+                    is_updating_clone.set(false);
+                });
+            }
+
+            let dropdown_clone = bind_type_dropdown.clone();
+            let flags_box_clone = flags_box.clone();
+            let switches_clone = switches.clone();
+            let is_updating_clone = is_updating.clone();
+            name_entry.connect_changed(move |entry| {
+                if is_updating_clone.get() {
+                    return;
+                }
+
+                is_updating_clone.set(true);
+                let text = entry.text();
+
+                if let Ok(bind_left) = BindLeft::from_str(&text) {
+                    match bind_left {
+                        BindLeft::Bind(flags) => {
+                            dropdown_clone.set_selected(0);
+                            flags_box_clone.set_visible(true);
+
+                            for (flag_name, switch) in &switches_clone {
+                                let flag_value = match flag_name {
+                                    BindFlagsEnum::Locked => flags.locked,
+                                    BindFlagsEnum::Release => flags.release,
+                                    BindFlagsEnum::Click => flags.click,
+                                    BindFlagsEnum::Drag => flags.drag,
+                                    BindFlagsEnum::LongPress => flags.long_press,
+                                    BindFlagsEnum::Repeat => flags.repeat,
+                                    BindFlagsEnum::NonConsuming => flags.non_consuming,
+                                    BindFlagsEnum::Mouse => flags.mouse,
+                                    BindFlagsEnum::Transparent => flags.transparent,
+                                    BindFlagsEnum::IgnoreMods => flags.ignore_mods,
+                                    BindFlagsEnum::Separate => flags.separate,
+                                    BindFlagsEnum::HasDescription => flags.has_description,
+                                    BindFlagsEnum::Bypass => flags.bypass,
+                                };
+                                switch.set_active(flag_value);
+                            }
+                        }
+                        BindLeft::Unbind => {
+                            dropdown_clone.set_selected(1);
+                            flags_box_clone.set_visible(false);
+                        }
+                    }
+                }
+
+                is_updating_clone.set(false);
+            });
+
+            if let Ok(bind_left) = BindLeft::from_str(&name_entry.text()) {
+                match bind_left {
+                    BindLeft::Bind(_) => bind_type_dropdown.set_selected(0),
+                    BindLeft::Unbind => bind_type_dropdown.set_selected(1),
+                }
+            }
+        }
+        "gesture" => {
             todo!()
         }
-        _ => {}
+        "windowrule" => {
+            todo!()
+        }
+        "layerrule" => {
+            todo!()
+        }
+        "exec" => {
+            todo!()
+        }
+        "env" => {
+            todo!()
+        }
+        "top_level" => {
+            // maybe in future i will implement this
+        }
+        e => {
+            dbg!(e);
+            unreachable!()
+        }
     }
 
     fancy_boxline.append(&fancy_name_entry);
@@ -701,7 +867,7 @@ macro_rules! optional_widget_connector {
     }};
 }
 
-fn create_entry() -> Entry {
+pub fn create_entry() -> Entry {
     Entry::builder()
         .width_request(100)
         .hexpand(true)
@@ -713,7 +879,7 @@ fn create_entry() -> Entry {
         .build()
 }
 
-fn create_spin_button(min: f64, max: f64, step: f64) -> SpinButton {
+pub fn create_spin_button(min: f64, max: f64, step: f64) -> SpinButton {
     let spin_button = SpinButton::with_range(min, max, step);
     spin_button.set_width_request(100);
     spin_button.set_hexpand(true);
@@ -725,7 +891,7 @@ fn create_spin_button(min: f64, max: f64, step: f64) -> SpinButton {
     spin_button
 }
 
-fn create_dropdown(string_list: &StringList) -> DropDown {
+pub fn create_dropdown(string_list: &StringList) -> DropDown {
     let dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
     dropdown.set_width_request(100);
     dropdown.set_hexpand(true);
@@ -737,7 +903,7 @@ fn create_dropdown(string_list: &StringList) -> DropDown {
     dropdown
 }
 
-fn create_switch() -> Switch {
+pub fn create_switch() -> Switch {
     Switch::builder()
         .width_request(50)
         .hexpand(false)
@@ -746,6 +912,19 @@ fn create_switch() -> Switch {
         .margin_bottom(5)
         .vexpand(false)
         .valign(Align::Center)
+        .build()
+}
+
+pub fn create_button(text: &str) -> Button {
+    Button::builder()
+        .width_request(100)
+        .hexpand(true)
+        .halign(Align::Fill)
+        .margin_top(5)
+        .margin_bottom(5)
+        .vexpand(false)
+        .valign(Align::Center)
+        .label(text)
         .build()
 }
 
@@ -3367,9 +3546,295 @@ fn fill_fancy_value_entry(
             }
         }
         "bind" => {
+            let bind_box = Box::new(GtkOrientation::Vertical, 5);
+
+            let bind_left =
+                BindLeft::from_str(name).unwrap_or(BindLeft::Bind(BindFlags::default()));
+
+            let (is_unbind, has_description) = if let BindLeft::Bind(flags) = bind_left {
+                (false, flags.has_description)
+            } else {
+                (true, false)
+            };
+
+            if is_unbind {
+                let unbind_right = match UnbindRight::from_str(&value_entry.text()) {
+                    Ok(unbind) => unbind,
+                    Err(_) => UnbindRight {
+                        mods: HashSet::new(),
+                        key: "".to_string(),
+                    },
+                };
+
+                let mods_box = Box::new(GtkOrientation::Horizontal, 5);
+                mods_box.append(&Label::new(Some(&t!("modifiers"))));
+
+                let modifier_names = [
+                    Modifier::Shift,
+                    Modifier::Ctrl,
+                    Modifier::Alt,
+                    Modifier::Super,
+                    Modifier::Caps,
+                    Modifier::Mod2,
+                    Modifier::Mod3,
+                    Modifier::Mod5,
+                ];
+
+                let mut modifier_switches = Vec::new();
+                for modifier in &modifier_names {
+                    let mod_box = Box::new(GtkOrientation::Horizontal, 5);
+                    let switch = create_switch();
+                    switch.set_active(unbind_right.mods.contains(modifier));
+                    mod_box.append(&Label::new(Some(&t!(modifier.to_string().to_lowercase()))));
+                    mod_box.append(&switch);
+                    mods_box.append(&mod_box);
+                    modifier_switches.push((*modifier, switch));
+                }
+
+                bind_box.append(&mods_box);
+
+                let key_box = Box::new(GtkOrientation::Horizontal, 5);
+                key_box.append(&Label::new(Some(&t!("key"))));
+                let key_entry = create_entry();
+                key_entry.set_text(&unbind_right.key);
+                key_box.append(&key_entry);
+                bind_box.append(&key_box);
+
+                for (modifier, switch) in &modifier_switches {
+                    let modifier = *modifier;
+                    let value_entry_clone = value_entry.clone();
+                    let is_updating_clone = is_updating.clone();
+                    switch.connect_state_notify(move |switch| {
+                        if is_updating_clone.get() {
+                            return;
+                        }
+                        is_updating_clone.set(true);
+                        if let Ok(mut unbind_right) =
+                            UnbindRight::from_str(&value_entry_clone.text())
+                        {
+                            if switch.is_active() {
+                                unbind_right.mods.insert(modifier);
+                            } else {
+                                unbind_right.mods.remove(&modifier);
+                            }
+                            value_entry_clone.set_text(&unbind_right.to_string());
+                        }
+                        is_updating_clone.set(false);
+                    });
+                }
+
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                key_entry.connect_changed(move |entry| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+                    if let Ok(mut unbind_right) = UnbindRight::from_str(&value_entry_clone.text()) {
+                        unbind_right.key = entry.text().to_string();
+                        value_entry_clone.set_text(&unbind_right.to_string());
+                    }
+                    is_updating_clone.set(false);
+                });
+
+                let is_updating_clone = is_updating.clone();
+                let key_entry_clone = key_entry.clone();
+                value_entry.connect_changed(move |entry| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+                    if let Ok(unbind_right) = UnbindRight::from_str(&entry.text()) {
+                        for (modifier, switch) in &modifier_switches {
+                            switch.set_active(unbind_right.mods.contains(modifier));
+                        }
+                        key_entry_clone.set_text(&unbind_right.key);
+                    }
+                    is_updating_clone.set(false);
+                });
+            } else {
+                let bind_right = parse_bind_right(has_description, &value_entry.text());
+
+                let mods_box = Box::new(GtkOrientation::Horizontal, 5);
+                mods_box.append(&Label::new(Some(&t!("modifiers"))));
+
+                let modifier_names = [
+                    Modifier::Shift,
+                    Modifier::Ctrl,
+                    Modifier::Alt,
+                    Modifier::Super,
+                    Modifier::Caps,
+                    Modifier::Mod2,
+                    Modifier::Mod3,
+                    Modifier::Mod5,
+                ];
+
+                let mut modifier_switches = Vec::new();
+                for modifier in &modifier_names {
+                    let mod_box = Box::new(GtkOrientation::Horizontal, 5);
+                    let switch = create_switch();
+                    switch.set_active(bind_right.mods.contains(modifier));
+                    mod_box.append(&Label::new(Some(&t!(modifier.to_string().to_lowercase()))));
+                    mod_box.append(&switch);
+                    mods_box.append(&mod_box);
+                    modifier_switches.push((*modifier, switch));
+                }
+
+                bind_box.append(&mods_box);
+
+                let key_box = Box::new(GtkOrientation::Horizontal, 5);
+                key_box.append(&Label::new(Some(&t!("key"))));
+                let key_entry = create_entry();
+                key_entry.set_text(&bind_right.key);
+                key_box.append(&key_entry);
+                bind_box.append(&key_box);
+
+                let dispatcher_box = Box::new(GtkOrientation::Vertical, 5);
+                dispatcher_box.append(&Label::new(Some(&t!("dispatcher"))));
+
+                let dispatcher_entry = create_entry();
+                dispatcher_entry.set_text(&bind_right.dispatcher.to_string());
+                let dispatcher_visualizer = Dispatcher::to_gtk_box(&dispatcher_entry);
+                dispatcher_box.append(&dispatcher_visualizer);
+                bind_box.append(&dispatcher_box);
+
+                let description_box = Box::new(GtkOrientation::Horizontal, 5);
+                description_box.append(&Label::new(Some(&t!("description"))));
+                let description_entry = create_entry();
+                if let Some(desc) = &bind_right.description {
+                    description_entry.set_text(desc);
+                }
+                description_box.append(&description_entry);
+                if has_description {
+                    bind_box.append(&description_box);
+                }
+
+                for (modifier, switch) in &modifier_switches {
+                    let modifier = *modifier;
+                    let value_entry_clone = value_entry.clone();
+                    let is_updating_clone = is_updating.clone();
+                    switch.connect_state_notify(move |switch| {
+                        if is_updating_clone.get() {
+                            return;
+                        }
+                        is_updating_clone.set(true);
+                        let mut bind_right =
+                            parse_bind_right(has_description, &value_entry_clone.text());
+
+                        if switch.is_active() {
+                            bind_right.mods.insert(modifier);
+                        } else {
+                            bind_right.mods.remove(&modifier);
+                        }
+                        value_entry_clone.set_text(&bind_right.to_string());
+
+                        is_updating_clone.set(false);
+                    });
+                }
+
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                key_entry.connect_changed(move |entry| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+                    let mut bind_right =
+                        parse_bind_right(has_description, &value_entry_clone.text());
+
+                    bind_right.key = entry.text().to_string();
+                    value_entry_clone.set_text(&bind_right.to_string());
+
+                    is_updating_clone.set(false);
+                });
+
+                let value_entry_clone = value_entry.clone();
+                let is_updating_clone = is_updating.clone();
+                dispatcher_entry.connect_changed(move |entry| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+                    let mut bind_right =
+                        parse_bind_right(has_description, &value_entry_clone.text());
+
+                    bind_right.dispatcher = entry.text().parse().unwrap_or_default();
+                    value_entry_clone.set_text(&bind_right.to_string());
+
+                    is_updating_clone.set(false);
+                });
+
+                if has_description {
+                    let value_entry_clone = value_entry.clone();
+                    let is_updating_clone = is_updating.clone();
+                    description_entry.connect_changed(move |entry| {
+                        if is_updating_clone.get() {
+                            return;
+                        }
+                        is_updating_clone.set(true);
+                        let mut bind_right =
+                            parse_bind_right(has_description, &value_entry_clone.text());
+
+                        bind_right.description = if !entry.text().is_empty() {
+                            Some(entry.text().to_string())
+                        } else {
+                            None
+                        };
+                        value_entry_clone.set_text(&bind_right.to_string());
+
+                        is_updating_clone.set(false);
+                    });
+                }
+
+                let is_updating_clone = is_updating.clone();
+                let key_entry_clone = key_entry.clone();
+                let dispatcher_entry_clone = dispatcher_entry.clone();
+                let description_entry_clone = description_entry.clone();
+                value_entry.connect_changed(move |entry| {
+                    if is_updating_clone.get() {
+                        return;
+                    }
+                    is_updating_clone.set(true);
+                    let bind_right = parse_bind_right(has_description, &entry.text());
+                    for (modifier, switch) in &modifier_switches {
+                        switch.set_active(bind_right.mods.contains(modifier));
+                    }
+                    key_entry_clone.set_text(&bind_right.key);
+                    dispatcher_entry_clone.set_text(&bind_right.dispatcher.to_string());
+                    if let Some(desc) = &bind_right.description {
+                        description_entry_clone.set_text(desc);
+                    } else {
+                        description_entry_clone.set_text("");
+                    }
+
+                    is_updating_clone.set(false);
+                });
+            }
+
+            fancy_value_entry.append(&bind_box);
+        }
+        "gesture" => {
             todo!()
         }
-        _ => {}
+        "windowrule" => {
+            todo!()
+        }
+        "layerrule" => {
+            todo!()
+        }
+        "exec" => {
+            todo!()
+        }
+        "env" => {
+            todo!()
+        }
+        "top_level" => {
+            // maybe in future i will implement this
+        }
+        e => {
+            dbg!(e);
+            unreachable!()
+        }
     }
 }
 

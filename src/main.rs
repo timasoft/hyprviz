@@ -13,6 +13,7 @@ use utils::{
 };
 
 mod advanced_editors;
+mod gtk_converters;
 mod gui;
 mod guides;
 mod system_info;
