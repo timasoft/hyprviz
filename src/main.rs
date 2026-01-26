@@ -3,13 +3,15 @@ use gui::ConfigGUI;
 use hyprparser::parse_config;
 use rust_i18n::{available_locales, i18n, t};
 use std::{
+    env,
     path::{Path, PathBuf},
     {cell::RefCell, fs, rc::Rc},
 };
 use utils::{
     CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
     check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
-    get_current_profile, get_system_locale, reload_hyprland, update_source_line,
+    get_current_profile, get_system_locale, initialize_development_mode, reload_hyprland,
+    update_source_line,
 };
 
 mod advanced_editors;
@@ -23,6 +25,12 @@ mod widget;
 i18n!("locales", fallback = "en");
 
 fn main() {
+    initialize_development_mode();
+
+    let args: Vec<String> = env::args().collect();
+    let filtered_args: Vec<String> = args.into_iter().filter(|arg| arg != "--dev").collect();
+    let filtered_args_str: Vec<&str> = filtered_args.iter().map(|s| s.as_str()).collect();
+
     {
         let locale = get_system_locale();
         if available_locales!().iter().any(|s| &locale == s) {
@@ -39,7 +47,7 @@ fn main() {
         .build();
 
     app.connect_activate(build_ui);
-    app.run();
+    app.run_with_args(&filtered_args_str);
 }
 
 fn build_ui(app: &Application) {

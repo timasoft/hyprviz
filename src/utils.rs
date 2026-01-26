@@ -12,9 +12,33 @@ use std::{
     path::{Path, PathBuf},
     process::Command,
     str::FromStr,
-    sync::LazyLock,
+    sync::{LazyLock, OnceLock},
 };
 use strum::{EnumDiscriminants, EnumIter, IntoEnumIterator};
+
+static IS_DEVELOPMENT_MODE: OnceLock<bool> = OnceLock::new();
+
+pub fn initialize_development_mode() {
+    let args: Vec<String> = env::args().collect();
+
+    let has_dev_flag = args.iter().any(|arg| arg == "--dev");
+
+    let is_dev = cfg!(debug_assertions) || has_dev_flag;
+
+    IS_DEVELOPMENT_MODE
+        .set(is_dev)
+        .expect("Development mode already initialized");
+
+    if is_dev {
+        println!("Running in development mode");
+    }
+}
+
+pub fn is_development_mode() -> bool {
+    *IS_DEVELOPMENT_MODE
+        .get()
+        .expect("Development mode not initialized")
+}
 
 pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
     let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
@@ -2399,8 +2423,7 @@ impl AnimationName {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, Default)]
 pub enum Side {
     #[default]
     Left,
@@ -2408,7 +2431,6 @@ pub enum Side {
     Top,
     Bottom,
 }
-
 
 impl FromStr for Side {
     type Err = ();
@@ -3099,7 +3121,6 @@ impl HasDiscriminant for MonitorTarget {
         }
     }
 }
-
 
 impl FromStr for MonitorTarget {
     type Err = ();
@@ -4003,8 +4024,7 @@ impl Display for ToggleState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter, Default)]
 pub enum FullscreenState {
     #[default]
     None,
@@ -4033,7 +4053,6 @@ impl FullscreenState {
         }
     }
 }
-
 
 impl FromStr for FullscreenState {
     type Err = ();
@@ -5499,7 +5518,6 @@ impl HasDiscriminant for WindowRule {
     }
 }
 
-
 impl FromStr for WindowRule {
     type Err = ();
 
@@ -5667,8 +5685,7 @@ impl Display for KeyState {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumIter, Default)]
 pub enum DispatcherFullscreenState {
     Current,
     #[default]
@@ -5700,7 +5717,6 @@ impl DispatcherFullscreenState {
         }
     }
 }
-
 
 impl FromStr for DispatcherFullscreenState {
     type Err = ();
@@ -7535,8 +7551,7 @@ impl FromStr for Dispatcher {
             "resizeactive" => Ok(Dispatcher::ResizeActive(params.parse().unwrap_or_default())),
             "moveactive" => Ok(Dispatcher::MoveActive(params.parse().unwrap_or_default())),
             "resizewindowpixel" => {
-                let (resize_params, window_target) =
-                    params.split_once(' ').unwrap_or((params, ""));
+                let (resize_params, window_target) = params.split_once(' ').unwrap_or((params, ""));
 
                 let resize_params = ResizeParams::from_str(resize_params).unwrap_or_default();
                 let window_target = window_target.parse().unwrap_or_default();
@@ -7544,8 +7559,7 @@ impl FromStr for Dispatcher {
                 Ok(Dispatcher::ResizeWindowPixel(resize_params, window_target))
             }
             "movewindowpixel" => {
-                let (resize_params, window_target) =
-                    params.split_once(' ').unwrap_or((params, ""));
+                let (resize_params, window_target) = params.split_once(' ').unwrap_or((params, ""));
 
                 let resize_params = ResizeParams::from_str(resize_params).unwrap_or_default();
                 let window_target = window_target.parse().unwrap_or_default();
