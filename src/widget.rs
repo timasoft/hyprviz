@@ -14,7 +14,13 @@ use std::{
 };
 
 use crate::{
-    advanced_editors::{create_bind_editor, create_curve_editor, create_fancy_boxline},
+    advanced_editors::{
+        create_bind_editor, create_curve_editor, create_entry, create_fancy_boxline,
+    },
+    gtk_converters::{
+        FieldLabel, ToGtkBoxImplementation, ToGtkBoxWithSeparatorAndNamesImplementation,
+        ToGtkBoxWithSeparatorImplementation, ToOptionalGtkBoxImplementation,
+    },
     guides::create_guide,
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
@@ -4053,6 +4059,230 @@ impl ConfigWidget {
                 });
 
                 container.append(&info_box);
+            }
+            "togtkbox_test" => {
+                add_section(
+                    &container,
+                    &t!("togtkbox_test_category.togtkbox_section_title"),
+                    &t!("togtkbox_test_category.togtkbox_section_description"),
+                    first_section.clone(),
+                );
+
+                let togtkbox_section = Box::new(Orientation::Vertical, 10);
+                container.append(&togtkbox_section);
+
+                for implementation in inventory::iter::<ToGtkBoxImplementation> {
+                    let test_box = Box::new(Orientation::Vertical, 5);
+                    test_box.add_css_class("card");
+
+                    let title = Label::new(Some(&format!(
+                        "{} {:?}",
+                        t!("togtkbox_test_category.togtkbox_label"),
+                        implementation.0
+                    )));
+                    title.add_css_class("heading");
+                    test_box.append(&title);
+
+                    let entry = create_entry();
+                    entry.set_placeholder_text(Some(&t!(
+                        "togtkbox_test_category.enter_value_placeholder"
+                    )));
+                    test_box.append(&entry);
+
+                    let result_box = implementation.0(&entry);
+                    test_box.append(&result_box);
+
+                    togtkbox_section.append(&test_box);
+                }
+
+                add_section(
+                    &container,
+                    &t!("togtkbox_test_category.tooptionalgtkbox_section_title"),
+                    &t!("togtkbox_test_category.tooptionalgtkbox_section_description"),
+                    first_section.clone(),
+                );
+
+                let tooptionalgtkbox_section = Box::new(Orientation::Vertical, 10);
+                container.append(&tooptionalgtkbox_section);
+
+                for implementation in inventory::iter::<ToOptionalGtkBoxImplementation> {
+                    let test_box = Box::new(Orientation::Vertical, 5);
+
+                    let title = Label::new(Some(&format!(
+                        "{} {:?}",
+                        t!("togtkbox_test_category.tooptionalgtkbox_label"),
+                        implementation.0
+                    )));
+                    title.add_css_class("heading");
+                    test_box.append(&title);
+
+                    let entry = create_entry();
+                    entry.set_placeholder_text(Some(&t!(
+                        "togtkbox_test_category.enter_value_or_empty_for_none"
+                    )));
+                    test_box.append(&entry);
+
+                    let result_box = implementation.0(&entry);
+                    test_box.append(&result_box);
+
+                    tooptionalgtkbox_section.append(&test_box);
+                }
+
+                add_section(
+                    &container,
+                    &t!("togtkbox_test_category.togtkbox_with_separator_section_title"),
+                    &t!("togtkbox_test_category.togtkbox_with_separator_section_description"),
+                    first_section.clone(),
+                );
+
+                let separator_section = Box::new(Orientation::Vertical, 10);
+                container.append(&separator_section);
+
+                for implementation in inventory::iter::<ToGtkBoxWithSeparatorImplementation> {
+                    let test_box = Box::new(Orientation::Vertical, 5);
+                    test_box.add_css_class("card");
+
+                    let title = Label::new(Some(&format!(
+                        "{} {:?}",
+                        t!("togtkbox_test_category.togtkbox_with_separator_label"),
+                        implementation.0
+                    )));
+                    title.add_css_class("heading");
+                    test_box.append(&title);
+
+                    let separator_controls = Box::new(Orientation::Horizontal, 5);
+
+                    let separator_label =
+                        Label::new(Some(&t!("togtkbox_test_category.separator_label")));
+                    separator_controls.append(&separator_label);
+
+                    let separator_entry = create_entry();
+                    separator_entry.set_text(";");
+                    separator_entry.set_max_width_chars(3);
+                    separator_controls.append(&separator_entry);
+
+                    test_box.append(&separator_controls);
+
+                    let entry = create_entry();
+                    entry.set_placeholder_text(Some(&format!(
+                        "{} {}",
+                        t!("togtkbox_test_category.enter_values_separated_by"),
+                        ";"
+                    )));
+                    test_box.append(&entry);
+
+                    let result_container = Box::new(Orientation::Vertical, 0);
+                    test_box.append(&result_container);
+
+                    let separator_entry_clone = separator_entry.clone();
+                    let entry_clone = entry.clone();
+                    let result_container_clone = result_container.clone();
+
+                    let update_ui = move || {
+                        let separator = separator_entry_clone.text().chars().next().unwrap_or(';');
+                        let placeholder = format!(
+                            "{} {}",
+                            t!("togtkbox_test_category.enter_values_separated_by"),
+                            separator
+                        );
+                        entry_clone.set_placeholder_text(Some(&placeholder));
+
+                        while let Some(child) = result_container_clone.first_child() {
+                            result_container_clone.remove(&child);
+                        }
+
+                        let result_box = implementation.0(&entry_clone, separator);
+                        result_container_clone.append(&result_box);
+                    };
+
+                    update_ui();
+
+                    separator_entry.connect_changed(move |_| {
+                        update_ui();
+                    });
+
+                    separator_section.append(&test_box);
+                }
+
+                add_section(
+                    &container,
+                    &t!("togtkbox_test_category.togtkbox_with_separator_and_names_section_title"),
+                    &t!(
+                        "togtkbox_test_category.togtkbox_with_separator_and_names_section_description"
+                    ),
+                    first_section.clone(),
+                );
+
+                let separator_and_names_section = Box::new(Orientation::Vertical, 10);
+                container.append(&separator_and_names_section);
+
+                for implementation in inventory::iter::<ToGtkBoxWithSeparatorAndNamesImplementation>
+                {
+                    let test_box = Box::new(Orientation::Vertical, 5);
+                    test_box.add_css_class("card");
+
+                    let title = Label::new(Some(&format!(
+                        "{} {:?}",
+                        t!("togtkbox_test_category.togtkbox_with_separator_and_names_label"),
+                        implementation.0
+                    )));
+                    title.add_css_class("heading");
+                    test_box.append(&title);
+
+                    let separator_controls = Box::new(Orientation::Horizontal, 5);
+
+                    let separator_label =
+                        Label::new(Some(&t!("togtkbox_test_category.separator_label")));
+                    separator_controls.append(&separator_label);
+
+                    let separator_entry = create_entry();
+                    separator_entry.set_text("_");
+                    separator_entry.set_max_width_chars(3);
+                    separator_controls.append(&separator_entry);
+
+                    test_box.append(&separator_controls);
+
+                    let entry = create_entry();
+                    entry.set_placeholder_text(Some(&format!(
+                        "{} {}",
+                        t!("togtkbox_test_category.enter_values_separated_by"),
+                        "_"
+                    )));
+                    test_box.append(&entry);
+
+                    let result_container = Box::new(Orientation::Vertical, 0);
+                    test_box.append(&result_container);
+
+                    let separator_entry_clone = separator_entry.clone();
+                    let entry_clone = entry.clone();
+                    let result_container_clone = result_container.clone();
+
+                    let update_ui = move || {
+                        let separator = separator_entry_clone.text().chars().next().unwrap_or('_');
+                        let placeholder = format!(
+                            "{} {}",
+                            t!("togtkbox_test_category.enter_values_separated_by"),
+                            separator
+                        );
+                        entry_clone.set_placeholder_text(Some(&placeholder));
+
+                        while let Some(child) = result_container_clone.first_child() {
+                            result_container_clone.remove(&child);
+                        }
+
+                        let empty_names: &[FieldLabel] = &[];
+                        let result_box = implementation.0(&entry_clone, separator, empty_names);
+                        result_container_clone.append(&result_box);
+                    };
+
+                    update_ui();
+
+                    separator_entry.connect_changed(move |_| {
+                        update_ui();
+                    });
+
+                    separator_and_names_section.append(&test_box);
+                }
             }
             _ => {
                 match category {

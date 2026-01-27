@@ -1,7 +1,7 @@
 use crate::{
     utils::{
         BACKUP_SUFFIX, HYPRVIZ_PROFILES_PATH, atomic_write, expand_source, find_all_profiles,
-        get_config_path, reload_hyprland,
+        get_config_path, is_development_mode, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -1004,7 +1004,7 @@ along with this program; if not, see
             }
         });
 
-        let categories = [
+        let mut categories = vec![
             (t!("general").to_string(), "general"),
             (t!("decoration").to_string(), "decoration"),
             (t!("animations_settings").to_string(), "animations"),
@@ -1033,6 +1033,10 @@ along with this program; if not, see
             (t!("all_top_level").to_string(), "top_level"),
             (t!("system_info").to_string(), "systeminfo"),
         ];
+
+        if is_development_mode() {
+            categories.push((t!("togtkbox_test").to_string(), "togtkbox_test"));
+        }
 
         for (display_name, category) in &categories {
             let widget = ConfigWidget::new(category, display_name);

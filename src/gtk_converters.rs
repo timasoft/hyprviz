@@ -51,18 +51,28 @@ trait EnumConfigForGtk {
 pub trait ToGtkBox {
     fn to_gtk_box(entry: &Entry) -> GtkBox;
 }
+pub struct ToGtkBoxImplementation(pub fn(&Entry) -> GtkBox);
+inventory::collect!(ToGtkBoxImplementation);
 
 trait ToOptionalGtkBox {
     fn to_gtk_box(entry: &Entry) -> GtkBox;
 }
+pub struct ToOptionalGtkBoxImplementation(pub fn(&Entry) -> GtkBox);
+inventory::collect!(ToOptionalGtkBoxImplementation);
 
 trait ToGtkBoxWithSeparator {
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox;
 }
+pub struct ToGtkBoxWithSeparatorImplementation(pub fn(&Entry, char) -> GtkBox);
+inventory::collect!(ToGtkBoxWithSeparatorImplementation);
 
 trait ToGtkBoxWithSeparatorAndNames {
     fn to_gtk_box(entry: &Entry, separator: char, names: &[FieldLabel]) -> GtkBox;
 }
+pub struct ToGtkBoxWithSeparatorAndNamesImplementation(
+    pub fn(&Entry, char, &[FieldLabel]) -> GtkBox,
+);
+inventory::collect!(ToGtkBoxWithSeparatorAndNamesImplementation);
 
 impl<T> ToGtkBox for T
 where
@@ -199,6 +209,7 @@ impl<T: ToGtkBox> ToOptionalGtkBox for Option<T> {
         mother_box.append(&is_some_switch);
 
         let sub_box = T::to_gtk_box(entry);
+        sub_box.set_visible(false);
         mother_box.append(&sub_box);
 
         let entry_clone = entry.clone();
@@ -423,6 +434,8 @@ impl<T: ToGtkBox + Default + Display + FromStr> ToGtkBoxWithSeparator for HashSe
                     }
                     is_updating_clone_clone.set(false);
                 });
+
+                mother_box_clone.append(&part_box);
             }
             mother_box_clone.append(&add_button_clone);
             remove_buttons
@@ -4384,4 +4397,258 @@ impl EnumConfigForGtk for Dispatcher {
             // other options does not need to be labelled
         ])
     }
+}
+
+// ToGtkBox
+inventory::submit! {
+    ToGtkBoxImplementation(<() as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<String as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<u8 as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<u32 as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<i32 as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<bool as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<Direction as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<MonitorTarget as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<PixelOrPercent as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<ResizeParams as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<FloatValue as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<ZHeight as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<FullscreenMode as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<RelativeId as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<WorkspaceTarget as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<WindowTarget as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<CursorCorner as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<GroupLockAction as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<ToggleState as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<FullscreenState as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<IdOrName as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<WindowGroupOption as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<WindowEvent as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<ContentType as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<HyprColor as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<IdleIngibitMode as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<HyprOpacity as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<Side as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<AnimationStyle as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<TagToggleState as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<WindowRule as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<KeyState as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<DispatcherFullscreenState as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<MoveDirection as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<SwapDirection as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<SwapNext as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<ChangeGroupActive as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<SetPropToggleState as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<SetProp as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<Modifier as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<Dispatcher as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<HyprCoord as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<HyprSize as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<Angle as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<BorderColor as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<CycleNext as ToGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxImplementation(<HyprGradient as ToGtkBox>::to_gtk_box)
+}
+
+// ToOptionalGtkBox
+inventory::submit! {
+    ToOptionalGtkBoxImplementation(<Option<Direction> as ToOptionalGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToOptionalGtkBoxImplementation(<Option<WindowTarget> as ToOptionalGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToOptionalGtkBoxImplementation(<Option<Angle> as ToOptionalGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToOptionalGtkBoxImplementation(<Option<HyprGradient> as ToOptionalGtkBox>::to_gtk_box)
+}
+inventory::submit! {
+    ToOptionalGtkBoxImplementation(<Option<String> as ToOptionalGtkBox>::to_gtk_box)
+}
+
+// ToGtkBoxWithSeparator
+inventory::submit! {
+    ToGtkBoxWithSeparatorImplementation(<Vec<HyprColor> as ToGtkBoxWithSeparator>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorImplementation(<Vec<WindowRule> as ToGtkBoxWithSeparator>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorImplementation(<Vec<WindowGroupOption> as ToGtkBoxWithSeparator>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorImplementation(<HashSet<Modifier> as ToGtkBoxWithSeparator>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorImplementation(<HashSet<WindowEvent> as ToGtkBoxWithSeparator>::to_gtk_box)
+}
+
+// ToGtkBoxWithSeparatorAndNames
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(Direction,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(u32,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(i32,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(String,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(PixelOrPercent,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(PixelOrPercent, PixelOrPercent) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(FloatValue,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(WindowTarget, String) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(WorkspaceTarget, MonitorTarget) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(MonitorTarget, MonitorTarget) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(TagToggleState, String) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(u32, String) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(u32, u32) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(u8, u8, u8) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(u8, u8, u8, u8) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(FullscreenState, FullscreenState) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(DispatcherFullscreenState, DispatcherFullscreenState) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(ResizeParams, WindowTarget) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(ToggleState,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(GroupLockAction,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(ChangeGroupActive,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(CycleNext,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(SwapNext,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(SetPropToggleState,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
+}
+inventory::submit! {
+    ToGtkBoxWithSeparatorAndNamesImplementation(<(KeyState,) as ToGtkBoxWithSeparatorAndNames>::to_gtk_box)
 }
