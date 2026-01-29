@@ -297,6 +297,7 @@ impl<T: ToGtkBox> ToGtkBox for Option<T> {
 impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
+        let join_separator = separator.to_string();
 
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         let add_button = create_button(&t!("add"));
@@ -305,21 +306,18 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         let add_button_clone = add_button.clone();
         let entry_clone = entry.clone();
         let is_updating_clone = is_updating.clone();
+        let separator_clone = separator;
+        let join_separator_clone = join_separator.clone();
+
         let rebuild_ui = move |text: &str| {
             while let Some(child) = mother_box_clone.first_child() {
                 mother_box_clone.remove(&child);
             }
 
             let mut remove_buttons = Vec::new();
+            let parts: Vec<&str> = text.split(separator_clone).collect();
 
-            let parts = text
-                .split(separator)
-                .filter(|p| !p.is_empty())
-                .collect::<Vec<_>>();
             for (i, part) in parts.iter().enumerate() {
-                if part.is_empty() {
-                    continue;
-                }
                 let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
                 let remove_button = create_button(&t!("remove"));
@@ -328,86 +326,99 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
 
                 let sub_entry = create_entry();
                 let sub_box = T::to_gtk_box(&sub_entry);
-                sub_entry.set_text(part);
+                sub_entry.set_text(part.trim());
                 part_box.append(&sub_box);
 
                 let entry_clone_clone = entry_clone.clone();
                 let is_updating_clone_clone = is_updating_clone.clone();
-                sub_entry.connect_changed(move |entry| {
+                let separator_inner = separator_clone;
+                let join_sep = join_separator_clone.clone();
+                let index = i;
+
+                sub_entry.connect_changed(move |sub_entry_widget| {
                     if is_updating_clone_clone.get() {
                         return;
                     }
                     is_updating_clone_clone.set(true);
-                    let new_text = entry.text().to_string();
-                    let entry_text = entry_clone_clone.text().to_string();
-                    let mut parts_vec: Vec<String> = entry_text
-                        .split(separator)
-                        .filter(|p| !p.is_empty())
+
+                    let new_value = sub_entry_widget.text().trim().to_string();
+                    let current_text = entry_clone_clone.text().to_string();
+
+                    let mut parts_vec: Vec<String> = current_text
+                        .split(separator_inner)
                         .map(|s| s.to_string())
                         .collect();
-                    if i < parts_vec.len() {
-                        parts_vec[i] = new_text;
-                        let separator = match separator {
-                            ';' => "; ".to_string(),
-                            char => char.to_string(),
-                        };
-                        let updated_text = parts_vec.join(&separator);
+
+                    if index < parts_vec.len() {
+                        parts_vec[index] = new_value;
+                        let updated_text = parts_vec.join(&join_sep);
                         entry_clone_clone.set_text(&updated_text);
                     }
+
                     is_updating_clone_clone.set(false);
                 });
 
                 mother_box_clone.append(&part_box);
             }
+
             mother_box_clone.append(&add_button_clone);
             remove_buttons
         };
 
-        let entry_clone = entry.clone();
+        let entry_clone_add = entry.clone();
+        let separator_add = separator;
+        let join_separator_add = join_separator.clone();
         add_button.connect_clicked(move |_| {
-            let text = entry_clone.text().to_string();
-            let mut parts = text.split(separator).collect::<Vec<_>>();
-            let new_text = T::default().to_string();
-            parts.push(&new_text);
-            let separator = match separator {
-                ';' => "; ".to_string(),
-                char => char.to_string(),
-            };
-            let updated_text = parts.join(&separator);
-            entry_clone.set_text(&updated_text);
+            let current_text = entry_clone_add.text().to_string();
+            let parts: Vec<String> = current_text
+                .split(separator_add)
+                .map(|s| s.to_string())
+                .collect();
+
+            let mut new_parts = parts;
+            new_parts.push(T::default().to_string());
+            let updated_text = new_parts.join(&join_separator_add);
+            entry_clone_add.set_text(&updated_text);
         });
 
-        let rebuild_ui_with_remove_buttons = move |entry: &Entry| {
-            let remove_buttons = rebuild_ui(entry.text().as_str());
-            for (i, remove_button) in remove_buttons.into_iter().enumerate() {
-                let entry_clone = entry.clone();
-                remove_button.connect_clicked(move |_| {
-                    let text = entry_clone.text().to_string();
-                    let mut parts = text
-                        .split(separator)
-                        .filter(|p| !p.is_empty())
-                        .collect::<Vec<_>>();
-                    parts.remove(i);
-                    let separator = match separator {
-                        ';' => "; ".to_string(),
-                        char => char.to_string(),
-                    };
-                    let updated_text = parts.join(&separator);
-                    entry_clone.set_text(&updated_text);
-                });
+        let rebuild_ui_with_remove_buttons = {
+            let separator_rm = separator;
+            let join_separator_rm = join_separator.clone();
+            move |entry_widget: &Entry| {
+                let remove_buttons = rebuild_ui(entry_widget.text().as_str());
+                for (i, remove_button) in remove_buttons.into_iter().enumerate() {
+                    let entry_clone_rm = entry_widget.clone();
+                    let separator_inner = separator_rm;
+                    let join_sep = join_separator_rm.clone();
+                    let index = i;
+
+                    remove_button.connect_clicked(move |_| {
+                        let current_text = entry_clone_rm.text().to_string();
+                        let mut parts_vec: Vec<String> = current_text
+                            .split(separator_inner)
+                            .map(|s| s.to_string())
+                            .collect();
+
+                        if index < parts_vec.len() {
+                            parts_vec.remove(index);
+                            let updated_text = parts_vec.join(&join_sep);
+                            entry_clone_rm.set_text(&updated_text);
+                        }
+                    });
+                }
             }
         };
 
         rebuild_ui_with_remove_buttons(entry);
 
-        let is_updating_clone = is_updating.clone();
-        entry.connect_changed(move |entry| {
-            if is_updating_clone.get() {
+        let is_updating_main = is_updating.clone();
+        entry.connect_changed(move |entry_widget| {
+            if is_updating_main.get() {
                 return;
             }
-            is_updating_clone.set(true);
-            rebuild_ui_with_remove_buttons(entry);
-            is_updating_clone.set(false);
+            is_updating_main.set(true);
+            rebuild_ui_with_remove_buttons(entry_widget);
+            is_updating_main.set(false);
         });
 
         mother_box
@@ -3032,7 +3043,7 @@ impl ToGtkBox for HyprGradient {
         colors_box.append(&Label::new(Some(&t!("gradient_colors"))));
 
         let colors_entry = create_entry();
-        let colors_separator = ',';
+        let colors_separator = ' ';
         let colors_ui_box = Vec::<HyprColor>::to_gtk_box(&colors_entry, colors_separator);
         colors_box.append(&colors_ui_box);
         mother_box.append(&colors_box);
@@ -4497,6 +4508,7 @@ register_togtkbox_with_separator!(
     Vec<WindowGroupOption>,
     HashSet<Modifier>,
     HashSet<WindowEvent>,
+    Vec<u8>,
 );
 
 register_togtkbox_with_separator_names!(
