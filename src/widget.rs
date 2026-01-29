@@ -19,7 +19,7 @@ use crate::{
     },
     gtk_converters::{
         FieldLabel, ToGtkBoxImplementation, ToGtkBoxWithSeparatorAndNamesImplementation,
-        ToGtkBoxWithSeparatorImplementation, ToOptionalGtkBoxImplementation,
+        ToGtkBoxWithSeparatorImplementation,
     },
     guides::create_guide,
     utils::{
@@ -4076,9 +4076,9 @@ impl ConfigWidget {
                     test_box.add_css_class("card");
 
                     let title = Label::new(Some(&format!(
-                        "{} {:?}",
+                        "{} {}",
                         t!("togtkbox_test_category.togtkbox_label"),
-                        implementation.0
+                        implementation.name
                     )));
                     title.add_css_class("heading");
                     test_box.append(&title);
@@ -4089,43 +4089,10 @@ impl ConfigWidget {
                     )));
                     test_box.append(&entry);
 
-                    let result_box = implementation.0(&entry);
+                    let result_box = (implementation.constructor)(&entry);
                     test_box.append(&result_box);
 
                     togtkbox_section.append(&test_box);
-                }
-
-                add_section(
-                    &container,
-                    &t!("togtkbox_test_category.tooptionalgtkbox_section_title"),
-                    &t!("togtkbox_test_category.tooptionalgtkbox_section_description"),
-                    first_section.clone(),
-                );
-
-                let tooptionalgtkbox_section = Box::new(Orientation::Vertical, 10);
-                container.append(&tooptionalgtkbox_section);
-
-                for implementation in inventory::iter::<ToOptionalGtkBoxImplementation> {
-                    let test_box = Box::new(Orientation::Vertical, 5);
-
-                    let title = Label::new(Some(&format!(
-                        "{} {:?}",
-                        t!("togtkbox_test_category.tooptionalgtkbox_label"),
-                        implementation.0
-                    )));
-                    title.add_css_class("heading");
-                    test_box.append(&title);
-
-                    let entry = create_entry();
-                    entry.set_placeholder_text(Some(&t!(
-                        "togtkbox_test_category.enter_value_or_empty_for_none"
-                    )));
-                    test_box.append(&entry);
-
-                    let result_box = implementation.0(&entry);
-                    test_box.append(&result_box);
-
-                    tooptionalgtkbox_section.append(&test_box);
                 }
 
                 add_section(
@@ -4143,9 +4110,9 @@ impl ConfigWidget {
                     test_box.add_css_class("card");
 
                     let title = Label::new(Some(&format!(
-                        "{} {:?}",
+                        "{} {}",
                         t!("togtkbox_test_category.togtkbox_with_separator_label"),
-                        implementation.0
+                        implementation.name
                     )));
                     title.add_css_class("heading");
                     test_box.append(&title);
@@ -4191,7 +4158,7 @@ impl ConfigWidget {
                             result_container_clone.remove(&child);
                         }
 
-                        let result_box = implementation.0(&entry_clone, separator);
+                        let result_box = (implementation.constructor)(&entry_clone, separator);
                         result_container_clone.append(&result_box);
                     };
 
@@ -4222,9 +4189,9 @@ impl ConfigWidget {
                     test_box.add_css_class("card");
 
                     let title = Label::new(Some(&format!(
-                        "{} {:?}",
+                        "{} {}",
                         t!("togtkbox_test_category.togtkbox_with_separator_and_names_label"),
-                        implementation.0
+                        implementation.name
                     )));
                     title.add_css_class("heading");
                     test_box.append(&title);
@@ -4271,7 +4238,8 @@ impl ConfigWidget {
                         }
 
                         let empty_names: &[FieldLabel] = &[];
-                        let result_box = implementation.0(&entry_clone, separator, empty_names);
+                        let result_box =
+                            (implementation.constructor)(&entry_clone, separator, empty_names);
                         result_container_clone.append(&result_box);
                     };
 
