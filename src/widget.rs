@@ -4061,6 +4061,50 @@ impl ConfigWidget {
                 container.append(&info_box);
             }
             "togtkbox_test" => {
+                let create_search_filter = |test_boxes: Vec<Box>| {
+                    let search_entry = create_entry();
+                    search_entry.set_placeholder_text(Some(&t!(
+                        "togtkbox_test_category.search_placeholder"
+                    )));
+                    search_entry.set_margin_bottom(10);
+                    container.prepend(&search_entry);
+
+                    let titles: Vec<String> = test_boxes
+                        .iter()
+                        .map(|gtkbox| {
+                            gtkbox
+                                .first_child()
+                                .and_downcast::<Label>()
+                                .map(|label| label.label().to_string())
+                                .unwrap_or_default()
+                        })
+                        .collect();
+
+                    let test_boxes_clone = test_boxes.clone();
+                    let titles_clone = titles.clone();
+
+                    search_entry.connect_changed(move |entry| {
+                        let query = entry.text().to_lowercase();
+                        for (i, test_box) in test_boxes_clone.iter().enumerate() {
+                            let visible = titles_clone[i].to_lowercase().contains(&query);
+                            test_box.set_visible(visible);
+                        }
+                    });
+
+                    for test_box in &test_boxes {
+                        test_box.set_visible(true);
+                    }
+                };
+
+                add_section(
+                    &container,
+                    &t!("togtkbox_test_category.togtkbox_test_title"),
+                    &t!("togtkbox_test_category.togtkbox_test_description"),
+                    first_section.clone(),
+                );
+
+                let mut test_boxes = Vec::new();
+
                 add_section(
                     &container,
                     &t!("togtkbox_test_category.togtkbox_section_title"),
@@ -4093,6 +4137,7 @@ impl ConfigWidget {
                     test_box.append(&result_box);
 
                     togtkbox_section.append(&test_box);
+                    test_boxes.push(test_box);
                 }
 
                 add_section(
@@ -4169,6 +4214,7 @@ impl ConfigWidget {
                     });
 
                     separator_section.append(&test_box);
+                    test_boxes.push(test_box);
                 }
 
                 add_section(
@@ -4250,7 +4296,10 @@ impl ConfigWidget {
                     });
 
                     separator_and_names_section.append(&test_box);
+                    test_boxes.push(test_box);
                 }
+
+                create_search_filter(test_boxes);
             }
             _ => {
                 match category {
