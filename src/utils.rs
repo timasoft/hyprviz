@@ -4611,7 +4611,9 @@ impl Display for HyprColor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             HyprColor::Rgb(r, g, b) => write!(f, "rgb({},{},{})", r, g, b),
-            HyprColor::Rgba(r, g, b, a) => write!(f, "rgba({},{},{},{})", r, g, b, a),
+            HyprColor::Rgba(r, g, b, a) => {
+                write!(f, "rgba({},{},{},{})", r, g, b, *a as f64 / 255.0)
+            }
         }
     }
 }
@@ -4686,10 +4688,15 @@ impl FromStr for BorderColor {
             let color = HyprColor::from_str(parts[0]).unwrap_or_default();
             Ok(BorderColor::Color(color))
         } else if parts.len() == 2 {
-            // Double Color
+            // Double Color and Simple Gradient
             let color1 = HyprColor::from_str(parts[0]).unwrap_or_default();
-            let color2 = HyprColor::from_str(parts[1]).unwrap_or_default();
-            Ok(BorderColor::DoubleColor(color1, color2))
+            match parts[1].parse::<Angle>() {
+                Ok(angle) => Ok(BorderColor::Gradient(vec![color1, color1], angle)),
+                Err(_) => Ok(BorderColor::DoubleColor(
+                    color1,
+                    HyprColor::from_str(parts[1]).unwrap_or_default(),
+                )),
+            }
         } else {
             // Gradient or Double Gradient
             let mut first_gradient: Vec<HyprColor> = Vec::new();
@@ -4704,6 +4711,10 @@ impl FromStr for BorderColor {
                 } else if let Ok(color) = HyprColor::from_str(part) {
                     first_gradient.push(color);
                 }
+            }
+
+            if first_gradient.len() == 1 {
+                first_gradient.push(first_gradient[0]);
             }
 
             if first_angle_idx == parts.len() - 1 {
@@ -4721,6 +4732,10 @@ impl FromStr for BorderColor {
                     } else if let Ok(color) = HyprColor::from_str(part) {
                         second_gradient.push(color);
                     }
+                }
+
+                if second_gradient.len() == 1 {
+                    second_gradient.push(second_gradient[0]);
                 }
 
                 Ok(BorderColor::DoubleGradient(

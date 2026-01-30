@@ -191,7 +191,6 @@ where
         update_ui(get_value(None, None));
 
         let get_value_clone = get_value.clone();
-        let update_ui_clone = update_ui.clone();
         let entry_clone = entry.clone();
         let is_updating_clone = is_updating.clone();
         parameter_entry.connect_changed(move |parameter_entry| {
@@ -202,7 +201,6 @@ where
 
             let new_value = get_value_clone(None, Some(parameter_entry.text().as_str()));
             entry_clone.set_text(&new_value.to_string());
-            update_ui_clone(new_value);
             is_updating_clone.set(false);
         });
 
@@ -1842,6 +1840,7 @@ impl ToGtkBox for BorderColor {
         gradient_box.append(&vec_hypr_color_box);
         let angle_entry = create_entry();
         let angle_box = Angle::to_gtk_box(&angle_entry);
+        angle_box.prepend(&Label::new(Some(&t!("angle"))));
         gradient_box.append(&angle_box);
         mother_box.append(&gradient_box);
 
@@ -1852,6 +1851,7 @@ impl ToGtkBox for BorderColor {
         second_gradient_box.append(&second_vec_hypr_color_box);
         let opt_angle_entry = create_entry();
         let opt_angle_box = Option::<Angle>::to_gtk_box(&opt_angle_entry);
+        opt_angle_box.prepend(&Label::new(Some(&t!("angle"))));
         second_gradient_box.append(&opt_angle_box);
         mother_box.append(&second_gradient_box);
 
@@ -1925,6 +1925,7 @@ impl ToGtkBox for BorderColor {
 
         update_ui(entry.text().parse().unwrap_or_default());
 
+        let update_ui_clone = update_ui.clone();
         let entry_clone = entry.clone();
         let hypr_color_entry_clone = hypr_color_entry.clone();
         let second_hypr_color_entry_clone = second_hypr_color_entry.clone();
@@ -1977,6 +1978,7 @@ impl ToGtkBox for BorderColor {
             };
 
             entry_clone.set_text(&border_color.to_string());
+            update_ui_clone(border_color);
             is_updating_clone.set(false);
         });
 
