@@ -7403,6 +7403,8 @@ impl FromStr for Dispatcher {
                         if c == '[' {
                             in_brackets = true;
                         } else if c == ']' {
+                            rules.push(rule.parse().unwrap_or_default());
+                            rule.clear();
                             in_brackets = false;
                         } else if c == ';' && in_brackets {
                             rules.push(rule.parse().unwrap_or_default());

@@ -13,15 +13,11 @@ use crate::{
         WindowRule, WindowTarget, WorkspaceTarget, ZHeight, cow_to_static_str, join_with_separator,
     },
 };
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, StringList, prelude::*};
-use rust_i18n::t;
-use std::{
-    cell::Cell,
-    collections::{HashMap, HashSet},
-    fmt::Display,
-    rc::Rc,
-    str::FromStr,
+use gtk::{
+    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, prelude::*,
 };
+use rust_i18n::t;
+use std::{cell::Cell, collections::HashSet, fmt::Display, rc::Rc, str::FromStr};
 use strum::IntoEnumIterator;
 
 const PLUG_SEPARATOR: char = '︲';
@@ -125,84 +121,95 @@ where
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let string_list = T::dropdown_items();
         let is_updating = Rc::new(Cell::new(false));
+        let empty_vec = Vec::new();
 
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let dropdown = create_dropdown(&string_list);
         dropdown.set_selected(0);
         mother_box.append(&dropdown);
 
-        let parameter_entry = create_entry();
-        let parameter_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        let mut variant_parameter_boxes = HashMap::new();
+        let stack = Stack::new();
+        let mut variant_entries = Vec::new();
+        let field_labels = T::field_labels().unwrap_or_default();
+
         if let Some(separator) = T::separator() {
             for (i, discriminant) in T::Discriminant::iter().enumerate() {
-                if let Some(builder) = T::from_discriminant(discriminant).parameter_builder() {
-                    let empty_vec = Vec::new();
-                    let field_labels = T::field_labels().unwrap_or(Vec::new());
-                    let labels = field_labels.get(i).unwrap_or(&empty_vec);
-                    let variant_parameter_box = builder(&parameter_entry, separator, labels);
-                    variant_parameter_box.set_visible(false);
+                let param_entry = create_entry();
+                variant_entries.push(param_entry.clone());
 
-                    parameter_box.append(&variant_parameter_box);
-                    variant_parameter_boxes.insert(i, variant_parameter_box);
+                if let Some(builder) = T::from_discriminant(discriminant).parameter_builder() {
+                    let labels = field_labels.get(i).unwrap_or(&empty_vec);
+                    let variant_box = builder(&param_entry, separator, labels);
+                    stack.add_named(&variant_box, Some(&format!("v{}", i)));
+                } else {
+                    stack.add_named(
+                        &GtkBox::new(GtkOrientation::Vertical, 0),
+                        Some(&format!("v{}", i)),
+                    );
                 }
             }
-            mother_box.append(&parameter_box);
+            mother_box.append(&stack);
         }
 
         let dropdown_clone = dropdown.clone();
-        let parameter_entry_clone = parameter_entry.clone();
-        let get_value = move |variant_index: Option<usize>, parameter_text: Option<&str>| {
-            let variant_index = match variant_index {
-                Some(variant_index) => variant_index,
-                None => dropdown_clone.selected() as usize,
-            };
-            let parameter_text = match parameter_text {
-                Some(parameter_text) => parameter_text.to_string(),
-                None => parameter_entry_clone.text().to_string(),
-            };
+        let variant_entries_clone = variant_entries.clone();
+        let get_value = move |variant_index: Option<usize>| -> T {
+            let variant_index = variant_index.unwrap_or(dropdown_clone.selected() as usize);
+            let param_text = variant_entries_clone
+                .get(variant_index)
+                .map(|e| e.text().to_string())
+                .unwrap_or_default();
 
             T::from_discriminant_and_str(
                 T::Discriminant::iter()
                     .nth(variant_index)
                     .expect("variant_index out of bounds"),
-                &parameter_text,
+                &param_text,
             )
         };
 
         let dropdown_clone = dropdown.clone();
-        let parameter_entry_clone = parameter_entry.clone();
+        let stack_clone = stack.clone();
+        let variant_entries_clone = variant_entries.clone();
         let update_ui = move |value: T| {
             let variant_index = value.variant_index();
-            dropdown_clone.set_selected(variant_index as u32);
-
-            for variant_parameter_box in variant_parameter_boxes.values() {
-                variant_parameter_box.set_visible(false);
+            let current_selection = dropdown_clone.selected() as usize;
+            if current_selection != variant_index {
+                dropdown_clone.set_selected(variant_index as u32);
             }
 
-            if let Some(variant_parameter_box) = variant_parameter_boxes.get(&variant_index) {
-                variant_parameter_box.set_visible(true);
+            if let Some(_separator) = T::separator() {
+                stack_clone.set_visible_child_name(&format!("v{}", variant_index));
             }
 
-            let new_text = value.to_str_without_discriminant().unwrap_or_default();
-            parameter_entry_clone.set_text(&new_text);
+            if let Some(param_entry) = variant_entries_clone.get(variant_index) {
+                let new_text = value.to_str_without_discriminant().unwrap_or_default();
+                if param_entry.text() != new_text {
+                    param_entry.set_text(&new_text);
+                }
+            }
         };
 
-        update_ui(get_value(None, None));
+        let initial_value: T = entry.text().to_string().parse().unwrap_or_default();
+        update_ui(initial_value);
 
-        let get_value_clone = get_value.clone();
-        let entry_clone = entry.clone();
-        let is_updating_clone = is_updating.clone();
-        parameter_entry.connect_changed(move |parameter_entry| {
-            if is_updating_clone.get() {
-                return;
-            }
-            is_updating_clone.set(true);
-
-            let new_value = get_value_clone(None, Some(parameter_entry.text().as_str()));
-            entry_clone.set_text(&new_value.to_string());
-            is_updating_clone.set(false);
-        });
+        for (i, param_entry) in variant_entries.into_iter().enumerate() {
+            let get_value_clone = get_value.clone();
+            let entry_clone = entry.clone();
+            let is_updating_clone = is_updating.clone();
+            param_entry.connect_changed(move |_| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+                let new_value = get_value_clone(Some(i));
+                let new_text = new_value.to_string();
+                if entry_clone.text() != new_text {
+                    entry_clone.set_text(&new_text);
+                }
+                is_updating_clone.set(false);
+            });
+        }
 
         let get_value_clone = get_value.clone();
         let update_ui_clone = update_ui.clone();
@@ -213,9 +220,12 @@ where
                 return;
             }
             is_updating_clone.set(true);
-
-            let new_value = get_value_clone(Some(dropdown.selected() as usize), None);
-            entry_clone.set_text(&new_value.to_string());
+            let variant_index = dropdown.selected() as usize;
+            let new_value = get_value_clone(Some(variant_index));
+            let new_text = new_value.to_string();
+            if entry_clone.text() != new_text {
+                entry_clone.set_text(&new_text);
+            }
             update_ui_clone(new_value);
             is_updating_clone.set(false);
         });
