@@ -3217,9 +3217,8 @@ impl FromStr for PixelOrPercent {
 
         if let Ok(p) = s.parse::<i32>() {
             Ok(PixelOrPercent::Pixel(p))
-        } else if s.ends_with('%') {
-            let p = &s[..s.len() - 1];
-            if let Ok(p) = p.parse::<f64>() {
+        } else if let Some(stripped) = s.strip_suffix("%") {
+            if let Ok(p) = stripped.parse::<f64>() {
                 Ok(PixelOrPercent::Percent(p))
             } else {
                 Err(())
@@ -3928,7 +3927,7 @@ pub enum CursorCorner {
 }
 
 impl CursorCorner {
-    pub fn to_num(&self) -> u8 {
+    pub fn to_num(self) -> u8 {
         match self {
             CursorCorner::TopLeft => 0,
             CursorCorner::TopRight => 1,
@@ -4211,22 +4210,22 @@ impl FromStr for HyprSize {
         let width = parts.first().unwrap_or(&"");
         let height = parts.get(1).unwrap_or(&"");
 
-        if width.starts_with("<") {
+        if let Some(stripped) = width.strip_prefix("<") {
             result.width_bound = SizeBound::Max;
-            result.width = PixelOrPercent::from_str(&width[1..]).unwrap_or_default();
-        } else if width.starts_with(">") {
+            result.width = PixelOrPercent::from_str(stripped).unwrap_or_default();
+        } else if let Some(stripped) = width.strip_prefix(">") {
             result.width_bound = SizeBound::Min;
-            result.width = PixelOrPercent::from_str(&width[1..]).unwrap_or_default();
+            result.width = PixelOrPercent::from_str(stripped).unwrap_or_default();
         } else {
             result.width = PixelOrPercent::from_str(width).unwrap_or_default();
         }
 
-        if height.starts_with("<") {
+        if let Some(stripped) = height.strip_prefix("<") {
             result.height_bound = SizeBound::Max;
-            result.height = PixelOrPercent::from_str(&height[1..]).unwrap_or_default();
-        } else if height.starts_with(">") {
+            result.height = PixelOrPercent::from_str(stripped).unwrap_or_default();
+        } else if let Some(stripped) = height.strip_prefix(">") {
             result.height_bound = SizeBound::Min;
-            result.height = PixelOrPercent::from_str(&height[1..]).unwrap_or_default();
+            result.height = PixelOrPercent::from_str(stripped).unwrap_or_default();
         } else {
             result.height = PixelOrPercent::from_str(height).unwrap_or_default();
         }
@@ -4638,8 +4637,8 @@ impl FromStr for Angle {
             return Err(());
         }
 
-        if s.ends_with("deg") {
-            let degrees = s[..s.len() - 3].parse::<u16>().unwrap_or_default();
+        if let Some(stripped) = s.strip_suffix("deg") {
+            let degrees = stripped.parse::<u16>().unwrap_or_default();
             Ok(Angle::Degrees(degrees))
         } else {
             Err(())
@@ -5467,10 +5466,10 @@ impl HasDiscriminant for WindowRule {
             Self::Discriminant::IdleIngibit => Self::IdleIngibit(str.parse().unwrap_or_default()),
             Self::Discriminant::Opacity => Self::Opacity(str.parse().unwrap_or_default()),
             Self::Discriminant::Tag => {
-                if str.starts_with('+') {
-                    Self::Tag(TagToggleState::Set, str[1..].trim().to_string())
-                } else if str.starts_with('-') {
-                    Self::Tag(TagToggleState::Unset, str[1..].trim().to_string())
+                if let Some(stripped) = str.strip_prefix('+') {
+                    Self::Tag(TagToggleState::Set, stripped.trim().to_string())
+                } else if let Some(stripped) = str.strip_prefix('-') {
+                    Self::Tag(TagToggleState::Unset, stripped.trim().to_string())
                 } else {
                     Self::Tag(TagToggleState::Toggle, str.trim().to_string())
                 }
@@ -5588,15 +5587,15 @@ impl FromStr for WindowRule {
             "idleingibit" => Ok(WindowRule::IdleIngibit(part2.parse().unwrap_or_default())),
             "opacity" => Ok(WindowRule::Opacity(part2.parse().unwrap_or_default())),
             "tag" => {
-                if part2.starts_with("+") {
+                if let Some(stripped) = part2.strip_prefix("+") {
                     Ok(WindowRule::Tag(
                         TagToggleState::Set,
-                        part2[1..].trim().to_string(),
+                        stripped.trim().to_string(),
                     ))
-                } else if part2.starts_with("-") {
+                } else if let Some(stripped) = part2.strip_prefix("-") {
                     Ok(WindowRule::Tag(
                         TagToggleState::Unset,
-                        part2[1..].trim().to_string(),
+                        stripped.trim().to_string(),
                     ))
                 } else {
                     Ok(WindowRule::Tag(
@@ -5722,7 +5721,7 @@ impl DispatcherFullscreenState {
         }
     }
 
-    pub fn to_num(&self) -> i8 {
+    pub fn to_num(self) -> i8 {
         match self {
             DispatcherFullscreenState::Current => -1,
             DispatcherFullscreenState::None => 0,
@@ -5814,8 +5813,8 @@ impl FromStr for MoveDirection {
 
         let (part1, part2) = s.rsplit_once(' ').unwrap_or((s, ""));
 
-        if part1.starts_with("mon:") {
-            let monitor = MonitorTarget::from_str(part1[4..].trim()).unwrap_or_default();
+        if let Some(stripped) = part1.strip_prefix("mon:") {
+            let monitor = MonitorTarget::from_str(stripped.trim()).unwrap_or_default();
             match part2 {
                 "silent" => Ok(MoveDirection::MonitorSilent(monitor)),
                 _ => Ok(MoveDirection::Monitor(monitor)),
@@ -6387,10 +6386,10 @@ impl HasDiscriminant for SetProp {
             Self::Discriminant::IdleIngibit => Self::IdleIngibit(str.parse().unwrap_or_default()),
             Self::Discriminant::Opacity => Self::Opacity(str.parse().unwrap_or_default()),
             Self::Discriminant::Tag => {
-                if str.starts_with('+') {
-                    Self::Tag(TagToggleState::Set, str[1..].trim().to_string())
-                } else if str.starts_with('-') {
-                    Self::Tag(TagToggleState::Unset, str[1..].trim().to_string())
+                if let Some(stripped) = str.strip_prefix('+') {
+                    Self::Tag(TagToggleState::Set, stripped.trim().to_string())
+                } else if let Some(stripped) = str.strip_prefix('-') {
+                    Self::Tag(TagToggleState::Unset, stripped.trim().to_string())
                 } else {
                     Self::Tag(TagToggleState::Toggle, str.trim().to_string())
                 }
@@ -6589,15 +6588,15 @@ impl FromStr for SetProp {
             )),
             "tag" => {
                 let part2 = parts.get(1).unwrap_or(&"");
-                if part2.starts_with("+") {
+                if let Some(stripped) = part2.strip_prefix("+") {
                     Ok(SetProp::Tag(
                         TagToggleState::Set,
-                        part2[1..].trim().to_string(),
+                        stripped.trim().to_string(),
                     ))
-                } else if part2.starts_with("-") {
+                } else if let Some(stripped) = part2.strip_prefix("-") {
                     Ok(SetProp::Tag(
                         TagToggleState::Unset,
-                        part2[1..].trim().to_string(),
+                        stripped.trim().to_string(),
                     ))
                 } else {
                     Ok(SetProp::Tag(
@@ -8078,18 +8077,6 @@ impl Display for UnbindRight {
         let result = format!("{}, {}", join_with_separator(&self.mods, "_"), self.key,);
         write!(f, "{}", result)
     }
-}
-
-pub fn parse_key_with_code(key: &str) -> String {
-    if key.starts_with("code:") {
-        let code = key.strip_prefix("code:").unwrap_or("");
-        if let Ok(keycode) = code.parse::<u32>() {
-            return keycode_to_en_key(keycode);
-        }
-    } else if key.starts_with("mouse:") {
-        return key.to_string();
-    }
-    key.to_string()
 }
 
 fn parse_bool(value: &str) -> Option<bool> {
