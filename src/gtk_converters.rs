@@ -308,7 +308,7 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         let join_separator = separator.to_string();
 
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        let add_button = create_button(&t!("add"));
+        let add_button = create_button(&t!("gtk_converters.add"));
 
         let mother_box_clone = mother_box.clone();
         let add_button_clone = add_button.clone();
@@ -328,7 +328,7 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
             for (i, part) in parts.iter().enumerate() {
                 let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
-                let remove_button = create_button(&t!("remove"));
+                let remove_button = create_button(&t!("gtk_converters.remove"));
                 part_box.append(&remove_button);
                 remove_buttons.push(remove_button.clone());
 
@@ -438,7 +438,7 @@ impl<T: ToGtkBox + Default + Display + FromStr> ToGtkBoxWithSeparator for HashSe
         let is_updating = Rc::new(Cell::new(false));
 
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        let add_button = create_button(&t!("add"));
+        let add_button = create_button(&t!("gtk_converters.add"));
 
         let mother_box_clone = mother_box.clone();
         let add_button_clone = add_button.clone();
@@ -461,7 +461,7 @@ impl<T: ToGtkBox + Default + Display + FromStr> ToGtkBoxWithSeparator for HashSe
                 }
                 let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
-                let remove_button = create_button(&t!("remove"));
+                let remove_button = create_button(&t!("gtk_converters.remove"));
                 part_box.append(&remove_button);
                 remove_buttons.push(remove_button.clone());
 
@@ -918,7 +918,7 @@ pub fn create_spin_button_builder(
         let spin_button = create_spin_button(min, max, step);
         mother_box.append(&spin_button);
         if let FieldLabel::Named("%") = name {
-            mother_box.append(&Label::new(Some(&t!("%"))));
+            mother_box.append(&Label::new(Some(&t!("gtk_converters.%"))));
         }
 
         let spin_button_clone = spin_button.clone();
@@ -1154,18 +1154,23 @@ impl ToGtkBox for bool {
 
 impl EnumConfigForGtk for Direction {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("left"), &t!("right"), &t!("up"), &t!("down")])
+        StringList::new(&[
+            &t!("gtk_converters.left"),
+            &t!("gtk_converters.right"),
+            &t!("gtk_converters.up"),
+            &t!("gtk_converters.down"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for MonitorTarget {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("direction"),
-            &t!("id"),
-            &t!("name"),
-            &t!("current"),
-            &t!("relative"),
+            &t!("gtk_converters.direction"),
+            &t!("gtk_converters.id"),
+            &t!("gtk_converters.name"),
+            &t!("gtk_converters.current"),
+            &t!("gtk_converters.relative"),
         ])
     }
 
@@ -1186,7 +1191,7 @@ impl EnumConfigForGtk for MonitorTarget {
 
 impl EnumConfigForGtk for PixelOrPercent {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("pixel"), &t!("percent")])
+        StringList::new(&[&t!("gtk_converters.pixel"), &t!("gtk_converters.percent")])
     }
 
     fn separator() -> Option<char> {
@@ -1215,7 +1220,7 @@ impl EnumConfigForGtk for PixelOrPercent {
 
 impl EnumConfigForGtk for ResizeParams {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("relative"), &t!("exact")])
+        StringList::new(&[&t!("gtk_converters.relative"), &t!("gtk_converters.exact")])
     }
 
     fn separator() -> Option<char> {
@@ -1232,7 +1237,7 @@ impl EnumConfigForGtk for ResizeParams {
 
 impl EnumConfigForGtk for FloatValue {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("relative"), &t!("exact")])
+        StringList::new(&[&t!("gtk_converters.relative"), &t!("gtk_converters.exact")])
     }
 
     fn separator() -> Option<char> {
@@ -1259,19 +1264,26 @@ impl EnumConfigForGtk for FloatValue {
 
 impl EnumConfigForGtk for ZHeight {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("top"), &t!("bottom")])
+        StringList::new(&[&t!("gtk_converters.top"), &t!("gtk_converters.bottom")])
     }
 }
 
 impl EnumConfigForGtk for FullscreenMode {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("fullscreen"), &t!("maximize")])
+        StringList::new(&[
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for RelativeId {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("absolute"), &t!("previous"), &t!("next")])
+        StringList::new(&[
+            &t!("gtk_converters.absolute"),
+            &t!("gtk_converters.previous"),
+            &t!("gtk_converters.next"),
+        ])
     }
 
     fn separator() -> Option<char> {
@@ -1290,20 +1302,20 @@ impl EnumConfigForGtk for RelativeId {
 impl EnumConfigForGtk for WorkspaceTarget {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("id"),
-            &t!("relative"),
-            &t!("on_monitor"),
-            &t!("on_monitor_including_empty_workspace"),
-            &t!("open"),
-            &t!("name"),
-            &t!("previous"),
-            &t!("previous_per_monitor"),
-            &t!("first_available_empty_workspace"),
-            &t!("next_available_empty_workspace"),
-            &t!("first_available_empty_workspace_on_monitor"),
-            &t!("next_available_empty_workspace_on_monitor"),
-            &t!("special"),
-            &t!("special_with_name"),
+            &t!("gtk_converters.id"),
+            &t!("gtk_converters.relative"),
+            &t!("gtk_converters.on_monitor"),
+            &t!("gtk_converters.on_monitor_including_empty_workspace"),
+            &t!("gtk_converters.open"),
+            &t!("gtk_converters.name"),
+            &t!("gtk_converters.previous"),
+            &t!("gtk_converters.previous_per_monitor"),
+            &t!("gtk_converters.first_available_empty_workspace"),
+            &t!("gtk_converters.next_available_empty_workspace"),
+            &t!("gtk_converters.first_available_empty_workspace_on_monitor"),
+            &t!("gtk_converters.next_available_empty_workspace_on_monitor"),
+            &t!("gtk_converters.special"),
+            &t!("gtk_converters.special_with_name"),
         ])
     }
 
@@ -1336,16 +1348,16 @@ impl EnumConfigForGtk for WorkspaceTarget {
 impl EnumConfigForGtk for WindowTarget {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("class"),
-            &t!("initial_class"),
-            &t!("title"),
-            &t!("initial_title"),
-            &t!("tag"),
-            &t!("pid"),
-            &t!("address"),
-            &t!("active_window"),
-            &t!("floating"),
-            &t!("tiled"),
+            &t!("gtk_converters.class"),
+            &t!("gtk_converters.initial_class"),
+            &t!("gtk_converters.title"),
+            &t!("gtk_converters.initial_title"),
+            &t!("gtk_converters.tag"),
+            &t!("gtk_converters.pid"),
+            &t!("gtk_converters.address"),
+            &t!("gtk_converters.active_window"),
+            &t!("gtk_converters.floating"),
+            &t!("gtk_converters.tiled"),
         ])
     }
 
@@ -1372,33 +1384,41 @@ impl EnumConfigForGtk for WindowTarget {
 impl EnumConfigForGtk for CursorCorner {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("top_left"),
-            &t!("top_right"),
-            &t!("bottom_left"),
-            &t!("bottom_right"),
+            &t!("gtk_converters.top_left"),
+            &t!("gtk_converters.top_right"),
+            &t!("gtk_converters.bottom_left"),
+            &t!("gtk_converters.bottom_right"),
         ])
     }
 }
 
 impl EnumConfigForGtk for GroupLockAction {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("lock"), &t!("unlock"), &t!("toggle")])
+        StringList::new(&[
+            &t!("gtk_converters.lock"),
+            &t!("gtk_converters.unlock"),
+            &t!("gtk_converters.toggle"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for ToggleState {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("on"), &t!("off"), &t!("toggle")])
+        StringList::new(&[
+            &t!("gtk_converters.on"),
+            &t!("gtk_converters.off"),
+            &t!("gtk_converters.toggle"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for FullscreenState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("none"),
-            &t!("maximize"),
-            &t!("fullscreen"),
-            &t!("maximize_and_fullscreen"),
+            &t!("gtk_converters.none"),
+            &t!("gtk_converters.maximize"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize_and_fullscreen"),
         ])
     }
 }
@@ -1424,25 +1444,25 @@ impl ToGtkBox for HyprCoord {
         mother_box.append(&y_box_box);
 
         let x_sub_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        x_sub_box.append(&Label::new(Some(&t!("subtrahend_of_x"))));
+        x_sub_box.append(&Label::new(Some(&t!("gtk_converters.subtrahend_of_x"))));
         let x_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         x_sub_box.append(&x_sub_spin_button);
         mother_box.append(&x_sub_box);
 
         let y_sub_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        y_sub_box.append(&Label::new(Some(&t!("subtrahend_of_y"))));
+        y_sub_box.append(&Label::new(Some(&t!("gtk_converters.subtrahend_of_y"))));
         let y_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         y_sub_box.append(&y_sub_spin_button);
         mother_box.append(&y_sub_box);
 
         let under_cursor_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        under_cursor_box.append(&Label::new(Some(&t!("under_cursor"))));
+        under_cursor_box.append(&Label::new(Some(&t!("gtk_converters.under_cursor"))));
         let under_cursor_switch = create_switch();
         under_cursor_box.append(&under_cursor_switch);
         mother_box.append(&under_cursor_box);
 
         let on_screen_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        on_screen_box.append(&Label::new(Some(&t!("on_screen"))));
+        on_screen_box.append(&Label::new(Some(&t!("gtk_converters.on_screen"))));
         let on_screen_switch = create_switch();
         on_screen_box.append(&on_screen_switch);
         mother_box.append(&on_screen_box);
@@ -1564,29 +1584,33 @@ impl ToGtkBox for HyprSize {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let width_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        width_box_box.append(&Label::new(Some(&t!("width"))));
+        width_box_box.append(&Label::new(Some(&t!("gtk_converters.width"))));
         let width_entry = create_entry();
         let width_box = PixelOrPercent::to_gtk_box(&width_entry);
         width_box_box.append(&width_box);
         mother_box.append(&width_box_box);
 
         let height_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        height_box_box.append(&Label::new(Some(&t!("height"))));
+        height_box_box.append(&Label::new(Some(&t!("gtk_converters.height"))));
         let height_entry = create_entry();
         let height_box = PixelOrPercent::to_gtk_box(&height_entry);
         height_box_box.append(&height_box);
         mother_box.append(&height_box_box);
 
-        let size_bound_string_list = StringList::new(&[&t!("exact"), &t!("max"), &t!("min")]);
+        let size_bound_string_list = StringList::new(&[
+            &t!("gtk_converters.exact"),
+            &t!("gtk_converters.max"),
+            &t!("gtk_converters.min"),
+        ]);
 
         let width_bound_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        width_bound_box.append(&Label::new(Some(&t!("width_bound"))));
+        width_bound_box.append(&Label::new(Some(&t!("gtk_converters.width_bound"))));
         let width_bound_dropdown = create_dropdown(&size_bound_string_list);
         width_bound_box.append(&width_bound_dropdown);
         mother_box.append(&width_bound_box);
 
         let height_bound_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        height_bound_box.append(&Label::new(Some(&t!("height_bound"))));
+        height_bound_box.append(&Label::new(Some(&t!("gtk_converters.height_bound"))));
         let height_bound_dropdown = create_dropdown(&size_bound_string_list);
         height_bound_box.append(&height_bound_dropdown);
         mother_box.append(&height_bound_box);
@@ -1691,7 +1715,7 @@ impl ToGtkBox for HyprSize {
 
 impl EnumConfigForGtk for IdOrName {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("id"), &t!("name")])
+        StringList::new(&[&t!("gtk_converters.id"), &t!("gtk_converters.name")])
     }
 
     fn separator() -> Option<char> {
@@ -1709,16 +1733,16 @@ impl EnumConfigForGtk for IdOrName {
 impl EnumConfigForGtk for WindowGroupOption {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("set"),
-            &t!("set_always"),
-            &t!("new"),
-            &t!("lock"),
-            &t!("lock_always"),
-            &t!("barred"),
-            &t!("deny"),
-            &t!("invade"),
-            &t!("override"),
-            &t!("unset"),
+            &t!("gtk_converters.set"),
+            &t!("gtk_converters.set_always"),
+            &t!("gtk_converters.new"),
+            &t!("gtk_converters.lock"),
+            &t!("gtk_converters.lock_always"),
+            &t!("gtk_converters.barred"),
+            &t!("gtk_converters.deny"),
+            &t!("gtk_converters.invade"),
+            &t!("gtk_converters.override"),
+            &t!("gtk_converters.unset"),
         ])
     }
 }
@@ -1726,18 +1750,23 @@ impl EnumConfigForGtk for WindowGroupOption {
 impl EnumConfigForGtk for WindowEvent {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("fullscreen"),
-            &t!("maximize"),
-            &t!("activate"),
-            &t!("activatefocus"),
-            &t!("fullscreenoutput"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize"),
+            &t!("gtk_converters.activate"),
+            &t!("gtk_converters.activatefocus"),
+            &t!("gtk_converters.fullscreenoutput"),
         ])
     }
 }
 
 impl EnumConfigForGtk for ContentType {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("none"), &t!("photo"), &t!("video"), &t!("game")])
+        StringList::new(&[
+            &t!("gtk_converters.none"),
+            &t!("gtk_converters.photo"),
+            &t!("gtk_converters.video"),
+            &t!("gtk_converters.game"),
+        ])
     }
 }
 
@@ -1760,15 +1789,15 @@ impl EnumConfigForGtk for HyprColor {
     fn field_labels() -> Option<Vec<Vec<FieldLabel>>> {
         Some(vec![
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("red"))),
-                FieldLabel::Named(cow_to_static_str(t!("green"))),
-                FieldLabel::Named(cow_to_static_str(t!("blue"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.red"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.green"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.blue"))),
             ],
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("red"))),
-                FieldLabel::Named(cow_to_static_str(t!("green"))),
-                FieldLabel::Named(cow_to_static_str(t!("blue"))),
-                FieldLabel::Named(cow_to_static_str(t!("alpha"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.red"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.green"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.blue"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.alpha"))),
             ],
         ])
     }
@@ -1824,10 +1853,10 @@ impl ToGtkBox for BorderColor {
 
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let border_color_string_list = StringList::new(&[
-            &t!("active_border_color"),
-            &t!("active_border_gradient"),
-            &t!("active_and_inactive_border_color"),
-            &t!("active_and_inactive_border_gradient"),
+            &t!("gtk_converters.active_border_color"),
+            &t!("gtk_converters.active_border_gradient"),
+            &t!("gtk_converters.active_and_inactive_border_color"),
+            &t!("gtk_converters.active_and_inactive_border_gradient"),
         ]);
         let border_color_dropdown = create_dropdown(&border_color_string_list);
         border_color_dropdown.set_selected(0);
@@ -1850,7 +1879,7 @@ impl ToGtkBox for BorderColor {
         gradient_box.append(&vec_hypr_color_box);
         let angle_entry = create_entry();
         let angle_box = Angle::to_gtk_box(&angle_entry);
-        angle_box.prepend(&Label::new(Some(&t!("angle"))));
+        angle_box.prepend(&Label::new(Some(&t!("gtk_converters.angle"))));
         gradient_box.append(&angle_box);
         mother_box.append(&gradient_box);
 
@@ -1861,7 +1890,7 @@ impl ToGtkBox for BorderColor {
         second_gradient_box.append(&second_vec_hypr_color_box);
         let opt_angle_entry = create_entry();
         let opt_angle_box = Option::<Angle>::to_gtk_box(&opt_angle_entry);
-        opt_angle_box.prepend(&Label::new(Some(&t!("angle"))));
+        opt_angle_box.prepend(&Label::new(Some(&t!("gtk_converters.angle"))));
         second_gradient_box.append(&opt_angle_box);
         mother_box.append(&second_gradient_box);
 
@@ -2141,16 +2170,21 @@ impl ToGtkBox for BorderColor {
 
 impl EnumConfigForGtk for IdleIngibitMode {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("none"), &t!("always"), &t!("focus"), &t!("fullscreen")])
+        StringList::new(&[
+            &t!("gtk_converters.none"),
+            &t!("gtk_converters.always"),
+            &t!("gtk_converters.focus"),
+            &t!("gtk_converters.fullscreen"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for HyprOpacity {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("overall"),
-            &t!("active and inactive"),
-            &t!("active and inactive and fullscreen"),
+            &t!("gtk_converters.overall"),
+            &t!("gtk_converters.active and inactive"),
+            &t!("gtk_converters.active and inactive and fullscreen"),
         ])
     }
 
@@ -2168,7 +2202,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity_spin_button);
 
                 let override_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override_box.append(&Label::new(Some(&t!("override"))));
+                override_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
                 let override_switch = create_switch();
                 override_box.append(&override_switch);
                 mother_box.append(&override_box);
@@ -2250,7 +2284,7 @@ impl EnumConfigForGtk for HyprOpacity {
                     mother_box.append(&opacity1_spin_button);
 
                     let override1_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    override1_box.append(&Label::new(Some(&t!("override"))));
+                    override1_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
                     let override1_switch = create_switch();
                     override1_box.append(&override1_switch);
                     mother_box.append(&override1_box);
@@ -2260,7 +2294,7 @@ impl EnumConfigForGtk for HyprOpacity {
                     mother_box.append(&opacity2_spin_button);
 
                     let override2_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    override2_box.append(&Label::new(Some(&t!("override"))));
+                    override2_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
                     let override2_switch = create_switch();
                     override2_box.append(&override2_switch);
                     mother_box.append(&override2_box);
@@ -2426,7 +2460,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity1_spin_button);
 
                 let override1_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override1_box.append(&Label::new(Some(&t!("override"))));
+                override1_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
                 let override1_switch = create_switch();
                 override1_box.append(&override1_switch);
                 mother_box.append(&override1_box);
@@ -2435,7 +2469,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity2_spin_button);
 
                 let override2_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override2_box.append(&Label::new(Some(&t!("override"))));
+                override2_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
                 let override2_switch = create_switch();
                 override2_box.append(&override2_switch);
                 mother_box.append(&override2_box);
@@ -2444,7 +2478,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity3_spin_button);
 
                 let override3_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override3_box.append(&Label::new(Some(&t!("override"))));
+                override3_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
                 let override3_switch = create_switch();
                 override3_box.append(&override3_switch);
                 mother_box.append(&override3_box);
@@ -2678,28 +2712,33 @@ impl EnumConfigForGtk for HyprOpacity {
 
 impl EnumConfigForGtk for Side {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("left"), &t!("right"), &t!("top"), &t!("bottom")])
+        StringList::new(&[
+            &t!("gtk_converters.left"),
+            &t!("gtk_converters.right"),
+            &t!("gtk_converters.top"),
+            &t!("gtk_converters.bottom"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for AnimationStyle {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("none"),
-            &t!("slide"),
-            &t!("slide_with_side"),
-            &t!("popin"),
-            &t!("popin_with_percent"),
-            &t!("gnomed"),
-            &t!("slide_vert"),
-            &t!("slide_vert_with_percent"),
-            &t!("fade"),
-            &t!("slide_fade"),
-            &t!("slide_fade_with_percent"),
-            &t!("slide_fade_vert"),
-            &t!("slide_fade_vert_with_percent"),
-            &t!("once"),
-            &t!("loop"),
+            &t!("gtk_converters.none"),
+            &t!("gtk_converters.slide"),
+            &t!("gtk_converters.slide_with_side"),
+            &t!("gtk_converters.popin"),
+            &t!("gtk_converters.popin_with_percent"),
+            &t!("gtk_converters.gnomed"),
+            &t!("gtk_converters.slide_vert"),
+            &t!("gtk_converters.slide_vert_with_percent"),
+            &t!("gtk_converters.fade"),
+            &t!("gtk_converters.slide_fade"),
+            &t!("gtk_converters.slide_fade_with_percent"),
+            &t!("gtk_converters.slide_fade_vert"),
+            &t!("gtk_converters.slide_fade_vert_with_percent"),
+            &t!("gtk_converters.once"),
+            &t!("gtk_converters.loop"),
         ])
     }
 
@@ -2741,42 +2780,46 @@ impl EnumConfigForGtk for AnimationStyle {
 
 impl EnumConfigForGtk for TagToggleState {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("set"), &t!("unset"), &t!("toggle")])
+        StringList::new(&[
+            &t!("gtk_converters.set"),
+            &t!("gtk_converters.unset"),
+            &t!("gtk_converters.toggle"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for WindowRule {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("float"),
-            &t!("tile"),
-            &t!("fullscreen"),
-            &t!("maximize"),
-            &t!("persistent_size"),
-            &t!("fullscreen_state"),
-            &t!("move"),
-            &t!("size"),
-            &t!("center"),
-            &t!("center_with_respect_to_monitor_reserved_area"),
-            &t!("pseudo"),
-            &t!("monitor"),
-            &t!("workspace"),
-            &t!("no_initial_focus"),
-            &t!("pin"),
-            &t!("unset"),
-            &t!("no_max_size"),
-            &t!("stay_focused"),
-            &t!("group"),
-            &t!("suppress_event"),
-            &t!("content"),
-            &t!("no_close_for"),
-            &t!("animation"),
-            &t!("border_color"),
-            &t!("idle_ingibit"),
-            &t!("opacity"),
-            &t!("tag"),
-            &t!("max_size"),
-            &t!("min_size"),
+            &t!("gtk_converters.float"),
+            &t!("gtk_converters.tile"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize"),
+            &t!("gtk_converters.persistent_size"),
+            &t!("gtk_converters.fullscreen_state"),
+            &t!("gtk_converters.move"),
+            &t!("gtk_converters.size"),
+            &t!("gtk_converters.center"),
+            &t!("gtk_converters.center_with_respect_to_monitor_reserved_area"),
+            &t!("gtk_converters.pseudo"),
+            &t!("gtk_converters.monitor"),
+            &t!("gtk_converters.workspace"),
+            &t!("gtk_converters.no_initial_focus"),
+            &t!("gtk_converters.pin"),
+            &t!("gtk_converters.unset"),
+            &t!("gtk_converters.no_max_size"),
+            &t!("gtk_converters.stay_focused"),
+            &t!("gtk_converters.group"),
+            &t!("gtk_converters.suppress_event"),
+            &t!("gtk_converters.content"),
+            &t!("gtk_converters.no_close_for"),
+            &t!("gtk_converters.animation"),
+            &t!("gtk_converters.border_color"),
+            &t!("gtk_converters.idle_ingibit"),
+            &t!("gtk_converters.opacity"),
+            &t!("gtk_converters.tag"),
+            &t!("gtk_converters.max_size"),
+            &t!("gtk_converters.min_size"),
         ])
     }
 
@@ -2829,18 +2872,22 @@ impl EnumConfigForGtk for WindowRule {
 
 impl EnumConfigForGtk for KeyState {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("down"), &t!("repeat"), &t!("up")])
+        StringList::new(&[
+            &t!("gtk_converters.down"),
+            &t!("gtk_converters.repeat"),
+            &t!("gtk_converters.up"),
+        ])
     }
 }
 
 impl EnumConfigForGtk for DispatcherFullscreenState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("current"),
-            &t!("none"),
-            &t!("maximize"),
-            &t!("fullscreen"),
-            &t!("maximize_and_fullscreen"),
+            &t!("gtk_converters.current"),
+            &t!("gtk_converters.none"),
+            &t!("gtk_converters.maximize"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize_and_fullscreen"),
         ])
     }
 }
@@ -2848,10 +2895,10 @@ impl EnumConfigForGtk for DispatcherFullscreenState {
 impl EnumConfigForGtk for MoveDirection {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("direction"),
-            &t!("direction_silent"),
-            &t!("monitor"),
-            &t!("monitor_silent"),
+            &t!("gtk_converters.direction"),
+            &t!("gtk_converters.direction_silent"),
+            &t!("gtk_converters.monitor"),
+            &t!("gtk_converters.monitor_silent"),
         ])
     }
 
@@ -2871,7 +2918,10 @@ impl EnumConfigForGtk for MoveDirection {
 
 impl EnumConfigForGtk for SwapDirection {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("direction"), &t!("window")])
+        StringList::new(&[
+            &t!("gtk_converters.direction"),
+            &t!("gtk_converters.window"),
+        ])
     }
 
     fn separator() -> Option<char> {
@@ -2892,31 +2942,31 @@ impl ToGtkBox for CycleNext {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let is_prev_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_prev_box.append(&Label::new(Some(&t!("is_previous"))));
+        is_prev_box.append(&Label::new(Some(&t!("gtk_converters.is_previous"))));
         let is_prev_switch = create_switch();
         is_prev_box.append(&is_prev_switch);
         mother_box.append(&is_prev_box);
 
         let is_tiled_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_tiled_box.append(&Label::new(Some(&t!("is_tiled"))));
+        is_tiled_box.append(&Label::new(Some(&t!("gtk_converters.is_tiled"))));
         let is_tiled_switch = create_switch();
         is_tiled_box.append(&is_tiled_switch);
         mother_box.append(&is_tiled_box);
 
         let is_floating_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_floating_box.append(&Label::new(Some(&t!("is_floating"))));
+        is_floating_box.append(&Label::new(Some(&t!("gtk_converters.is_floating"))));
         let is_floating_switch = create_switch();
         is_floating_box.append(&is_floating_switch);
         mother_box.append(&is_floating_box);
 
         let is_visible_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_visible_box.append(&Label::new(Some(&t!("is_visible"))));
+        is_visible_box.append(&Label::new(Some(&t!("gtk_converters.is_visible"))));
         let is_visible_switch = create_switch();
         is_visible_box.append(&is_visible_switch);
         mother_box.append(&is_visible_box);
 
         let is_hist_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_hist_box.append(&Label::new(Some(&t!("is_hist"))));
+        is_hist_box.append(&Label::new(Some(&t!("gtk_converters.is_hist"))));
         let is_hist_switch = create_switch();
         is_hist_box.append(&is_hist_switch);
         mother_box.append(&is_hist_box);
@@ -3018,13 +3068,17 @@ impl ToGtkBox for CycleNext {
 
 impl EnumConfigForGtk for SwapNext {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("next"), &t!("prev")])
+        StringList::new(&[&t!("gtk_converters.next"), &t!("gtk_converters.prev")])
     }
 }
 
 impl EnumConfigForGtk for ChangeGroupActive {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("back"), &t!("forward"), &t!("index")])
+        StringList::new(&[
+            &t!("gtk_converters.back"),
+            &t!("gtk_converters.forward"),
+            &t!("gtk_converters.index"),
+        ])
     }
 
     fn separator() -> Option<char> {
@@ -3042,7 +3096,12 @@ impl EnumConfigForGtk for ChangeGroupActive {
 
 impl EnumConfigForGtk for SetPropToggleState {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("on"), &t!("off"), &t!("toggle"), &t!("unset")])
+        StringList::new(&[
+            &t!("gtk_converters.on"),
+            &t!("gtk_converters.off"),
+            &t!("gtk_converters.toggle"),
+            &t!("gtk_converters.unset"),
+        ])
     }
 }
 
@@ -3052,7 +3111,7 @@ impl ToGtkBox for HyprGradient {
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
         let colors_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        colors_box.append(&Label::new(Some(&t!("gradient_colors"))));
+        colors_box.append(&Label::new(Some(&t!("gtk_converters.gradient_colors"))));
 
         let colors_entry = create_entry();
         let colors_separator = ' ';
@@ -3061,7 +3120,7 @@ impl ToGtkBox for HyprGradient {
         mother_box.append(&colors_box);
 
         let angle_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        angle_box.append(&Label::new(Some(&t!("gradient_angle"))));
+        angle_box.append(&Label::new(Some(&t!("gtk_converters.gradient_angle"))));
 
         let angle_entry = create_entry();
         let angle_ui_box = Option::<Angle>::to_gtk_box(&angle_entry);
@@ -3155,51 +3214,51 @@ impl ToGtkBox for HyprGradient {
 impl EnumConfigForGtk for SetProp {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("alpha"),
-            &t!("alpha_override"),
-            &t!("alpha_inactive"),
-            &t!("alpha_inactive_override"),
-            &t!("alpha_fullscreen"),
-            &t!("alpha_fullscreen_override"),
-            &t!("animation_style"),
-            &t!("active_border_color"),
-            &t!("inactive_border_color"),
-            &t!("animation"),
-            &t!("border_color"),
-            &t!("idle_ingibit"),
-            &t!("opacity"),
-            &t!("tag"),
-            &t!("max_size"),
-            &t!("min_size"),
-            &t!("border_size"),
-            &t!("rounding"),
-            &t!("rounding_power"),
-            &t!("allows_input"),
-            &t!("dim_around"),
-            &t!("decorate"),
-            &t!("focus_on_activate"),
-            &t!("keep_aspect_ratio"),
-            &t!("nearest_neighbor"),
-            &t!("no_anim"),
-            &t!("no_blur"),
-            &t!("no_border"),
-            &t!("no_dim"),
-            &t!("no_focus"),
-            &t!("no_follow_mouse"),
-            &t!("no_max_size"),
-            &t!("no_rounding"),
-            &t!("no_shadow"),
-            &t!("no_shortcuts_inhibit"),
-            &t!("opaque"),
-            &t!("force_rgbx"),
-            &t!("sync_fullscreen"),
-            &t!("immediate"),
-            &t!("xray"),
-            &t!("render_unfocused"),
-            &t!("scroll_mouse"),
-            &t!("scroll_touchpad"),
-            &t!("no_screenshare"),
-            &t!("no_vrr"),
+            &t!("gtk_converters.alpha"),
+            &t!("gtk_converters.alpha_override"),
+            &t!("gtk_converters.alpha_inactive"),
+            &t!("gtk_converters.alpha_inactive_override"),
+            &t!("gtk_converters.alpha_fullscreen"),
+            &t!("gtk_converters.alpha_fullscreen_override"),
+            &t!("gtk_converters.animation_style"),
+            &t!("gtk_converters.active_border_color"),
+            &t!("gtk_converters.inactive_border_color"),
+            &t!("gtk_converters.animation"),
+            &t!("gtk_converters.border_color"),
+            &t!("gtk_converters.idle_ingibit"),
+            &t!("gtk_converters.opacity"),
+            &t!("gtk_converters.tag"),
+            &t!("gtk_converters.max_size"),
+            &t!("gtk_converters.min_size"),
+            &t!("gtk_converters.border_size"),
+            &t!("gtk_converters.rounding"),
+            &t!("gtk_converters.rounding_power"),
+            &t!("gtk_converters.allows_input"),
+            &t!("gtk_converters.dim_around"),
+            &t!("gtk_converters.decorate"),
+            &t!("gtk_converters.focus_on_activate"),
+            &t!("gtk_converters.keep_aspect_ratio"),
+            &t!("gtk_converters.nearest_neighbor"),
+            &t!("gtk_converters.no_anim"),
+            &t!("gtk_converters.no_blur"),
+            &t!("gtk_converters.no_border"),
+            &t!("gtk_converters.no_dim"),
+            &t!("gtk_converters.no_focus"),
+            &t!("gtk_converters.no_follow_mouse"),
+            &t!("gtk_converters.no_max_size"),
+            &t!("gtk_converters.no_rounding"),
+            &t!("gtk_converters.no_shadow"),
+            &t!("gtk_converters.no_shortcuts_inhibit"),
+            &t!("gtk_converters.opaque"),
+            &t!("gtk_converters.force_rgbx"),
+            &t!("gtk_converters.sync_fullscreen"),
+            &t!("gtk_converters.immediate"),
+            &t!("gtk_converters.xray"),
+            &t!("gtk_converters.render_unfocused"),
+            &t!("gtk_converters.scroll_mouse"),
+            &t!("gtk_converters.scroll_touchpad"),
+            &t!("gtk_converters.no_screenshare"),
+            &t!("gtk_converters.no_vrr"),
         ])
     }
 
@@ -3305,69 +3364,69 @@ impl EnumConfigForGtk for Modifier {
 impl EnumConfigForGtk for Dispatcher {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("exec"),
-            &t!("execr"),
-            &t!("pass"),
-            &t!("send_shortcut"),
-            &t!("send_key_state"),
-            &t!("kill_active"),
-            &t!("force_kill_active"),
-            &t!("close_window"),
-            &t!("kill_window"),
-            &t!("signal"),
-            &t!("signal_window"),
-            &t!("workspace"),
-            &t!("move_to_workspace"),
-            &t!("move_to_workspace_silent"),
-            &t!("toggle_floating"),
-            &t!("set_floating"),
-            &t!("set_tiled"),
-            &t!("fullscreen"),
-            &t!("fullscreen_state"),
-            &t!("dpms"),
-            &t!("pin"),
-            &t!("move_focus"),
-            &t!("move_window"),
-            &t!("swap_window"),
-            &t!("center_window"),
-            &t!("resize_active"),
-            &t!("move_active"),
-            &t!("resize_window_pixel"),
-            &t!("move_window_pixel"),
-            &t!("cycle_next"),
-            &t!("swap_next"),
-            &t!("tag_window"),
-            &t!("focus_window"),
-            &t!("focus_monitor"),
-            &t!("split_ratio"),
-            &t!("move_cursor_to_corner"),
-            &t!("move_cursor"),
-            &t!("rename_workspace"),
-            &t!("exit"),
-            &t!("force_renderer_reload"),
-            &t!("move_current_workspace_to_monitor"),
-            &t!("focus_workspace_on_current_monitor"),
-            &t!("move_workspace_to_monitor"),
-            &t!("swap_active_workspaces"),
-            &t!("bring_active_to_top"),
-            &t!("alter_z_order"),
-            &t!("toggle_special_workspace"),
-            &t!("focus_urgent_or_last"),
-            &t!("toggle_group"),
-            &t!("change_group_active"),
-            &t!("focus_current_or_last"),
-            &t!("lock_groups"),
-            &t!("lock_active_group"),
-            &t!("move_into_group"),
-            &t!("move_out_of_group"),
-            &t!("move_window_or_group"),
-            &t!("move_group_window"),
-            &t!("deny_window_from_group"),
-            &t!("set_ignore_group_lock"),
-            &t!("global"),
-            &t!("event"),
-            &t!("set_prop"),
-            &t!("toggle_swallow"),
+            &t!("gtk_converters.exec"),
+            &t!("gtk_converters.execr"),
+            &t!("gtk_converters.pass"),
+            &t!("gtk_converters.send_shortcut"),
+            &t!("gtk_converters.send_key_state"),
+            &t!("gtk_converters.kill_active"),
+            &t!("gtk_converters.force_kill_active"),
+            &t!("gtk_converters.close_window"),
+            &t!("gtk_converters.kill_window"),
+            &t!("gtk_converters.signal"),
+            &t!("gtk_converters.signal_window"),
+            &t!("gtk_converters.workspace"),
+            &t!("gtk_converters.move_to_workspace"),
+            &t!("gtk_converters.move_to_workspace_silent"),
+            &t!("gtk_converters.toggle_floating"),
+            &t!("gtk_converters.set_floating"),
+            &t!("gtk_converters.set_tiled"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.fullscreen_state"),
+            &t!("gtk_converters.dpms"),
+            &t!("gtk_converters.pin"),
+            &t!("gtk_converters.move_focus"),
+            &t!("gtk_converters.move_window"),
+            &t!("gtk_converters.swap_window"),
+            &t!("gtk_converters.center_window"),
+            &t!("gtk_converters.resize_active"),
+            &t!("gtk_converters.move_active"),
+            &t!("gtk_converters.resize_window_pixel"),
+            &t!("gtk_converters.move_window_pixel"),
+            &t!("gtk_converters.cycle_next"),
+            &t!("gtk_converters.swap_next"),
+            &t!("gtk_converters.tag_window"),
+            &t!("gtk_converters.focus_window"),
+            &t!("gtk_converters.focus_monitor"),
+            &t!("gtk_converters.split_ratio"),
+            &t!("gtk_converters.move_cursor_to_corner"),
+            &t!("gtk_converters.move_cursor"),
+            &t!("gtk_converters.rename_workspace"),
+            &t!("gtk_converters.exit"),
+            &t!("gtk_converters.force_renderer_reload"),
+            &t!("gtk_converters.move_current_workspace_to_monitor"),
+            &t!("gtk_converters.focus_workspace_on_current_monitor"),
+            &t!("gtk_converters.move_workspace_to_monitor"),
+            &t!("gtk_converters.swap_active_workspaces"),
+            &t!("gtk_converters.bring_active_to_top"),
+            &t!("gtk_converters.alter_z_order"),
+            &t!("gtk_converters.toggle_special_workspace"),
+            &t!("gtk_converters.focus_urgent_or_last"),
+            &t!("gtk_converters.toggle_group"),
+            &t!("gtk_converters.change_group_active"),
+            &t!("gtk_converters.focus_current_or_last"),
+            &t!("gtk_converters.lock_groups"),
+            &t!("gtk_converters.lock_active_group"),
+            &t!("gtk_converters.move_into_group"),
+            &t!("gtk_converters.move_out_of_group"),
+            &t!("gtk_converters.move_window_or_group"),
+            &t!("gtk_converters.move_group_window"),
+            &t!("gtk_converters.deny_window_from_group"),
+            &t!("gtk_converters.set_ignore_group_lock"),
+            &t!("gtk_converters.global"),
+            &t!("gtk_converters.event"),
+            &t!("gtk_converters.set_prop"),
+            &t!("gtk_converters.toggle_swallow"),
         ])
     }
 
@@ -3382,7 +3441,8 @@ impl EnumConfigForGtk for Dispatcher {
                 let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
                 let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                window_rules_mother_box.append(&Label::new(Some(&t!("window_rules"))));
+                window_rules_mother_box
+                    .append(&Label::new(Some(&t!("gtk_converters.window_rules"))));
                 let window_rules_entry = create_entry();
                 let window_rules_box = Vec::<WindowRule>::to_gtk_box(&window_rules_entry, ';');
                 window_rules_mother_box.append(&window_rules_box);
@@ -3471,7 +3531,8 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&key_entry);
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box.append(&Label::new(Some(&t!("window_target"))));
+                    window_target_box
+                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -3794,7 +3855,8 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&workspace_target_box);
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box.append(&Label::new(Some(&t!("window_target"))));
+                    window_target_box
+                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -3896,7 +3958,8 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&workspace_target_box);
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box.append(&Label::new(Some(&t!("window_target"))));
+                    window_target_box
+                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -4007,7 +4070,7 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&toggle_state_box);
 
                     let monitor_name_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    monitor_name_box.append(&Label::new(Some(&t!("monitor_name"))));
+                    monitor_name_box.append(&Label::new(Some(&t!("gtk_converters.monitor_name"))));
                     let optional_monitor_name_entry = create_entry();
                     let optional_monitor_name_box =
                         Option::<String>::to_gtk_box(&optional_monitor_name_entry);
@@ -4119,7 +4182,8 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&tag_entry);
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box.append(&Label::new(Some(&t!("window_target"))));
+                    window_target_box
+                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -4294,7 +4358,8 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&z_height_box);
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box.append(&Label::new(Some(&t!("window_target"))));
+                    window_target_box
+                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -4448,11 +4513,13 @@ impl EnumConfigForGtk for Dispatcher {
             // SetTiled(Option<WindowTarget>),
             vec![],
             // Fullscreen(FullscreenMode),
-            vec![FieldLabel::Named(cow_to_static_str(t!("fullscreen_mode")))],
+            vec![FieldLabel::Named(cow_to_static_str(t!(
+                "gtk_converters.fullscreen_mode"
+            )))],
             // FullscreenState(DispatcherFullscreenState, DispatcherFullscreenState),
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("internal_state"))),
-                FieldLabel::Named(cow_to_static_str(t!("client_state"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.internal_state"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.client_state"))),
             ],
             // other options does not need to be labelled
         ])

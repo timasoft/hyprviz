@@ -1,0 +1,349 @@
+_version: 2
+gtk_converters.add:
+  en: "Add"
+  ru: "Добавить"
+  zh-CN: "添加"
+gtk_converters.remove:
+  en: "Remove"
+  ru: "Удалить"
+  zh-CN: "移除"
+gtk_converters.%:
+  en: "%"
+  ru: "%"
+  zh-CN: "%"
+gtk_converters.left:
+  en: "Left"
+  ru: "Слева"
+  zh-CN: "左边"
+gtk_converters.right:
+  en: "Right"
+  ru: "Справа"
+  zh-CN: "右边"
+gtk_converters.up:
+  en: "Up"
+  ru: "Сверху"
+  zh-CN: "上面"
+gtk_converters.down:
+  en: "Down"
+  ru: "Снизу"
+  zh-CN: "下面"
+gtk_converters.pixel:
+  en: "Pixel"
+  ru: "Пиксель"
+  zh-CN: "像素"
+gtk_converters.percent:
+  en: "Percent"
+  ru: "Процент"
+  zh-CN: "百分比"
+gtk_converters.relative:
+  en: "Relative"
+  ru: "Относительно"
+  zh-CN: "相对"
+gtk_converters.exact:
+  en: "Exact"
+  ru: "Точно"
+  zh-CN: "精确"
+gtk_converters.top:
+  en: "Top"
+  ru: "Сверху"
+  zh-CN: "顶部"
+gtk_converters.bottom:
+  en: "Bottom"
+  ru: "Снизу"
+  zh-CN: "底部"
+gtk_converters.fullscreen:
+  en: "Fullscreen"
+  ru: "Полный экран"
+  zh-CN: "全屏"
+gtk_converters.maximize:
+  en: "Maximize"
+  ru: "Максимизировать"
+  zh-CN: "最大化"
+gtk_converters.absolute:
+  en: "Absolute"
+  ru: "Абсолютный"
+  zh-CN: "绝对"
+gtk_converters.previous:
+  en: "Previous"
+  ru: "Предыдущий"
+  zh-CN: "上一个"
+gtk_converters.next:
+  en: "Next"
+  ru: "Следующий"
+  zh-CN: "下一个"
+gtk_converters.id:
+  en: "ID"
+  ru: "ID"
+  zh-CN: "ID"
+gtk_converters.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+gtk_converters.current:
+  en: "Current"
+  ru: "Текущий"
+  zh-CN: "当前"
+gtk_converters.direction:
+  en: "Direction"
+  ru: "Направление"
+  zh-CN: "方向"
+gtk_converters.on_monitor:
+  en: "On Monitor"
+  ru: "На мониторе"
+  zh-CN: "在显示器上"
+gtk_converters.on_monitor_including_empty_workspace:
+  en: "On Monitor Including Empty Workspace"
+  ru: "На мониторе включая пустые рабочие пространства"
+  zh-CN: "在显示器上包括空工作区"
+gtk_converters.open:
+  en: "Open"
+  ru: "Открыть"
+  zh-CN: "打开"
+gtk_converters.previous_per_monitor:
+  en: "Previous Per Monitor"
+  ru: "Предыдущий на мониторе"
+  zh-CN: "每个显示器的上一个"
+gtk_converters.first_available_empty_workspace:
+  en: "First Available Empty Workspace"
+  ru: "Первое доступное пустое рабочее пространство"
+  zh-CN: "第一个可用的空工作区"
+gtk_converters.next_available_empty_workspace:
+  en: "Next Available Empty Workspace"
+  ru: "Следующее доступное пустое рабочее пространство"
+  zh-CN: "下一个可用的空工作区"
+gtk_converters.first_available_empty_workspace_on_monitor:
+  en: "First Available Empty Workspace on Monitor"
+  ru: "Первое доступное пустое рабочее пространство на мониторе"
+  zh-CN: "显示器上第一个可用的空工作区"
+gtk_converters.next_available_empty_workspace_on_monitor:
+  en: "Next Available Empty Workspace on Monitor"
+  ru: "Следующее доступное пустое рабочее пространство на мониторе"
+  zh-CN: "显示器上下一个可用的空工作区"
+gtk_converters.special:
+  en: "Special"
+  ru: "Специальное"
+  zh-CN: "特殊"
+gtk_converters.special_with_name:
+  en: "Special with Name"
+  ru: "Специальное с именем"
+  zh-CN: "带名称的特殊工作区"
+gtk_converters.class:
+  en: "Class"
+  ru: "Класс"
+  zh-CN: "类"
+gtk_converters.initial_class:
+  en: "Initial Class"
+  ru: "Начальный класс"
+  zh-CN: "初始类"
+gtk_converters.title:
+  en: "Title"
+  ru: "Заголовок"
+  zh-CN: "标题"
+gtk_converters.initial_title:
+  en: "Initial Title"
+  ru: "Начальный заголовок"
+  zh-CN: "初始标题"
+gtk_converters.tag:
+  en: "Tag"
+  ru: "Тег"
+  zh-CN: "标签"
+gtk_converters.pid:
+  en: "PID"
+  ru: "PID"
+  zh-CN: "PID"
+gtk_converters.address:
+  en: "Address"
+  ru: "Адрес"
+  zh-CN: "地址"
+gtk_converters.active_window:
+  en: "Active Window"
+  ru: "Активное окно"
+  zh-CN: "活动窗口"
+gtk_converters.floating:
+  en: "Floating"
+  ru: "Плавающее"
+  zh-CN: "浮动"
+gtk_converters.tiled:
+  en: "Tiled"
+  ru: "Плиточное"
+  zh-CN: "平铺"
+gtk_converters.top_left:
+  en: "Top Left"
+  ru: "Верхний левый"
+  zh-CN: "左上"
+gtk_converters.top_right:
+  en: "Top Right"
+  ru: "Верхний правый"
+  zh-CN: "右上"
+gtk_converters.bottom_left:
+  en: "Bottom Left"
+  ru: "Нижний левый"
+  zh-CN: "左下"
+gtk_converters.bottom_right:
+  en: "Bottom Right"
+  ru: "Нижний правый"
+  zh-CN: "右下"
+gtk_converters.lock:
+  en: "Lock"
+  ru: "Заблокировать"
+  zh-CN: "锁定"
+gtk_converters.unlock:
+  en: "Unlock"
+  ru: "Разблокировать"
+  zh-CN: "解锁"
+gtk_converters.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"
+gtk_converters.on:
+  en: "On"
+  ru: "Вкл"
+  zh-CN: "开"
+gtk_converters.off:
+  en: "Off"
+  ru: "Выкл"
+  zh-CN: "关"
+gtk_converters.none:
+  en: "None"
+  ru: "Нет"
+  zh-CN: "无"
+gtk_converters.maximize_and_fullscreen:
+  en: "Maximize and Fullscreen"
+  ru: "Максимизировать и полный экран"
+  zh-CN: "最大化和全屏"
+gtk_converters.subtrahend_of_x:
+  en: "Subtrahend of X"
+  ru: "Вычитаемое X"
+  zh-CN: "X的减数"
+gtk_converters.subtrahend_of_y:
+  en: "Subtrahend of Y"
+  ru: "Вычитаемое Y"
+  zh-CN: "Y的减数"
+gtk_converters.under_cursor:
+  en: "Under Cursor"
+  ru: "Под курсором"
+  zh-CN: "光标下"
+gtk_converters.on_screen:
+  en: "On Screen"
+  ru: "На экране"
+  zh-CN: "屏幕上"
+gtk_converters.width:
+  en: "Width"
+  ru: "Ширина"
+  zh-CN: "宽度"
+gtk_converters.height:
+  en: "Height"
+  ru: "Высота"
+  zh-CN: "高度"
+gtk_converters.width_bound:
+  en: "Width Bound"
+  ru: "Ограничение ширины"
+  zh-CN: "宽度限制"
+gtk_converters.height_bound:
+  en: "Height Bound"
+  ru: "Ограничение высоты"
+  zh-CN: "高度限制"
+gtk_converters.red:
+  en: "Red"
+  ru: "Красный"
+  zh-CN: "红色"
+gtk_converters.green:
+  en: "Green"
+  ru: "Зелёный"
+  zh-CN: "绿色"
+gtk_converters.blue:
+  en: "Blue"
+  ru: "Синий"
+  zh-CN: "蓝色"
+gtk_converters.alpha:
+  en: "Alpha"
+  ru: "Альфа"
+  zh-CN: "透明度"
+gtk_converters.active_border_color:
+  en: "Active Border Color"
+  ru: "Цвет границы активного окна"
+  zh-CN: "活动边框颜色"
+gtk_converters.active_border_gradient:
+  en: "Active Border Gradient"
+  ru: "Градиент границы активного окна"
+  zh-CN: "活动边框渐变"
+gtk_converters.active_and_inactive_border_color:
+  en: "Active and Inactive Border Color"
+  ru: "Цвет границы активного и неактивного окна"
+  zh-CN: "活动和非活动边框颜色"
+gtk_converters.active_and_inactive_border_gradient:
+  en: "Active and Inactive Border Gradient"
+  ru: "Градиент границы активного и неактивного окна"
+  zh-CN: "活动和非活动边框渐变"
+gtk_converters.angle:
+  en: "Angle"
+  ru: "Угол"
+  zh-CN: "角度"
+gtk_converters.override:
+  en: "Override"
+  ru: "Переопределить"
+  zh-CN: "覆盖"
+gtk_converters.gradient_colors:
+  en: "Gradient Colors"
+  ru: "Цвета градиента"
+  zh-CN: "渐变颜色"
+gtk_converters.gradient_angle:
+  en: "Gradient Angle"
+  ru: "Угол градиента"
+  zh-CN: "渐变角度"
+gtk_converters.window_rules:
+  en: "Window Rules"
+  ru: "Правила окна"
+  zh-CN: "窗口规则"
+gtk_converters.window_target:
+  en: "Window Target"
+  ru: "Цель окна"
+  zh-CN: "窗口目标"
+gtk_converters.fullscreen_mode:
+  en: "Fullscreen Mode"
+  ru: "Режим полного экрана"
+  zh-CN: "全屏模式"
+gtk_converters.internal_state:
+  en: "Internal State"
+  ru: "Внутреннее состояние"
+  zh-CN: "内部状态"
+gtk_converters.client_state:
+  en: "Client State"
+  ru: "Состояние клиента"
+  zh-CN: "客户端状态"
+gtk_converters.is_previous:
+  en: "Is Previous"
+  ru: "Предыдущий"
+  zh-CN: "是上一个"
+gtk_converters.is_tiled:
+  en: "Is Tiled"
+  ru: "Плиточное"
+  zh-CN: "是平铺"
+gtk_converters.is_floating:
+  en: "Is Floating"
+  ru: "Плавающее"
+  zh-CN: "是浮动"
+gtk_converters.is_visible:
+  en: "Is Visible"
+  ru: "Видимое"
+  zh-CN: "是可见"
+gtk_converters.is_hist:
+  en: "Is History"
+  ru: "История"
+  zh-CN: "是历史"
+gtk_converters.back:
+  en: "Back"
+  ru: "Назад"
+  zh-CN: "返回"
+gtk_converters.forward:
+  en: "Forward"
+  ru: "Вперёд"
+  zh-CN: "前进"
+gtk_converters.index:
+  en: "Index"
+  ru: "Индекс"
+  zh-CN: "索引"
+gtk_converters.monitor_name:
+  en: "Monitor Name"
+  ru: "Имя монитора"
+  zh-CN: "显示器名称"

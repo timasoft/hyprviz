@@ -124,12 +124,12 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
         .visible(false)
         .build();
 
-    let toggle_button = Button::with_label(&t!("show_editor"));
+    let toggle_button = Button::with_label(&t!("advanced_editors.show_editor"));
 
     let vbox_clone = vbox.clone();
     let button_clone = toggle_button.clone();
-    let show_editor = t!("show_editor");
-    let hide_editor = t!("hide_editor");
+    let show_editor = t!("advanced_editors.show_editor");
+    let hide_editor = t!("advanced_editors.hide_editor");
     toggle_button.connect_clicked(move |_| {
         let is_visible = vbox_clone.is_visible();
         vbox_clone.set_visible(!is_visible);
@@ -310,7 +310,7 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
 pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (Box, Button) {
     let container = Box::new(GtkOrientation::Vertical, 5);
 
-    let toggle_button = Button::with_label(&t!("record_bind"));
+    let toggle_button = Button::with_label(&t!("advanced_editors.record_bind"));
 
     let is_recording = Rc::new(RefCell::new(false));
 
@@ -343,7 +343,7 @@ pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (B
 
             key_controller_handlers_ids.borrow_mut().clear();
 
-            toggle_button_clone.set_label(&t!("record_bind"));
+            toggle_button_clone.set_label(&t!("advanced_editors.record_bind"));
         } else {
             *is_recording_mut = true;
 
@@ -405,7 +405,7 @@ pub fn create_bind_editor(window: &ApplicationWindow, value_entry: &Entry) -> (B
 
             update_display(&active_inputs, &buffer, &value_entry_clone);
 
-            toggle_button_clone_clone.set_label(&t!("stop_recording"));
+            toggle_button_clone_clone.set_label(&t!("advanced_editors.stop_recording"));
         }
     });
 
@@ -450,7 +450,7 @@ fn update_display(
     };
 
     if !modifiers.is_empty() && !regular_keys.is_empty() {
-        buffer.insert(&mut end_iter, &t!("active_combinations"));
+        buffer.insert(&mut end_iter, &t!("advanced_editors.active_combinations"));
 
         let mut modifiers_vec: Vec<&str> = modifiers.into_iter().collect();
         modifiers_vec.sort_by_key(|&modifier| modifier_priority(&modifier));
@@ -461,7 +461,7 @@ fn update_display(
             buffer.insert(&mut end_iter, &format!("  {} + {}\n", modifiers_str, key));
         }
     } else if !modifiers.is_empty() {
-        buffer.insert(&mut end_iter, &t!("active_modifiers"));
+        buffer.insert(&mut end_iter, &t!("advanced_editors.active_modifiers"));
 
         let mut modifiers_vec: Vec<&str> = modifiers.into_iter().collect();
         modifiers_vec.sort_by_key(|&modifier| modifier_priority(&modifier));
@@ -472,14 +472,14 @@ fn update_display(
             buffer.insert(&mut end_iter, &format!("  {}\n", modifier));
         }
     } else if !regular_keys.is_empty() {
-        buffer.insert(&mut end_iter, &t!("active_keys"));
+        buffer.insert(&mut end_iter, &t!("advanced_editors.active_keys"));
 
         for key in &regular_keys {
             value_entry.set_text(&format!(", {}{}", key, bind_action));
             buffer.insert(&mut end_iter, &format!("  {}\n", key));
         }
     } else {
-        buffer.insert(&mut end_iter, &t!("no_active_inputs"));
+        buffer.insert(&mut end_iter, &t!("advanced_editors.no_active_inputs"));
     }
 }
 
@@ -546,9 +546,10 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
         "bind" => {
             let bind_left_box = Box::new(GtkOrientation::Horizontal, 5);
 
-            let bind_type_string_list = StringList::new(&[&t!("bind"), &t!("unbind")]);
+            let bind_type_string_list =
+                StringList::new(&[&t!("advanced_editors.bind"), &t!("advanced_editors.unbind")]);
             let bind_type_dropdown = create_dropdown(&bind_type_string_list);
-            bind_left_box.append(&Label::new(Some(&t!("type"))));
+            bind_left_box.append(&Label::new(Some(&t!("advanced_editors.type"))));
             bind_left_box.append(&bind_type_dropdown);
 
             let flags_box = Box::new(GtkOrientation::Vertical, 5);
@@ -560,7 +561,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             for flag_name in flag_names {
                 let flag_box = Box::new(GtkOrientation::Horizontal, 5);
                 let switch = create_switch();
-                flag_box.append(&Label::new(Some(&t!(flag_name.as_str()))));
+                flag_box.append(&Label::new(Some(&flag_name.to_fancy_string())));
                 flag_box.append(&switch);
                 flags_box.append(&flag_box);
                 switches.push((flag_name, switch));
@@ -942,11 +943,11 @@ fn fill_fancy_value_entry(
             let (monitor_selector, monitor) = parse_monitor(&value_entry.text());
 
             let name_box = Box::new(GtkOrientation::Horizontal, 5);
-            name_box.append(&Label::new(Some(&t!("name"))));
+            name_box.append(&Label::new(Some(&t!("advanced_editors.name"))));
             let monitors = get_available_monitors(false);
             let mut monitor_selector_list =
                 monitors.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
-            let all = t!("all");
+            let all = t!("advanced_editors.all");
             monitor_selector_list.insert(0, &all);
             let monitor_selector_string_list = StringList::new(&monitor_selector_list);
             let monitor_selector_dropdown = create_dropdown(&monitor_selector_string_list);
@@ -954,7 +955,7 @@ fn fill_fancy_value_entry(
             fancy_value_entry.append(&name_box);
 
             let resolution_box = Box::new(GtkOrientation::Horizontal, 5);
-            resolution_box.append(&Label::new(Some(&t!("resolution/mode"))));
+            resolution_box.append(&Label::new(Some(&t!("advanced_editors.resolution/mode"))));
             let resolution_string_list = StringList::new(
                 &get_available_resolutions_for_monitor(&monitor_selector)
                     .iter()
@@ -968,7 +969,7 @@ fn fill_fancy_value_entry(
             let enabled_box = Box::new(GtkOrientation::Vertical, 5);
 
             let position_box = Box::new(GtkOrientation::Horizontal, 5);
-            position_box.append(&Label::new(Some(&t!("position"))));
+            position_box.append(&Label::new(Some(&t!("advanced_editors.position"))));
             let position_str_list = Position::get_list();
             let position_string_list =
                 StringList::new(&Position::get_fancy_list().each_ref().map(|s| s.as_str()));
@@ -987,7 +988,7 @@ fn fill_fancy_value_entry(
             enabled_box.append(&position_box);
 
             let monitor_scale_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_scale_box.append(&Label::new(Some(&t!("scale"))));
+            monitor_scale_box.append(&Label::new(Some(&t!("advanced_editors.scale"))));
             let scale_string_list =
                 StringList::new(&Scale::get_fancy_list().each_ref().map(|s| s.as_str()));
             let monitor_scale_dropdown = create_dropdown(&scale_string_list);
@@ -999,7 +1000,7 @@ fn fill_fancy_value_entry(
             enabled_box.append(&monitor_scale_box);
 
             let monitor_mirror_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_mirror_box.append(&Label::new(Some(&t!("mirror"))));
+            monitor_mirror_box.append(&Label::new(Some(&t!("advanced_editors.mirror"))));
             let monitor_mirror_onoff_switch = create_switch();
             monitor_mirror_box.append(&monitor_mirror_onoff_switch);
             let monitor_mirror_selector_string_list = StringList::new(
@@ -1014,7 +1015,7 @@ fn fill_fancy_value_entry(
             enabled_box.append(&monitor_mirror_box);
 
             let monitor_bitdepth_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_bitdepth_box.append(&Label::new(Some(&t!("bitdepth"))));
+            monitor_bitdepth_box.append(&Label::new(Some(&t!("advanced_editors.bitdepth"))));
             let monitor_bitdepth_onoff_switch = create_switch();
             monitor_bitdepth_box.append(&monitor_bitdepth_onoff_switch);
             let monitor_bitdepth_spin = create_spin_button(1.0, MAX_SAFE_INTEGER_F64, 1.0);
@@ -1023,7 +1024,7 @@ fn fill_fancy_value_entry(
             enabled_box.append(&monitor_bitdepth_box);
 
             let monitor_cm_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_cm_box.append(&Label::new(Some(&t!("color_management"))));
+            monitor_cm_box.append(&Label::new(Some(&t!("advanced_editors.color_management"))));
             let monitor_cm_onoff_switch = create_switch();
             monitor_cm_box.append(&monitor_cm_onoff_switch);
             let cm_string_list = StringList::new(&Cm::get_fancy_list());
@@ -1032,7 +1033,8 @@ fn fill_fancy_value_entry(
             enabled_box.append(&monitor_cm_box);
 
             let monitor_sdrbrightness_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_sdrbrightness_box.append(&Label::new(Some(&t!("sdr_brightness"))));
+            monitor_sdrbrightness_box
+                .append(&Label::new(Some(&t!("advanced_editors.sdr_brightness"))));
             let monitor_sdrbrightness_onoff_switch = create_switch();
             monitor_sdrbrightness_box.append(&monitor_sdrbrightness_onoff_switch);
             let monitor_sdrbrightness_spin = create_spin_button(0.0, f64::MAX, 0.01);
@@ -1041,7 +1043,8 @@ fn fill_fancy_value_entry(
             enabled_box.append(&monitor_sdrbrightness_box);
 
             let monitor_sdrsaturation_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_sdrsaturation_box.append(&Label::new(Some(&t!("sdr_saturation"))));
+            monitor_sdrsaturation_box
+                .append(&Label::new(Some(&t!("advanced_editors.sdr_saturation"))));
             let monitor_sdrsaturation_onoff_switch = create_switch();
             monitor_sdrsaturation_box.append(&monitor_sdrsaturation_onoff_switch);
             let monitor_sdrsaturation_spin = create_spin_button(0.0, f64::MAX, 0.01);
@@ -1050,32 +1053,32 @@ fn fill_fancy_value_entry(
             enabled_box.append(&monitor_sdrsaturation_box);
 
             let monitor_vrr_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_vrr_box.append(&Label::new(Some(&t!("vrr"))));
+            monitor_vrr_box.append(&Label::new(Some(&t!("advanced_editors.vrr"))));
             let monitor_vrr_onoff_switch = create_switch();
             monitor_vrr_box.append(&monitor_vrr_onoff_switch);
             let vrr_string_list = StringList::new(&[
-                &t!("misc_category.vrr_off"),
-                &t!("misc_category.vrr_on"),
-                &t!("misc_category.vrr_fullscreen_only"),
-                &t!("misc_category.vrr_fullscreen_with_video/game"),
+                &t!("widget.misc_category.vrr_off"),
+                &t!("widget.misc_category.vrr_on"),
+                &t!("widget.misc_category.vrr_fullscreen_only"),
+                &t!("widget.misc_category.vrr_fullscreen_with_video/game"),
             ]);
             let monitor_vrr_dropdown = create_dropdown(&vrr_string_list);
             monitor_vrr_box.append(&monitor_vrr_dropdown);
             enabled_box.append(&monitor_vrr_box);
 
             let monitor_transform_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_transform_box.append(&Label::new(Some(&t!("transform"))));
+            monitor_transform_box.append(&Label::new(Some(&t!("advanced_editors.transform"))));
             let monitor_transform_onoff_switch = create_switch();
             monitor_transform_box.append(&monitor_transform_onoff_switch);
             let transform_string_list = StringList::new(&[
-                &t!("normal"),
-                &t!("rotate_90"),
-                &t!("rotate_180"),
-                &t!("rotate_270"),
-                &t!("flip"),
-                &t!("flip_rotate_90"),
-                &t!("flip_rotate_180"),
-                &t!("flip_rotate_270"),
+                &t!("advanced_editors.normal"),
+                &t!("advanced_editors.rotate_90"),
+                &t!("advanced_editors.rotate_180"),
+                &t!("advanced_editors.rotate_270"),
+                &t!("advanced_editors.flip"),
+                &t!("advanced_editors.flip_rotate_90"),
+                &t!("advanced_editors.flip_rotate_180"),
+                &t!("advanced_editors.flip_rotate_270"),
             ]);
             let monitor_transform_dropdown = create_dropdown(&transform_string_list);
             monitor_transform_box.append(&monitor_transform_dropdown);
@@ -1085,19 +1088,19 @@ fn fill_fancy_value_entry(
 
             let monitor_addreserved_box = Box::new(GtkOrientation::Vertical, 5);
 
-            monitor_addreserved_box.append(&Label::new(Some(&t!("top"))));
+            monitor_addreserved_box.append(&Label::new(Some(&t!("advanced_editors.top"))));
             let monitor_addreserved_up_spin = create_spin_button(0.0, MAX_SAFE_INTEGER_F64, 1.0);
             monitor_addreserved_box.append(&monitor_addreserved_up_spin);
 
-            monitor_addreserved_box.append(&Label::new(Some(&t!("bottom"))));
+            monitor_addreserved_box.append(&Label::new(Some(&t!("advanced_editors.bottom"))));
             let monitor_addreserved_down_spin = create_spin_button(0.0, MAX_SAFE_INTEGER_F64, 1.0);
             monitor_addreserved_box.append(&monitor_addreserved_down_spin);
 
-            monitor_addreserved_box.append(&Label::new(Some(&t!("left"))));
+            monitor_addreserved_box.append(&Label::new(Some(&t!("advanced_editors.left"))));
             let monitor_addreserved_left_spin = create_spin_button(0.0, MAX_SAFE_INTEGER_F64, 1.0);
             monitor_addreserved_box.append(&monitor_addreserved_left_spin);
 
-            monitor_addreserved_box.append(&Label::new(Some(&t!("right"))));
+            monitor_addreserved_box.append(&Label::new(Some(&t!("advanced_editors.right"))));
             let monitor_addreserved_right_spin = create_spin_button(0.0, MAX_SAFE_INTEGER_F64, 1.0);
             monitor_addreserved_box.append(&monitor_addreserved_right_spin);
 
@@ -2264,7 +2267,7 @@ fn fill_fancy_value_entry(
             let workspace_selector_box = Box::new(GtkOrientation::Horizontal, 5);
 
             let workspace_selector_type_box = Box::new(GtkOrientation::Horizontal, 5);
-            workspace_selector_type_box.append(&Label::new(Some(&t!("type"))));
+            workspace_selector_type_box.append(&Label::new(Some(&t!("advanced_editors.type"))));
             let workspace_selector_type_string_list = StringList::new(
                 &WorkspaceType::get_fancy_list()
                     .each_ref()
@@ -2409,8 +2412,11 @@ fn fill_fancy_value_entry(
             workspace_rules_box.set_margin_top(10);
             fancy_value_entry.append(&workspace_rules_box);
 
-            let workspace_rules_label = Label::new(Some(&t!("workspace_rules")));
-            workspace_rules_label.set_markup(&format!("<b>{}</b>", t!("workspace_rules")));
+            let workspace_rules_label = Label::new(Some(&t!("advanced_editors.workspace_rules")));
+            workspace_rules_label.set_markup(&format!(
+                "<b>{}</b>",
+                t!("advanced_editors.workspace_rules")
+            ));
             workspace_rules_label.set_halign(gtk::Align::Start);
             workspace_rules_label.set_margin_bottom(5);
             workspace_rules_box.append(&workspace_rules_label);
@@ -2420,7 +2426,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&separator);
 
             let monitor_box = Box::new(GtkOrientation::Horizontal, 5);
-            monitor_box.append(&Label::new(Some(&t!("monitor"))));
+            monitor_box.append(&Label::new(Some(&t!("advanced_editors.monitor"))));
             let monitor_onoff_switch = create_switch();
             monitor_box.append(&monitor_onoff_switch);
             let available_monitors = get_available_monitors(true);
@@ -2435,7 +2441,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&monitor_box);
 
             let default_box = Box::new(GtkOrientation::Horizontal, 5);
-            default_box.append(&Label::new(Some(&t!("default"))));
+            default_box.append(&Label::new(Some(&t!("advanced_editors.default"))));
             let default_onoff_switch = create_switch();
             default_box.append(&default_onoff_switch);
             let default_value_switch = create_switch();
@@ -2444,7 +2450,9 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&default_box);
 
             let gaps_in_box = Box::new(GtkOrientation::Horizontal, 5);
-            gaps_in_box.append(&Label::new(Some(&t!("general_category.gaps_in_label"))));
+            gaps_in_box.append(&Label::new(Some(&t!(
+                "widget.general_category.gaps_in_label"
+            ))));
             let gaps_in_onoff_switch = create_switch();
             gaps_in_box.append(&gaps_in_onoff_switch);
             let gaps_in_spin = create_spin_button(0.0, 200.0, 1.0);
@@ -2453,7 +2461,9 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&gaps_in_box);
 
             let gaps_out_box = Box::new(GtkOrientation::Horizontal, 5);
-            gaps_out_box.append(&Label::new(Some(&t!("general_category.gaps_out_label"))));
+            gaps_out_box.append(&Label::new(Some(&t!(
+                "widget.general_category.gaps_out_label"
+            ))));
             let gaps_out_onoff_switch = create_switch();
             gaps_out_box.append(&gaps_out_onoff_switch);
             let gaps_out_spin = create_spin_button(0.0, 200.0, 1.0);
@@ -2462,7 +2472,9 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&gaps_out_box);
 
             let border_size_box = Box::new(GtkOrientation::Horizontal, 5);
-            border_size_box.append(&Label::new(Some(&t!("general_category.border_size_label"))));
+            border_size_box.append(&Label::new(Some(&t!(
+                "widget.general_category.border_size_label"
+            ))));
             let border_size_onoff_switch = create_switch();
             border_size_box.append(&border_size_onoff_switch);
             let border_size_spin = create_spin_button(0.0, 20.0, 1.0);
@@ -2471,7 +2483,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&border_size_box);
 
             let border_box = Box::new(GtkOrientation::Horizontal, 5);
-            border_box.append(&Label::new(Some(&t!("border"))));
+            border_box.append(&Label::new(Some(&t!("advanced_editors.border"))));
             let border_onoff_switch = create_switch();
             border_box.append(&border_onoff_switch);
             let border_value_switch = create_switch();
@@ -2480,7 +2492,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&border_box);
 
             let shadow_box = Box::new(GtkOrientation::Horizontal, 5);
-            shadow_box.append(&Label::new(Some(&t!("shadow"))));
+            shadow_box.append(&Label::new(Some(&t!("advanced_editors.shadow"))));
             let shadow_onoff_switch = create_switch();
             shadow_box.append(&shadow_onoff_switch);
             let shadow_value_switch = create_switch();
@@ -2489,7 +2501,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&shadow_box);
 
             let rounding_box = Box::new(GtkOrientation::Horizontal, 5);
-            rounding_box.append(&Label::new(Some(&t!("rounding"))));
+            rounding_box.append(&Label::new(Some(&t!("advanced_editors.rounding"))));
             let rounding_onoff_switch = create_switch();
             rounding_box.append(&rounding_onoff_switch);
             let rounding_value_switch = create_switch();
@@ -2498,7 +2510,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&rounding_box);
 
             let decorate_box = Box::new(GtkOrientation::Horizontal, 5);
-            decorate_box.append(&Label::new(Some(&t!("decorate"))));
+            decorate_box.append(&Label::new(Some(&t!("advanced_editors.decorate"))));
             let decorate_onoff_switch = create_switch();
             decorate_box.append(&decorate_onoff_switch);
             let decorate_value_switch = create_switch();
@@ -2507,7 +2519,7 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&decorate_box);
 
             let persistent_box = Box::new(GtkOrientation::Horizontal, 5);
-            persistent_box.append(&Label::new(Some(&t!("persistent"))));
+            persistent_box.append(&Label::new(Some(&t!("advanced_editors.persistent"))));
             let persistent_onoff_switch = create_switch();
             persistent_box.append(&persistent_onoff_switch);
             let persistent_value_switch = create_switch();
@@ -2516,35 +2528,40 @@ fn fill_fancy_value_entry(
             workspace_rules_box.append(&persistent_box);
 
             let on_created_empty_box = Box::new(GtkOrientation::Horizontal, 5);
-            on_created_empty_box.append(&Label::new(Some(&t!("on_created_empty"))));
+            on_created_empty_box
+                .append(&Label::new(Some(&t!("advanced_editors.on_created_empty"))));
             let on_created_empty_onoff_switch = create_switch();
             on_created_empty_box.append(&on_created_empty_onoff_switch);
             let on_created_empty_entry = create_entry();
-            on_created_empty_entry.set_placeholder_text(Some(&t!("command_to_execute")));
+            on_created_empty_entry
+                .set_placeholder_text(Some(&t!("advanced_editors.command_to_execute")));
             on_created_empty_entry.set_visible(false);
             on_created_empty_box.append(&on_created_empty_entry);
             workspace_rules_box.append(&on_created_empty_box);
 
             let default_name_box = Box::new(GtkOrientation::Horizontal, 5);
-            default_name_box.append(&Label::new(Some(&t!("default_name"))));
+            default_name_box.append(&Label::new(Some(&t!("advanced_editors.default_name"))));
             let default_name_onoff_switch = create_switch();
             default_name_box.append(&default_name_onoff_switch);
             let default_name_entry = create_entry();
-            default_name_entry.set_placeholder_text(Some(&t!("default_workspace_name")));
+            default_name_entry
+                .set_placeholder_text(Some(&t!("advanced_editors.default_workspace_name")));
             default_name_entry.set_visible(false);
             default_name_box.append(&default_name_entry);
             workspace_rules_box.append(&default_name_box);
 
             let layoutopt_orientation_box = Box::new(GtkOrientation::Horizontal, 5);
-            layoutopt_orientation_box.append(&Label::new(Some(&t!("layoutopt_orientation"))));
+            layoutopt_orientation_box.append(&Label::new(Some(&t!(
+                "advanced_editors.layoutopt_orientation"
+            ))));
             let layoutopt_orientation_onoff_switch = create_switch();
             layoutopt_orientation_box.append(&layoutopt_orientation_onoff_switch);
             let orientation_string_list = StringList::new(&[
-                &t!("left"),
-                &t!("right"),
-                &t!("top"),
-                &t!("bottom"),
-                &t!("center"),
+                &t!("advanced_editors.left"),
+                &t!("advanced_editors.right"),
+                &t!("advanced_editors.top"),
+                &t!("advanced_editors.bottom"),
+                &t!("advanced_editors.center"),
             ]);
             let layoutopt_orientation_dropdown = create_dropdown(&orientation_string_list);
             layoutopt_orientation_dropdown.set_visible(false);
@@ -3125,7 +3142,7 @@ fn fill_fancy_value_entry(
                     });
                 }
 
-                fancy_value_entry.append(&Label::new(Some(&t!("name"))));
+                fancy_value_entry.append(&Label::new(Some(&t!("advanced_editors.name"))));
                 fancy_value_entry.append(&bezier_name_entry);
                 fancy_value_entry.append(&Label::new(Some("X0")));
                 fancy_value_entry.append(&bezier_x0_spin);
@@ -3164,7 +3181,7 @@ fn fill_fancy_value_entry(
                 let animation_curve_entry = create_entry();
                 animation_curve_entry.set_text(&animation.curve);
 
-                let style_label = Label::new(Some(&t!("style")));
+                let style_label = Label::new(Some(&t!("advanced_editors.style")));
                 style_label.set_visible(false);
 
                 let animation_style_box = Box::new(GtkOrientation::Vertical, 5);
@@ -3173,7 +3190,7 @@ fn fill_fancy_value_entry(
                 let available_styles = animation
                     .name
                     .get_fancy_available_styles()
-                    .unwrap_or_else(|| vec![t!("none").to_string()]);
+                    .unwrap_or_else(|| vec![t!("advanced_editors.none").to_string()]);
                 let style_string_list = StringList::new(
                     &available_styles
                         .iter()
@@ -3191,13 +3208,13 @@ fn fill_fancy_value_entry(
                 let style_params_box = Box::new(GtkOrientation::Vertical, 5);
                 style_params_box.set_margin_start(20);
 
-                let side_label = Label::new(Some(&t!("side")));
+                let side_label = Label::new(Some(&t!("advanced_editors.side")));
                 side_label.set_halign(Align::Start);
                 let side_string_list =
                     StringList::new(&Side::get_fancy_list().each_ref().map(|s| s.as_str()));
                 let side_dropdown = create_dropdown(&side_string_list);
 
-                let percent_label = Label::new(Some(&t!("percentage")));
+                let percent_label = Label::new(Some(&t!("advanced_editors.percentage")));
                 percent_label.set_halign(Align::Start);
                 let percent_spin = create_spin_button(0.0, 100.0, 1.0);
                 percent_spin.set_digits(1);
@@ -3530,16 +3547,16 @@ fn fill_fancy_value_entry(
                     is_updating_clone.set(false);
                 });
 
-                fancy_value_entry.append(&Label::new(Some(&t!("name"))));
+                fancy_value_entry.append(&Label::new(Some(&t!("advanced_editors.name"))));
                 fancy_value_entry.append(&animation_name_dropdown);
 
-                fancy_value_entry.append(&Label::new(Some(&t!("onoff"))));
+                fancy_value_entry.append(&Label::new(Some(&t!("advanced_editors.onoff"))));
                 fancy_value_entry.append(&animation_onoff_switch);
 
-                fancy_value_entry.append(&Label::new(Some(&t!("speed"))));
+                fancy_value_entry.append(&Label::new(Some(&t!("advanced_editors.speed"))));
                 fancy_value_entry.append(&animation_speed_spin);
 
-                fancy_value_entry.append(&Label::new(Some(&t!("curve"))));
+                fancy_value_entry.append(&Label::new(Some(&t!("advanced_editors.curve"))));
                 fancy_value_entry.append(&animation_curve_entry);
 
                 fancy_value_entry.append(&style_label);
@@ -3568,7 +3585,7 @@ fn fill_fancy_value_entry(
                 };
 
                 let mods_box = Box::new(GtkOrientation::Horizontal, 5);
-                mods_box.append(&Label::new(Some(&t!("modifiers"))));
+                mods_box.append(&Label::new(Some(&t!("advanced_editors.modifiers"))));
 
                 let modifier_names = [
                     Modifier::Shift,
@@ -3586,7 +3603,7 @@ fn fill_fancy_value_entry(
                     let mod_box = Box::new(GtkOrientation::Horizontal, 5);
                     let switch = create_switch();
                     switch.set_active(unbind_right.mods.contains(modifier));
-                    mod_box.append(&Label::new(Some(&t!(modifier.to_string().to_lowercase()))));
+                    mod_box.append(&Label::new(Some(&modifier.to_string())));
                     mod_box.append(&switch);
                     mods_box.append(&mod_box);
                     modifier_switches.push((*modifier, switch));
@@ -3595,7 +3612,7 @@ fn fill_fancy_value_entry(
                 bind_box.append(&mods_box);
 
                 let key_box = Box::new(GtkOrientation::Horizontal, 5);
-                key_box.append(&Label::new(Some(&t!("key"))));
+                key_box.append(&Label::new(Some(&t!("advanced_editors.key"))));
                 let key_entry = create_entry();
                 key_entry.set_text(&unbind_right.key);
                 key_box.append(&key_entry);
@@ -3657,7 +3674,7 @@ fn fill_fancy_value_entry(
                 let bind_right = parse_bind_right(has_description, &value_entry.text());
 
                 let mods_box = Box::new(GtkOrientation::Horizontal, 5);
-                mods_box.append(&Label::new(Some(&t!("modifiers"))));
+                mods_box.append(&Label::new(Some(&t!("advanced_editors.modifiers"))));
 
                 let modifier_names = [
                     Modifier::Shift,
@@ -3675,7 +3692,7 @@ fn fill_fancy_value_entry(
                     let mod_box = Box::new(GtkOrientation::Horizontal, 5);
                     let switch = create_switch();
                     switch.set_active(bind_right.mods.contains(modifier));
-                    mod_box.append(&Label::new(Some(&t!(modifier.to_string().to_lowercase()))));
+                    mod_box.append(&Label::new(Some(&modifier.to_string())));
                     mod_box.append(&switch);
                     mods_box.append(&mod_box);
                     modifier_switches.push((*modifier, switch));
@@ -3684,14 +3701,14 @@ fn fill_fancy_value_entry(
                 bind_box.append(&mods_box);
 
                 let key_box = Box::new(GtkOrientation::Horizontal, 5);
-                key_box.append(&Label::new(Some(&t!("key"))));
+                key_box.append(&Label::new(Some(&t!("advanced_editors.key"))));
                 let key_entry = create_entry();
                 key_entry.set_text(&bind_right.key);
                 key_box.append(&key_entry);
                 bind_box.append(&key_box);
 
                 let dispatcher_box = Box::new(GtkOrientation::Vertical, 5);
-                dispatcher_box.append(&Label::new(Some(&t!("dispatcher"))));
+                dispatcher_box.append(&Label::new(Some(&t!("advanced_editors.dispatcher"))));
 
                 let dispatcher_entry = create_entry();
                 dispatcher_entry.set_text(&bind_right.dispatcher.to_string());
@@ -3700,7 +3717,7 @@ fn fill_fancy_value_entry(
                 bind_box.append(&dispatcher_box);
 
                 let description_box = Box::new(GtkOrientation::Horizontal, 5);
-                description_box.append(&Label::new(Some(&t!("description"))));
+                description_box.append(&Label::new(Some(&t!("advanced_editors.description"))));
                 let description_entry = create_entry();
                 if let Some(desc) = &bind_right.description {
                     description_entry.set_text(desc);
@@ -3899,7 +3916,7 @@ fn add_selector_box(
     let selector_box = Box::new(GtkOrientation::Vertical, 5);
 
     let selector_type_box = Box::new(GtkOrientation::Horizontal, 5);
-    selector_type_box.append(&Label::new(Some(&t!("type"))));
+    selector_type_box.append(&Label::new(Some(&t!("advanced_editors.type"))));
     let selector_type_string_list = StringList::new(
         &WorkspaceSelector::get_fancy_list()
             .each_ref()
@@ -4097,8 +4114,11 @@ fn add_selector_box(
                 }
 
                 let named_box = Box::new(GtkOrientation::Horizontal, 5);
-                let named_type_string_list =
-                    StringList::new(&[&t!("is_named"), &t!("starts_with"), &t!("ends_with")]);
+                let named_type_string_list = StringList::new(&[
+                    &t!("advanced_editors.is_named"),
+                    &t!("advanced_editors.starts_with"),
+                    &t!("advanced_editors.ends_with"),
+                ]);
                 let named_type_dropdown = create_dropdown(&named_type_string_list);
                 named_box.append(&named_type_dropdown);
                 let named_is_named_switch = create_switch();
@@ -4289,7 +4309,7 @@ fn add_selector_box(
                 let monitors = get_available_monitors(false);
                 let mut monitor_selector_list =
                     monitors.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
-                let all = t!("all");
+                let all = t!("advanced_editors.all");
                 monitor_selector_list.insert(0, &all);
                 let monitor_selector_string_list = StringList::new(&monitor_selector_list);
                 let monitor_selector_dropdown = create_dropdown(&monitor_selector_string_list);
@@ -4400,28 +4420,30 @@ fn add_selector_box(
 
                 let window_count_box = Box::new(GtkOrientation::Vertical, 5);
                 let window_count_type_box = Box::new(GtkOrientation::Horizontal, 5);
-                window_count_type_box.append(&Label::new(Some(&t!("type"))));
+                window_count_type_box.append(&Label::new(Some(&t!("advanced_editors.type"))));
 
-                let window_count_type_string_list =
-                    StringList::new(&[&t!("single_count"), &t!("range_count")]);
+                let window_count_type_string_list = StringList::new(&[
+                    &t!("advanced_editors.single_count"),
+                    &t!("advanced_editors.range_count"),
+                ]);
                 let window_count_type_dropdown = create_dropdown(&window_count_type_string_list);
                 window_count_type_dropdown.set_selected(0);
                 window_count_type_box.append(&window_count_type_dropdown);
                 window_count_box.append(&window_count_type_box);
 
                 let flags_box = Box::new(GtkOrientation::Vertical, 5);
-                flags_box.append(&Label::new(Some(&t!("count_flags"))));
+                flags_box.append(&Label::new(Some(&t!("advanced_editors.count_flags"))));
 
                 let flags_grid = Grid::new();
                 flags_grid.set_column_spacing(10);
                 flags_grid.set_row_spacing(5);
 
                 let flag_labels = [
-                    ("t", t!("tiled_windows")),
-                    ("f", t!("floating_windows")),
-                    ("g", t!("groups_instead_of_windows")),
-                    ("v", t!("visible_windows_only")),
-                    ("p", t!("pinned_windows_only")),
+                    ("t", t!("advanced_editors.tiled_windows")),
+                    ("f", t!("advanced_editors.floating_windows")),
+                    ("g", t!("advanced_editors.groups_instead_of_windows")),
+                    ("v", t!("advanced_editors.visible_windows_only")),
+                    ("p", t!("advanced_editors.pinned_windows_only")),
                 ];
 
                 let mut flag_switches = Vec::new();
@@ -4445,16 +4467,16 @@ fn add_selector_box(
                 let count_values_box = Box::new(GtkOrientation::Vertical, 5);
 
                 let single_count_box = Box::new(GtkOrientation::Horizontal, 5);
-                single_count_box.append(&Label::new(Some(&t!("window_count"))));
+                single_count_box.append(&Label::new(Some(&t!("advanced_editors.window_count"))));
                 let single_count_spin = create_spin_button(1.0, 100.0, 1.0);
                 single_count_box.append(&single_count_spin);
                 count_values_box.append(&single_count_box);
 
                 let range_count_box = Box::new(GtkOrientation::Horizontal, 5);
-                range_count_box.append(&Label::new(Some(&t!("range_start"))));
+                range_count_box.append(&Label::new(Some(&t!("advanced_editors.range_start"))));
                 let range_start_spin = create_spin_button(1.0, 100.0, 1.0);
                 range_count_box.append(&range_start_spin);
-                range_count_box.append(&Label::new(Some(&t!("range_end"))));
+                range_count_box.append(&Label::new(Some(&t!("advanced_editors.range_end"))));
                 let range_end_spin = create_spin_button(1.0, 100.0, 1.0);
                 range_end_spin.set_value(10.0);
                 range_count_box.append(&range_end_spin);
@@ -4759,10 +4781,10 @@ fn add_selector_box(
                 }
                 let fullscreen_box = Box::new(GtkOrientation::Horizontal, 5);
                 let fullscreen_type_string_list = StringList::new(&[
-                    &t!("no_fullscreen"),
-                    &t!("fullscreen"),
-                    &t!("maximized"),
-                    &t!("fullscreen_without_window_state"),
+                    &t!("advanced_editors.no_fullscreen"),
+                    &t!("advanced_editors.fullscreen"),
+                    &t!("advanced_editors.maximized"),
+                    &t!("advanced_editors.fullscreen_without_window_state"),
                 ]);
                 let fullscreen_type_dropdown = create_dropdown(&fullscreen_type_string_list);
                 fullscreen_type_dropdown.set_selected(0);

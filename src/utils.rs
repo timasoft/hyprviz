@@ -86,15 +86,15 @@ pub fn get_latest_version(repo: &str) -> String {
                         {
                             return version.to_string();
                         }
-                        t!("version_parse_failed").to_string()
+                        t!("utils.version_parse_failed").to_string()
                     }
-                    Err(_) => t!("json_parse_error").to_string(),
+                    Err(_) => t!("utils.json_parse_error").to_string(),
                 }
             } else {
-                t!("http_error", status_code = response.status_code).to_string()
+                t!("utils.http_error", status_code = response.status_code).to_string()
             }
         }
-        Err(e) => t!("request_failed", error = e).to_string(),
+        Err(e) => t!("utils.request_failed", error = e).to_string(),
     }
 }
 
@@ -998,16 +998,16 @@ pub enum Position {
 impl Position {
     pub fn get_fancy_list() -> [String; 10] {
         [
-            t!("auto").to_string(),
-            t!("auto_right").to_string(),
-            t!("auto_left").to_string(),
-            t!("auto_up").to_string(),
-            t!("auto_down").to_string(),
-            t!("auto_center_right").to_string(),
-            t!("auto_center_left").to_string(),
-            t!("auto_center_up").to_string(),
-            t!("auto_center_down").to_string(),
-            t!("coordinates").to_string(),
+            t!("utils.auto").to_string(),
+            t!("utils.auto_right").to_string(),
+            t!("utils.auto_left").to_string(),
+            t!("utils.auto_up").to_string(),
+            t!("utils.auto_down").to_string(),
+            t!("utils.auto_center_right").to_string(),
+            t!("utils.auto_center_left").to_string(),
+            t!("utils.auto_center_up").to_string(),
+            t!("utils.auto_center_down").to_string(),
+            t!("utils.coordinates").to_string(),
         ]
     }
 
@@ -1109,7 +1109,7 @@ pub enum Scale {
 
 impl Scale {
     pub fn get_fancy_list() -> [String; 2] {
-        [t!("auto").to_string(), t!("manual").to_string()]
+        [t!("utils.auto").to_string(), t!("utils.manual").to_string()]
     }
 
     pub fn from_id(id: usize, value: Option<f64>) -> Self {
@@ -1657,13 +1657,13 @@ pub enum WorkspaceSelector {
 impl WorkspaceSelector {
     pub fn get_fancy_list() -> [String; 7] {
         [
-            t!("none").to_string(),
-            t!("range").to_string(),
-            t!("special").to_string(),
-            t!("named").to_string(),
-            t!("monitor").to_string(),
-            t!("window_count").to_string(),
-            t!("fullscreen").to_string(),
+            t!("utils.none").to_string(),
+            t!("utils.range").to_string(),
+            t!("utils.special").to_string(),
+            t!("utils.named").to_string(),
+            t!("utils.monitor").to_string(),
+            t!("utils.window_count").to_string(),
+            t!("utils.fullscreen").to_string(),
         ]
     }
 
@@ -1711,10 +1711,10 @@ pub enum WorkspaceType {
 impl WorkspaceType {
     pub fn get_fancy_list() -> [String; 4] {
         [
-            t!("named").to_string(),
-            t!("special").to_string(),
-            t!("numbered").to_string(),
-            t!("selector").to_string(),
+            t!("utils.named").to_string(),
+            t!("utils.special").to_string(),
+            t!("utils.numbered").to_string(),
+            t!("utils.selector").to_string(),
         ]
     }
 }
@@ -2243,37 +2243,37 @@ impl AnimationName {
 
     pub fn get_fancy_list() -> [String; 31] {
         [
-            t!("global").to_string(),
-            t!("windows").to_string(),
-            t!("windows_in").to_string(),
-            t!("windows_out").to_string(),
-            t!("windows_move").to_string(),
-            t!("layers").to_string(),
-            t!("layers_in").to_string(),
-            t!("layers_out").to_string(),
-            t!("fade").to_string(),
-            t!("fade_in").to_string(),
-            t!("fade_out").to_string(),
-            t!("fade_switch").to_string(),
-            t!("fade_shadow").to_string(),
-            t!("fade_dim").to_string(),
-            t!("fade_layers").to_string(),
-            t!("fade_layers_in").to_string(),
-            t!("fade_layers_out").to_string(),
-            t!("fade_popups").to_string(),
-            t!("fade_popups_in").to_string(),
-            t!("fade_popups_out").to_string(),
-            t!("fade_dpms").to_string(),
-            t!("border").to_string(),
-            t!("borderangle").to_string(),
-            t!("workspaces").to_string(),
-            t!("workspaces_in").to_string(),
-            t!("workspaces_out").to_string(),
-            t!("special_workspace").to_string(),
-            t!("special_workspace_in").to_string(),
-            t!("special_workspace_out").to_string(),
-            t!("zoom_factor").to_string(),
-            t!("monitor_added").to_string(),
+            t!("utils.global").to_string(),
+            t!("utils.windows").to_string(),
+            t!("utils.windows_in").to_string(),
+            t!("utils.windows_out").to_string(),
+            t!("utils.windows_move").to_string(),
+            t!("utils.layers").to_string(),
+            t!("utils.layers_in").to_string(),
+            t!("utils.layers_out").to_string(),
+            t!("utils.fade").to_string(),
+            t!("utils.fade_in").to_string(),
+            t!("utils.fade_out").to_string(),
+            t!("utils.fade_switch").to_string(),
+            t!("utils.fade_shadow").to_string(),
+            t!("utils.fade_dim").to_string(),
+            t!("utils.fade_layers").to_string(),
+            t!("utils.fade_layers_in").to_string(),
+            t!("utils.fade_layers_out").to_string(),
+            t!("utils.fade_popups").to_string(),
+            t!("utils.fade_popups_in").to_string(),
+            t!("utils.fade_popups_out").to_string(),
+            t!("utils.fade_dpms").to_string(),
+            t!("utils.border").to_string(),
+            t!("utils.borderangle").to_string(),
+            t!("utils.workspaces").to_string(),
+            t!("utils.workspaces_in").to_string(),
+            t!("utils.workspaces_out").to_string(),
+            t!("utils.special_workspace").to_string(),
+            t!("utils.special_workspace_in").to_string(),
+            t!("utils.special_workspace_out").to_string(),
+            t!("utils.zoom_factor").to_string(),
+            t!("utils.monitor_added").to_string(),
         ]
     }
 
@@ -2281,27 +2281,27 @@ impl AnimationName {
         match self {
             AnimationName::Windows | AnimationName::WindowsIn | AnimationName::WindowsOut => {
                 Some(vec![
-                    t!("none").to_string(),
-                    t!("slide").to_string(),
-                    t!("slide_with_side").to_string(),
-                    t!("popin").to_string(),
-                    t!("popin_with_percent").to_string(),
-                    t!("gnomed").to_string(),
+                    t!("utils.none").to_string(),
+                    t!("utils.slide").to_string(),
+                    t!("utils.slide_with_side").to_string(),
+                    t!("utils.popin").to_string(),
+                    t!("utils.popin_with_percent").to_string(),
+                    t!("utils.gnomed").to_string(),
                 ])
             }
             AnimationName::Layers | AnimationName::LayersIn | AnimationName::LayersOut => {
                 Some(vec![
-                    t!("none").to_string(),
-                    t!("slide").to_string(),
-                    t!("slide_with_side").to_string(),
-                    t!("popin").to_string(),
-                    t!("fade").to_string(),
+                    t!("utils.none").to_string(),
+                    t!("utils.slide").to_string(),
+                    t!("utils.slide_with_side").to_string(),
+                    t!("utils.popin").to_string(),
+                    t!("utils.fade").to_string(),
                 ])
             }
             AnimationName::BorderAngle => Some(vec![
-                t!("none").to_string(),
-                t!("once").to_string(),
-                t!("loop").to_string(),
+                t!("utils.none").to_string(),
+                t!("utils.once").to_string(),
+                t!("utils.loop").to_string(),
             ]),
             AnimationName::Workspaces
             | AnimationName::WorkspacesIn
@@ -2309,16 +2309,16 @@ impl AnimationName {
             | AnimationName::SpecialWorkspace
             | AnimationName::SpecialWorkspaceIn
             | AnimationName::SpecialWorkspaceOut => Some(vec![
-                t!("none").to_string(),
-                t!("slide").to_string(),
-                t!("slide_with_percent").to_string(),
-                t!("slidevert").to_string(),
-                t!("slidevert_with_percent").to_string(),
-                t!("fade").to_string(),
-                t!("slidefade").to_string(),
-                t!("slidefade_with_percent").to_string(),
-                t!("slidefadevert").to_string(),
-                t!("slidefade_with_percent").to_string(),
+                t!("utils.none").to_string(),
+                t!("utils.slide").to_string(),
+                t!("utils.slide_with_percent").to_string(),
+                t!("utils.slidevert").to_string(),
+                t!("utils.slidevert_with_percent").to_string(),
+                t!("utils.fade").to_string(),
+                t!("utils.slidefade").to_string(),
+                t!("utils.slidefade_with_percent").to_string(),
+                t!("utils.slidefadevert").to_string(),
+                t!("utils.slidefade_with_percent").to_string(),
             ]),
             _ => None,
         }
@@ -2463,10 +2463,10 @@ impl Side {
 
     pub fn get_fancy_list() -> [String; 4] {
         [
-            t!("left").to_string(),
-            t!("right").to_string(),
-            t!("top").to_string(),
-            t!("bottom").to_string(),
+            t!("utils.left").to_string(),
+            t!("utils.right").to_string(),
+            t!("utils.top").to_string(),
+            t!("utils.bottom").to_string(),
         ]
     }
 
@@ -2924,21 +2924,21 @@ impl BindFlagsEnum {
         ]
     }
 
-    pub fn as_str(&self) -> &'static str {
+    pub fn to_fancy_string(&self) -> String {
         match self {
-            BindFlagsEnum::Locked => "locked",
-            BindFlagsEnum::Release => "release",
-            BindFlagsEnum::Click => "click",
-            BindFlagsEnum::Drag => "drag",
-            BindFlagsEnum::LongPress => "long_press",
-            BindFlagsEnum::Repeat => "repeat",
-            BindFlagsEnum::NonConsuming => "non_consuming",
-            BindFlagsEnum::Mouse => "mouse",
-            BindFlagsEnum::Transparent => "transparent",
-            BindFlagsEnum::IgnoreMods => "ignore_mods",
-            BindFlagsEnum::Separate => "separate",
-            BindFlagsEnum::HasDescription => "has_description",
-            BindFlagsEnum::Bypass => "bypass",
+            BindFlagsEnum::Locked => t!("utils.locked").to_string(),
+            BindFlagsEnum::Release => t!("utils.release").to_string(),
+            BindFlagsEnum::Click => t!("utils.click").to_string(),
+            BindFlagsEnum::Drag => t!("utils.drag").to_string(),
+            BindFlagsEnum::LongPress => t!("utils.long_press").to_string(),
+            BindFlagsEnum::Repeat => t!("utils.repeat").to_string(),
+            BindFlagsEnum::NonConsuming => t!("utils.non_consuming").to_string(),
+            BindFlagsEnum::Mouse => t!("utils.mouse").to_string(),
+            BindFlagsEnum::Transparent => t!("utils.transparent").to_string(),
+            BindFlagsEnum::IgnoreMods => t!("utils.ignore_mods").to_string(),
+            BindFlagsEnum::Separate => t!("utils.separate").to_string(),
+            BindFlagsEnum::HasDescription => t!("utils.has_description").to_string(),
+            BindFlagsEnum::Bypass => t!("utils.bypass").to_string(),
         }
     }
 }
@@ -7943,7 +7943,7 @@ impl FromStr for BindRight {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<String> = s.split(',').map(|s| s.trim().to_string()).collect();
         if parts.is_empty() {
-            return Err(t!("bind_parse_error", count = parts.len()).into());
+            return Err(t!("utils.bind_parse_error", count = parts.len()).into());
         }
 
         let mods_str = &parts[0];
@@ -8057,7 +8057,7 @@ impl FromStr for UnbindRight {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<String> = s.split(',').map(|s| s.trim().to_string()).collect();
         if parts.is_empty() {
-            return Err(t!("unbind_parse_error", count = parts.len()).into());
+            return Err(t!("utils.unbind_parse_error", count = parts.len()).into());
         }
 
         let mods_str = &parts[0];

@@ -14,7 +14,7 @@ pub fn get_hyprland_version() -> String {
     };
 
     if !output.status.success() {
-        return t!("failed_to_get_version").to_string();
+        return t!("system_info.failed_to_get_version").to_string();
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -25,7 +25,7 @@ pub fn get_hyprland_version() -> String {
         return version.strip_prefix('v').unwrap_or(version).to_string();
     }
 
-    t!("failed_to_parse_version").to_string()
+    t!("system_info.failed_to_parse_version").to_string()
 }
 
 pub fn get_hyprviz_version() -> String {
@@ -138,7 +138,7 @@ pub fn get_os_info() -> String {
         Ok(output) if output.status.success() => {
             String::from_utf8_lossy(&output.stdout).trim().to_string()
         }
-        _ => t!("os_information_not_available").to_string(),
+        _ => t!("system_info.os_information_not_available").to_string(),
     }
 }
 
@@ -147,7 +147,7 @@ pub fn get_kernel_info() -> String {
         Ok(output) if output.status.success() => {
             String::from_utf8_lossy(&output.stdout).trim().to_string()
         }
-        Ok(_) => t!("failed_to_get_kernel_info").to_string(),
+        Ok(_) => t!("system_info.failed_to_get_kernel_info").to_string(),
         Err(e) => e,
     }
 }
@@ -222,9 +222,9 @@ pub fn get_cpu_info() -> String {
     match execute_command("nproc", &[]) {
         Ok(output) if output.status.success() => {
             let cores = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            t!("cpu_with__cores__model_unknown", n = cores).to_string()
+            t!("system_info.cpu_with__cores__model_unknown", n = cores).to_string()
         }
-        _ => t!("cpu_information_not_available").to_string(),
+        _ => t!("system_info.cpu_information_not_available").to_string(),
     }
 }
 
@@ -241,12 +241,12 @@ pub fn get_gpu_info() -> String {
                 .collect();
 
             if gpu_lines.is_empty() {
-                t!("failed_to_parse_gpu_info").to_string()
+                t!("system_info.failed_to_parse_gpu_info").to_string()
             } else {
                 gpu_lines.join("\n")
             }
         }
-        _ => t!("failed_to_get_gpu_info").to_string(),
+        _ => t!("system_info.failed_to_get_gpu_info").to_string(),
     }
 }
 
@@ -268,13 +268,13 @@ pub fn get_memory_info() -> String {
                         let used_gb = total_gb - available_gb;
                         format!("{:.2} GB / {:.2} GB", used_gb, total_gb)
                     }
-                    _ => t!("failed_to_parse_memory_info").to_string(),
+                    _ => t!("system_info.failed_to_parse_memory_info").to_string(),
                 }
             } else {
-                t!("failed_to_get_memory_info_from_/proc/meminfo").to_string()
+                t!("system_info.failed_to_get_memory_info_from_/proc/meminfo").to_string()
             }
         }
-        _ => t!("failed_to_get_memory_info").to_string(),
+        _ => t!("system_info.failed_to_get_memory_info").to_string(),
     }
 }
 
@@ -340,59 +340,68 @@ pub fn get_monitor_info() -> String {
 
                             let focus_indicator = if focused { "*" } else { " " };
                             let dpms_text = if dpms_status {
-                                t!("dpms_on")
+                                t!("system_info.dpms_on")
                             } else {
-                                t!("dpms_off")
+                                t!("system_info.dpms_off")
                             };
 
                             result.push_str(&format!(
                                 "{} {}: #{}: {} [{}]\n",
                                 focus_indicator,
-                                t!("monitor"),
+                                t!("system_info.monitor"),
                                 id,
                                 name,
                                 dpms_text
                             ));
                             result.push_str(&format!(
                                 "   {}: {}\n",
-                                t!("description"),
+                                t!("system_info.description"),
                                 description
                             ));
                             result.push_str(&format!(
                                 "   {}: {}x{} @ {:.1}Hz\n",
-                                t!("resolution"),
+                                t!("system_info.resolution"),
                                 width,
                                 height,
                                 refresh_rate
                             ));
-                            result.push_str(&format!("   {}: {}x{}\n", t!("position"), x, y));
-                            result.push_str(&format!("   {}: {:.2}x\n", t!("scale"), scale));
+                            result.push_str(&format!(
+                                "   {}: {}x{}\n",
+                                t!("system_info.position"),
+                                x,
+                                y
+                            ));
+                            result.push_str(&format!(
+                                "   {}: {:.2}x\n",
+                                t!("system_info.scale"),
+                                scale
+                            ));
 
                             let transform_str = match transform {
-                                0 => t!("normal"),
-                                1 => t!("rotate_90"),
-                                2 => t!("rotate_180"),
-                                3 => t!("rotate_270"),
-                                4 => t!("flip"),
-                                5 => t!("flip_rotate_90"),
-                                6 => t!("flip_rotate_180"),
-                                7 => t!("flip_rotate_270"),
-                                _ => t!("unknown"),
+                                0 => t!("system_info.normal"),
+                                1 => t!("system_info.rotate_90"),
+                                2 => t!("system_info.rotate_180"),
+                                3 => t!("system_info.rotate_270"),
+                                4 => t!("system_info.flip"),
+                                5 => t!("system_info.flip_rotate_90"),
+                                6 => t!("system_info.flip_rotate_180"),
+                                7 => t!("system_info.flip_rotate_270"),
+                                _ => t!("system_info.unknown"),
                             };
 
                             result.push_str(&format!(
                                 "   {}: {}\n",
-                                t!("transform"),
+                                t!("system_info.transform"),
                                 transform_str
                             ));
                             result.push_str(&format!(
                                 "   {}: {}\n",
-                                t!("current_format"),
+                                t!("system_info.current_format"),
                                 current_format
                             ));
                             result.push_str(&format!(
                                 "   {}: #{} ({})\n",
-                                t!("active_workspace"),
+                                t!("system_info.active_workspace"),
                                 workspace_id,
                                 workspace_name
                             ));
@@ -405,13 +414,17 @@ pub fn get_monitor_info() -> String {
 
                     result
                 }
-                Ok(_) => t!("no_monitors_found").into_owned(),
-                Err(e) => format!("{}: {}", t!("json_parse_error"), e),
+                Ok(_) => t!("system_info.no_monitors_found").into_owned(),
+                Err(e) => format!("{}: {}", t!("system_info.json_parse_error"), e),
             }
         }
         Ok(output) => {
             let stderr = String::from_utf8_lossy(&output.stderr);
-            format!("{}: {}", t!("failed_to_get_monitor_info"), stderr.trim())
+            format!(
+                "{}: {}",
+                t!("system_info.failed_to_get_monitor_info"),
+                stderr.trim()
+            )
         }
         Err(e) => e,
     }

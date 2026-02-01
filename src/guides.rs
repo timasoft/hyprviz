@@ -466,9 +466,9 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .build();
 
     let title = match callout_type {
-        "info" => &format!("<b>{}</b>", t!("information")),
-        "warning" => &format!("<b>{}</b>", t!("warning")),
-        "error" => &format!("<b>{}</b>", t!("error")),
+        "info" => &format!("<b>{}</b>", t!("guides.information")),
+        "warning" => &format!("<b>{}</b>", t!("guides.warning")),
+        "error" => &format!("<b>{}</b>", t!("guides.error")),
         _ => &format!("<b>{}</b>", callout_type),
     };
 
