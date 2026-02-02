@@ -5,19 +5,28 @@ use crate::{
     utils::{
         Angle, AnimationStyle, BorderColor, ChangeGroupActive, ContentType, CursorCorner,
         CycleNext, Direction, Dispatcher, DispatcherDiscriminant, DispatcherFullscreenState,
-        FloatValue, FullscreenMode, FullscreenState, GroupLockAction, HasDiscriminant, HyprColor,
-        HyprCoord, HyprGradient, HyprOpacity, HyprSize, IdOrName, IdleIngibitMode, KeyState,
+        FloatValue, FullscreenMode, FullscreenState, Gesture, GestureAction, GestureDirection,
+        GestureFloating, GestureFullscreen, GroupLockAction, HasDiscriminant, HyprColor, HyprCoord,
+        HyprGradient, HyprOpacity, HyprSize, IdOrName, IdleIngibitMode, KeyState,
         MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64, Modifier, MonitorTarget, MoveDirection,
         PixelOrPercent, RelativeId, ResizeParams, SetProp, SetPropToggleState, Side, SizeBound,
         SwapDirection, SwapNext, TagToggleState, ToggleState, WindowEvent, WindowGroupOption,
         WindowRule, WindowTarget, WorkspaceTarget, ZHeight, cow_to_static_str, join_with_separator,
+        parse_modifiers,
     },
 };
 use gtk::{
     Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, prelude::*,
 };
 use rust_i18n::t;
-use std::{cell::Cell, collections::HashSet, fmt::Display, rc::Rc, str::FromStr};
+use std::{
+    cell::{Cell, RefCell},
+    collections::HashSet,
+    fmt::Display,
+    hash::Hash,
+    rc::Rc,
+    str::FromStr,
+};
 use strum::IntoEnumIterator;
 
 const PLUG_SEPARATOR: char = '︲';
@@ -314,16 +323,14 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         let add_button_clone = add_button.clone();
         let entry_clone = entry.clone();
         let is_updating_clone = is_updating.clone();
-        let separator_clone = separator;
         let join_separator_clone = join_separator.clone();
-
         let rebuild_ui = move |text: &str| {
             while let Some(child) = mother_box_clone.first_child() {
                 mother_box_clone.remove(&child);
             }
 
             let mut remove_buttons = Vec::new();
-            let parts: Vec<&str> = text.split(separator_clone).collect();
+            let parts: Vec<&str> = text.split(separator).collect();
 
             for (i, part) in parts.iter().enumerate() {
                 let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
@@ -339,7 +346,6 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
 
                 let entry_clone_clone = entry_clone.clone();
                 let is_updating_clone_clone = is_updating_clone.clone();
-                let separator_inner = separator_clone;
                 let join_sep = join_separator_clone.clone();
                 let index = i;
 
@@ -353,7 +359,7 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
                     let current_text = entry_clone_clone.text().to_string();
 
                     let mut parts_vec: Vec<String> = current_text
-                        .split(separator_inner)
+                        .split(separator)
                         .map(|s| s.to_string())
                         .collect();
 
@@ -374,12 +380,11 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         };
 
         let entry_clone_add = entry.clone();
-        let separator_add = separator;
         let join_separator_add = join_separator.clone();
         add_button.connect_clicked(move |_| {
             let current_text = entry_clone_add.text().to_string();
             let parts: Vec<String> = current_text
-                .split(separator_add)
+                .split(separator)
                 .map(|s| s.to_string())
                 .collect();
 
@@ -390,20 +395,18 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         });
 
         let rebuild_ui_with_remove_buttons = {
-            let separator_rm = separator;
             let join_separator_rm = join_separator.clone();
             move |entry_widget: &Entry| {
                 let remove_buttons = rebuild_ui(entry_widget.text().as_str());
                 for (i, remove_button) in remove_buttons.into_iter().enumerate() {
                     let entry_clone_rm = entry_widget.clone();
-                    let separator_inner = separator_rm;
                     let join_sep = join_separator_rm.clone();
                     let index = i;
 
                     remove_button.connect_clicked(move |_| {
                         let current_text = entry_clone_rm.text().to_string();
                         let mut parts_vec: Vec<String> = current_text
-                            .split(separator_inner)
+                            .split(separator)
                             .map(|s| s.to_string())
                             .collect();
 
@@ -433,94 +436,153 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
     }
 }
 
-impl<T: ToGtkBox + Default + Display + FromStr> ToGtkBoxWithSeparator for HashSet<T> {
+impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> ToGtkBoxWithSeparator
+    for HashSet<T>
+{
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
+        let join_separator = separator.to_string();
 
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let add_button = create_button(&t!("gtk_converters.add"));
 
         let mother_box_clone = mother_box.clone();
         let add_button_clone = add_button.clone();
         let entry_clone = entry.clone();
         let is_updating_clone = is_updating.clone();
+        let join_separator_clone = join_separator.clone();
         let rebuild_ui = move |text: &str| {
             while let Some(child) = mother_box_clone.first_child() {
                 mother_box_clone.remove(&child);
             }
 
             let mut remove_buttons = Vec::new();
+            let parts: Vec<&str> = text
+                .split(&join_separator_clone)
+                .filter(|s| !s.is_empty())
+                .collect();
 
-            let parts = text
-                .split(separator)
-                .filter(|p| !p.is_empty())
-                .collect::<Vec<_>>();
-            for (i, part) in parts.iter().enumerate() {
-                if part.is_empty() {
+            let mut displayed_values = HashSet::new();
+
+            for part in parts {
+                let value: T = part.parse().unwrap_or_default();
+                if !displayed_values.insert(value.clone()) {
                     continue;
                 }
-                let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
+
+                let item_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                item_box.set_margin_start(5);
+                item_box.set_margin_end(5);
+                item_box.set_margin_top(2);
+                item_box.set_margin_bottom(2);
 
                 let remove_button = create_button(&t!("gtk_converters.remove"));
-                part_box.append(&remove_button);
-                remove_buttons.push(remove_button.clone());
+                item_box.append(&remove_button);
 
                 let sub_entry = create_entry();
                 let sub_box = T::to_gtk_box(&sub_entry);
-                part_box.append(&sub_box);
+                let initial_text = part.trim().to_string();
+                sub_entry.set_text(&initial_text);
+                item_box.append(&sub_box);
+
+                let prev_text = Rc::new(RefCell::new(initial_text));
 
                 let entry_clone_clone = entry_clone.clone();
                 let is_updating_clone_clone = is_updating_clone.clone();
-                sub_entry.connect_changed(move |entry| {
+                let join_separator_clone_clone = join_separator_clone.clone();
+                let prev_text_clone = prev_text.clone();
+                sub_entry.connect_changed(move |sub_entry| {
                     if is_updating_clone_clone.get() {
                         return;
                     }
                     is_updating_clone_clone.set(true);
-                    let new_text = entry.text().to_string();
-                    let entry_text = entry_clone_clone.text().to_string();
-                    let mut parts_vec: Vec<String> = entry_text
-                        .split(separator)
-                        .filter(|p| !p.is_empty())
-                        .map(|s| s.to_string())
+
+                    let new_text = sub_entry.text().trim().to_string();
+                    let old_text = prev_text_clone.borrow().clone();
+                    prev_text_clone.replace(new_text.clone());
+
+                    let current_text = entry_clone_clone.text().to_string();
+                    let mut current_set: HashSet<T> = current_text
+                        .split(&join_separator_clone_clone)
+                        .filter(|s| !s.is_empty())
+                        .map(|s| s.parse().unwrap_or_default())
                         .collect();
-                    if i < parts_vec.len() {
-                        parts_vec[i] = new_text;
-                        let updated_text = parts_vec.join(&separator.to_string());
-                        entry_clone_clone.set_text(&updated_text);
+
+                    if !old_text.is_empty()
+                        && let Ok(old_value) = old_text.parse::<T>()
+                    {
+                        current_set.remove(&old_value);
                     }
+
+                    if !new_text.is_empty()
+                        && let Ok(new_value) = new_text.parse::<T>()
+                    {
+                        current_set.insert(new_value);
+                    }
+
+                    let updated_text = current_set
+                        .iter()
+                        .map(|v| v.to_string())
+                        .collect::<Vec<_>>()
+                        .join(&join_separator_clone_clone);
+                    entry_clone_clone.set_text(&updated_text);
+
                     is_updating_clone_clone.set(false);
                 });
 
-                mother_box_clone.append(&part_box);
+                mother_box_clone.append(&item_box);
+                remove_buttons.push((value, remove_button));
             }
+
             mother_box_clone.append(&add_button_clone);
             remove_buttons
         };
 
         let entry_clone = entry.clone();
+        let join_separator_clone = join_separator.clone();
         add_button.connect_clicked(move |_| {
-            let text = entry_clone.text().to_string();
-            let mut parts = text.split(separator).collect::<Vec<_>>();
-            let new_text = T::default().to_string();
-            parts.push(&new_text);
-            let updated_text = parts.join(&separator.to_string());
+            let current_text = entry_clone.text().to_string();
+            let mut set: HashSet<T> = current_text
+                .split(&join_separator_clone)
+                .filter(|s| !s.is_empty())
+                .map(|s| s.parse().unwrap_or_default())
+                .collect();
+
+            set.insert(T::default());
+
+            let updated_text = set
+                .iter()
+                .map(|v| v.to_string())
+                .collect::<Vec<_>>()
+                .join(&join_separator_clone);
             entry_clone.set_text(&updated_text);
         });
 
-        let rebuild_ui_with_remove_buttons = move |entry: &Entry| {
-            let remove_buttons = rebuild_ui(entry.text().as_str());
-            for (i, remove_button) in remove_buttons.into_iter().enumerate() {
-                let entry_clone = entry.clone();
-                remove_button.connect_clicked(move |_| {
-                    let text = entry_clone.text().to_string();
-                    let mut parts = text
-                        .split(separator)
-                        .filter(|p| !p.is_empty())
-                        .collect::<Vec<_>>();
-                    parts.remove(i);
-                    let updated_text = parts.join(&separator.to_string());
-                    entry_clone.set_text(&updated_text);
-                });
+        let rebuild_ui_with_remove_buttons = {
+            let join_separator_clone = join_separator.clone();
+            move |entry: &Entry| {
+                let remove_buttons = rebuild_ui(entry.text().as_str());
+                for (value, remove_button) in remove_buttons {
+                    let entry_clone = entry.clone();
+                    let join_separator_clone_clone = join_separator_clone.clone();
+                    let value_clone = value.clone();
+                    remove_button.connect_clicked(move |_| {
+                        let current_text = entry_clone.text().to_string();
+                        let mut set: HashSet<T> = current_text
+                            .split(&join_separator_clone_clone)
+                            .filter(|s| !s.is_empty())
+                            .map(|s| s.parse().unwrap_or_default())
+                            .collect();
+
+                        set.remove(&value_clone);
+                        let updated_text = set
+                            .iter()
+                            .map(|v| v.to_string())
+                            .collect::<Vec<_>>()
+                            .join(&join_separator_clone_clone);
+                        entry_clone.set_text(&updated_text);
+                    });
+                }
             }
         };
 
@@ -918,7 +980,7 @@ pub fn create_spin_button_builder(
         let spin_button = create_spin_button(min, max, step);
         mother_box.append(&spin_button);
         if let FieldLabel::Named("%") = name {
-            mother_box.append(&Label::new(Some(&t!("gtk_converters.%"))));
+            mother_box.append(&Label::new(Some("%")));
         }
 
         let spin_button_clone = spin_button.clone();
@@ -2183,8 +2245,8 @@ impl EnumConfigForGtk for HyprOpacity {
     fn dropdown_items() -> StringList {
         StringList::new(&[
             &t!("gtk_converters.overall"),
-            &t!("gtk_converters.active and inactive"),
-            &t!("gtk_converters.active and inactive and fullscreen"),
+            &t!("gtk_converters.active_and_inactive"),
+            &t!("gtk_converters.active_and_inactive_and_fullscreen"),
         ])
     }
 
@@ -4526,6 +4588,296 @@ impl EnumConfigForGtk for Dispatcher {
     }
 }
 
+impl EnumConfigForGtk for GestureDirection {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.swipe"),
+            &t!("gtk_converters.horizontal"),
+            &t!("gtk_converters.vertical"),
+            &t!("gtk_converters.left"),
+            &t!("gtk_converters.right"),
+            &t!("gtk_converters.up"),
+            &t!("gtk_converters.down"),
+            &t!("gtk_converters.pinch"),
+            &t!("gtk_converters.pinchin"),
+            &t!("gtk_converters.pinchout"),
+        ])
+    }
+}
+
+impl EnumConfigForGtk for GestureFullscreen {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize"),
+        ])
+    }
+}
+
+impl EnumConfigForGtk for GestureFloating {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.toggle"),
+            &t!("gtk_converters.float"),
+            &t!("gtk_converters.tile"),
+        ])
+    }
+}
+
+impl EnumConfigForGtk for GestureAction {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.dispatcher"),
+            &t!("gtk_converters.workspace"),
+            &t!("gtk_converters.move"),
+            &t!("gtk_converters.resize"),
+            &t!("gtk_converters.special"),
+            &t!("gtk_converters.close"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.float"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(',')
+    }
+
+    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+        match self {
+            GestureAction::Dispatcher(_dispatcher) => Some(<(Dispatcher,)>::to_gtk_box),
+            GestureAction::Workspace => None,
+            GestureAction::Move => None,
+            GestureAction::Resize => None,
+            GestureAction::Special(_special) => Some(<(String,)>::to_gtk_box),
+            GestureAction::Close => None,
+            GestureAction::Fullscreen(_fullscreen) => Some(<(GestureFullscreen,)>::to_gtk_box),
+            GestureAction::Float(_floating) => Some(<(GestureFloating,)>::to_gtk_box),
+        }
+    }
+}
+
+impl ToGtkBox for Gesture {
+    fn to_gtk_box(entry: &Entry) -> GtkBox {
+        let is_updating = Rc::new(Cell::new(false));
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+
+        let finger_count_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        finger_count_box.append(&Label::new(Some(&t!("gtk_converters.finger_count"))));
+        let finger_count_spin = create_spin_button(1.0, i32::MAX as f64, 1.0);
+        finger_count_box.append(&finger_count_spin);
+        mother_box.append(&finger_count_box);
+
+        let direction_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        direction_box.append(&Label::new(Some(&t!("gtk_converters.direction"))));
+        let direction_entry = create_entry();
+        let direction_ui = GestureDirection::to_gtk_box(&direction_entry);
+        direction_box.append(&direction_ui);
+        mother_box.append(&direction_box);
+
+        let action_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        action_box.append(&Label::new(Some(&t!("gtk_converters.action"))));
+        let action_entry = create_entry();
+        let action_ui = GestureAction::to_gtk_box(&action_entry);
+        action_box.append(&action_ui);
+        mother_box.append(&action_box);
+
+        let anim_speed_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let anim_speed_switch_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        anim_speed_switch_box.append(&Label::new(Some(&t!("gtk_converters.animation_speed"))));
+        let anim_speed_switch = create_switch();
+        anim_speed_switch_box.append(&anim_speed_switch);
+        anim_speed_mother_box.append(&anim_speed_switch_box);
+
+        let anim_speed_value_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let anim_speed_spin = create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
+        anim_speed_spin.set_value(1.0);
+        anim_speed_value_box.append(&anim_speed_spin);
+        anim_speed_value_box.set_visible(false);
+        anim_speed_mother_box.append(&anim_speed_value_box);
+        mother_box.append(&anim_speed_mother_box);
+
+        let mods_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let mods_switch_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        mods_switch_box.append(&Label::new(Some(&t!("gtk_converters.modifiers"))));
+        let mods_switch = create_switch();
+        mods_switch_box.append(&mods_switch);
+        mods_mother_box.append(&mods_switch_box);
+
+        let mods_value_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let mods_entry = create_entry();
+        let mods_ui = HashSet::<Modifier>::to_gtk_box(&mods_entry, '_');
+        mods_value_box.append(&mods_ui);
+        mods_value_box.set_visible(false);
+        mods_mother_box.append(&mods_value_box);
+        mother_box.append(&mods_mother_box);
+
+        let finger_count_spin_clone = finger_count_spin.clone();
+        let direction_entry_clone = direction_entry.clone();
+        let action_entry_clone = action_entry.clone();
+        let anim_speed_switch_clone = anim_speed_switch.clone();
+        let anim_speed_spin_clone = anim_speed_spin.clone();
+        let anim_speed_value_box_clone = anim_speed_value_box.clone();
+        let mods_switch_clone = mods_switch.clone();
+        let mods_entry_clone = mods_entry.clone();
+        let mods_value_box_clone = mods_value_box.clone();
+        let update_ui = move |gesture: Gesture| {
+            finger_count_spin_clone.set_value(gesture.finger_count as f64);
+            direction_entry_clone.set_text(&gesture.direction.to_string());
+            action_entry_clone.set_text(&gesture.action.to_string());
+
+            if let Some(speed) = gesture.anim_speed {
+                anim_speed_switch_clone.set_active(true);
+                anim_speed_value_box_clone.set_visible(true);
+                anim_speed_spin_clone.set_value(speed);
+            } else {
+                anim_speed_switch_clone.set_active(false);
+                anim_speed_value_box_clone.set_visible(false);
+            }
+
+            if let Some(mods) = gesture.mods {
+                mods_switch_clone.set_active(true);
+                mods_value_box_clone.set_visible(true);
+                mods_entry_clone.set_text(&join_with_separator(&mods, "_"));
+            } else {
+                mods_switch_clone.set_active(false);
+                mods_value_box_clone.set_visible(false);
+                mods_entry_clone.set_text("");
+            }
+        };
+
+        let initial_gesture: Gesture = entry.text().to_string().parse().unwrap_or_default();
+        update_ui(initial_gesture);
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        finger_count_spin.connect_value_changed(move |spin| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            gesture.finger_count = spin.value() as u32;
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        direction_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            gesture.direction = entry.text().parse().unwrap_or_default();
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        action_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            gesture.action = entry.text().parse().unwrap_or_default();
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        let anim_speed_spin_clone = anim_speed_spin.clone();
+        let anim_speed_value_box_clone = anim_speed_value_box.clone();
+        anim_speed_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            if switch.state() {
+                gesture.anim_speed = Some(anim_speed_spin_clone.value());
+                anim_speed_value_box_clone.set_visible(true);
+            } else {
+                gesture.anim_speed = None;
+                anim_speed_value_box_clone.set_visible(false);
+            }
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        anim_speed_spin.connect_value_changed(move |spin| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            gesture.anim_speed = Some(spin.value());
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        let mods_entry_clone = mods_entry.clone();
+        let mods_value_box_clone = mods_value_box.clone();
+        mods_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            if switch.state() {
+                let mods: HashSet<Modifier> = mods_entry_clone
+                    .text()
+                    .split('_')
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.parse().unwrap_or_default())
+                    .collect();
+                gesture.mods = if mods.is_empty() { None } else { Some(mods) };
+                mods_value_box_clone.set_visible(true);
+            } else {
+                gesture.mods = None;
+                mods_value_box_clone.set_visible(false);
+            }
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        mods_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut gesture: Gesture = entry_clone.text().parse().unwrap_or_default();
+            let mods: HashSet<Modifier> = parse_modifiers(entry.text().as_str());
+            gesture.mods = if mods.is_empty() { None } else { Some(mods) };
+            entry_clone.set_text(&gesture.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let is_updating_clone = is_updating.clone();
+        let update_ui_clone = update_ui.clone();
+        entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let gesture: Gesture = entry.text().parse().unwrap_or_default();
+            update_ui_clone(gesture);
+            is_updating_clone.set(false);
+        });
+
+        mother_box
+    }
+}
+
 register_togtkbox!(
     (),
     String,
@@ -4574,6 +4926,11 @@ register_togtkbox!(
     BorderColor,
     CycleNext,
     HyprGradient,
+    GestureDirection,
+    GestureFullscreen,
+    GestureFloating,
+    GestureAction,
+    Gesture,
     Option<Direction>,
     Option<WindowTarget>,
     Option<Angle>,
@@ -4616,4 +4973,7 @@ register_togtkbox_with_separator_names!(
     (SwapNext,),
     (SetPropToggleState,),
     (KeyState,),
+    (Dispatcher,),
+    (GestureFullscreen,),
+    (GestureFloating,),
 );

@@ -2852,7 +2852,7 @@ impl Display for Modifier {
     }
 }
 
-fn parse_modifiers(s: &str) -> HashSet<Modifier> {
+pub fn parse_modifiers(s: &str) -> HashSet<Modifier> {
     let mut mods = HashSet::new();
 
     let s_upper = s.trim_start().to_uppercase();
@@ -7397,6 +7397,7 @@ impl FromStr for Dispatcher {
                     let mut rule = String::new();
                     let mut in_brackets = false;
                     let mut command = String::new();
+                    let mut skip_whitespace = false;
 
                     for c in params.chars() {
                         if c == '[' {
@@ -7405,12 +7406,13 @@ impl FromStr for Dispatcher {
                             rules.push(rule.parse().unwrap_or_default());
                             rule.clear();
                             in_brackets = false;
+                            skip_whitespace = true;
                         } else if c == ';' && in_brackets {
                             rules.push(rule.parse().unwrap_or_default());
                             rule.clear();
                         } else if in_brackets {
                             rule.push(c);
-                        } else {
+                        } else if c != ' ' || !skip_whitespace {
                             command.push(c);
                         }
                     }
@@ -7732,7 +7734,7 @@ impl Display for Dispatcher {
                         f,
                         "exec, [{}] {}",
                         join_with_separator(window_rules, "; "),
-                        command
+                        command.trim()
                     )
                 }
             }
@@ -8076,6 +8078,343 @@ impl Display for UnbindRight {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let result = format!("{}, {}", join_with_separator(&self.mods, "_"), self.key,);
         write!(f, "{}", result)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
+pub enum GestureDirection {
+    #[default]
+    Swipe,
+    Horizontal,
+    Vertical,
+    Left,
+    Right,
+    Up,
+    Down,
+    Pinch,
+    PinchIn,
+    PinchOut,
+}
+
+impl FromStr for GestureDirection {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim().to_lowercase();
+        match s.as_str() {
+            "swipe" => Ok(GestureDirection::Swipe),
+            "horizontal" => Ok(GestureDirection::Horizontal),
+            "vertical" => Ok(GestureDirection::Vertical),
+            "left" => Ok(GestureDirection::Left),
+            "right" => Ok(GestureDirection::Right),
+            "up" => Ok(GestureDirection::Up),
+            "down" => Ok(GestureDirection::Down),
+            "pinch" => Ok(GestureDirection::Pinch),
+            "pinchin" => Ok(GestureDirection::PinchIn),
+            "pinchout" => Ok(GestureDirection::PinchOut),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for GestureDirection {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GestureDirection::Swipe => write!(f, "swipe"),
+            GestureDirection::Horizontal => write!(f, "horizontal"),
+            GestureDirection::Vertical => write!(f, "vertical"),
+            GestureDirection::Left => write!(f, "left"),
+            GestureDirection::Right => write!(f, "right"),
+            GestureDirection::Up => write!(f, "up"),
+            GestureDirection::Down => write!(f, "down"),
+            GestureDirection::Pinch => write!(f, "pinch"),
+            GestureDirection::PinchIn => write!(f, "pinchin"),
+            GestureDirection::PinchOut => write!(f, "pinchout"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
+pub enum GestureFullscreen {
+    #[default]
+    Fullscreen,
+    Maximize,
+}
+
+impl FromStr for GestureFullscreen {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim().to_lowercase();
+        match s.as_str() {
+            "" | "fullscreen" => Ok(GestureFullscreen::Fullscreen),
+            "maximize" => Ok(GestureFullscreen::Maximize),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for GestureFullscreen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GestureFullscreen::Fullscreen => write!(f, ""),
+            GestureFullscreen::Maximize => write!(f, "maximize"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
+pub enum GestureFloating {
+    #[default]
+    Toggle,
+    Float,
+    Tile,
+}
+
+impl FromStr for GestureFloating {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim().to_lowercase();
+        match s.as_str() {
+            "" | "toggle" => Ok(GestureFloating::Toggle),
+            "float" => Ok(GestureFloating::Float),
+            "tile" => Ok(GestureFloating::Tile),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for GestureFloating {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GestureFloating::Toggle => write!(f, ""),
+            GestureFloating::Float => write!(f, "float"),
+            GestureFloating::Tile => write!(f, "tile"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
+#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(name(GestureActionDiscriminant))]
+pub enum GestureAction {
+    Dispatcher(Dispatcher),
+    Workspace,
+    Move,
+    Resize,
+    Special(String),
+    Close,
+    Fullscreen(GestureFullscreen),
+    Float(GestureFloating),
+}
+
+impl HasDiscriminant for GestureAction {
+    type Discriminant = GestureActionDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            GestureActionDiscriminant::Dispatcher => {
+                GestureAction::Dispatcher(Dispatcher::default())
+            }
+            GestureActionDiscriminant::Workspace => GestureAction::Workspace,
+            GestureActionDiscriminant::Move => GestureAction::Move,
+            GestureActionDiscriminant::Resize => GestureAction::Resize,
+            GestureActionDiscriminant::Special => GestureAction::Special(String::default()),
+            GestureActionDiscriminant::Close => GestureAction::Close,
+            GestureActionDiscriminant::Fullscreen => {
+                GestureAction::Fullscreen(GestureFullscreen::Fullscreen)
+            }
+            GestureActionDiscriminant::Float => GestureAction::Float(GestureFloating::default()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            GestureActionDiscriminant::Dispatcher => {
+                GestureAction::Dispatcher(Dispatcher::from_str(str).unwrap_or_default())
+            }
+            GestureActionDiscriminant::Workspace => GestureAction::Workspace,
+            GestureActionDiscriminant::Move => GestureAction::Move,
+            GestureActionDiscriminant::Resize => GestureAction::Resize,
+            GestureActionDiscriminant::Special => GestureAction::Special(str.to_string()),
+            GestureActionDiscriminant::Close => GestureAction::Close,
+            GestureActionDiscriminant::Fullscreen => {
+                GestureAction::Fullscreen(GestureFullscreen::from_str(str).unwrap_or_default())
+            }
+            GestureActionDiscriminant::Float => {
+                GestureAction::Float(GestureFloating::from_str(str).unwrap_or_default())
+            }
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            GestureAction::Dispatcher(dispatcher) => Some(dispatcher.to_string()),
+            GestureAction::Workspace => None,
+            GestureAction::Move => None,
+            GestureAction::Resize => None,
+            GestureAction::Special(special) => Some(special.to_string()),
+            GestureAction::Close => None,
+            GestureAction::Fullscreen(fullscreen) => Some(fullscreen.to_string()),
+            GestureAction::Float(floating) => Some(floating.to_string()),
+        }
+    }
+}
+
+impl Default for GestureAction {
+    fn default() -> Self {
+        GestureAction::Dispatcher(Dispatcher::default())
+    }
+}
+
+impl FromStr for GestureAction {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (action, arguments) = s.split_once(',').unwrap_or((s, ""));
+        let action = action.trim();
+        let arguments = arguments.trim();
+
+        match action {
+            "dispatcher" => Ok(GestureAction::Dispatcher(
+                Dispatcher::from_str(arguments).unwrap_or_default(),
+            )),
+            "workspace" => Ok(GestureAction::Workspace),
+            "move" => Ok(GestureAction::Move),
+            "resize" => Ok(GestureAction::Resize),
+            "special" => Ok(GestureAction::Special(arguments.to_string())),
+            "close" => Ok(GestureAction::Close),
+            "fullscreen" => Ok(GestureAction::Fullscreen(
+                GestureFullscreen::from_str(arguments).unwrap_or_default(),
+            )),
+            "float" => Ok(GestureAction::Float(
+                GestureFloating::from_str(arguments).unwrap_or_default(),
+            )),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for GestureAction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GestureAction::Dispatcher(dispatcher) => write!(f, "dispatcher, {}", dispatcher),
+            GestureAction::Workspace => write!(f, "workspace"),
+            GestureAction::Move => write!(f, "move"),
+            GestureAction::Resize => write!(f, "resize"),
+            GestureAction::Special(special) => write!(f, "special, {}", special),
+            GestureAction::Close => write!(f, "close"),
+            GestureAction::Fullscreen(fullscreen) => write!(f, "fullscreen, {}", fullscreen),
+            GestureAction::Float(floating) => write!(f, "float, {}", floating),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Gesture {
+    pub finger_count: u32,
+    pub direction: GestureDirection,
+    pub action: GestureAction,
+    pub anim_speed: Option<f64>,
+    pub mods: Option<HashSet<Modifier>>,
+}
+
+impl Default for Gesture {
+    fn default() -> Self {
+        Gesture {
+            finger_count: 3,
+            direction: GestureDirection::Swipe,
+            action: GestureAction::default(),
+            anim_speed: None,
+            mods: None,
+        }
+    }
+}
+
+impl FromStr for Gesture {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split(',').collect();
+
+        let finger_count = match parts.first().unwrap_or(&"").parse::<u32>() {
+            Ok(0) | Ok(1) | Ok(2) | Ok(3) => 3,
+            Ok(finger_count) => finger_count,
+            _ => 3,
+        };
+
+        let direction = parts
+            .get(1)
+            .unwrap_or(&"")
+            .parse::<GestureDirection>()
+            .unwrap_or_default();
+
+        let mut action = GestureAction::default();
+
+        let mut anim_speed = None;
+
+        let mut mods = None;
+
+        for (i, part) in parts.iter().enumerate().skip(2) {
+            if let Some(stripped) = part.trim().strip_prefix("mod:") {
+                mods = Some(parse_modifiers(stripped));
+            } else if let Some(stripped) = part.trim().strip_prefix("scale:")
+                && let Ok(speed) = stripped.parse::<f64>()
+            {
+                anim_speed = Some(speed);
+            } else if let Ok(gesture_action) =
+                GestureAction::from_str(&format!("{}, {}", part, parts.get(i + 1).unwrap_or(&"")))
+            {
+                action = gesture_action;
+            }
+        }
+
+        Ok(Gesture {
+            finger_count,
+            direction,
+            action,
+            anim_speed,
+            mods,
+        })
+    }
+}
+
+impl Display for Gesture {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match (self.anim_speed, &self.mods) {
+            (Some(speed), Some(mods)) => write!(
+                f,
+                "{}, {}, mod:{}, scale:{}, {}",
+                self.finger_count,
+                self.direction,
+                join_with_separator(mods, "_"),
+                speed,
+                self.action
+            ),
+            (Some(speed), None) => write!(
+                f,
+                "{}, {}, scale:{}, {}",
+                self.finger_count, self.direction, speed, self.action
+            ),
+            (None, Some(mods)) => write!(
+                f,
+                "{}, {}, mod:{}, {}",
+                self.finger_count,
+                self.direction,
+                join_with_separator(mods, "_"),
+                self.action
+            ),
+            (None, None) => write!(
+                f,
+                "{}, {}, {}",
+                self.finger_count, self.direction, self.action
+            ),
+        }
     }
 }
 

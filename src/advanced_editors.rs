@@ -2,13 +2,14 @@ use crate::{
     gtk_converters::ToGtkBox,
     utils::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
-        BindFlagsEnum, BindLeft, Cm, Dispatcher, MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64,
-        MIN_SAFE_INTEGER_F64, Modifier, Monitor, MonitorSelector, MonitorState, Orientation,
-        Position, Range, Scale, Side, UnbindRight, Workspace, WorkspaceSelector,
-        WorkspaceSelectorNamed, WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags,
-        WorkspaceType, after_second_comma, get_available_monitors,
-        get_available_resolutions_for_monitor, is_modifier, keycode_to_en_key, parse_animation,
-        parse_bezier, parse_bind_right, parse_coordinates, parse_monitor, parse_workspace,
+        BindFlagsEnum, BindLeft, Cm, Dispatcher, Gesture, MAX_SAFE_INTEGER_F64,
+        MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor, MonitorSelector,
+        MonitorState, Orientation, Position, Range, Scale, Side, UnbindRight, Workspace,
+        WorkspaceSelector, WorkspaceSelectorNamed, WorkspaceSelectorWindowCount,
+        WorkspaceSelectorWindowCountFlags, WorkspaceType, after_second_comma,
+        get_available_monitors, get_available_resolutions_for_monitor, is_modifier,
+        keycode_to_en_key, parse_animation, parse_bezier, parse_bind_right, parse_coordinates,
+        parse_monitor, parse_workspace,
     },
 };
 use gio::glib::SignalHandlerId;
@@ -687,7 +688,14 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             }
         }
         "gesture" => {
-            todo!()
+            let label = Label::new(Some("gesture"));
+            label.set_width_request(100);
+            label.set_selectable(true);
+            fancy_name_entry.append(&label);
+            name_entry.set_text("gesture");
+            name_entry.connect_changed(move |entry| {
+                label.set_text(&entry.text());
+            });
         }
         "windowrule" => {
             todo!()
@@ -3832,7 +3840,8 @@ fn fill_fancy_value_entry(
             fancy_value_entry.append(&bind_box);
         }
         "gesture" => {
-            todo!()
+            let gesture_box = Gesture::to_gtk_box(value_entry);
+            fancy_value_entry.append(&gesture_box);
         }
         "windowrule" => {
             todo!()

@@ -7,26 +7,42 @@ gtk_converters.remove:
   en: "Remove"
   ru: "Удалить"
   zh-CN: "移除"
-gtk_converters.%:
-  en: "%"
-  ru: "%"
-  zh-CN: "%"
 gtk_converters.left:
   en: "Left"
-  ru: "Слева"
-  zh-CN: "左边"
+  ru: "Влево"
+  zh-CN: "向左"
 gtk_converters.right:
   en: "Right"
-  ru: "Справа"
-  zh-CN: "右边"
+  ru: "Вправо"
+  zh-CN: "向右"
 gtk_converters.up:
   en: "Up"
-  ru: "Сверху"
-  zh-CN: "上面"
+  ru: "Вверх"
+  zh-CN: "向上"
 gtk_converters.down:
   en: "Down"
-  ru: "Снизу"
-  zh-CN: "下面"
+  ru: "Вниз"
+  zh-CN: "向下"
+gtk_converters.direction:
+  en: "Direction"
+  ru: "Направление"
+  zh-CN: "方向"
+gtk_converters.id:
+  en: "ID"
+  ru: "ID"
+  zh-CN: "ID"
+gtk_converters.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+gtk_converters.current:
+  en: "Current"
+  ru: "Текущий"
+  zh-CN: "当前"
+gtk_converters.relative:
+  en: "Relative"
+  ru: "Относительный"
+  zh-CN: "相对"
 gtk_converters.pixel:
   en: "Pixel"
   ru: "Пиксель"
@@ -35,29 +51,25 @@ gtk_converters.percent:
   en: "Percent"
   ru: "Процент"
   zh-CN: "百分比"
-gtk_converters.relative:
-  en: "Relative"
-  ru: "Относительно"
-  zh-CN: "相对"
 gtk_converters.exact:
   en: "Exact"
-  ru: "Точно"
+  ru: "Точный"
   zh-CN: "精确"
 gtk_converters.top:
   en: "Top"
-  ru: "Сверху"
+  ru: "Верхний слой"
   zh-CN: "顶部"
 gtk_converters.bottom:
   en: "Bottom"
-  ru: "Снизу"
+  ru: "Нижний слой"
   zh-CN: "底部"
 gtk_converters.fullscreen:
   en: "Fullscreen"
-  ru: "Полный экран"
+  ru: "Полноэкранный режим"
   zh-CN: "全屏"
 gtk_converters.maximize:
   en: "Maximize"
-  ru: "Максимизировать"
+  ru: "Развернуть"
   zh-CN: "最大化"
 gtk_converters.absolute:
   en: "Absolute"
@@ -71,77 +83,57 @@ gtk_converters.next:
   en: "Next"
   ru: "Следующий"
   zh-CN: "下一个"
-gtk_converters.id:
-  en: "ID"
-  ru: "ID"
-  zh-CN: "ID"
-gtk_converters.name:
-  en: "Name"
-  ru: "Имя"
-  zh-CN: "名称"
-gtk_converters.current:
-  en: "Current"
-  ru: "Текущий"
-  zh-CN: "当前"
-gtk_converters.direction:
-  en: "Direction"
-  ru: "Направление"
-  zh-CN: "方向"
 gtk_converters.on_monitor:
   en: "On Monitor"
   ru: "На мониторе"
   zh-CN: "在显示器上"
 gtk_converters.on_monitor_including_empty_workspace:
   en: "On Monitor Including Empty Workspace"
-  ru: "На мониторе включая пустые рабочие пространства"
-  zh-CN: "在显示器上包括空工作区"
+  ru: "На мониторе, включая пустые"
+  zh-CN: "在显示器上（含空工作区）"
 gtk_converters.open:
   en: "Open"
   ru: "Открыть"
   zh-CN: "打开"
-gtk_converters.previous_per_monitor:
-  en: "Previous Per Monitor"
-  ru: "Предыдущий на мониторе"
-  zh-CN: "每个显示器的上一个"
 gtk_converters.first_available_empty_workspace:
   en: "First Available Empty Workspace"
-  ru: "Первое доступное пустое рабочее пространство"
-  zh-CN: "第一个可用的空工作区"
+  ru: "Первое свободное"
+  zh-CN: "首个可用空工作区"
 gtk_converters.next_available_empty_workspace:
   en: "Next Available Empty Workspace"
-  ru: "Следующее доступное пустое рабочее пространство"
-  zh-CN: "下一个可用的空工作区"
+  ru: "Следующее свободное"
+  zh-CN: "下一个可用空工作区"
 gtk_converters.first_available_empty_workspace_on_monitor:
-  en: "First Available Empty Workspace on Monitor"
-  ru: "Первое доступное пустое рабочее пространство на мониторе"
-  zh-CN: "显示器上第一个可用的空工作区"
+  en: "First Available Empty Workspace On Monitor"
+  ru: "Первое свободное на мониторе"
+  zh-CN: "显示器上首个可用空工作区"
 gtk_converters.next_available_empty_workspace_on_monitor:
-  en: "Next Available Empty Workspace on Monitor"
-  ru: "Следующее доступное пустое рабочее пространство на мониторе"
-  zh-CN: "显示器上下一个可用的空工作区"
+  en: "Next Available Empty Workspace On Monitor"
+  ru: "Следующее свободное на мониторе"
+  zh-CN: "显示器上下一个可用空工作区"
 gtk_converters.special:
   en: "Special"
   ru: "Специальное"
   zh-CN: "特殊"
 gtk_converters.special_with_name:
-  en: "Special with Name"
+  en: "Special With Name"
   ru: "Специальное с именем"
   zh-CN: "带名称的特殊工作区"
 gtk_converters.class:
   en: "Class"
   ru: "Класс"
-  zh-CN: "类"
+  zh-CN: "类名"
 gtk_converters.initial_class:
   en: "Initial Class"
-  ru: "Начальный класс"
-  zh-CN: "初始类"
+  ru: "Исходный класс"
+  zh-CN: "初始类名"
 gtk_converters.title:
   en: "Title"
   ru: "Заголовок"
   zh-CN: "标题"
 gtk_converters.initial_title:
   en: "Initial Title"
-  ru: "Начальный заголовок"
+  ru: "Исходный заголовок"
   zh-CN: "初始标题"
 gtk_converters.tag:
   en: "Tag"
@@ -150,7 +142,7 @@ gtk_converters.tag:
 gtk_converters.pid:
   en: "PID"
   ru: "PID"
-  zh-CN: "PID"
+  zh-CN: "进程ID"
 gtk_converters.address:
   en: "Address"
   ru: "Адрес"
@@ -161,27 +153,27 @@ gtk_converters.active_window:
   zh-CN: "活动窗口"
 gtk_converters.floating:
   en: "Floating"
-  ru: "Плавающее"
+  ru: "Плавающий"
   zh-CN: "浮动"
 gtk_converters.tiled:
   en: "Tiled"
-  ru: "Плиточное"
+  ru: "Плиточный"
   zh-CN: "平铺"
 gtk_converters.top_left:
   en: "Top Left"
-  ru: "Верхний левый"
+  ru: "Верхний левый угол"
   zh-CN: "左上"
 gtk_converters.top_right:
   en: "Top Right"
-  ru: "Верхний правый"
+  ru: "Верхний правый угол"
   zh-CN: "右上"
 gtk_converters.bottom_left:
   en: "Bottom Left"
-  ru: "Нижний левый"
+  ru: "Нижний левый угол"
   zh-CN: "左下"
 gtk_converters.bottom_right:
   en: "Bottom Right"
-  ru: "Нижний правый"
+  ru: "Нижний правый угол"
   zh-CN: "右下"
 gtk_converters.lock:
   en: "Lock"
@@ -198,35 +190,35 @@ gtk_converters.toggle:
 gtk_converters.on:
   en: "On"
   ru: "Вкл"
-  zh-CN: "开"
+  zh-CN: "开启"
 gtk_converters.off:
   en: "Off"
   ru: "Выкл"
-  zh-CN: "关"
+  zh-CN: "关闭"
 gtk_converters.none:
   en: "None"
   ru: "Нет"
   zh-CN: "无"
 gtk_converters.maximize_and_fullscreen:
   en: "Maximize and Fullscreen"
-  ru: "Максимизировать и полный экран"
-  zh-CN: "最大化和全屏"
+  ru: "Развернуть и на весь экран"
+  zh-CN: "最大化并全屏"
 gtk_converters.subtrahend_of_x:
   en: "Subtrahend of X"
-  ru: "Вычитаемое X"
-  zh-CN: "X的减数"
+  ru: "Смещение по X"
+  zh-CN: "X轴减量"
 gtk_converters.subtrahend_of_y:
   en: "Subtrahend of Y"
-  ru: "Вычитаемое Y"
-  zh-CN: "Y的减数"
+  ru: "Смещение по Y"
+  zh-CN: "Y轴减量"
 gtk_converters.under_cursor:
   en: "Under Cursor"
   ru: "Под курсором"
-  zh-CN: "光标下"
+  zh-CN: "光标位置"
 gtk_converters.on_screen:
   en: "On Screen"
-  ru: "На экране"
-  zh-CN: "屏幕上"
+  ru: "В пределах экрана"
+  zh-CN: "屏幕内"
 gtk_converters.width:
   en: "Width"
   ru: "Ширина"
@@ -235,14 +227,78 @@ gtk_converters.height:
   en: "Height"
   ru: "Высота"
   zh-CN: "高度"
+gtk_converters.max:
+  en: "Max"
+  ru: "Макс"
+  zh-CN: "最大"
+gtk_converters.min:
+  en: "Min"
+  ru: "Мин"
+  zh-CN: "最小"
 gtk_converters.width_bound:
   en: "Width Bound"
   ru: "Ограничение ширины"
-  zh-CN: "宽度限制"
+  zh-CN: "宽度约束"
 gtk_converters.height_bound:
   en: "Height Bound"
   ru: "Ограничение высоты"
-  zh-CN: "高度限制"
+  zh-CN: "高度约束"
+gtk_converters.set:
+  en: "Set"
+  ru: "Установить"
+  zh-CN: "设置"
+gtk_converters.set_always:
+  en: "Set Always"
+  ru: "Всегда устанавливать"
+  zh-CN: "始终设置"
+gtk_converters.new:
+  en: "New"
+  ru: "Новый"
+  zh-CN: "新建"
+gtk_converters.barred:
+  en: "Barred"
+  ru: "Запрещённый"
+  zh-CN: "禁止"
+gtk_converters.deny:
+  en: "Deny"
+  ru: "Запретить"
+  zh-CN: "拒绝"
+gtk_converters.invade:
+  en: "Invade"
+  ru: "Вторгнуться"
+  zh-CN: "侵入"
+gtk_converters.override:
+  en: "Override"
+  ru: "Переопределить"
+  zh-CN: "覆写"
+gtk_converters.unset:
+  en: "Unset"
+  ru: "Сбросить"
+  zh-CN: "取消设置"
+gtk_converters.activate:
+  en: "Activate"
+  ru: "Активировать"
+  zh-CN: "激活"
+gtk_converters.activatefocus:
+  en: "Activate Focus"
+  ru: "Активировать с фокусом"
+  zh-CN: "激活并聚焦"
+gtk_converters.fullscreenoutput:
+  en: "Fullscreen Output"
+  ru: "Вывод на весь экран"
+  zh-CN: "全屏输出"
+gtk_converters.photo:
+  en: "Photo"
+  ru: "Фото"
+  zh-CN: "照片"
+gtk_converters.video:
+  en: "Video"
+  ru: "Видео"
+  zh-CN: "视频"
+gtk_converters.game:
+  en: "Game"
+  ru: "Игра"
+  zh-CN: "游戏"
 gtk_converters.red:
   en: "Red"
   ru: "Красный"
@@ -262,75 +318,235 @@ gtk_converters.alpha:
 gtk_converters.active_border_color:
   en: "Active Border Color"
   ru: "Цвет границы активного окна"
-  zh-CN: "活动边框颜色"
+  zh-CN: "活动窗口边框颜色"
 gtk_converters.active_border_gradient:
   en: "Active Border Gradient"
   ru: "Градиент границы активного окна"
-  zh-CN: "活动边框渐变"
+  zh-CN: "活动窗口边框渐变"
 gtk_converters.active_and_inactive_border_color:
   en: "Active and Inactive Border Color"
-  ru: "Цвет границы активного и неактивного окна"
-  zh-CN: "活动和非活动边框颜色"
+  ru: "Цвет границы активного и неактивного окон"
+  zh-CN: "活动与非活动窗口边框颜色"
 gtk_converters.active_and_inactive_border_gradient:
   en: "Active and Inactive Border Gradient"
-  ru: "Градиент границы активного и неактивного окна"
-  zh-CN: "活动和非活动边框渐变"
+  ru: "Градиент границы активного и неактивного окон"
+  zh-CN: "活动与非活动窗口边框渐变"
 gtk_converters.angle:
   en: "Angle"
   ru: "Угол"
   zh-CN: "角度"
-gtk_converters.override:
-  en: "Override"
-  ru: "Переопределить"
-  zh-CN: "覆盖"
-gtk_converters.gradient_colors:
-  en: "Gradient Colors"
-  ru: "Цвета градиента"
-  zh-CN: "渐变颜色"
-gtk_converters.gradient_angle:
-  en: "Gradient Angle"
-  ru: "Угол градиента"
-  zh-CN: "渐变角度"
-gtk_converters.window_rules:
-  en: "Window Rules"
-  ru: "Правила окна"
-  zh-CN: "窗口规则"
-gtk_converters.window_target:
-  en: "Window Target"
-  ru: "Цель окна"
-  zh-CN: "窗口目标"
-gtk_converters.fullscreen_mode:
-  en: "Fullscreen Mode"
-  ru: "Режим полного экрана"
-  zh-CN: "全屏模式"
-gtk_converters.internal_state:
-  en: "Internal State"
-  ru: "Внутреннее состояние"
-  zh-CN: "内部状态"
-gtk_converters.client_state:
-  en: "Client State"
-  ru: "Состояние клиента"
-  zh-CN: "客户端状态"
+gtk_converters.always:
+  en: "Always"
+  ru: "Всегда"
+  zh-CN: "始终"
+gtk_converters.focus:
+  en: "Focus"
+  ru: "Фокус"
+  zh-CN: "聚焦"
+gtk_converters.overall:
+  en: "Overall"
+  ru: "Общий"
+  zh-CN: "整体"
+gtk_converters.active_and_inactive:
+  en: "Active and Inactive"
+  ru: "Активное и неактивное"
+  zh-CN: "活动与非活动"
+gtk_converters.active_and_inactive_and_fullscreen:
+  en: "Active and Inactive and Fullscreen"
+  ru: "Активное, неактивное и полноэкранное"
+  zh-CN: "活动、非活动与全屏"
+gtk_converters.slide:
+  en: "Slide"
+  ru: "Скольжение"
+  zh-CN: "滑动"
+gtk_converters.slide_with_side:
+  en: "Slide With Side"
+  ru: "Скольжение с боковым смещением"
+  zh-CN: "侧向滑动"
+gtk_converters.popin:
+  en: "Pop In"
+  ru: "Вход"
+  zh-CN: "弹入"
+gtk_converters.popin_with_percent:
+  en: "Pop In With Percent"
+  ru: "Вход с процентом"
+  zh-CN: "百分比弹入"
+gtk_converters.gnomed:
+  en: "Gnomed"
+  ru: "GNOME-стиль"
+  zh-CN: "GNOME 风格"
+gtk_converters.slide_vert:
+  en: "Slide Vert"
+  ru: "Вертикальное скольжение"
+  zh-CN: "垂直滑动"
+gtk_converters.slide_vert_with_percent:
+  en: "Slide Vert With Percent"
+  ru: "Вертикальное скольжение с процентом"
+  zh-CN: "百分比垂直滑动"
+gtk_converters.fade:
+  en: "Fade"
+  ru: "Затухание"
+  zh-CN: "淡入淡出"
+gtk_converters.slide_fade:
+  en: "Slide Fade"
+  ru: "Скольжение с затуханием"
+  zh-CN: "滑动淡入淡出"
+gtk_converters.slide_fade_with_percent:
+  en: "Slide Fade With Percent"
+  ru: "Скольжение с затуханием и процентом"
+  zh-CN: "百分比滑动淡入淡出"
+gtk_converters.slide_fade_vert:
+  en: "Slide Fade Vert"
+  ru: "Вертикальное скольжение с затуханием"
+  zh-CN: "垂直滑动淡入淡出"
+gtk_converters.slide_fade_vert_with_percent:
+  en: "Slide Fade Vert With Percent"
+  ru: "Вертикальное скольжение с затуханием и процентом"
+  zh-CN: "百分比垂直滑动淡入淡出"
+gtk_converters.once:
+  en: "Once"
+  ru: "Один раз"
+  zh-CN: "单次"
+gtk_converters.loop:
+  en: "Loop"
+  ru: "Цикл"
+  zh-CN: "循环"
+gtk_converters.float:
+  en: "Float"
+  ru: "Плавающий"
+  zh-CN: "浮动"
+gtk_converters.tile:
+  en: "Tile"
+  ru: "Плиточный"
+  zh-CN: "平铺"
+gtk_converters.persistent_size:
+  en: "Persistent Size"
+  ru: "Сохранять размер"
+  zh-CN: "持久尺寸"
+gtk_converters.fullscreen_state:
+  en: "Fullscreen State"
+  ru: "Состояние полноэкранного режима"
+  zh-CN: "全屏状态"
+gtk_converters.move:
+  en: "Move"
+  ru: "Переместить"
+  zh-CN: "移动"
+gtk_converters.size:
+  en: "Size"
+  ru: "Размер"
+  zh-CN: "尺寸"
+gtk_converters.center:
+  en: "Center"
+  ru: "По центру"
+  zh-CN: "居中"
+gtk_converters.center_with_respect_to_monitor_reserved_area:
+  en: "Center With Respect To Monitor Reserved Area"
+  ru: "По центру с учётом области монитора"
+  zh-CN: "相对于显示器保留区域居中"
+gtk_converters.pseudo:
+  en: "Pseudo"
+  ru: "Псевдоокно"
+  zh-CN: "伪"
+gtk_converters.monitor:
+  en: "Monitor"
+  ru: "Монитор"
+  zh-CN: "显示器"
+gtk_converters.workspace:
+  en: "Workspace"
+  ru: "Рабочее пространство"
+  zh-CN: "工作区"
+gtk_converters.no_initial_focus:
+  en: "No Initial Focus"
+  ru: "Без первоначального фокуса"
+  zh-CN: "无初始焦点"
+gtk_converters.pin:
+  en: "Pin"
+  ru: "Закрепить"
+  zh-CN: "固定"
+gtk_converters.no_max_size:
+  en: "No Max Size"
+  ru: "Без ограничения размера"
+  zh-CN: "无最大尺寸限制"
+gtk_converters.stay_focused:
+  en: "Stay Focused"
+  ru: "Сохранять фокус"
+  zh-CN: "保持聚焦"
+gtk_converters.group:
+  en: "Group"
+  ru: "Группа"
+  zh-CN: "分组"
+gtk_converters.suppress_event:
+  en: "Suppress Event"
+  ru: "Игнорировать событие"
+  zh-CN: "抑制事件"
+gtk_converters.content:
+  en: "Content"
+  ru: "Тип содержимого"
+  zh-CN: "内容类型"
+gtk_converters.no_close_for:
+  en: "No Close For"
+  ru: "Защита от закрытия"
+  zh-CN: "禁止关闭时长"
+gtk_converters.animation:
+  en: "Animation"
+  ru: "Анимация"
+  zh-CN: "动画"
+gtk_converters.border_color:
+  en: "Border Color"
+  ru: "Цвет границы"
+  zh-CN: "边框颜色"
+gtk_converters.idle_ingibit:
+  en: "Idle Inhibit"
+  ru: "Блокировка простоя"
+  zh-CN: "抑制空闲"
+gtk_converters.opacity:
+  en: "Opacity"
+  ru: "Прозрачность"  # КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ!
+  zh-CN: "不透明度"
+gtk_converters.max_size:
+  en: "Max Size"
+  ru: "Максимальный размер"
+  zh-CN: "最大尺寸"
+gtk_converters.min_size:
+  en: "Min Size"
+  ru: "Минимальный размер"
+  zh-CN: "最小尺寸"
+gtk_converters.repeat:
+  en: "Repeat"
+  ru: "Повтор"
+  zh-CN: "重复"
+gtk_converters.direction_silent:
+  en: "Direction Silent"
+  ru: "Направление без уведомления"
+  zh-CN: "静默方向"
+gtk_converters.monitor_silent:
+  en: "Monitor Silent"
+  ru: "Монитор без уведомления"
+  zh-CN: "静默显示器"
+gtk_converters.window:
+  en: "Window"
+  ru: "Окно"
+  zh-CN: "窗口"
 gtk_converters.is_previous:
   en: "Is Previous"
-  ru: "Предыдущий"
-  zh-CN: "是上一个"
+  ru: "Предыдущее"
+  zh-CN: "上一个"
 gtk_converters.is_tiled:
   en: "Is Tiled"
-  ru: "Плиточное"
-  zh-CN: "是平铺"
+  ru: "В плиточном режиме"
+  zh-CN: "已平铺"
 gtk_converters.is_floating:
   en: "Is Floating"
-  ru: "Плавающее"
-  zh-CN: "是浮动"
+  ru: "В плавающем режиме"
+  zh-CN: "已浮动"
 gtk_converters.is_visible:
   en: "Is Visible"
   ru: "Видимое"
-  zh-CN: "是可见"
+  zh-CN: "可见"
 gtk_converters.is_hist:
-  en: "Is History"
-  ru: "История"
-  zh-CN: "是历史"
+  en: "Is Hist"
+  ru: "Из истории"
+  zh-CN: "历史窗口"
 gtk_converters.back:
   en: "Back"
   ru: "Назад"
@@ -343,7 +559,471 @@ gtk_converters.index:
   en: "Index"
   ru: "Индекс"
   zh-CN: "索引"
+gtk_converters.gradient_colors:
+  en: "Gradient Colors"
+  ru: "Цвета градиента"
+  zh-CN: "渐变颜色"
+gtk_converters.gradient_angle:
+  en: "Gradient Angle"
+  ru: "Угол градиента"
+  zh-CN: "渐变角度"
+gtk_converters.alpha_override:
+  en: "Alpha Override"
+  ru: "Переопределение альфа"
+  zh-CN: "覆写透明度"
+gtk_converters.alpha_inactive:
+  en: "Alpha Inactive"
+  ru: "Альфа неактивного"
+  zh-CN: "非活动透明度"
+gtk_converters.alpha_inactive_override:
+  en: "Alpha Inactive Override"
+  ru: "Переопределение альфа неактивного"
+  zh-CN: "覆写非活动透明度"
+gtk_converters.alpha_fullscreen:
+  en: "Alpha Fullscreen"
+  ru: "Альфа полноэкранного"
+  zh-CN: "全屏透明度"
+gtk_converters.alpha_fullscreen_override:
+  en: "Alpha Fullscreen Override"
+  ru: "Переопределение альфа полноэкранного"
+  zh-CN: "覆写全屏透明度"
+gtk_converters.animation_style:
+  en: "Animation Style"
+  ru: "Стиль анимации"
+  zh-CN: "动画样式"
+gtk_converters.inactive_border_color:
+  en: "Inactive Border Color"
+  ru: "Цвет границы неактивного окна"
+  zh-CN: "非活动窗口边框颜色"
+gtk_converters.border_size:
+  en: "Border Size"
+  ru: "Размер границы"
+  zh-CN: "边框尺寸"
+gtk_converters.rounding:
+  en: "Rounding"
+  ru: "Скругление"
+  zh-CN: "圆角"
+gtk_converters.rounding_power:
+  en: "Rounding Power"
+  ru: "Степень скругления"
+  zh-CN: "圆角幂次"
+gtk_converters.allows_input:
+  en: "Allows Input"
+  ru: "Разрешать ввод"
+  zh-CN: "允许输入"
+gtk_converters.dim_around:
+  en: "Dim Around"
+  ru: "Затемнение фона"
+  zh-CN: "周围调暗"
+gtk_converters.decorate:
+  en: "Decorate"
+  ru: "Декорирование"
+  zh-CN: "装饰"
+gtk_converters.focus_on_activate:
+  en: "Focus On Activate"
+  ru: "Фокусировка при активации"
+  zh-CN: "激活时聚焦"
+gtk_converters.keep_aspect_ratio:
+  en: "Keep Aspect Ratio"
+  ru: "Сохранять пропорции"
+  zh-CN: "保持宽高比"
+gtk_converters.nearest_neighbor:
+  en: "Nearest Neighbor"
+  ru: "Ближайший сосед"
+  zh-CN: "最近邻插值"
+gtk_converters.no_anim:
+  en: "No Anim"
+  ru: "Без анимации"
+  zh-CN: "无动画"
+gtk_converters.no_blur:
+  en: "No Blur"
+  ru: "Без размытия"
+  zh-CN: "无模糊"
+gtk_converters.no_border:
+  en: "No Border"
+  ru: "Без границ"
+  zh-CN: "无边框"
+gtk_converters.no_dim:
+  en: "No Dim"
+  ru: "Без затемнения"
+  zh-CN: "无调暗"
+gtk_converters.no_focus:
+  en: "No Focus"
+  ru: "Без фокуса"
+  zh-CN: "无焦点"
+gtk_converters.no_follow_mouse:
+  en: "No Follow Mouse"
+  ru: "Не следовать за мышью"
+  zh-CN: "不跟随鼠标"
+gtk_converters.no_max_size:
+  en: "No Max Size"
+  ru: "Без ограничения размера"
+  zh-CN: "无最大尺寸"
+gtk_converters.no_rounding:
+  en: "No Rounding"
+  ru: "Без скругления"
+  zh-CN: "无圆角"
+gtk_converters.no_shadow:
+  en: "No Shadow"
+  ru: "Без теней"
+  zh-CN: "无阴影"
+gtk_converters.no_shortcuts_inhibit:
+  en: "No Shortcuts Inhibit"
+  ru: "Не блокировать сочетания клавиш"
+  zh-CN: "不禁用快捷键"
+gtk_converters.opaque:
+  en: "Opaque"
+  ru: "Непрозрачный"
+  zh-CN: "不透明"
+gtk_converters.force_rgbx:
+  en: "Force RGBX"
+  ru: "Принудительный RGBX"
+  zh-CN: "强制 RGBX"
+gtk_converters.sync_fullscreen:
+  en: "Sync Fullscreen"
+  ru: "Синхронизация с полноэкранным режимом"
+  zh-CN: "同步全屏"
+gtk_converters.immediate:
+  en: "Immediate"
+  ru: "Немедленно"
+  zh-CN: "立即"
+gtk_converters.xray:
+  en: "XRay"
+  ru: "X-Ray"
+  zh-CN: "X 光"
+gtk_converters.render_unfocused:
+  en: "Render Unfocused"
+  ru: "Отрисовка неактивных"
+  zh-CN: "渲染非活动窗口"
+gtk_converters.scroll_mouse:
+  en: "Scroll Mouse"
+  ru: "Прокрутка мышью"
+  zh-CN: "鼠标滚动"
+gtk_converters.scroll_touchpad:
+  en: "Scroll Touchpad"
+  ru: "Прокрутка тачпадом"
+  zh-CN: "触控板滚动"
+gtk_converters.no_screenshare:
+  en: "No Screenshare"
+  ru: "Без трансляции экрана"
+  zh-CN: "禁用屏幕共享"
+gtk_converters.no_vrr:
+  en: "No VRR"
+  ru: "Без VRR"
+  zh-CN: "禁用可变刷新率"
+gtk_converters.exec:
+  en: "Exec"
+  ru: "Выполнить"
+  zh-CN: "执行"
+gtk_converters.execr:
+  en: "Execr"
+  ru: "Выполнить с сохранением"
+  zh-CN: "执行（保留）"
+gtk_converters.pass:
+  en: "Pass"
+  ru: "Передать"
+  zh-CN: "透传"
+gtk_converters.send_shortcut:
+  en: "Send Shortcut"
+  ru: "Отправить сочетание клавиш"
+  zh-CN: "发送快捷键"
+gtk_converters.send_key_state:
+  en: "Send Key State"
+  ru: "Отправить состояние клавиши"
+  zh-CN: "发送按键状态"
+gtk_converters.kill_active:
+  en: "Kill Active"
+  ru: "Завершить активное"
+  zh-CN: "终止活动窗口"
+gtk_converters.force_kill_active:
+  en: "Force Kill Active"
+  ru: "Принудительно завершить"
+  zh-CN: "强制终止活动窗口"
+gtk_converters.close_window:
+  en: "Close Window"
+  ru: "Закрыть окно"
+  zh-CN: "关闭窗口"
+gtk_converters.kill_window:
+  en: "Kill Window"
+  ru: "Завершить окно"
+  zh-CN: "终止窗口"
+gtk_converters.signal:
+  en: "Signal"
+  ru: "Сигнал"
+  zh-CN: "信号"
+gtk_converters.signal_window:
+  en: "Signal Window"
+  ru: "Сигнал окну"
+  zh-CN: "窗口信号"
+gtk_converters.move_to_workspace:
+  en: "Move To Workspace"
+  ru: "Переместить на рабочее пространство"
+  zh-CN: "移动到工作区"
+gtk_converters.move_to_workspace_silent:
+  en: "Move To Workspace Silent"
+  ru: "Переместить без уведомления"
+  zh-CN: "静默移动到工作区"
+gtk_converters.toggle_floating:
+  en: "Toggle Floating"
+  ru: "Переключить плавающий режим"
+  zh-CN: "切换浮动状态"
+gtk_converters.set_floating:
+  en: "Set Floating"
+  ru: "Включить плавающий режим"
+  zh-CN: "设置为浮动"
+gtk_converters.set_tiled:
+  en: "Set Tiled"
+  ru: "Включить плиточный режим"
+  zh-CN: "设置为平铺"
+gtk_converters.dpms:
+  en: "DPMS"
+  ru: "DPMS"
+  zh-CN: "DPMS"
+gtk_converters.move_focus:
+  en: "Move Focus"
+  ru: "Переместить фокус"
+  zh-CN: "移动焦点"
+gtk_converters.move_window:
+  en: "Move Window"
+  ru: "Переместить окно"
+  zh-CN: "移动窗口"
+gtk_converters.swap_window:
+  en: "Swap Window"
+  ru: "Поменять окна местами"
+  zh-CN: "交换窗口"
+gtk_converters.center_window:
+  en: "Center Window"
+  ru: "Центрировать окно"
+  zh-CN: "窗口居中"
+gtk_converters.resize_active:
+  en: "Resize Active"
+  ru: "Изменить размер активного окна"
+  zh-CN: "调整活动窗口大小"
+gtk_converters.move_active:
+  en: "Move Active"
+  ru: "Переместить активное окно"
+  zh-CN: "移动活动窗口"
+gtk_converters.resize_window_pixel:
+  en: "Resize Window Pixel"
+  ru: "Изменить размер окна (пиксели)"
+  zh-CN: "像素级调整窗口大小"
+gtk_converters.move_window_pixel:
+  en: "Move Window Pixel"
+  ru: "Переместить окно (пиксели)"
+  zh-CN: "像素级移动窗口"
+gtk_converters.cycle_next:
+  en: "Cycle Next"
+  ru: "Циклический переход"
+  zh-CN: "循环切换"
+gtk_converters.swap_next:
+  en: "Swap Next"
+  ru: "Поменять со следующим"
+  zh-CN: "交换下一个"
+gtk_converters.tag_window:
+  en: "Tag Window"
+  ru: "Назначить тег окну"
+  zh-CN: "标记窗口"
+gtk_converters.focus_window:
+  en: "Focus Window"
+  ru: "Фокус на окно"
+  zh-CN: "聚焦窗口"
+gtk_converters.focus_monitor:
+  en: "Focus Monitor"
+  ru: "Фокус на монитор"
+  zh-CN: "聚焦显示器"
+gtk_converters.split_ratio:
+  en: "Split Ratio"
+  ru: "Соотношение разделения"
+  zh-CN: "分割比例"
+gtk_converters.move_cursor_to_corner:
+  en: "Move Cursor To Corner"
+  ru: "Переместить курсор в угол"
+  zh-CN: "移动光标到角落"
+gtk_converters.move_cursor:
+  en: "Move Cursor"
+  ru: "Переместить курсор"
+  zh-CN: "移动光标"
+gtk_converters.rename_workspace:
+  en: "Rename Workspace"
+  ru: "Переименовать рабочее пространство"
+  zh-CN: "重命名工作区"
+gtk_converters.exit:
+  en: "Exit"
+  ru: "Выход"
+  zh-CN: "退出"
+gtk_converters.force_renderer_reload:
+  en: "Force Renderer Reload"
+  ru: "Принудительная перезагрузка рендерера"
+  zh-CN: "强制重载渲染器"
+gtk_converters.move_current_workspace_to_monitor:
+  en: "Move Current Workspace To Monitor"
+  ru: "Переместить текущее пространство на монитор"
+  zh-CN: "将当前工作区移动到显示器"
+gtk_converters.focus_workspace_on_current_monitor:
+  en: "Focus Workspace On Current Monitor"
+  ru: "Фокус на пространстве текущего монитора"
+  zh-CN: "聚焦当前显示器上的工作区"
+gtk_converters.move_workspace_to_monitor:
+  en: "Move Workspace To Monitor"
+  ru: "Переместить пространство на монитор"
+  zh-CN: "将工作区移动到显示器"
+gtk_converters.swap_active_workspaces:
+  en: "Swap Active Workspaces"
+  ru: "Поменять активные пространства местами"
+  zh-CN: "交换活动工作区"
+gtk_converters.bring_active_to_top:
+  en: "Bring Active To Top"
+  ru: "Переместить активное наверх"
+  zh-CN: "置顶活动窗口"
+gtk_converters.alter_z_order:
+  en: "Alter Z Order"
+  ru: "Изменить Z-порядок"
+  zh-CN: "调整 Z 轴顺序"
+gtk_converters.toggle_special_workspace:
+  en: "Toggle Special Workspace"
+  ru: "Переключить специальное пространство"
+  zh-CN: "切换特殊工作区"
+gtk_converters.focus_urgent_or_last:
+  en: "Focus Urgent Or Last"
+  ru: "Фокус на важном или последнем"
+  zh-CN: "聚焦紧急或上一个窗口"
+gtk_converters.toggle_group:
+  en: "Toggle Group"
+  ru: "Переключить группу"
+  zh-CN: "切换分组"
+gtk_converters.change_group_active:
+  en: "Change Group Active"
+  ru: "Изменить активную группу"
+  zh-CN: "更改活动分组"
+gtk_converters.focus_current_or_last:
+  en: "Focus Current Or Last"
+  ru: "Фокус на текущем или последнем"
+  zh-CN: "聚焦当前或上一个窗口"
+gtk_converters.lock_groups:
+  en: "Lock Groups"
+  ru: "Заблокировать группы"
+  zh-CN: "锁定分组"
+gtk_converters.lock_active_group:
+  en: "Lock Active Group"
+  ru: "Заблокировать активную группу"
+  zh-CN: "锁定活动分组"
+gtk_converters.move_into_group:
+  en: "Move Into Group"
+  ru: "Переместить в группу"
+  zh-CN: "移入分组"
+gtk_converters.move_out_of_group:
+  en: "Move Out Of Group"
+  ru: "Переместить из группы"
+  zh-CN: "移出分组"
+gtk_converters.move_window_or_group:
+  en: "Move Window Or Group"
+  ru: "Переместить окно или группу"
+  zh-CN: "移动窗口或分组"
+gtk_converters.move_group_window:
+  en: "Move Group Window"
+  ru: "Переместить окно группы"
+  zh-CN: "移动分组内窗口"
+gtk_converters.deny_window_from_group:
+  en: "Deny Window From Group"
+  ru: "Исключить окно из группы"
+  zh-CN: "禁止窗口加入分组"
+gtk_converters.set_ignore_group_lock:
+  en: "Set Ignore Group Lock"
+  ru: "Игнорировать блокировку группы"
+  zh-CN: "设置忽略分组锁定"
+gtk_converters.global:
+  en: "Global"
+  ru: "Глобальный"
+  zh-CN: "全局"
+gtk_converters.event:
+  en: "Event"
+  ru: "Событие"
+  zh-CN: "事件"
+gtk_converters.set_prop:
+  en: "Set Prop"
+  ru: "Установить свойство"
+  zh-CN: "设置属性"
+gtk_converters.toggle_swallow:
+  en: "Toggle Swallow"
+  ru: "Переключить поглощение"
+  zh-CN: "切换窗口吞噬"
+gtk_converters.window_rules:
+  en: "Window Rules"
+  ru: "Правила окон"
+  zh-CN: "窗口规则"
+gtk_converters.window_target:
+  en: "Window Target"
+  ru: "Цель окна"
+  zh-CN: "窗口目标"
 gtk_converters.monitor_name:
   en: "Monitor Name"
   ru: "Имя монитора"
   zh-CN: "显示器名称"
+gtk_converters.internal_state:
+  en: "Internal State"
+  ru: "Внутреннее состояние"
+  zh-CN: "内部状态"
+gtk_converters.client_state:
+  en: "Client State"
+  ru: "Состояние клиента"
+  zh-CN: "客户端状态"
+gtk_converters.swipe:
+  en: "Swipe"
+  ru: "Свайп"
+  zh-CN: "滑动"
+gtk_converters.horizontal:
+  en: "Horizontal"
+  ru: "Горизонтальный"
+  zh-CN: "水平"
+gtk_converters.vertical:
+  en: "Vertical"
+  ru: "Вертикальный"
+  zh-CN: "垂直"
+gtk_converters.pinch:
+  en: "Pinch"
+  ru: "Сведение пальцев"
+  zh-CN: "捏合"
+gtk_converters.pinchin:
+  en: "Pinch In"
+  ru: "Сжатие"
+  zh-CN: "捏合缩小"
+gtk_converters.pinchout:
+  en: "Pinch Out"
+  ru: "Расширение"
+  zh-CN: "捏合放大"
+gtk_converters.dispatcher:
+  en: "Dispatcher"
+  ru: "Диспетчер"
+  zh-CN: "调度器"
+gtk_converters.close:
+  en: "Close"
+  ru: "Закрыть"
+  zh-CN: "关闭"
+gtk_converters.finger_count:
+  en: "Finger Count"
+  ru: "Количество пальцев"
+  zh-CN: "手指数量"
+gtk_converters.action:
+  en: "Action"
+  ru: "Действие"
+  zh-CN: "动作"
+gtk_converters.animation_speed:
+  en: "Animation Speed"
+  ru: "Скорость анимации"
+  zh-CN: "动画速度"
+gtk_converters.modifiers:
+  en: "Modifiers"
+  ru: "Модификаторы"
+  zh-CN: "修饰键"
+gtk_converters.lock_always:
+  en: "Lock Always"
+  ru: "Всегда блокировать"
+  zh-CN: "始终锁定"
+gtk_converters.previous_per_monitor:
+  en: "Previous Per Monitor"
+  ru: "Предыдущее на каждом мониторе"
+  zh-CN: "每个显示器上的上一个"
+gtk_converters.resize:
+  en: "Resize"
+  ru: "Изменить размер"
+  zh-CN: "调整大小"
