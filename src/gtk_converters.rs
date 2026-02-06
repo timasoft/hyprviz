@@ -7,12 +7,15 @@ use crate::{
         CycleNext, Direction, Dispatcher, DispatcherDiscriminant, DispatcherFullscreenState,
         FloatValue, FullscreenMode, FullscreenState, Gesture, GestureAction, GestureDirection,
         GestureFloating, GestureFullscreen, GroupLockAction, HasDiscriminant, HyprColor, HyprCoord,
-        HyprGradient, HyprOpacity, HyprSize, IdOrName, IdleIngibitMode, KeyState,
-        MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64, Modifier, MonitorTarget, MoveDirection,
-        PixelOrPercent, RelativeId, ResizeParams, SetProp, SetPropToggleState, Side, SizeBound,
-        SwapDirection, SwapNext, TagToggleState, ToggleState, WindowEvent, WindowGroupOption,
-        WindowRule, WindowTarget, WorkspaceTarget, ZHeight, cow_to_static_str, join_with_separator,
-        parse_modifiers,
+        HyprGradient, HyprOpacity, HyprSize, IdOrName, IdOrNameOrWorkspaceSelector,
+        IdleIngibitMode, KeyState, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64, Modifier,
+        MonitorSelector, MonitorTarget, MoveDirection, PixelOrPercent, Range, RelativeId,
+        ResizeParams, SetProp, SetPropToggleState, Side, SizeBound, SwapDirection, SwapNext,
+        TagToggleState, ToggleState, WindowEvent, WindowGroupOption, WindowRule,
+        WindowRuleFullscreenState, WindowRuleParameter, WindowRuleWithParameters, WindowTarget,
+        WorkspaceSelector, WorkspaceSelectorFullscreen, WorkspaceSelectorNamed,
+        WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags, WorkspaceTarget, ZHeight,
+        cow_to_static_str, join_with_separator, parse_modifiers,
     },
 };
 use gtk::{
@@ -38,16 +41,20 @@ pub enum FieldLabel {
     Unnamed,
 }
 
+type ToGtkBoxWithSeparatorAndNamesBuilder =
+    fn(&Entry, char, &[FieldLabel], custom_split: Option<fn(&str) -> Vec<&str>>) -> GtkBox;
+
 trait EnumConfigForGtk {
     fn separator() -> Option<char> {
         None
     }
 
     fn dropdown_items() -> StringList;
-    #[allow(clippy::type_complexity)]
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         None
     }
+
     fn field_labels() -> Option<Vec<Vec<FieldLabel>>> {
         None
     }
@@ -74,7 +81,7 @@ macro_rules! register_togtkbox {
     };
 }
 
-trait ToGtkBoxWithSeparator {
+pub trait ToGtkBoxWithSeparator {
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox;
 }
 pub struct ToGtkBoxWithSeparatorImplementation {
@@ -96,11 +103,16 @@ macro_rules! register_togtkbox_with_separator {
 }
 
 trait ToGtkBoxWithSeparatorAndNames {
-    fn to_gtk_box(entry: &Entry, separator: char, names: &[FieldLabel]) -> GtkBox;
+    fn to_gtk_box(
+        entry: &Entry,
+        separator: char,
+        names: &[FieldLabel],
+        custom_split: Option<fn(&str) -> Vec<&str>>,
+    ) -> GtkBox;
 }
 pub struct ToGtkBoxWithSeparatorAndNamesImplementation {
     pub name: &'static str,
-    pub constructor: fn(&Entry, char, &[FieldLabel]) -> GtkBox,
+    pub constructor: ToGtkBoxWithSeparatorAndNamesBuilder,
 }
 inventory::collect!(ToGtkBoxWithSeparatorAndNamesImplementation);
 macro_rules! register_togtkbox_with_separator_names {
@@ -148,7 +160,12 @@ where
 
                 if let Some(builder) = T::from_discriminant(discriminant).parameter_builder() {
                     let labels = field_labels.get(i).unwrap_or(&empty_vec);
-                    let variant_box = builder(&param_entry, separator, labels);
+                    let variant_box = builder(
+                        &param_entry,
+                        separator,
+                        labels,
+                        T::custom_split(discriminant),
+                    );
                     stack.add_named(&variant_box, Some(&format!("v{}", i)));
                 } else {
                     stack.add_named(
@@ -603,7 +620,12 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
 }
 
 impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparatorAndNames for (T,) {
-    fn to_gtk_box(entry: &Entry, _separator: char, names: &[FieldLabel]) -> GtkBox {
+    fn to_gtk_box(
+        entry: &Entry,
+        _separator: char,
+        names: &[FieldLabel],
+        _custom_split: Option<fn(&str) -> Vec<&str>>,
+    ) -> GtkBox {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         if let Some(FieldLabel::Named(name)) = names.first() {
             mother_box.append(&Label::new(Some(name)));
@@ -618,7 +640,12 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparatorAndNames for (T,) {
 impl<T: ToGtkBox + Default + Display, N: ToGtkBox + Default + Display> ToGtkBoxWithSeparatorAndNames
     for (T, N)
 {
-    fn to_gtk_box(entry: &Entry, separator: char, names: &[FieldLabel]) -> GtkBox {
+    fn to_gtk_box(
+        entry: &Entry,
+        separator: char,
+        names: &[FieldLabel],
+        custom_split: Option<fn(&str) -> Vec<&str>>,
+    ) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -639,7 +666,10 @@ impl<T: ToGtkBox + Default + Display, N: ToGtkBox + Default + Display> ToGtkBoxW
         let t_entry_clone = t_entry.clone();
         let n_entry_clone = n_entry.clone();
         let update_ui = move |text: &str| {
-            let parts: Vec<&str> = text.split(separator).collect();
+            let parts: Vec<&str> = match custom_split {
+                Some(custom_split) => custom_split(text),
+                None => text.split(separator).collect(),
+            };
             if parts.len() >= 2 {
                 t_entry_clone.set_text(parts[0]);
                 n_entry_clone.set_text(parts[1]);
@@ -705,7 +735,12 @@ impl<
     M: ToGtkBox + Default + Display,
 > ToGtkBoxWithSeparatorAndNames for (T, N, M)
 {
-    fn to_gtk_box(entry: &Entry, separator: char, names: &[FieldLabel]) -> GtkBox {
+    fn to_gtk_box(
+        entry: &Entry,
+        separator: char,
+        names: &[FieldLabel],
+        custom_split: Option<fn(&str) -> Vec<&str>>,
+    ) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -734,7 +769,10 @@ impl<
         let n_entry_clone = n_entry.clone();
         let m_entry_clone = m_entry.clone();
         let update_ui = move |text: &str| {
-            let parts: Vec<&str> = text.split(separator).collect();
+            let parts: Vec<&str> = match custom_split {
+                Some(custom_split) => custom_split(text),
+                None => text.split(separator).collect(),
+            };
             if parts.len() >= 3 {
                 t_entry_clone.set_text(parts[0]);
                 n_entry_clone.set_text(parts[1]);
@@ -821,7 +859,12 @@ impl<
     B: ToGtkBox + Default + Display,
 > ToGtkBoxWithSeparatorAndNames for (T, N, M, B)
 {
-    fn to_gtk_box(entry: &Entry, separator: char, names: &[FieldLabel]) -> GtkBox {
+    fn to_gtk_box(
+        entry: &Entry,
+        separator: char,
+        names: &[FieldLabel],
+        custom_split: Option<fn(&str) -> Vec<&str>>,
+    ) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -858,7 +901,10 @@ impl<
         let m_entry_clone = m_entry.clone();
         let b_entry_clone = b_entry.clone();
         let update_ui = move |text: &str| {
-            let parts: Vec<&str> = text.split(separator).collect();
+            let parts: Vec<&str> = match custom_split {
+                Some(custom_split) => custom_split(text),
+                None => text.split(separator).collect(),
+            };
             if parts.len() >= 4 {
                 t_entry_clone.set_text(parts[0]);
                 n_entry_clone.set_text(parts[1]);
@@ -1240,7 +1286,7 @@ impl EnumConfigForGtk for MonitorTarget {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             MonitorTarget::Direction(_direction) => Some(<(Direction,)>::to_gtk_box),
             MonitorTarget::Id(_id) => Some(<(u32,)>::to_gtk_box),
@@ -1260,10 +1306,10 @@ impl EnumConfigForGtk for PixelOrPercent {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             PixelOrPercent::Pixel(_foo) => Some(<(i32,)>::to_gtk_box),
-            PixelOrPercent::Percent(_foo) => Some(|entry, _, names| {
+            PixelOrPercent::Percent(_foo) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, 100.0, 0.1)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
@@ -1289,7 +1335,7 @@ impl EnumConfigForGtk for ResizeParams {
         Some(' ')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             ResizeParams::Relative(_x, _y) => Some(<(PixelOrPercent, PixelOrPercent)>::to_gtk_box),
             ResizeParams::Exact(_x, _y) => Some(<(PixelOrPercent, PixelOrPercent)>::to_gtk_box),
@@ -1306,15 +1352,15 @@ impl EnumConfigForGtk for FloatValue {
         Some(' ')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
-            FloatValue::Relative(_f) => Some(|entry, _, names| {
+            FloatValue::Relative(_f) => Some(|entry, _, names, _| {
                 create_spin_button_builder(MIN_SAFE_STEP_0_01_F64, MAX_SAFE_STEP_0_01_F64, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
                 )
             }),
-            FloatValue::Exact(_f) => Some(|entry, _, names| {
+            FloatValue::Exact(_f) => Some(|entry, _, names, _| {
                 create_spin_button_builder(MIN_SAFE_STEP_0_01_F64, MAX_SAFE_STEP_0_01_F64, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
@@ -1352,7 +1398,7 @@ impl EnumConfigForGtk for RelativeId {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             RelativeId::Absolute(_i) => Some(<(u32,)>::to_gtk_box),
             RelativeId::Previous(_i) => Some(<(u32,)>::to_gtk_box),
@@ -1385,7 +1431,7 @@ impl EnumConfigForGtk for WorkspaceTarget {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             WorkspaceTarget::Id(_id) => Some(<(u32,)>::to_gtk_box),
             WorkspaceTarget::Relative(_relative) => Some(<(i32,)>::to_gtk_box),
@@ -1427,7 +1473,7 @@ impl EnumConfigForGtk for WindowTarget {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             WindowTarget::Class(_class) => Some(<(String,)>::to_gtk_box),
             WindowTarget::InitialClass(_class) => Some(<(String,)>::to_gtk_box),
@@ -1489,41 +1535,41 @@ impl ToGtkBox for HyprCoord {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
-        let x_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let x_box_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         x_box_box.append(&Label::new(Some("X")));
         let x_entry = create_entry();
         let x_box = PixelOrPercent::to_gtk_box(&x_entry);
         x_box_box.append(&x_box);
         mother_box.append(&x_box_box);
 
-        let y_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let y_box_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         y_box_box.append(&Label::new(Some("Y")));
         let y_entry = create_entry();
         let y_box = PixelOrPercent::to_gtk_box(&y_entry);
         y_box_box.append(&y_box);
         mother_box.append(&y_box_box);
 
-        let x_sub_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let x_sub_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         x_sub_box.append(&Label::new(Some(&t!("gtk_converters.subtrahend_of_x"))));
         let x_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         x_sub_box.append(&x_sub_spin_button);
         mother_box.append(&x_sub_box);
 
-        let y_sub_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let y_sub_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         y_sub_box.append(&Label::new(Some(&t!("gtk_converters.subtrahend_of_y"))));
         let y_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         y_sub_box.append(&y_sub_spin_button);
         mother_box.append(&y_sub_box);
 
-        let under_cursor_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let under_cursor_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         under_cursor_box.append(&Label::new(Some(&t!("gtk_converters.under_cursor"))));
         let under_cursor_switch = create_switch();
         under_cursor_box.append(&under_cursor_switch);
         mother_box.append(&under_cursor_box);
 
-        let on_screen_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let on_screen_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         on_screen_box.append(&Label::new(Some(&t!("gtk_converters.on_screen"))));
         let on_screen_switch = create_switch();
         on_screen_box.append(&on_screen_switch);
@@ -1643,16 +1689,16 @@ impl ToGtkBox for HyprSize {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
-        let width_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let width_box_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         width_box_box.append(&Label::new(Some(&t!("gtk_converters.width"))));
         let width_entry = create_entry();
         let width_box = PixelOrPercent::to_gtk_box(&width_entry);
         width_box_box.append(&width_box);
         mother_box.append(&width_box_box);
 
-        let height_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let height_box_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         height_box_box.append(&Label::new(Some(&t!("gtk_converters.height"))));
         let height_entry = create_entry();
         let height_box = PixelOrPercent::to_gtk_box(&height_entry);
@@ -1665,13 +1711,13 @@ impl ToGtkBox for HyprSize {
             &t!("gtk_converters.min"),
         ]);
 
-        let width_bound_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let width_bound_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         width_bound_box.append(&Label::new(Some(&t!("gtk_converters.width_bound"))));
         let width_bound_dropdown = create_dropdown(&size_bound_string_list);
         width_bound_box.append(&width_bound_dropdown);
         mother_box.append(&width_bound_box);
 
-        let height_bound_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let height_bound_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         height_bound_box.append(&Label::new(Some(&t!("gtk_converters.height_bound"))));
         let height_bound_dropdown = create_dropdown(&size_bound_string_list);
         height_bound_box.append(&height_bound_dropdown);
@@ -1784,7 +1830,7 @@ impl EnumConfigForGtk for IdOrName {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             IdOrName::Id(_id) => Some(<(u32,)>::to_gtk_box),
             IdOrName::Name(_name) => Some(<(String,)>::to_gtk_box),
@@ -1841,7 +1887,7 @@ impl EnumConfigForGtk for HyprColor {
         Some(',')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             HyprColor::Rgb(_r, _g, _b) => Some(<(u8, u8, u8)>::to_gtk_box),
             HyprColor::Rgba(_r, _g, _b, _a) => Some(<(u8, u8, u8, u8)>::to_gtk_box),
@@ -2254,9 +2300,9 @@ impl EnumConfigForGtk for HyprOpacity {
         Some(' ')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
-            HyprOpacity::Overall(_opacity, _override) => Some(|entry, _separator, _labels| {
+            HyprOpacity::Overall(_opacity, _override) => Some(|entry, _separator, _labels, _| {
                 let is_updating = Rc::new(Cell::new(false));
                 let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -2337,7 +2383,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box
             }),
             HyprOpacity::ActiveAndInactive(_opacity1, _override1, _opacity2, _override2) => {
-                Some(|entry, _separator, _labels| {
+                Some(|entry, _separator, _labels, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -2514,7 +2560,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 _override2,
                 _opacity3,
                 _override3,
-            ) => Some(|entry, _separator, _labels| {
+            ) => Some(|entry, _separator, _labels, _| {
                 let is_updating = Rc::new(Cell::new(false));
                 let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -2808,30 +2854,30 @@ impl EnumConfigForGtk for AnimationStyle {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             AnimationStyle::None => None,
             AnimationStyle::Slide => None,
             AnimationStyle::SlideSide(_side) => Some(<(Side,)>::to_gtk_box),
-            AnimationStyle::SlidePercent(_) => Some(|entry, _, _| {
+            AnimationStyle::SlidePercent(_) => Some(|entry, _, _, _| {
                 create_spin_button_builder(0.0, 100.0, 0.1)(entry, &FieldLabel::Named("%"))
             }),
             AnimationStyle::Popin => None,
-            AnimationStyle::PopinPercent(_percent) => Some(|entry, _, _| {
+            AnimationStyle::PopinPercent(_percent) => Some(|entry, _, _, _| {
                 create_spin_button_builder(0.0, 100.0, 0.1)(entry, &FieldLabel::Named("%"))
             }),
             AnimationStyle::Gnomed => None,
             AnimationStyle::SlideVert => None,
-            AnimationStyle::SlideVertPercent(_percent) => Some(|entry, _, _| {
+            AnimationStyle::SlideVertPercent(_percent) => Some(|entry, _, _, _| {
                 create_spin_button_builder(0.0, 100.0, 0.1)(entry, &FieldLabel::Named("%"))
             }),
             AnimationStyle::Fade => None,
             AnimationStyle::SlideFade => None,
-            AnimationStyle::SlideFadePercent(_percent) => Some(|entry, _, _| {
+            AnimationStyle::SlideFadePercent(_percent) => Some(|entry, _, _, _| {
                 create_spin_button_builder(0.0, 100.0, 0.1)(entry, &FieldLabel::Named("%"))
             }),
             AnimationStyle::SlideFadeVert => None,
-            AnimationStyle::SlideFadeVertPercent(_percent) => Some(|entry, _, _| {
+            AnimationStyle::SlideFadeVertPercent(_percent) => Some(|entry, _, _, _| {
                 create_spin_button_builder(0.0, 100.0, 0.1)(entry, &FieldLabel::Named("%"))
             }),
             AnimationStyle::Once => None,
@@ -2889,7 +2935,7 @@ impl EnumConfigForGtk for WindowRule {
         Some(' ')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             WindowRule::Float => None,
             WindowRule::Tile => None,
@@ -2911,10 +2957,10 @@ impl EnumConfigForGtk for WindowRule {
             WindowRule::Unset => None,
             WindowRule::NoMaxSize => None,
             WindowRule::StayFocused => None,
-            WindowRule::Group(_window_group_option) => Some(|entry, separator, _names| {
+            WindowRule::Group(_window_group_option) => Some(|entry, separator, _names, _| {
                 Vec::<WindowGroupOption>::to_gtk_box(entry, separator)
             }),
-            WindowRule::SuppressEvent(_window_event) => Some(|entry, separator, _names| {
+            WindowRule::SuppressEvent(_window_event) => Some(|entry, separator, _names, _| {
                 HashSet::<WindowEvent>::to_gtk_box(entry, separator)
             }),
             WindowRule::Content(_content_type) => Some(<(ContentType,)>::to_gtk_box),
@@ -2923,9 +2969,16 @@ impl EnumConfigForGtk for WindowRule {
             WindowRule::BorderColor(_border_color) => Some(<(BorderColor,)>::to_gtk_box),
             WindowRule::IdleIngibit(_idle_ingibit_mode) => Some(<(IdleIngibitMode,)>::to_gtk_box),
             WindowRule::Opacity(_hypr_opacity) => Some(<(HyprOpacity,)>::to_gtk_box),
-            WindowRule::Tag(_tag_toggle_state, _tag) => Some(|entry, _separator, names| {
-                <(TagToggleState, String)>::to_gtk_box(entry, PLUG_SEPARATOR, names)
-            }),
+            WindowRule::Tag(_tag_toggle_state, _tag) => {
+                Some(|entry, _separator, names, custom_split| {
+                    <(TagToggleState, String)>::to_gtk_box(
+                        entry,
+                        PLUG_SEPARATOR,
+                        names,
+                        custom_split,
+                    )
+                })
+            }
             WindowRule::MaxSize(_x, _y) => Some(<(u32, u32)>::to_gtk_box),
             WindowRule::MinSize(_x, _y) => Some(<(u32, u32)>::to_gtk_box),
         }
@@ -2968,7 +3021,7 @@ impl EnumConfigForGtk for MoveDirection {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             MoveDirection::Direction(_direction) => Some(<(Direction,)>::to_gtk_box),
             MoveDirection::DirectionSilent(_direction) => Some(<(Direction,)>::to_gtk_box),
@@ -2990,7 +3043,7 @@ impl EnumConfigForGtk for SwapDirection {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             SwapDirection::Direction(_direction) => Some(<(Direction,)>::to_gtk_box),
             SwapDirection::Window(_window_target) => Some(<(WindowTarget,)>::to_gtk_box),
@@ -3147,7 +3200,7 @@ impl EnumConfigForGtk for ChangeGroupActive {
         Some(PLUG_SEPARATOR)
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             ChangeGroupActive::Back => None,
             ChangeGroupActive::Forward => None,
@@ -3328,23 +3381,23 @@ impl EnumConfigForGtk for SetProp {
         Some(' ')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
-            SetProp::Alpha(_alpha) => Some(|entry, _, names| {
+            SetProp::Alpha(_alpha) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, 1.0, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
                 )
             }),
             SetProp::AlphaOverride(_override) => Some(<(bool,)>::to_gtk_box),
-            SetProp::AlphaInactive(_alpha) => Some(|entry, _, names| {
+            SetProp::AlphaInactive(_alpha) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, 1.0, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
                 )
             }),
             SetProp::AlphaInactiveOverride(_override) => Some(<(bool,)>::to_gtk_box),
-            SetProp::AlphaFullscreen(_alpha) => Some(|entry, _, names| {
+            SetProp::AlphaFullscreen(_alpha) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, 1.0, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
@@ -3353,23 +3406,23 @@ impl EnumConfigForGtk for SetProp {
             SetProp::AlphaFullscreenOverride(_override) => Some(<(bool,)>::to_gtk_box),
             SetProp::AnimationStyle(_style) => Some(<(String,)>::to_gtk_box),
             SetProp::ActiveBorderColor(_optional_gradient) => {
-                Some(|entry, _, _| Option::<HyprGradient>::to_gtk_box(entry))
+                Some(|entry, _, _, _| Option::<HyprGradient>::to_gtk_box(entry))
             }
             SetProp::InactiveBorderColor(_optional_gradient) => {
-                Some(|entry, _, _| Option::<HyprGradient>::to_gtk_box(entry))
+                Some(|entry, _, _, _| Option::<HyprGradient>::to_gtk_box(entry))
             }
             SetProp::Animation(_style) => Some(<(AnimationStyle,)>::to_gtk_box),
             SetProp::BorderColor(_color) => Some(<(BorderColor,)>::to_gtk_box),
             SetProp::IdleIngibit(_mode) => Some(<(IdleIngibitMode,)>::to_gtk_box),
             SetProp::Opacity(_opacity) => Some(<(HyprOpacity,)>::to_gtk_box),
-            SetProp::Tag(_toggle_state, _tag) => Some(|entry, _, names| {
-                <(TagToggleState, String)>::to_gtk_box(entry, PLUG_SEPARATOR, names)
+            SetProp::Tag(_toggle_state, _tag) => Some(|entry, _, names, custom_split| {
+                <(TagToggleState, String)>::to_gtk_box(entry, PLUG_SEPARATOR, names, custom_split)
             }),
             SetProp::MaxSize(_x, _y) => Some(<(u32, u32)>::to_gtk_box),
             SetProp::MinSize(_x, _y) => Some(<(u32, u32)>::to_gtk_box),
             SetProp::BorderSize(_size) => Some(<(u32,)>::to_gtk_box),
             SetProp::Rounding(_size) => Some(<(u32,)>::to_gtk_box),
-            SetProp::RoundingPower(_power) => Some(|entry, _, names| {
+            SetProp::RoundingPower(_power) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, MAX_SAFE_STEP_0_01_F64, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
@@ -3397,13 +3450,13 @@ impl EnumConfigForGtk for SetProp {
             SetProp::Immediate(_toggle_state) => Some(<(SetPropToggleState,)>::to_gtk_box),
             SetProp::Xray(_toggle_state) => Some(<(SetPropToggleState,)>::to_gtk_box),
             SetProp::RenderUnfocused => None,
-            SetProp::ScrollMouse(_scroll_factor) => Some(|entry, _, names| {
+            SetProp::ScrollMouse(_scroll_factor) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, MAX_SAFE_STEP_0_01_F64, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
                 )
             }),
-            SetProp::ScrollTouchpad(_scroll_factor) => Some(|entry, _, names| {
+            SetProp::ScrollTouchpad(_scroll_factor) => Some(|entry, _, names, _| {
                 create_spin_button_builder(0.0, MAX_SAFE_STEP_0_01_F64, 0.01)(
                     entry,
                     names.first().unwrap_or(&FieldLabel::Unnamed),
@@ -3496,9 +3549,9 @@ impl EnumConfigForGtk for Dispatcher {
         Some(' ')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
-            Self::Exec(_window_rules, _command) => Some(|entry, separator, _names| {
+            Self::Exec(_window_rules, _command) => Some(|entry, separator, _names, _| {
                 let is_updating = Rc::new(Cell::new(false));
                 let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -3581,7 +3634,7 @@ impl EnumConfigForGtk for Dispatcher {
             Self::Execr(_command) => Some(<(String,)>::to_gtk_box),
             Self::Pass(_window_target) => Some(<(WindowTarget,)>::to_gtk_box),
             Self::SendShortcut(_modifiers, _key, _window_target) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -3736,7 +3789,7 @@ impl EnumConfigForGtk for Dispatcher {
                 })
             }
             Self::SendKeyState(_modifiers, _key, _state, _window_target) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -3908,7 +3961,7 @@ impl EnumConfigForGtk for Dispatcher {
             }
             Self::Workspace(_workspace_target) => Some(<(WorkspaceTarget,)>::to_gtk_box),
             Self::MoveToWorkspace(_workspace_target, _optional_window_target) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -4011,7 +4064,7 @@ impl EnumConfigForGtk for Dispatcher {
                 })
             }
             Self::MoveToWorkspaceSilent(_workspace_target, _optional_window_target) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -4116,14 +4169,14 @@ impl EnumConfigForGtk for Dispatcher {
             Self::ToggleFloating(_optional_window_target)
             | Self::SetFloating(_optional_window_target)
             | Self::SetTiled(_optional_window_target) => {
-                Some(|entry, _separator, _names| Option::<WindowTarget>::to_gtk_box(entry))
+                Some(|entry, _separator, _names, _| Option::<WindowTarget>::to_gtk_box(entry))
             }
             Self::Fullscreen(_fullscreen_mode) => Some(<(FullscreenMode,)>::to_gtk_box),
             Self::FullscreenState(_fullscreen_state1, _fullscreen_state2) => {
                 Some(<(DispatcherFullscreenState, DispatcherFullscreenState)>::to_gtk_box)
             }
             Self::Dpms(_toggle_state, _optional_monitor_name) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -4217,7 +4270,7 @@ impl EnumConfigForGtk for Dispatcher {
                 })
             }
             Self::Pin(_optional_window_target) => {
-                Some(|entry, _separator, _names| Option::<WindowTarget>::to_gtk_box(entry))
+                Some(|entry, _separator, _names, _| Option::<WindowTarget>::to_gtk_box(entry))
             }
             Self::MoveFocus(_direction) => Some(<(Direction,)>::to_gtk_box),
             Self::MoveWindow(_move_direction) => Some(<(MoveDirection,)>::to_gtk_box),
@@ -4232,7 +4285,7 @@ impl EnumConfigForGtk for Dispatcher {
             Self::CycleNext(_cycle_next) => Some(<(CycleNext,)>::to_gtk_box),
             Self::SwapNext(_swap_next) => Some(<(SwapNext,)>::to_gtk_box),
             Self::TagWindow(_tag_toggle_state, _tag, _optional_window_target) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -4411,7 +4464,7 @@ impl EnumConfigForGtk for Dispatcher {
             }
             Self::BringActiveToTop => None,
             Self::AlterZOrder(_z_height, _optional_window_target) => {
-                Some(|entry, separator, _names| {
+                Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
                     let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
@@ -4513,7 +4566,7 @@ impl EnumConfigForGtk for Dispatcher {
                 })
             }
             Self::ToggleSpecialWorkspace(_optional_name) => {
-                Some(|entry, _separator, _names| Option::<String>::to_gtk_box(entry))
+                Some(|entry, _separator, _names, _| Option::<String>::to_gtk_box(entry))
             }
             Self::FocusUrgentOrLast => None,
             Self::ToggleGroup => None,
@@ -4525,7 +4578,7 @@ impl EnumConfigForGtk for Dispatcher {
             Self::LockActiveGroup(_group_lock_action) => Some(<(GroupLockAction,)>::to_gtk_box),
             Self::MoveIntoGroup(_direction) => Some(<(Direction,)>::to_gtk_box),
             Self::MoveOutOfGroup(_optional_window_target) => {
-                Some(|entry, _separator, _names| Option::<WindowTarget>::to_gtk_box(entry))
+                Some(|entry, _separator, _names, _| Option::<WindowTarget>::to_gtk_box(entry))
             }
             Self::MoveWindowOrGroup(_direction) => Some(<(Direction,)>::to_gtk_box),
             Self::MoveGroupWindow(_is_back) => Some(<(bool,)>::to_gtk_box),
@@ -4642,7 +4695,7 @@ impl EnumConfigForGtk for GestureAction {
         Some(',')
     }
 
-    fn parameter_builder(&self) -> Option<fn(&Entry, char, &[FieldLabel]) -> GtkBox> {
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
             GestureAction::Dispatcher(_dispatcher) => Some(<(Dispatcher,)>::to_gtk_box),
             GestureAction::Workspace => None,
@@ -4878,6 +4931,541 @@ impl ToGtkBox for Gesture {
     }
 }
 
+impl EnumConfigForGtk for WindowRuleFullscreenState {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.any"),
+            &t!("gtk_converters.none"),
+            &t!("gtk_converters.maximize"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximize_and_fullscreen"),
+        ])
+    }
+}
+
+impl ToGtkBox for Range {
+    fn to_gtk_box(entry: &Entry) -> GtkBox {
+        let is_updating = Rc::new(Cell::new(false));
+
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+
+        let start_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        start_box_box.append(&Label::new(Some(&t!("gtk_converters.start"))));
+        let start_spin_button = create_spin_button(1.0, i32::MAX as f64, 1.0);
+        start_box_box.append(&start_spin_button);
+        mother_box.append(&start_box_box);
+
+        let end_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        end_box_box.append(&Label::new(Some(&t!("gtk_converters.end"))));
+        let end_spin_button = create_spin_button(1.0, i32::MAX as f64, 1.0);
+        end_box_box.append(&end_spin_button);
+        mother_box.append(&end_box_box);
+
+        let start_spin_button_clone = start_spin_button.clone();
+        let end_spin_button_clone = end_spin_button.clone();
+        let update_ui = move |range: Range| {
+            start_spin_button_clone.set_value(range.start as f64);
+            end_spin_button_clone.set_value(range.end as f64);
+        };
+
+        update_ui(entry.text().parse().unwrap_or_default());
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        start_spin_button.connect_value_changed(move |spin| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut range: Range = entry_clone.text().parse().unwrap_or_default();
+            range.start = spin.value() as u32;
+            entry_clone.set_text(&range.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        end_spin_button.connect_value_changed(move |spin| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut range: Range = entry_clone.text().parse().unwrap_or_default();
+            range.end = spin.value() as u32;
+            entry_clone.set_text(&range.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let is_updating_clone = is_updating.clone();
+        entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let range: Range = entry.text().parse().unwrap_or_default();
+            update_ui(range);
+            is_updating_clone.set(false);
+        });
+
+        mother_box
+    }
+}
+
+impl EnumConfigForGtk for WorkspaceSelectorNamed {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.is_named"),
+            &t!("gtk_converters.starts_with"),
+            &t!("gtk_converters.ends_with"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(PLUG_SEPARATOR)
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::IsNamed(_is_named) => Some(<(bool,)>::to_gtk_box),
+            Self::Starts(_starts_with) => Some(<(String,)>::to_gtk_box),
+            Self::Ends(_ends_with) => Some(<(String,)>::to_gtk_box),
+        }
+    }
+}
+
+impl EnumConfigForGtk for MonitorSelector {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.all"),
+            &t!("gtk_converters.name"),
+            &t!("gtk_converters.description"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(PLUG_SEPARATOR)
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::All => None,
+            Self::Name(_name) => Some(<(String,)>::to_gtk_box),
+            Self::Description(_description) => Some(<(String,)>::to_gtk_box),
+        }
+    }
+}
+
+impl ToGtkBox for WorkspaceSelectorWindowCountFlags {
+    fn to_gtk_box(entry: &Entry) -> GtkBox {
+        let is_updating = Rc::new(Cell::new(false));
+
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+
+        let tiled_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        tiled_box.append(&Label::new(Some(&t!("gtk_converters.is_tiled"))));
+        let tiled_switch = create_switch();
+        tiled_box.append(&tiled_switch);
+        mother_box.append(&tiled_box);
+
+        let floating_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        floating_box.append(&Label::new(Some(&t!("gtk_converters.is_floating"))));
+        let floating_switch = create_switch();
+        floating_box.append(&floating_switch);
+        mother_box.append(&floating_box);
+
+        let groups_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        groups_box.append(&Label::new(Some(&t!("gtk_converters.is_in_group"))));
+        let groups_switch = create_switch();
+        groups_box.append(&groups_switch);
+        mother_box.append(&groups_box);
+
+        let visible_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        visible_box.append(&Label::new(Some(&t!("gtk_converters.is_visible"))));
+        let visible_switch = create_switch();
+        visible_box.append(&visible_switch);
+        mother_box.append(&visible_box);
+
+        let pinned_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        pinned_box.append(&Label::new(Some(&t!("gtk_converters.is_pinned"))));
+        let pinned_switch = create_switch();
+        pinned_box.append(&pinned_switch);
+        mother_box.append(&pinned_box);
+
+        let tiled_switch_clone = tiled_switch.clone();
+        let floating_switch_clone = floating_switch.clone();
+        let groups_switch_clone = groups_switch.clone();
+        let visible_switch_clone = visible_switch.clone();
+        let pinned_switch_clone = pinned_switch.clone();
+        let update_ui = move |flags: WorkspaceSelectorWindowCountFlags| {
+            tiled_switch_clone.set_active(flags.tiled);
+            floating_switch_clone.set_active(flags.floating);
+            groups_switch_clone.set_active(flags.groups);
+            visible_switch_clone.set_active(flags.visible);
+            pinned_switch_clone.set_active(flags.pinned);
+        };
+
+        update_ui(entry.text().parse().unwrap_or_default());
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        tiled_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut flags: WorkspaceSelectorWindowCountFlags =
+                entry_clone.text().parse().unwrap_or_default();
+            flags.tiled = switch.state();
+            entry_clone.set_text(&flags.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        floating_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut flags: WorkspaceSelectorWindowCountFlags =
+                entry_clone.text().parse().unwrap_or_default();
+            flags.floating = switch.state();
+            entry_clone.set_text(&flags.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        groups_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut flags: WorkspaceSelectorWindowCountFlags =
+                entry_clone.text().parse().unwrap_or_default();
+            flags.groups = switch.state();
+            entry_clone.set_text(&flags.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        visible_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut flags: WorkspaceSelectorWindowCountFlags =
+                entry_clone.text().parse().unwrap_or_default();
+            flags.visible = switch.state();
+            entry_clone.set_text(&flags.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        pinned_switch.connect_state_notify(move |switch| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut flags: WorkspaceSelectorWindowCountFlags =
+                entry_clone.text().parse().unwrap_or_default();
+            flags.pinned = switch.state();
+            entry_clone.set_text(&flags.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let is_updating_clone = is_updating.clone();
+        entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let flags: WorkspaceSelectorWindowCountFlags = entry.text().parse().unwrap_or_default();
+            update_ui(flags);
+            is_updating_clone.set(false);
+        });
+
+        mother_box
+    }
+}
+
+impl EnumConfigForGtk for WorkspaceSelectorWindowCount {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[&t!("gtk_converters.range"), &t!("gtk_converters.single")])
+    }
+
+    fn separator() -> Option<char> {
+        Some('-')
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::Range {
+                flags: _,
+                range_start: _,
+                range_end: _,
+            } => Some(<(WorkspaceSelectorWindowCountFlags, u32, u32)>::to_gtk_box),
+            Self::Single { flags: _, count: _ } => {
+                Some(<(WorkspaceSelectorWindowCountFlags, u32)>::to_gtk_box)
+            }
+        }
+    }
+}
+
+impl EnumConfigForGtk for WorkspaceSelectorFullscreen {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.no_fullscreen"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.maximized"),
+            &t!("gtk_converters.fullscreen_without_window_fullscreen_state_sent_to_the_window"),
+        ])
+    }
+}
+
+impl EnumConfigForGtk for WorkspaceSelector {
+    fn dropdown_items() -> StringList {
+        let list = WorkspaceSelector::get_fancy_list();
+
+        StringList::new(&list.iter().map(|s| s.as_str()).collect::<Vec<_>>())
+    }
+
+    fn separator() -> Option<char> {
+        Some(PLUG_SEPARATOR)
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::None => None,
+            Self::Range(_range) => Some(<(Range,)>::to_gtk_box),
+            Self::Special(_is_special) => Some(<(bool,)>::to_gtk_box),
+            Self::Named(_workspace_selector_named) => Some(<(WorkspaceSelectorNamed,)>::to_gtk_box),
+            Self::Monitor(_monitor_selector) => Some(<(MonitorSelector,)>::to_gtk_box),
+            Self::WindowCount(_workspace_selector_window_count) => {
+                Some(<(WorkspaceSelectorWindowCount,)>::to_gtk_box)
+            }
+            Self::Fullscreen(_workspace_selector_fullscreen) => {
+                Some(<(WorkspaceSelectorFullscreen,)>::to_gtk_box)
+            }
+        }
+    }
+}
+
+impl EnumConfigForGtk for IdOrNameOrWorkspaceSelector {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.id"),
+            &t!("gtk_converters.name"),
+            &t!("gtk_converters.workspace_selector"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(',')
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            IdOrNameOrWorkspaceSelector::Id(_id) => Some(<(u32,)>::to_gtk_box),
+            IdOrNameOrWorkspaceSelector::Name(_name) => Some(<(String,)>::to_gtk_box),
+            IdOrNameOrWorkspaceSelector::WorkspaceSelector(_workspace_selector) => {
+                Some(|entry, _char, _names, _| Vec::<WorkspaceSelector>::to_gtk_box(entry, ' '))
+            }
+        }
+    }
+}
+
+impl EnumConfigForGtk for WindowRuleParameter {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.class"),
+            &t!("gtk_converters.title"),
+            &t!("gtk_converters.initial_class"),
+            &t!("gtk_converters.initial_title"),
+            &t!("gtk_converters.tag"),
+            &t!("gtk_converters.xwayland"),
+            &t!("gtk_converters.not_xwayland"),
+            &t!("gtk_converters.floating"),
+            &t!("gtk_converters.not_floating"),
+            &t!("gtk_converters.fullscreen"),
+            &t!("gtk_converters.not_fullscreen"),
+            &t!("gtk_converters.pinned"),
+            &t!("gtk_converters.not_pinned"),
+            &t!("gtk_converters.focus"),
+            &t!("gtk_converters.not_focus"),
+            &t!("gtk_converters.group"),
+            &t!("gtk_converters.not_group"),
+            &t!("gtk_converters.fullscreen_state"),
+            &t!("gtk_converters.workspace"),
+            &t!("gtk_converters.on_workspace"),
+            &t!("gtk_converters.content"),
+            &t!("gtk_converters.xdg_tag"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(PLUG_SEPARATOR)
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::Class(_class) => Some(<(String,)>::to_gtk_box),
+            Self::Title(_title) => Some(<(String,)>::to_gtk_box),
+            Self::InitialClass(_class) => Some(<(String,)>::to_gtk_box),
+            Self::InitialTitle(_title) => Some(<(String,)>::to_gtk_box),
+            Self::Tag(_) => Some(<(String,)>::to_gtk_box),
+            Self::Xwayland => None,
+            Self::NotXwayland => None,
+            Self::Floating => None,
+            Self::NotFloating => None,
+            Self::Fullscreen => None,
+            Self::NotFullscreen => None,
+            Self::Pinned => None,
+            Self::NotPinned => None,
+            Self::Focus => None,
+            Self::NotFocus => None,
+            Self::Group => None,
+            Self::NotGroup => None,
+            Self::FullscreenState(_state, _state2) => {
+                Some(<(WindowRuleFullscreenState,)>::to_gtk_box)
+            }
+            Self::Workspace(_) => Some(<(IdOrName,)>::to_gtk_box),
+            Self::OnWorkspace(_) => Some(<(IdOrNameOrWorkspaceSelector,)>::to_gtk_box),
+            Self::Content(_) => Some(<(ContentType,)>::to_gtk_box),
+            Self::XdgTag(_) => Some(<(String,)>::to_gtk_box),
+        }
+    }
+
+    fn field_labels() -> Option<Vec<Vec<FieldLabel>>> {
+        Some(vec![
+            // Class(String),
+            vec![],
+            // Title(String),
+            vec![],
+            // InitialClass(String),
+            vec![],
+            // InitialTitle(String),
+            vec![],
+            // Tag(String),
+            vec![],
+            // Xwayland,
+            vec![],
+            // NotXwayland,
+            vec![],
+            // Floating,
+            vec![],
+            // NotFloating,
+            vec![],
+            // Fullscreen,
+            vec![],
+            // NotFullscreen,
+            vec![],
+            // Pinned,
+            vec![],
+            // NotPinned,
+            vec![],
+            // Focus,
+            vec![],
+            // NotFocus,
+            vec![],
+            // Group,
+            vec![],
+            // NotGroup,
+            vec![],
+            // FullscreenState(WindowRuleFullscreenState, WindowRuleFullscreenState),
+            vec![
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.internal_state"))),
+                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.client_state"))),
+            ],
+            // Workspace(IdOrName),
+            // OnWorkspace(IdOrNameOrWorkspaceSelector),
+            // Content(ContentType),
+            // XdgTag(String),
+        ])
+    }
+}
+
+impl ToGtkBox for WindowRuleWithParameters {
+    fn to_gtk_box(entry: &Entry) -> GtkBox {
+        let is_updating = Rc::new(Cell::new(false));
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+
+        let window_rule_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        window_rule_box_box.append(&Label::new(Some(&t!("gtk_converters.rule"))));
+        let window_rule_entry = create_entry();
+        let window_rule_box = WindowRule::to_gtk_box(&window_rule_entry);
+        window_rule_box_box.append(&window_rule_box);
+        mother_box.append(&window_rule_box_box);
+
+        let parameters_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        parameters_box_box.append(&Label::new(Some(&t!("gtk_converters.parameters"))));
+        let parameters_entry = create_entry();
+        let parameters_box = Vec::<WindowRuleParameter>::to_gtk_box(&parameters_entry, ',');
+        parameters_box_box.append(&parameters_box);
+        mother_box.append(&parameters_box_box);
+
+        let window_rule_entry_clone = window_rule_entry.clone();
+        let parameters_entry_clone = parameters_entry.clone();
+        let update_ui = move |window_rule_with_parameters: WindowRuleWithParameters| {
+            window_rule_entry_clone.set_text(&window_rule_with_parameters.rule.to_string());
+            parameters_entry_clone.set_text(&join_with_separator(
+                window_rule_with_parameters.parameters,
+                ", ",
+            ));
+        };
+
+        update_ui(entry.text().parse().unwrap_or_default());
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        window_rule_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut window_rule_with_parameters: WindowRuleWithParameters =
+                entry_clone.text().parse().unwrap_or_default();
+            window_rule_with_parameters.rule = entry.text().parse().unwrap_or_default();
+            entry_clone.set_text(&window_rule_with_parameters.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        parameters_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut window_rule_with_parameters: WindowRuleWithParameters =
+                entry_clone.text().parse().unwrap_or_default();
+            window_rule_with_parameters.parameters = entry
+                .text()
+                .split(',')
+                .map(|s| s.trim().parse().unwrap_or_default())
+                .collect();
+            entry_clone.set_text(&window_rule_with_parameters.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let is_updating_clone = is_updating.clone();
+        entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let window_rule_with_parameters: WindowRuleWithParameters =
+                entry.text().parse().unwrap_or_default();
+            update_ui(window_rule_with_parameters);
+            is_updating_clone.set(false);
+        });
+
+        mother_box
+    }
+}
+
 register_togtkbox!(
     (),
     String,
@@ -4931,6 +5519,17 @@ register_togtkbox!(
     GestureFloating,
     GestureAction,
     Gesture,
+    WindowRuleFullscreenState,
+    Range,
+    WorkspaceSelectorNamed,
+    MonitorSelector,
+    WorkspaceSelectorWindowCountFlags,
+    WorkspaceSelectorWindowCount,
+    WorkspaceSelectorFullscreen,
+    WorkspaceSelector,
+    IdOrNameOrWorkspaceSelector,
+    WindowRuleParameter,
+    WindowRuleWithParameters,
     Option<Direction>,
     Option<WindowTarget>,
     Option<Angle>,
@@ -4942,9 +5541,13 @@ register_togtkbox_with_separator!(
     Vec<HyprColor>,
     Vec<WindowRule>,
     Vec<WindowGroupOption>,
+    Vec<WorkspaceSelector>,
+    Vec<WindowRuleParameter>,
     HashSet<Modifier>,
     HashSet<WindowEvent>,
     Vec<u8>,
+    Vec<WorkspaceSelectorNamed>,
+    Vec<MonitorSelector>,
 );
 
 register_togtkbox_with_separator_names!(
@@ -4976,4 +5579,16 @@ register_togtkbox_with_separator_names!(
     (Dispatcher,),
     (GestureFullscreen,),
     (GestureFloating,),
+    (ContentType,),
+    (WindowRuleFullscreenState,),
+    (IdOrName,),
+    (IdOrNameOrWorkspaceSelector,),
+    (WorkspaceSelectorNamed,),
+    (MonitorSelector,),
+    (WorkspaceSelectorWindowCount,),
+    (WorkspaceSelectorFullscreen,),
+    (WorkspaceSelector,),
+    (WindowRuleParameter,),
+    (HyprColor,),
+    (AnimationStyle,),
 );

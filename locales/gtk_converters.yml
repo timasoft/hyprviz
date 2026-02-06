@@ -463,10 +463,6 @@ gtk_converters.pin:
   en: "Pin"
   ru: "Закрепить"
   zh-CN: "固定"
-gtk_converters.no_max_size:
-  en: "No Max Size"
-  ru: "Без ограничения размера"
-  zh-CN: "无最大尺寸限制"
 gtk_converters.stay_focused:
   en: "Stay Focused"
   ru: "Сохранять фокус"
@@ -1027,3 +1023,115 @@ gtk_converters.resize:
   en: "Resize"
   ru: "Изменить размер"
   zh-CN: "调整大小"
+gtk_converters.any:
+  en: "Any"
+  ru: "Любой"
+  zh-CN: "任意"
+gtk_converters.start:
+  en: "Start"
+  ru: "Начало"
+  zh-CN: "起始"
+gtk_converters.end:
+  en: "End"
+  ru: "Конец"
+  zh-CN: "结束"
+gtk_converters.is_named:
+  en: "Is Named"
+  ru: "Имеет имя"
+  zh-CN: "已命名"
+gtk_converters.starts_with:
+  en: "Starts With"
+  ru: "Начинается с"
+  zh-CN: "以前缀开头"
+gtk_converters.ends_with:
+  en: "Ends With"
+  ru: "Заканчивается на"
+  zh-CN: "以后缀结尾"
+gtk_converters.all:
+  en: "All"
+  ru: "Все"
+  zh-CN: "全部"
+gtk_converters.description:
+  en: "Description"
+  ru: "Описание"
+  zh-CN: "描述"
+gtk_converters.is_in_group:
+  en: "Is in Group"
+  ru: "В группе"
+  zh-CN: "在组中"
+gtk_converters.is_pinned:
+  en: "Is Pinned"
+  ru: "Закреплено"
+  zh-CN: "已固定"
+gtk_converters.range:
+  en: "Range"
+  ru: "Диапазон"
+  zh-CN: "范围"
+gtk_converters.single:
+  en: "Single"
+  ru: "Одиночное"
+  zh-CN: "单一值"
+gtk_converters.no_fullscreen:
+  en: "No Fullscreen"
+  ru: "Без полноэкранного режима"
+  zh-CN: "非全屏"
+gtk_converters.maximized:
+  en: "Maximized"
+  ru: "Развёрнуто"
+  zh-CN: "最大化"
+gtk_converters.fullscreen_without_window_fullscreen_state_sent_to_the_window:
+  en: "Fullscreen (no client notification)"
+  ru: "Полноэкранный режим (без уведомления клиента)"
+  zh-CN: "全屏（不通知客户端）"
+gtk_converters.workspace_selector:
+  en: "Workspace Selector"
+  ru: "Селектор рабочего пространства"
+  zh-CN: "工作区选择器"
+gtk_converters.xwayland:
+  en: "XWayland"
+  ru: "XWayland"
+  zh-CN: "XWayland"
+gtk_converters.not_xwayland:
+  en: "Not XWayland"
+  ru: "Не XWayland"
+  zh-CN: "非 XWayland"
+gtk_converters.not_floating:
+  en: "Not Floating"
+  ru: "Не плавающее"
+  zh-CN: "非浮动"
+gtk_converters.not_fullscreen:
+  en: "Not Fullscreen"
+  ru: "Не полноэкранное"
+  zh-CN: "非全屏"
+gtk_converters.pinned:
+  en: "Pinned"
+  ru: "Закреплено"
+  zh-CN: "已固定"
+gtk_converters.not_pinned:
+  en: "Not Pinned"
+  ru: "Не закреплено"
+  zh-CN: "未固定"
+gtk_converters.not_focus:
+  en: "Unfocused"
+  ru: "Без фокуса"
+  zh-CN: "未聚焦"
+gtk_converters.not_group:
+  en: "Not in Group"
+  ru: "Не в группе"
+  zh-CN: "不在组中"
+gtk_converters.on_workspace:
+  en: "On Workspace"
+  ru: "На рабочеё пространстве"
+  zh-CN: "位于工作区"
+gtk_converters.xdg_tag:
+  en: "XDG Tag"
+  ru: "XDG-тег"
+  zh-CN: "XDG 标签"
+gtk_converters.rule:
+  en: "Rule"
+  ru: "Правило"
+  zh-CN: "规则"
+gtk_converters.parameters:
+  en: "Parameters"
+  ru: "Параметры"
+  zh-CN: "参数"

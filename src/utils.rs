@@ -947,12 +947,46 @@ pub fn is_modifier(key: &str) -> bool {
     )
 }
 
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(MonitorSelectorDiscriminant))]
 pub enum MonitorSelector {
     #[default]
     All,
     Name(String),
     Description(String),
+}
+
+impl HasDiscriminant for MonitorSelector {
+    type Discriminant = MonitorSelectorDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            Self::Discriminant::All => Self::All,
+            Self::Discriminant::Name => Self::Name("".to_string()),
+            Self::Discriminant::Description => Self::Description("".to_string()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            Self::Discriminant::All => Self::All,
+            Self::Discriminant::Name => Self::Name(str.to_string()),
+            Self::Discriminant::Description => Self::Description(str.to_string()),
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            Self::All => None,
+            Self::Name(name) => Some(name.to_string()),
+            Self::Description(desc) => Some(desc.to_string()),
+        }
+    }
 }
 
 impl FromStr for MonitorSelector {
@@ -1531,59 +1565,118 @@ pub fn get_available_monitors(only_names: bool) -> HashSet<String> {
     monitors
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Range {
     pub start: u32,
     pub end: u32,
 }
 
-#[derive(Clone, Debug)]
+impl Default for Range {
+    fn default() -> Self {
+        Range { start: 1, end: 1 }
+    }
+}
+
+impl FromStr for Range {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (start, end) = s.split_once('-').unwrap_or((s, "1"));
+        Ok(Range {
+            start: start.parse().unwrap_or(1),
+            end: end.parse().unwrap_or(1),
+        })
+    }
+}
+
+impl Display for Range {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}-{}", self.start, self.end)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(WorkspaceSelectorNamedDiscriminant))]
 pub enum WorkspaceSelectorNamed {
     IsNamed(bool),
     Starts(String),
     Ends(String),
 }
 
-impl Display for WorkspaceSelectorNamed {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl HasDiscriminant for WorkspaceSelectorNamed {
+    type Discriminant = WorkspaceSelectorNamedDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            Self::Discriminant::IsNamed => Self::IsNamed(false),
+            Self::Discriminant::Starts => Self::Starts("".to_string()),
+            Self::Discriminant::Ends => Self::Ends("".to_string()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            Self::Discriminant::IsNamed => Self::IsNamed(parse_bool(str).unwrap_or(false)),
+            Self::Discriminant::Starts => Self::Starts(str.to_string()),
+            Self::Discriminant::Ends => Self::Ends(str.to_string()),
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
         match self {
-            WorkspaceSelectorNamed::IsNamed(is_named) => write!(f, "n[{}]", is_named),
-            WorkspaceSelectorNamed::Starts(prefix) => write!(f, "n[s:{}]", prefix),
-            WorkspaceSelectorNamed::Ends(suffix) => write!(f, "n[e:{}]", suffix),
+            Self::IsNamed(is_named) => Some(format!("{}", is_named)),
+            Self::Starts(prefix) => Some(prefix.to_string()),
+            Self::Ends(suffix) => Some(suffix.to_string()),
         }
     }
 }
 
-#[derive(Default, Clone, Debug)]
+impl Default for WorkspaceSelectorNamed {
+    fn default() -> Self {
+        WorkspaceSelectorNamed::IsNamed(false)
+    }
+}
+
+impl FromStr for WorkspaceSelectorNamed {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+
+        if let Some(starts_with) = s.strip_prefix("s:") {
+            Ok(WorkspaceSelectorNamed::Starts(starts_with.to_string()))
+        } else if let Some(ends_with) = s.strip_prefix("e:") {
+            Ok(WorkspaceSelectorNamed::Ends(ends_with.to_string()))
+        } else {
+            Ok(WorkspaceSelectorNamed::IsNamed(
+                parse_bool(s).unwrap_or(false),
+            ))
+        }
+    }
+}
+
+impl Display for WorkspaceSelectorNamed {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WorkspaceSelectorNamed::IsNamed(is_named) => write!(f, "{}", is_named),
+            WorkspaceSelectorNamed::Starts(prefix) => write!(f, "s:{}", prefix),
+            WorkspaceSelectorNamed::Ends(suffix) => write!(f, "e:{}", suffix),
+        }
+    }
+}
+
+#[derive(Default, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct WorkspaceSelectorWindowCountFlags {
     pub tiled: bool,
     pub floating: bool,
     pub groups: bool,
     pub visible: bool,
     pub pinned: bool,
-}
-
-impl Display for WorkspaceSelectorWindowCountFlags {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut flags = String::new();
-
-        if self.tiled {
-            flags.push('t');
-        }
-        if self.floating {
-            flags.push('f');
-        }
-        if self.groups {
-            flags.push('g');
-        }
-        if self.visible {
-            flags.push('v');
-        }
-        if self.pinned {
-            flags.push('p');
-        }
-        write!(f, "{}", flags)
-    }
 }
 
 impl FromStr for WorkspaceSelectorWindowCountFlags {
@@ -1613,7 +1706,32 @@ impl FromStr for WorkspaceSelectorWindowCountFlags {
     }
 }
 
-#[derive(Clone, Debug)]
+impl Display for WorkspaceSelectorWindowCountFlags {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut flags = String::new();
+
+        if self.tiled {
+            flags.push('t');
+        }
+        if self.floating {
+            flags.push('f');
+        }
+        if self.groups {
+            flags.push('g');
+        }
+        if self.visible {
+            flags.push('v');
+        }
+        if self.pinned {
+            flags.push('p');
+        }
+        write!(f, "{}", flags)
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(WorkspaceSelectorWindowCountDiscriminant))]
 pub enum WorkspaceSelectorWindowCount {
     Range {
         flags: WorkspaceSelectorWindowCountFlags,
@@ -1626,6 +1744,152 @@ pub enum WorkspaceSelectorWindowCount {
     },
 }
 
+impl HasDiscriminant for WorkspaceSelectorWindowCount {
+    type Discriminant = WorkspaceSelectorWindowCountDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            Self::Discriminant::Range => Self::Range {
+                flags: WorkspaceSelectorWindowCountFlags::default(),
+                range_start: 0,
+                range_end: 0,
+            },
+            Self::Discriminant::Single => Self::Single {
+                flags: WorkspaceSelectorWindowCountFlags::default(),
+                count: 0,
+            },
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            Self::Discriminant::Range => match Self::from_str(str).unwrap_or_default() {
+                Self::Range {
+                    flags,
+                    range_start,
+                    range_end,
+                } => Self::Range {
+                    flags,
+                    range_start,
+                    range_end,
+                },
+                Self::Single { flags, count } => Self::Range {
+                    flags,
+                    range_start: count,
+                    range_end: count,
+                },
+            },
+            Self::Discriminant::Single => match Self::from_str(str).unwrap_or_default() {
+                Self::Range {
+                    flags,
+                    range_start,
+                    range_end: _,
+                } => Self::Single {
+                    flags,
+                    count: range_start,
+                },
+                Self::Single { flags, count } => Self::Single { flags, count },
+            },
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            Self::Range {
+                flags,
+                range_start,
+                range_end,
+            } => Some(format!("{}{}-{}", flags, range_start, range_end)),
+            Self::Single { flags, count } => Some(format!("{}{}", flags, count)),
+        }
+    }
+
+    fn custom_split(discriminant: Self::Discriminant) -> Option<fn(&str) -> Vec<&str>> {
+        match discriminant {
+            Self::Discriminant::Range => Some(|s: &str| {
+                let s = s.trim();
+                let (flags_str, count_str) = if let Some(pos) = s.find(|c: char| !c.is_alphabetic())
+                {
+                    (&s[..pos], &s[pos..])
+                } else {
+                    (s, "")
+                };
+                let count_str = count_str.trim().trim_matches('-');
+                let (start_str, end_str) =
+                    count_str.split_once('-').unwrap_or((count_str, count_str));
+
+                vec![flags_str, start_str, end_str]
+            }),
+            Self::Discriminant::Single => Some(|s: &str| {
+                let s = s.trim();
+                let (flags_str, count_str) = if let Some(pos) = s.find(|c: char| !c.is_alphabetic())
+                {
+                    (&s[..pos], &s[pos..])
+                } else {
+                    (s, "")
+                };
+                let count_str = count_str.trim().trim_matches('-');
+
+                vec![flags_str, count_str]
+            }),
+        }
+    }
+}
+
+impl Default for WorkspaceSelectorWindowCount {
+    fn default() -> Self {
+        WorkspaceSelectorWindowCount::Single {
+            flags: WorkspaceSelectorWindowCountFlags::default(),
+            count: 0,
+        }
+    }
+}
+
+impl FromStr for WorkspaceSelectorWindowCount {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+
+        let (flags_str, count_str) = if let Some(pos) = s.find(|c: char| !c.is_alphabetic()) {
+            (&s[..pos], &s[pos..])
+        } else {
+            (s, "")
+        };
+
+        let flags = WorkspaceSelectorWindowCountFlags::from_str(flags_str).unwrap_or_default();
+
+        let count_str = count_str.trim().trim_matches('-');
+
+        if count_str.contains('-') {
+            if let Some((start_str, end_str)) = count_str.split_once('-')
+                && let (Ok(start), Ok(end)) = (
+                    start_str.trim().parse::<u32>(),
+                    end_str.trim().parse::<u32>(),
+                )
+            {
+                Ok(WorkspaceSelectorWindowCount::Range {
+                    flags,
+                    range_start: start,
+                    range_end: end,
+                })
+            } else {
+                Err(())
+            }
+        } else if !count_str.is_empty()
+            && let Ok(count) = count_str.parse::<u32>()
+        {
+            Ok(WorkspaceSelectorWindowCount::Single { flags, count })
+        } else {
+            Err(())
+        }
+    }
+}
+
 impl Display for WorkspaceSelectorWindowCount {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -1634,24 +1898,74 @@ impl Display for WorkspaceSelectorWindowCount {
                 range_start,
                 range_end,
             } => {
-                write!(f, "w[{}{}-{}]", flags, range_start, range_end)
+                write!(f, "{}{}-{}", flags, range_start, range_end)
             }
             WorkspaceSelectorWindowCount::Single { flags, count } => {
-                write!(f, "w[{}{}]", flags, count)
+                write!(f, "{}{}", flags, count)
             }
         }
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, EnumIter, Default)]
+pub enum WorkspaceSelectorFullscreen {
+    NoFullscreen,
+    #[default]
+    Fullscreen,
+    Maximized,
+    FullscreenWithoutFullscreenStateSentToTheWindow,
+}
+
+impl WorkspaceSelectorFullscreen {
+    pub fn from_num(num: i8) -> Self {
+        match num {
+            -1 => WorkspaceSelectorFullscreen::NoFullscreen,
+            0 => WorkspaceSelectorFullscreen::Fullscreen,
+            1 => WorkspaceSelectorFullscreen::Maximized,
+            2 => WorkspaceSelectorFullscreen::FullscreenWithoutFullscreenStateSentToTheWindow,
+            _ => WorkspaceSelectorFullscreen::default(),
+        }
+    }
+
+    pub fn to_num(self) -> i8 {
+        match self {
+            WorkspaceSelectorFullscreen::NoFullscreen => -1,
+            WorkspaceSelectorFullscreen::Fullscreen => 0,
+            WorkspaceSelectorFullscreen::Maximized => 1,
+            WorkspaceSelectorFullscreen::FullscreenWithoutFullscreenStateSentToTheWindow => 2,
+        }
+    }
+}
+
+impl FromStr for WorkspaceSelectorFullscreen {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.trim().parse::<i8>() {
+            Ok(num) => Ok(WorkspaceSelectorFullscreen::from_num(num)),
+            Err(_) => Err(()),
+        }
+    }
+}
+
+impl Display for WorkspaceSelectorFullscreen {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_num())
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(WorkspaceSelectorDiscriminant))]
 pub enum WorkspaceSelector {
+    #[default]
     None,
     Range(Range),
     Special(bool),
     Named(WorkspaceSelectorNamed),
     Monitor(MonitorSelector),
     WindowCount(WorkspaceSelectorWindowCount),
-    Fullscreen(i32),
+    Fullscreen(WorkspaceSelectorFullscreen),
 }
 
 impl WorkspaceSelector {
@@ -1666,16 +1980,73 @@ impl WorkspaceSelector {
             t!("utils.fullscreen").to_string(),
         ]
     }
+}
 
-    pub fn get_id(&self) -> usize {
+impl HasDiscriminant for WorkspaceSelector {
+    type Discriminant = WorkspaceSelectorDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            Self::Discriminant::None => Self::None,
+            Self::Discriminant::Range => Self::Range(Range::default()),
+            Self::Discriminant::Special => Self::Special(false),
+            Self::Discriminant::Named => Self::Named(WorkspaceSelectorNamed::default()),
+            Self::Discriminant::Monitor => Self::Monitor(MonitorSelector::default()),
+            Self::Discriminant::WindowCount => {
+                Self::WindowCount(WorkspaceSelectorWindowCount::default())
+            }
+            Self::Discriminant::Fullscreen => {
+                Self::Fullscreen(WorkspaceSelectorFullscreen::default())
+            }
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            Self::Discriminant::None => Self::None,
+            Self::Discriminant::Range => Self::Range(Range::from_str(str).unwrap_or_default()),
+            Self::Discriminant::Special => Self::Special(str.parse().unwrap_or_default()),
+            Self::Discriminant::Named => {
+                Self::Named(WorkspaceSelectorNamed::from_str(str).unwrap_or_default())
+            }
+            Self::Discriminant::Monitor => {
+                Self::Monitor(MonitorSelector::from_str(str).unwrap_or_default())
+            }
+            Self::Discriminant::WindowCount => {
+                Self::WindowCount(WorkspaceSelectorWindowCount::from_str(str).unwrap_or_default())
+            }
+            Self::Discriminant::Fullscreen => {
+                Self::Fullscreen(WorkspaceSelectorFullscreen::from_str(str).unwrap_or_default())
+            }
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
         match self {
-            WorkspaceSelector::None => 0,
-            WorkspaceSelector::Range { .. } => 1,
-            WorkspaceSelector::Special(_) => 2,
-            WorkspaceSelector::Named(_) => 3,
-            WorkspaceSelector::Monitor(_) => 4,
-            WorkspaceSelector::WindowCount(_) => 5,
-            WorkspaceSelector::Fullscreen(_) => 6,
+            Self::None => None,
+            Self::Range(Range { start, end }) => Some(format!("[{}-{}]", start, end)),
+            Self::Special(is_special) => Some(format!("[{}]", is_special)),
+            Self::Named(named) => Some(format!("[{}]", named)),
+            Self::Monitor(monitor) => Some(format!("[{}]", monitor)),
+            Self::WindowCount(window_count) => Some(format!("[{}]", window_count)),
+            Self::Fullscreen(state) => Some(format!("[{}]", state)),
+        }
+    }
+}
+
+impl FromStr for WorkspaceSelector {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+
+        match parse_single_selector(s) {
+            Some((selector, _)) => Ok(selector),
+            None => Err(()),
         }
     }
 }
@@ -1684,16 +2055,16 @@ impl Display for WorkspaceSelector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             WorkspaceSelector::None => write!(f, ""),
-            WorkspaceSelector::Range(Range { start, end }) => write!(f, "r[{}-{}]", start, end),
+            WorkspaceSelector::Range(range) => write!(f, "r[{}]", range),
             WorkspaceSelector::Special(is_special) => {
                 write!(f, "s[{}]", is_special)
             }
             WorkspaceSelector::Named(named) => {
-                write!(f, "{}", named)
+                write!(f, "n[{}]", named)
             }
             WorkspaceSelector::Monitor(monitor) => write!(f, "m[{}]", monitor),
             WorkspaceSelector::WindowCount(window_count) => {
-                write!(f, "{}", window_count)
+                write!(f, "w[{}]", window_count)
             }
             WorkspaceSelector::Fullscreen(state) => write!(f, "f[{}]", state),
         }
@@ -1895,17 +2266,7 @@ pub fn parse_workspace(input: &str) -> Workspace {
     }
 }
 
-pub fn parse_workspace_type(input: &str) -> WorkspaceType {
-    if input.starts_with("name:") {
-        let name = input.strip_prefix("name:").unwrap_or("").to_string();
-        return WorkspaceType::Named(name);
-    } else if input.starts_with("special:") {
-        let name = input.strip_prefix("special:").unwrap_or("").to_string();
-        return WorkspaceType::Special(name);
-    } else if let Ok(num) = input.parse::<u32>() {
-        return WorkspaceType::Numbered(num);
-    }
-
+pub fn parse_workspace_selector(input: &str) -> Vec<WorkspaceSelector> {
     let mut selectors = Vec::new();
     let mut remaining = input.trim();
 
@@ -1923,10 +2284,18 @@ pub fn parse_workspace_type(input: &str) -> WorkspaceType {
         }
     }
 
-    if selectors.is_empty() {
-        WorkspaceType::Selector(Vec::new())
+    selectors
+}
+
+pub fn parse_workspace_type(input: &str) -> WorkspaceType {
+    if let Some(name) = input.strip_prefix("name:") {
+        WorkspaceType::Named(name.to_string())
+    } else if let Some(name) = input.strip_prefix("special:") {
+        WorkspaceType::Special(name.to_string())
+    } else if let Ok(num) = input.parse::<u32>() {
+        WorkspaceType::Numbered(num)
     } else {
-        WorkspaceType::Selector(selectors)
+        WorkspaceType::Selector(parse_workspace_selector(input))
     }
 }
 
@@ -1936,11 +2305,12 @@ pub fn parse_single_selector(input: &str) -> Option<(WorkspaceSelector, &str)> {
             let content = &input[2..end_idx];
             let rest = &input[end_idx + 1..];
 
-            if let Some((start_str, end_str)) = content.split_once('-')
-                && let (Ok(start), Ok(end)) = (start_str.parse::<u32>(), end_str.parse::<u32>())
-            {
-                return Some((WorkspaceSelector::Range(Range { start, end }), rest));
-            }
+            let selector = match Range::from_str(content) {
+                Ok(range) => WorkspaceSelector::Range(range),
+                Err(_) => return None,
+            };
+
+            return Some((selector, rest));
         }
     } else if input.starts_with("s[") {
         if let Some(end_idx) = find_matching_bracket(input, "s[", ']') {
@@ -1955,15 +2325,9 @@ pub fn parse_single_selector(input: &str) -> Option<(WorkspaceSelector, &str)> {
             let content = &input[2..end_idx];
             let rest = &input[end_idx + 1..];
 
-            let selector = if content.starts_with("s:") {
-                let prefix = content.strip_prefix("s:").unwrap_or("").to_string();
-                WorkspaceSelector::Named(WorkspaceSelectorNamed::Starts(prefix))
-            } else if content.starts_with("e:") {
-                let suffix = content.strip_prefix("e:").unwrap_or("").to_string();
-                WorkspaceSelector::Named(WorkspaceSelectorNamed::Ends(suffix))
-            } else {
-                let is_named = parse_bool(content).unwrap_or(false);
-                WorkspaceSelector::Named(WorkspaceSelectorNamed::IsNamed(is_named))
+            let selector = match WorkspaceSelectorNamed::from_str(content) {
+                Ok(selector) => WorkspaceSelector::Named(selector),
+                Err(_) => return None,
             };
 
             return Some((selector, rest));
@@ -1984,36 +2348,9 @@ pub fn parse_single_selector(input: &str) -> Option<(WorkspaceSelector, &str)> {
             let content = &input[2..end_idx];
             let rest = &input[end_idx + 1..];
 
-            let (flags_str, count_str) =
-                if let Some(pos) = content.find(|c: char| !c.is_alphabetic()) {
-                    (&content[..pos], &content[pos..])
-                } else {
-                    (content, "")
-                };
-
-            let flags = WorkspaceSelectorWindowCountFlags::from_str(flags_str).unwrap_or_default();
-
-            let selector = if count_str.contains('-') {
-                if let Some((start_str, end_str)) = count_str.split_once('-')
-                    && let (Ok(start), Ok(end)) = (start_str.parse::<u32>(), end_str.parse::<u32>())
-                {
-                    WorkspaceSelector::WindowCount(WorkspaceSelectorWindowCount::Range {
-                        flags,
-                        range_start: start,
-                        range_end: end,
-                    })
-                } else {
-                    return None;
-                }
-            } else if !count_str.is_empty()
-                && let Ok(count) = count_str.parse::<u32>()
-            {
-                WorkspaceSelector::WindowCount(WorkspaceSelectorWindowCount::Single {
-                    flags,
-                    count,
-                })
-            } else {
-                return None;
+            let selector = match WorkspaceSelectorWindowCount::from_str(content) {
+                Ok(selector) => WorkspaceSelector::WindowCount(selector),
+                Err(_) => return None,
             };
 
             return Some((selector, rest));
@@ -2024,7 +2361,7 @@ pub fn parse_single_selector(input: &str) -> Option<(WorkspaceSelector, &str)> {
         let content = &input[2..end_idx];
         let rest = &input[end_idx + 1..];
 
-        if let Ok(state) = content.parse::<i32>() {
+        if let Ok(state) = content.parse::<WorkspaceSelectorFullscreen>() {
             return Some((WorkspaceSelector::Fullscreen(state), rest));
         }
     }
@@ -2481,7 +2818,7 @@ impl Side {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Default, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(AnimationStyleDiscriminant))]
 pub enum AnimationStyle {
     #[default]
@@ -3070,7 +3407,7 @@ impl Display for BindLeft {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(MonitorTargetDescriminants))]
 #[derive(Default)]
 pub enum MonitorTarget {
@@ -3164,7 +3501,7 @@ impl Display for MonitorTarget {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(PixelOrPercentDiscriminant))]
 pub enum PixelOrPercent {
     Pixel(i32),
@@ -3239,7 +3576,7 @@ impl Display for PixelOrPercent {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(ResizeParamsDiscriminant))]
 pub enum ResizeParams {
     Relative(PixelOrPercent, PixelOrPercent),
@@ -3336,7 +3673,7 @@ impl Display for ResizeParams {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(FloatValueDiscriminant))]
 pub enum FloatValue {
     Relative(f64),
@@ -3526,7 +3863,7 @@ impl Display for FullscreenMode {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(RelativeIdDiscriminant))]
 pub enum RelativeId {
     Absolute(u32),
@@ -3601,7 +3938,7 @@ impl Display for RelativeId {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(WorkspaceTargetDiscriminant))]
 pub enum WorkspaceTarget {
     Id(u32),
@@ -3780,7 +4117,7 @@ impl Display for WorkspaceTarget {
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(WindowTargetDiscriminant))]
 pub enum WindowTarget {
     Class(String),
@@ -4275,7 +4612,7 @@ impl Display for HyprSize {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(IdOrNameDiscriminant))]
 pub enum IdOrName {
     Id(u32),
@@ -4482,7 +4819,7 @@ impl Display for ContentType {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(HyprColorDiscriminant))]
 pub enum HyprColor {
     Rgb(u8, u8, u8),
@@ -4824,7 +5161,7 @@ impl Display for IdleIngibitMode {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(HyprOpacityDiscriminant))]
 pub enum HyprOpacity {
     Overall(f64, bool),
@@ -5338,7 +5675,7 @@ impl Display for TagToggleState {
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(WindowRuleDiscriminant))]
 #[derive(Default)]
 pub enum WindowRule {
@@ -5528,6 +5865,21 @@ impl HasDiscriminant for WindowRule {
             }),
             WindowRule::MaxSize(width, height) => Some(format!("{} {}", width, height)),
             WindowRule::MinSize(width, height) => Some(format!("{} {}", width, height)),
+        }
+    }
+
+    fn custom_split(discriminant: Self::Discriminant) -> Option<fn(&str) -> Vec<&str>> {
+        match discriminant {
+            Self::Discriminant::Tag => Some(|s| {
+                if let Some(stripped) = s.strip_prefix("+") {
+                    vec!["+", stripped]
+                } else if let Some(stripped) = s.strip_prefix("-") {
+                    vec!["-", stripped]
+                } else {
+                    vec!["", s]
+                }
+            }),
+            _ => None,
         }
     }
 }
@@ -5747,7 +6099,7 @@ impl Display for DispatcherFullscreenState {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(MoveDirectionDiscriminant))]
 pub enum MoveDirection {
     Direction(Direction),
@@ -5849,7 +6201,7 @@ impl Display for MoveDirection {
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(SwapDirectionDiscriminant))]
 pub enum SwapDirection {
     Direction(Direction),
@@ -6054,7 +6406,7 @@ impl Display for SwapNext {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(ChangeGroupActiveDiscriminant))]
 pub enum ChangeGroupActive {
     Back,
@@ -6231,7 +6583,7 @@ impl Display for HyprGradient {
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(SetPropDiscriminant))]
 pub enum SetProp {
     Alpha(f64),
@@ -6511,6 +6863,21 @@ impl HasDiscriminant for SetProp {
             SetProp::NoVRR(mode) => Some(mode.to_string()),
         }
     }
+
+    fn custom_split(discriminant: Self::Discriminant) -> Option<fn(&str) -> Vec<&str>> {
+        match discriminant {
+            Self::Discriminant::Tag => Some(|s| {
+                if let Some(stripped) = s.strip_prefix("+") {
+                    vec!["+", stripped]
+                } else if let Some(stripped) = s.strip_prefix("-") {
+                    vec!["-", stripped]
+                } else {
+                    vec!["", s]
+                }
+            }),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SetProp {
@@ -6771,7 +7138,7 @@ impl Display for SetProp {
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(DispatcherDiscriminant))]
 pub enum Dispatcher {
     Exec(Vec<WindowRule>, String),
@@ -8196,7 +8563,7 @@ impl Display for GestureFloating {
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-#[strum_discriminants(derive(strum::EnumIter))]
+#[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(GestureActionDiscriminant))]
 pub enum GestureAction {
     Dispatcher(Dispatcher),
@@ -8418,6 +8785,403 @@ impl Display for Gesture {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
+pub enum WindowRuleFullscreenState {
+    #[default]
+    Any,
+    None,
+    Maximize,
+    Fullscreen,
+    MaximizeAndFullscreen,
+}
+
+impl FromStr for WindowRuleFullscreenState {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let first_byte = match s.trim_start().as_bytes().first() {
+            Some(byte) => byte,
+            None => return Err(()),
+        };
+        match *first_byte {
+            b'*' => Ok(WindowRuleFullscreenState::Any),
+            b'0' => Ok(WindowRuleFullscreenState::None),
+            b'1' => Ok(WindowRuleFullscreenState::Maximize),
+            b'2' => Ok(WindowRuleFullscreenState::Fullscreen),
+            b'3' => Ok(WindowRuleFullscreenState::MaximizeAndFullscreen),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for WindowRuleFullscreenState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WindowRuleFullscreenState::Any => write!(f, "*"),
+            WindowRuleFullscreenState::None => write!(f, "0"),
+            WindowRuleFullscreenState::Maximize => write!(f, "1"),
+            WindowRuleFullscreenState::Fullscreen => write!(f, "2"),
+            WindowRuleFullscreenState::MaximizeAndFullscreen => write!(f, "3"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(IdOrNameOrWorkspaceSelectorDiscriminant))]
+pub enum IdOrNameOrWorkspaceSelector {
+    Id(u32),
+    Name(String),
+    WorkspaceSelector(Vec<WorkspaceSelector>),
+}
+
+impl HasDiscriminant for IdOrNameOrWorkspaceSelector {
+    type Discriminant = IdOrNameOrWorkspaceSelectorDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            Self::Discriminant::Id => Self::Id(1),
+            Self::Discriminant::Name => Self::Name("".to_string()),
+            Self::Discriminant::WorkspaceSelector => Self::WorkspaceSelector(Vec::new()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            Self::Discriminant::Id => Self::Id(str.parse().unwrap_or_default()),
+            Self::Discriminant::Name => Self::Name(str.to_string()),
+            Self::Discriminant::WorkspaceSelector => {
+                Self::WorkspaceSelector(parse_workspace_selector(str))
+            }
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            IdOrNameOrWorkspaceSelector::Id(id) => Some(id.to_string()),
+            IdOrNameOrWorkspaceSelector::Name(name) => Some(name.clone()),
+            IdOrNameOrWorkspaceSelector::WorkspaceSelector(workspace_selector) => {
+                Some(join_with_separator(workspace_selector, ""))
+            }
+        }
+    }
+}
+
+impl Default for IdOrNameOrWorkspaceSelector {
+    fn default() -> Self {
+        IdOrNameOrWorkspaceSelector::Id(1)
+    }
+}
+
+impl FromStr for IdOrNameOrWorkspaceSelector {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(name) = s.strip_prefix("name:") {
+            Ok(IdOrNameOrWorkspaceSelector::Name(name.to_string()))
+        } else if let Ok(id) = s.parse::<u32>() {
+            Ok(IdOrNameOrWorkspaceSelector::Id(id))
+        } else {
+            Ok(IdOrNameOrWorkspaceSelector::WorkspaceSelector(
+                parse_workspace_selector(s),
+            ))
+        }
+    }
+}
+
+impl Display for IdOrNameOrWorkspaceSelector {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IdOrNameOrWorkspaceSelector::Id(id) => write!(f, "{id}"),
+            IdOrNameOrWorkspaceSelector::Name(name) => write!(f, "name:{name}"),
+            IdOrNameOrWorkspaceSelector::WorkspaceSelector(workspace_selector) => {
+                write!(f, "{}", join_with_separator(workspace_selector, ""))
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(WindowRuleParameterDiscriminant))]
+pub enum WindowRuleParameter {
+    Class(String),
+    Title(String),
+    InitialClass(String),
+    InitialTitle(String),
+    Tag(String),
+    Xwayland,
+    NotXwayland,
+    Floating,
+    NotFloating,
+    Fullscreen,
+    NotFullscreen,
+    Pinned,
+    NotPinned,
+    Focus,
+    NotFocus,
+    Group,
+    NotGroup,
+    FullscreenState(WindowRuleFullscreenState, WindowRuleFullscreenState),
+    Workspace(IdOrName),
+    OnWorkspace(IdOrNameOrWorkspaceSelector),
+    Content(ContentType),
+    XdgTag(String),
+}
+
+impl HasDiscriminant for WindowRuleParameter {
+    type Discriminant = WindowRuleParameterDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            Self::Discriminant::Class => Self::Class(String::new()),
+            Self::Discriminant::Title => Self::Title(String::new()),
+            Self::Discriminant::InitialClass => Self::InitialClass(String::new()),
+            Self::Discriminant::InitialTitle => Self::InitialTitle(String::new()),
+            Self::Discriminant::Tag => Self::Tag(String::new()),
+            Self::Discriminant::Xwayland => Self::Xwayland,
+            Self::Discriminant::NotXwayland => Self::NotXwayland,
+            Self::Discriminant::Floating => Self::Floating,
+            Self::Discriminant::NotFloating => Self::NotFloating,
+            Self::Discriminant::Fullscreen => Self::Fullscreen,
+            Self::Discriminant::NotFullscreen => Self::NotFullscreen,
+            Self::Discriminant::Pinned => Self::Pinned,
+            Self::Discriminant::NotPinned => Self::NotPinned,
+            Self::Discriminant::Focus => Self::Focus,
+            Self::Discriminant::NotFocus => Self::NotFocus,
+            Self::Discriminant::Group => Self::Group,
+            Self::Discriminant::NotGroup => Self::NotGroup,
+            Self::Discriminant::FullscreenState => Self::FullscreenState(
+                WindowRuleFullscreenState::default(),
+                WindowRuleFullscreenState::default(),
+            ),
+            Self::Discriminant::Workspace => Self::Workspace(IdOrName::default()),
+            Self::Discriminant::OnWorkspace => {
+                Self::OnWorkspace(IdOrNameOrWorkspaceSelector::default())
+            }
+            Self::Discriminant::Content => Self::Content(ContentType::default()),
+            Self::Discriminant::XdgTag => Self::XdgTag(String::new()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            Self::Discriminant::Class => Self::Class(str.to_string()),
+            Self::Discriminant::Title => Self::Title(str.to_string()),
+            Self::Discriminant::InitialClass => Self::InitialClass(str.to_string()),
+            Self::Discriminant::InitialTitle => Self::InitialTitle(str.to_string()),
+            Self::Discriminant::Tag => Self::Tag(str.to_string()),
+            Self::Discriminant::Xwayland => Self::Xwayland,
+            Self::Discriminant::NotXwayland => Self::NotXwayland,
+            Self::Discriminant::Floating => Self::Floating,
+            Self::Discriminant::NotFloating => Self::NotFloating,
+            Self::Discriminant::Fullscreen => Self::Fullscreen,
+            Self::Discriminant::NotFullscreen => Self::NotFullscreen,
+            Self::Discriminant::Pinned => Self::Pinned,
+            Self::Discriminant::NotPinned => Self::NotPinned,
+            Self::Discriminant::Focus => Self::Focus,
+            Self::Discriminant::NotFocus => Self::NotFocus,
+            Self::Discriminant::Group => Self::Group,
+            Self::Discriminant::NotGroup => Self::NotGroup,
+            Self::Discriminant::FullscreenState => {
+                let (state1, state2) = str.split_once(' ').unwrap_or((str, ""));
+                Self::FullscreenState(
+                    state1.parse().unwrap_or_default(),
+                    state2.parse().unwrap_or_default(),
+                )
+            }
+            Self::Discriminant::Workspace => Self::Workspace(str.parse().unwrap_or_default()),
+            Self::Discriminant::OnWorkspace => Self::OnWorkspace(str.parse().unwrap_or_default()),
+            Self::Discriminant::Content => Self::Content(str.parse().unwrap_or_default()),
+            Self::Discriminant::XdgTag => Self::XdgTag(str.to_string()),
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            WindowRuleParameter::Class(class) => Some(class.clone()),
+            WindowRuleParameter::Title(title) => Some(title.clone()),
+            WindowRuleParameter::InitialClass(initial_class) => Some(initial_class.clone()),
+            WindowRuleParameter::InitialTitle(initial_title) => Some(initial_title.clone()),
+            WindowRuleParameter::Tag(tag) => Some(tag.clone()),
+            WindowRuleParameter::Xwayland => Some("1".to_string()),
+            WindowRuleParameter::NotXwayland => Some("0".to_string()),
+            WindowRuleParameter::Floating => Some("1".to_string()),
+            WindowRuleParameter::NotFloating => Some("0".to_string()),
+            WindowRuleParameter::Fullscreen => Some("1".to_string()),
+            WindowRuleParameter::NotFullscreen => Some("0".to_string()),
+            WindowRuleParameter::Pinned => Some("1".to_string()),
+            WindowRuleParameter::NotPinned => Some("0".to_string()),
+            WindowRuleParameter::Focus => Some("1".to_string()),
+            WindowRuleParameter::NotFocus => Some("0".to_string()),
+            WindowRuleParameter::Group => Some("1".to_string()),
+            WindowRuleParameter::NotGroup => Some("0".to_string()),
+            WindowRuleParameter::FullscreenState(state1, state2) => {
+                Some(format!("{} {}", state1, state2))
+            }
+            WindowRuleParameter::Workspace(workspace) => Some(workspace.to_string()),
+            WindowRuleParameter::OnWorkspace(workspace_selector) => {
+                Some(workspace_selector.to_string())
+            }
+            WindowRuleParameter::Content(content_type) => Some(content_type.to_string()),
+            WindowRuleParameter::XdgTag(tag) => Some(tag.clone()),
+        }
+    }
+}
+
+impl Default for WindowRuleParameter {
+    fn default() -> Self {
+        Self::Class(String::new())
+    }
+}
+
+impl FromStr for WindowRuleParameter {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (part1, part2) = s.split_once(':').unwrap_or((s, ""));
+
+        match part1 {
+            "class" => Ok(WindowRuleParameter::Class(part2.to_string())),
+            "title" => Ok(WindowRuleParameter::Title(part2.to_string())),
+            "initialClass" => Ok(WindowRuleParameter::InitialClass(part2.to_string())),
+            "initialTitle" => Ok(WindowRuleParameter::InitialTitle(part2.to_string())),
+            "tag" => Ok(WindowRuleParameter::Tag(part2.to_string())),
+            "xwayland" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Xwayland),
+                Some(false) => Ok(WindowRuleParameter::NotXwayland),
+                None => Ok(WindowRuleParameter::Xwayland),
+            },
+            "floating" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Floating),
+                Some(false) => Ok(WindowRuleParameter::NotFloating),
+                None => Ok(WindowRuleParameter::Floating),
+            },
+            "fullscreen" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Fullscreen),
+                Some(false) => Ok(WindowRuleParameter::NotFullscreen),
+                None => Ok(WindowRuleParameter::Fullscreen),
+            },
+            "pinned" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Pinned),
+                Some(false) => Ok(WindowRuleParameter::NotPinned),
+                None => Ok(WindowRuleParameter::Pinned),
+            },
+            "focus" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Focus),
+                Some(false) => Ok(WindowRuleParameter::NotFocus),
+                None => Ok(WindowRuleParameter::Focus),
+            },
+            "group" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Group),
+                Some(false) => Ok(WindowRuleParameter::NotGroup),
+                None => Ok(WindowRuleParameter::Group),
+            },
+            "fullscreenState" => {
+                let (state1, state2) = part2.split_once(' ').unwrap_or((part2, ""));
+                Ok(WindowRuleParameter::FullscreenState(
+                    state1.parse().unwrap_or_default(),
+                    state2.parse().unwrap_or_default(),
+                ))
+            }
+            "workspace" => Ok(WindowRuleParameter::Workspace(
+                part2.parse().unwrap_or_default(),
+            )),
+            "onworkspace" => Ok(WindowRuleParameter::OnWorkspace(
+                part2.parse().unwrap_or_default(),
+            )),
+            "content" => Ok(WindowRuleParameter::Content(
+                part2.parse().unwrap_or_default(),
+            )),
+            "xdgtag" => Ok(WindowRuleParameter::XdgTag(part2.to_string())),
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for WindowRuleParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            WindowRuleParameter::Class(class) => write!(f, "class:{}", class),
+            WindowRuleParameter::Title(title) => write!(f, "title:{}", title),
+            WindowRuleParameter::InitialClass(initial_class) => {
+                write!(f, "initialClass:{}", initial_class)
+            }
+            WindowRuleParameter::InitialTitle(initial_title) => {
+                write!(f, "initialTitle:{}", initial_title)
+            }
+            WindowRuleParameter::Tag(tag) => write!(f, "tag:{}", tag),
+            WindowRuleParameter::Xwayland => write!(f, "xwayland:1"),
+            WindowRuleParameter::NotXwayland => write!(f, "xwayland:0"),
+            WindowRuleParameter::Floating => write!(f, "floating:1"),
+            WindowRuleParameter::NotFloating => write!(f, "floating:0"),
+            WindowRuleParameter::Fullscreen => write!(f, "fullscreen:1"),
+            WindowRuleParameter::NotFullscreen => write!(f, "fullscreen:0"),
+            WindowRuleParameter::Pinned => write!(f, "pinned:1"),
+            WindowRuleParameter::NotPinned => write!(f, "pinned:0"),
+            WindowRuleParameter::Focus => write!(f, "focus:1"),
+            WindowRuleParameter::NotFocus => write!(f, "focus:0"),
+            WindowRuleParameter::Group => write!(f, "group:1"),
+            WindowRuleParameter::NotGroup => write!(f, "group:0"),
+            WindowRuleParameter::FullscreenState(state1, state2) => {
+                write!(f, "fullscreenState:{} {}", state1, state2)
+            }
+            WindowRuleParameter::Workspace(workspace) => write!(f, "workspace:{}", workspace),
+            WindowRuleParameter::OnWorkspace(workspace_selector) => {
+                write!(f, "onworkspace:{}", workspace_selector)
+            }
+            WindowRuleParameter::Content(content_type) => write!(f, "content:{}", content_type),
+            WindowRuleParameter::XdgTag(tag) => write!(f, "xdgtag:{}", tag),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct WindowRuleWithParameters {
+    pub rule: WindowRule,
+    pub parameters: Vec<WindowRuleParameter>,
+}
+
+impl FromStr for WindowRuleWithParameters {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<String> = s.split(',').map(|s| s.trim().to_string()).collect();
+        if parts.is_empty() {
+            return Err(());
+        }
+
+        let rule: WindowRule = parts[0].parse().unwrap_or_default();
+
+        let parameters: Vec<WindowRuleParameter> = parts
+            .iter()
+            .skip(1)
+            .filter_map(|s| s.parse::<WindowRuleParameter>().ok())
+            .collect();
+
+        Ok(WindowRuleWithParameters { rule, parameters })
+    }
+}
+
+impl Display for WindowRuleWithParameters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}, {}",
+            self.rule,
+            join_with_separator(&self.parameters, ", ")
+        )
+    }
+}
+
 fn parse_bool(value: &str) -> Option<bool> {
     match value.to_lowercase().as_str() {
         "true" | "1" | "yes" | "on" => Some(true),
@@ -8459,6 +9223,10 @@ pub trait HasDiscriminant {
     fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self;
 
     fn to_str_without_discriminant(&self) -> Option<String> {
+        None
+    }
+
+    fn custom_split(_discriminant: Self::Discriminant) -> Option<fn(&str) -> Vec<&str>> {
         None
     }
 

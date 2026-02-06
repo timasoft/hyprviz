@@ -4096,24 +4096,26 @@ impl ConfigWidget {
                     search_entry.set_margin_bottom(10);
                     container.prepend(&search_entry);
 
-                    let titles: Vec<String> = test_boxes
+                    let titles_lower: Vec<String> = test_boxes
                         .iter()
                         .map(|gtkbox| {
                             gtkbox
                                 .first_child()
                                 .and_downcast::<Label>()
-                                .map(|label| label.label().to_string())
+                                .map(|label| label.label().to_lowercase())
                                 .unwrap_or_default()
                         })
                         .collect();
 
                     let test_boxes_clone = test_boxes.clone();
-                    let titles_clone = titles.clone();
+                    let titles_clone = titles_lower.clone();
 
                     search_entry.connect_changed(move |entry| {
                         let query = entry.text().to_lowercase();
+                        let keywords: Vec<&str> = query.split_whitespace().collect();
+
                         for (i, test_box) in test_boxes_clone.iter().enumerate() {
-                            let visible = titles_clone[i].to_lowercase().contains(&query);
+                            let visible = keywords.iter().all(|kw| titles_clone[i].contains(kw));
                             test_box.set_visible(visible);
                         }
                     });
@@ -4315,8 +4317,12 @@ impl ConfigWidget {
                         }
 
                         let empty_names: &[FieldLabel] = &[];
-                        let result_box =
-                            (implementation.constructor)(&entry_clone, separator, empty_names);
+                        let result_box = (implementation.constructor)(
+                            &entry_clone,
+                            separator,
+                            empty_names,
+                            None,
+                        );
                         result_container_clone.append(&result_box);
                     };
 
