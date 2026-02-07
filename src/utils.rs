@@ -8709,7 +8709,7 @@ impl FromStr for Gesture {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<&str> = s.split(',').collect();
 
-        let finger_count = match parts.first().unwrap_or(&"").parse::<u32>() {
+        let finger_count = match parts.first().unwrap_or(&"").trim().parse::<u32>() {
             Ok(0) | Ok(1) | Ok(2) | Ok(3) => 3,
             Ok(finger_count) => finger_count,
             _ => 3,
@@ -8881,6 +8881,8 @@ impl FromStr for IdOrNameOrWorkspaceSelector {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+
         if let Some(name) = s.strip_prefix("name:") {
             Ok(IdOrNameOrWorkspaceSelector::Name(name.to_string()))
         } else if let Ok(id) = s.parse::<u32>() {
@@ -9049,7 +9051,7 @@ impl FromStr for WindowRuleParameter {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (part1, part2) = s.split_once(':').unwrap_or((s, ""));
 
-        match part1 {
+        match part1.trim() {
             "class" => Ok(WindowRuleParameter::Class(part2.to_string())),
             "title" => Ok(WindowRuleParameter::Title(part2.to_string())),
             "initialClass" => Ok(WindowRuleParameter::InitialClass(part2.to_string())),
@@ -9182,8 +9184,277 @@ impl Display for WindowRuleWithParameters {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
+pub enum OnOrOffOrUnset {
+    #[default]
+    Unset,
+    On,
+    Off,
+}
+
+impl FromStr for OnOrOffOrUnset {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match parse_bool(s) {
+            Some(true) => Ok(OnOrOffOrUnset::On),
+            Some(false) => Ok(OnOrOffOrUnset::Off),
+            None => Ok(OnOrOffOrUnset::Unset),
+        }
+    }
+}
+
+impl Display for OnOrOffOrUnset {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            OnOrOffOrUnset::Unset => write!(f, "unset"),
+            OnOrOffOrUnset::On => write!(f, "1"),
+            OnOrOffOrUnset::Off => write!(f, "0"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, EnumDiscriminants, Default)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(LayerRuleDiscriminant))]
+pub enum LayerRule {
+    #[default]
+    Unset,
+    NoAnim,
+    Blur,
+    BlurPopups,
+    IgnoreAlpha(f64),
+    IgnoreZero,
+    DimAround,
+    Xray(OnOrOffOrUnset),
+    Animation(AnimationStyle),
+    Order(i32),
+    AboveLock,
+    AboveLockInteractable,
+}
+
+impl HasDiscriminant for LayerRule {
+    type Discriminant = LayerRuleDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            LayerRuleDiscriminant::Unset => LayerRule::Unset,
+            LayerRuleDiscriminant::NoAnim => LayerRule::NoAnim,
+            LayerRuleDiscriminant::Blur => LayerRule::Blur,
+            LayerRuleDiscriminant::BlurPopups => LayerRule::BlurPopups,
+            LayerRuleDiscriminant::IgnoreAlpha => LayerRule::IgnoreAlpha(0.0),
+            LayerRuleDiscriminant::IgnoreZero => LayerRule::IgnoreZero,
+            LayerRuleDiscriminant::DimAround => LayerRule::DimAround,
+            LayerRuleDiscriminant::Xray => LayerRule::Xray(OnOrOffOrUnset::default()),
+            LayerRuleDiscriminant::Animation => LayerRule::Animation(AnimationStyle::default()),
+            LayerRuleDiscriminant::Order => LayerRule::Order(0),
+            LayerRuleDiscriminant::AboveLock => LayerRule::AboveLock,
+            LayerRuleDiscriminant::AboveLockInteractable => LayerRule::AboveLockInteractable,
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            LayerRuleDiscriminant::Unset => LayerRule::Unset,
+            LayerRuleDiscriminant::NoAnim => LayerRule::NoAnim,
+            LayerRuleDiscriminant::Blur => LayerRule::Blur,
+            LayerRuleDiscriminant::BlurPopups => LayerRule::BlurPopups,
+            LayerRuleDiscriminant::IgnoreAlpha => {
+                LayerRule::IgnoreAlpha(str.parse().unwrap_or(0.0))
+            }
+            LayerRuleDiscriminant::IgnoreZero => LayerRule::IgnoreZero,
+            LayerRuleDiscriminant::DimAround => LayerRule::DimAround,
+            LayerRuleDiscriminant::Xray => {
+                LayerRule::Xray(OnOrOffOrUnset::from_str(str).unwrap_or_default())
+            }
+            LayerRuleDiscriminant::Animation => {
+                LayerRule::Animation(AnimationStyle::from_str(str).unwrap_or_default())
+            }
+            LayerRuleDiscriminant::Order => LayerRule::Order(str.parse().unwrap_or(0)),
+            LayerRuleDiscriminant::AboveLock => LayerRule::AboveLock,
+            LayerRuleDiscriminant::AboveLockInteractable => LayerRule::AboveLockInteractable,
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            LayerRule::Unset => None,
+            LayerRule::NoAnim => None,
+            LayerRule::Blur => None,
+            LayerRule::BlurPopups => None,
+            LayerRule::IgnoreAlpha(value) => Some(format!("{}", value)),
+            LayerRule::IgnoreZero => None,
+            LayerRule::DimAround => None,
+            LayerRule::Xray(value) => Some(value.to_string()),
+            LayerRule::Animation(value) => Some(value.to_string()),
+            LayerRule::Order(value) => Some(value.to_string()),
+            LayerRule::AboveLock => None,
+            LayerRule::AboveLockInteractable => None,
+        }
+    }
+}
+
+impl FromStr for LayerRule {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+
+        let (discriminant, str) = s.split_once(' ').unwrap_or((s, ""));
+        let discriminant = discriminant.trim();
+        let str = str.trim();
+
+        match discriminant.to_lowercase().as_str() {
+            "unset" => Ok(LayerRule::Unset),
+            "noanim" => Ok(LayerRule::NoAnim),
+            "blur" => Ok(LayerRule::Blur),
+            "blurpopups" => Ok(LayerRule::BlurPopups),
+            "ignorealpha" => Ok(LayerRule::IgnoreAlpha(
+                str.parse().unwrap_or(0.0f64).clamp(0.0, 1.0),
+            )),
+            "ignorezero" => Ok(LayerRule::IgnoreZero),
+            "dimaround" => Ok(LayerRule::DimAround),
+            "xray" => Ok(LayerRule::Xray(
+                OnOrOffOrUnset::from_str(str).unwrap_or_default(),
+            )),
+            "animation" => Ok(LayerRule::Animation(str.parse().unwrap_or_default())),
+            "order" => Ok(LayerRule::Order(str.parse().unwrap_or(0))),
+            "abovelock" => {
+                if let Some(true) = parse_bool(str) {
+                    Ok(LayerRule::AboveLockInteractable)
+                } else {
+                    Ok(LayerRule::AboveLock)
+                }
+            }
+            _ => Err(()),
+        }
+    }
+}
+
+impl Display for LayerRule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LayerRule::Unset => write!(f, "unset"),
+            LayerRule::NoAnim => write!(f, "noanim"),
+            LayerRule::Blur => write!(f, "blur"),
+            LayerRule::BlurPopups => write!(f, "blurpopups"),
+            LayerRule::IgnoreAlpha(value) => write!(f, "ignorealpha {}", value),
+            LayerRule::IgnoreZero => write!(f, "ignorezero"),
+            LayerRule::DimAround => write!(f, "dimaround"),
+            LayerRule::Xray(value) => write!(f, "xray {}", value),
+            LayerRule::Animation(value) => write!(f, "animation {}", value),
+            LayerRule::Order(value) => write!(f, "order {}", value),
+            LayerRule::AboveLock => write!(f, "abovelock"),
+            LayerRule::AboveLockInteractable => write!(f, "abovelock true"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(NamespaceOrAddressDiscriminant))]
+pub enum NamespaceOrAddress {
+    Namespace(String),
+    Address(String),
+}
+
+impl HasDiscriminant for NamespaceOrAddress {
+    type Discriminant = NamespaceOrAddressDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            NamespaceOrAddressDiscriminant::Namespace => {
+                NamespaceOrAddress::Namespace("".to_string())
+            }
+            NamespaceOrAddressDiscriminant::Address => NamespaceOrAddress::Address("".to_string()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            NamespaceOrAddressDiscriminant::Namespace => {
+                NamespaceOrAddress::Namespace(str.to_string())
+            }
+            NamespaceOrAddressDiscriminant::Address => NamespaceOrAddress::Address(str.to_string()),
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            NamespaceOrAddress::Namespace(namespace) => Some(namespace.to_string()),
+            NamespaceOrAddress::Address(address) => Some(address.to_string()),
+        }
+    }
+}
+
+impl Default for NamespaceOrAddress {
+    fn default() -> Self {
+        NamespaceOrAddress::Namespace("".to_string())
+    }
+}
+
+impl FromStr for NamespaceOrAddress {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+
+        if let Some(address) = s.strip_prefix("address:0x") {
+            Ok(NamespaceOrAddress::Address(address.to_string()))
+        } else {
+            Ok(NamespaceOrAddress::Namespace(s.to_string()))
+        }
+    }
+}
+
+impl Display for NamespaceOrAddress {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NamespaceOrAddress::Namespace(namespace) => write!(f, "{}", namespace),
+            NamespaceOrAddress::Address(address) => write!(f, "address:0x{}", address),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct LayerRuleWithParameter {
+    pub rule: LayerRule,
+    pub namespace_or_address: NamespaceOrAddress,
+}
+
+impl FromStr for LayerRuleWithParameter {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (rule_str, namespace_or_address_str) = s.split_once(',').unwrap_or((s, ""));
+
+        let rule = rule_str.parse().unwrap_or_default();
+
+        let namespace_or_address = namespace_or_address_str.parse().unwrap_or_default();
+
+        Ok(LayerRuleWithParameter {
+            rule,
+            namespace_or_address,
+        })
+    }
+}
+
+impl Display for LayerRuleWithParameter {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}, {}", self.rule, self.namespace_or_address)
+    }
+}
+
 fn parse_bool(value: &str) -> Option<bool> {
-    match value.to_lowercase().as_str() {
+    match value.trim().to_lowercase().as_str() {
         "true" | "1" | "yes" | "on" => Some(true),
         "false" | "0" | "no" | "off" => Some(false),
         _ => None,

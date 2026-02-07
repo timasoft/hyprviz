@@ -8,14 +8,15 @@ use crate::{
         FloatValue, FullscreenMode, FullscreenState, Gesture, GestureAction, GestureDirection,
         GestureFloating, GestureFullscreen, GroupLockAction, HasDiscriminant, HyprColor, HyprCoord,
         HyprGradient, HyprOpacity, HyprSize, IdOrName, IdOrNameOrWorkspaceSelector,
-        IdleIngibitMode, KeyState, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64, Modifier,
-        MonitorSelector, MonitorTarget, MoveDirection, PixelOrPercent, Range, RelativeId,
-        ResizeParams, SetProp, SetPropToggleState, Side, SizeBound, SwapDirection, SwapNext,
-        TagToggleState, ToggleState, WindowEvent, WindowGroupOption, WindowRule,
-        WindowRuleFullscreenState, WindowRuleParameter, WindowRuleWithParameters, WindowTarget,
-        WorkspaceSelector, WorkspaceSelectorFullscreen, WorkspaceSelectorNamed,
-        WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags, WorkspaceTarget, ZHeight,
-        cow_to_static_str, join_with_separator, parse_modifiers,
+        IdleIngibitMode, KeyState, LayerRule, LayerRuleWithParameter, MAX_SAFE_STEP_0_01_F64,
+        MIN_SAFE_STEP_0_01_F64, Modifier, MonitorSelector, MonitorTarget, MoveDirection,
+        NamespaceOrAddress, OnOrOffOrUnset, PixelOrPercent, Range, RelativeId, ResizeParams,
+        SetProp, SetPropToggleState, Side, SizeBound, SwapDirection, SwapNext, TagToggleState,
+        ToggleState, WindowEvent, WindowGroupOption, WindowRule, WindowRuleFullscreenState,
+        WindowRuleParameter, WindowRuleWithParameters, WindowTarget, WorkspaceSelector,
+        WorkspaceSelectorFullscreen, WorkspaceSelectorNamed, WorkspaceSelectorWindowCount,
+        WorkspaceSelectorWindowCountFlags, WorkspaceTarget, ZHeight, cow_to_static_str,
+        join_with_separator, parse_modifiers,
     },
 };
 use gtk::{
@@ -5466,6 +5467,156 @@ impl ToGtkBox for WindowRuleWithParameters {
     }
 }
 
+impl EnumConfigForGtk for OnOrOffOrUnset {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.unset"),
+            &t!("gtk_converters.on"),
+            &t!("gtk_converters.off"),
+        ])
+    }
+}
+
+impl EnumConfigForGtk for LayerRule {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.unset"),
+            &t!("gtk_converters.no_anim"),
+            &t!("gtk_converters.blur"),
+            &t!("gtk_converters.blur_popups"),
+            &t!("gtk_converters.ignore_alpha"),
+            &t!("gtk_converters.ignore_zero"),
+            &t!("gtk_converters.dim_around"),
+            &t!("gtk_converters.xray"),
+            &t!("gtk_converters.animation"),
+            &t!("gtk_converters.order"),
+            &t!("gtk_converters.above_lock"),
+            &t!("gtk_converters.above_lock_interactable"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(PLUG_SEPARATOR)
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::Unset => None,
+            Self::NoAnim => None,
+            Self::Blur => None,
+            Self::BlurPopups => None,
+            Self::IgnoreAlpha(_float) => Some(|entry, _separator, _names, _custom_split| {
+                create_spin_button_builder(0.0, 1.0, 0.01)(entry, &FieldLabel::Unnamed)
+            }),
+            Self::IgnoreZero => None,
+            Self::DimAround => None,
+            Self::Xray(_on_or_off_or_unset) => Some(<(OnOrOffOrUnset,)>::to_gtk_box),
+            Self::Animation(_animation_style) => Some(<(AnimationStyle,)>::to_gtk_box),
+            Self::Order(_i32) => Some(<(i32,)>::to_gtk_box),
+            Self::AboveLock => None,
+            Self::AboveLockInteractable => None,
+        }
+    }
+}
+
+impl EnumConfigForGtk for NamespaceOrAddress {
+    fn dropdown_items() -> StringList {
+        StringList::new(&[
+            &t!("gtk_converters.namespace"),
+            &t!("gtk_converters.address"),
+        ])
+    }
+
+    fn separator() -> Option<char> {
+        Some(PLUG_SEPARATOR)
+    }
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            Self::Namespace(_namespace) => Some(<(String,)>::to_gtk_box),
+            Self::Address(_address) => Some(<(String,)>::to_gtk_box),
+        }
+    }
+
+    fn field_labels() -> Option<Vec<Vec<FieldLabel>>> {
+        Some(vec![vec![], vec![FieldLabel::Named("0x")]])
+    }
+}
+
+impl ToGtkBox for LayerRuleWithParameter {
+    fn to_gtk_box(entry: &Entry) -> GtkBox {
+        let is_updating = Rc::new(Cell::new(false));
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+
+        let rule_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        rule_box_box.append(&Label::new(Some(&t!("gtk_converters.rule"))));
+        let rule_entry = create_entry();
+        let rule_box = LayerRule::to_gtk_box(&rule_entry);
+        rule_box_box.append(&rule_box);
+        mother_box.append(&rule_box_box);
+
+        let namespace_or_address_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        namespace_or_address_box_box.append(&Label::new(Some(&t!(
+            "gtk_converters.namespace_or_address"
+        ))));
+        let namespace_or_address_entry = create_entry();
+        let namespace_or_address_box = NamespaceOrAddress::to_gtk_box(&namespace_or_address_entry);
+        namespace_or_address_box_box.append(&namespace_or_address_box);
+        mother_box.append(&namespace_or_address_box_box);
+
+        let rule_entry_clone = rule_entry.clone();
+        let namespace_or_address_entry_clone = namespace_or_address_entry.clone();
+        let update_ui = move |layer_rule_with_parameter: LayerRuleWithParameter| {
+            rule_entry_clone.set_text(&layer_rule_with_parameter.rule.to_string());
+            namespace_or_address_entry_clone
+                .set_text(&layer_rule_with_parameter.namespace_or_address.to_string());
+        };
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        rule_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut layer_rule_with_parameter: LayerRuleWithParameter =
+                entry_clone.text().parse().unwrap_or_default();
+            layer_rule_with_parameter.rule = entry.text().parse().unwrap_or_default();
+            entry_clone.set_text(&layer_rule_with_parameter.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        namespace_or_address_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let mut layer_rule_with_parameter: LayerRuleWithParameter =
+                entry_clone.text().parse().unwrap_or_default();
+            layer_rule_with_parameter.namespace_or_address =
+                entry.text().parse().unwrap_or_default();
+            entry_clone.set_text(&layer_rule_with_parameter.to_string());
+            is_updating_clone.set(false);
+        });
+
+        let is_updating_clone = is_updating.clone();
+        entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let layer_rule_with_parameter: LayerRuleWithParameter =
+                entry.text().parse().unwrap_or_default();
+            update_ui(layer_rule_with_parameter);
+            is_updating_clone.set(false);
+        });
+
+        mother_box
+    }
+}
+
 register_togtkbox!(
     (),
     String,
@@ -5530,6 +5681,10 @@ register_togtkbox!(
     IdOrNameOrWorkspaceSelector,
     WindowRuleParameter,
     WindowRuleWithParameters,
+    OnOrOffOrUnset,
+    LayerRule,
+    NamespaceOrAddress,
+    LayerRuleWithParameter,
     Option<Direction>,
     Option<WindowTarget>,
     Option<Angle>,

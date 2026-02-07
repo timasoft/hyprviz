@@ -2,13 +2,13 @@ use crate::{
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     utils::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
-        BindFlagsEnum, BindLeft, Cm, Dispatcher, Gesture, MAX_SAFE_INTEGER_F64,
-        MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor, MonitorSelector,
-        MonitorState, Orientation, Position, Scale, Side, UnbindRight, WindowRuleWithParameters,
-        Workspace, WorkspaceSelector, WorkspaceType, after_second_comma, get_available_monitors,
-        get_available_resolutions_for_monitor, is_modifier, join_with_separator, keycode_to_en_key,
-        parse_animation, parse_bezier, parse_bind_right, parse_coordinates, parse_monitor,
-        parse_workspace,
+        BindFlagsEnum, BindLeft, Cm, Dispatcher, Gesture, LayerRuleWithParameter,
+        MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor,
+        MonitorSelector, MonitorState, Orientation, Position, Scale, Side, UnbindRight,
+        WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType, after_second_comma,
+        get_available_monitors, get_available_resolutions_for_monitor, is_modifier,
+        join_with_separator, keycode_to_en_key, parse_animation, parse_bezier, parse_bind_right,
+        parse_coordinates, parse_monitor, parse_workspace,
     },
 };
 use gio::glib::SignalHandlerId;
@@ -707,7 +707,14 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             });
         }
         "layerrule" => {
-            todo!()
+            let label = Label::new(Some("layerrule"));
+            label.set_width_request(100);
+            label.set_selectable(true);
+            fancy_name_entry.append(&label);
+            name_entry.set_text("layerrule");
+            name_entry.connect_changed(move |entry| {
+                label.set_text(&entry.text());
+            });
         }
         "exec" => {
             todo!()
@@ -3870,7 +3877,8 @@ fn fill_fancy_value_entry(
             fancy_value_entry.append(&window_rule_box);
         }
         "layerrule" => {
-            todo!()
+            let layer_rule_box = LayerRuleWithParameter::to_gtk_box(value_entry);
+            fancy_value_entry.append(&layer_rule_box);
         }
         "exec" => {
             todo!()

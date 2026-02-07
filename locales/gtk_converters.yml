@@ -1135,3 +1135,39 @@ gtk_converters.parameters:
   en: "Parameters"
   ru: "Параметры"
   zh-CN: "参数"
+gtk_converters.blur:
+  en: "Blur"
+  ru: "Размытие"
+  zh-CN: "模糊"
+gtk_converters.blur_popups:
+  en: "Blur Popups"
+  ru: "Размытие всплывающих окон"
+  zh-CN: "模糊弹出窗口"
+gtk_converters.ignore_alpha:
+  en: "Ignore Alpha"
+  ru: "Игнорировать альфа-канал"
+  zh-CN: "忽略透明通道"
+gtk_converters.ignore_zero:
+  en: "Ignore Zero Alpha"
+  ru: "Игнорировать нулевой альфа"
+  zh-CN: "忽略零透明度"
+gtk_converters.order:
+  en: "Order"
+  ru: "Порядок"
+  zh-CN: "层级"
+gtk_converters.above_lock:
+  en: "Above Lock"
+  ru: "Выше блокировки"
+  zh-CN: "锁屏上方"
+gtk_converters.above_lock_interactable:
+  en: "Above Lock Interactable"
+  ru: "Выше блокировки (интерактивный)"
+  zh-CN: "锁屏上方（可交互）"
+gtk_converters.namespace:
+  en: "Namespace"
+  ru: "Пространство имён"
+  zh-CN: "命名空间"
+gtk_converters.namespace_or_address:
+  en: "Namespace or Address"
+  ru: "Пространство имён или адрес"
+  zh-CN: "命名空间或地址"
