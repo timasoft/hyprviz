@@ -325,3 +325,11 @@ advanced_editors.fullscreen_without_window_state:
   en: "Fullscreen Without Window State"
   ru: "Полный экран без состояния окна"
   zh-CN: "全屏无窗口状态"
+advanced_editors.key: # env key
+  en: "Key"
+  ru: "Ключ"
+  zh-CN: "键"
+advanced_editors.value: # env value
+  en: "Value"
+  ru: "Значение"
+  zh-CN: "值"

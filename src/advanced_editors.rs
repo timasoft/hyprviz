@@ -1,14 +1,14 @@
 use crate::{
-    gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
+    gtk_converters::{FieldLabel, ToGtkBox, ToGtkBoxWithSeparator, ToGtkBoxWithSeparatorAndNames},
     utils::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
         BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleWithParameter,
         MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor,
         MonitorSelector, MonitorState, Orientation, Position, Scale, Side, UnbindRight,
         WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType, after_second_comma,
-        get_available_monitors, get_available_resolutions_for_monitor, is_modifier,
-        join_with_separator, keycode_to_en_key, parse_animation, parse_bezier, parse_bind_right,
-        parse_coordinates, parse_monitor, parse_workspace,
+        cow_to_static_str, get_available_monitors, get_available_resolutions_for_monitor,
+        is_modifier, join_with_separator, keycode_to_en_key, parse_animation, parse_bezier,
+        parse_bind_right, parse_coordinates, parse_monitor, parse_workspace,
     },
 };
 use gio::glib::SignalHandlerId;
@@ -750,7 +750,36 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             fancy_name_entry.append(&dropdown);
         }
         "env" => {
-            todo!()
+            let string_list = StringList::new(&["env", "envd"]);
+            let dropdown = create_dropdown(&string_list);
+            dropdown.set_width_request(100);
+
+            let name_entry_clone = name_entry.clone();
+            dropdown.connect_selected_notify(move |dd| {
+                if let Some(selected) = dd.selected_item()
+                    && let Some(string_object) = selected.downcast_ref::<StringObject>()
+                {
+                    let new_name = string_object.string().to_string();
+                    name_entry_clone.set_text(&new_name);
+                }
+            });
+            let dropdown_clone = dropdown.clone();
+            name_entry.set_text("env");
+            name_entry.connect_changed(move |entry| {
+                let new_name = entry.text().to_string();
+
+                for idx in 0..string_list.n_items() {
+                    if let Some(item) = string_list.item(idx) {
+                        let item_str = item.property::<String>("string");
+
+                        if item_str == new_name {
+                            dropdown_clone.set_selected(idx);
+                            break;
+                        }
+                    }
+                }
+            });
+            fancy_name_entry.append(&dropdown);
         }
         "top_level" => {
             // maybe in future i will implement this
@@ -3921,7 +3950,16 @@ fn fill_fancy_value_entry(
             }
         },
         "env" => {
-            todo!()
+            let env_box = <(String, String)>::to_gtk_box(
+                value_entry,
+                ',',
+                &[
+                    FieldLabel::Named(cow_to_static_str(t!("advanced_editors.key"))),
+                    FieldLabel::Named(cow_to_static_str(t!("advanced_editors.value"))),
+                ],
+                None,
+            );
+            fancy_value_entry.append(&env_box);
         }
         "top_level" => {
             // maybe in future i will implement this
