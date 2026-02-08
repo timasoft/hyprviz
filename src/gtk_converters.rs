@@ -46,9 +46,7 @@ type ToGtkBoxWithSeparatorAndNamesBuilder =
     fn(&Entry, char, &[FieldLabel], custom_split: Option<fn(&str) -> Vec<&str>>) -> GtkBox;
 
 trait EnumConfigForGtk {
-    fn separator() -> Option<char> {
-        None
-    }
+    const SEPARATOR: Option<char> = None;
 
     fn dropdown_items() -> StringList;
 
@@ -154,7 +152,7 @@ where
         let mut variant_entries = Vec::new();
         let field_labels = T::field_labels().unwrap_or_default();
 
-        if let Some(separator) = T::separator() {
+        if let Some(separator) = T::SEPARATOR {
             for (i, discriminant) in T::Discriminant::iter().enumerate() {
                 let param_entry = create_entry();
                 variant_entries.push(param_entry.clone());
@@ -205,7 +203,7 @@ where
                 dropdown_clone.set_selected(variant_index as u32);
             }
 
-            if let Some(_separator) = T::separator() {
+            if let Some(_separator) = T::SEPARATOR {
                 stack_clone.set_visible_child_name(&format!("v{}", variant_index));
             }
 
@@ -1283,9 +1281,7 @@ impl EnumConfigForGtk for MonitorTarget {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1303,9 +1299,7 @@ impl EnumConfigForGtk for PixelOrPercent {
         StringList::new(&[&t!("gtk_converters.pixel"), &t!("gtk_converters.percent")])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1332,9 +1326,7 @@ impl EnumConfigForGtk for ResizeParams {
         StringList::new(&[&t!("gtk_converters.relative"), &t!("gtk_converters.exact")])
     }
 
-    fn separator() -> Option<char> {
-        Some(' ')
-    }
+    const SEPARATOR: Option<char> = Some(' ');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1349,9 +1341,7 @@ impl EnumConfigForGtk for FloatValue {
         StringList::new(&[&t!("gtk_converters.relative"), &t!("gtk_converters.exact")])
     }
 
-    fn separator() -> Option<char> {
-        Some(' ')
-    }
+    const SEPARATOR: Option<char> = Some(' ');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1395,9 +1385,7 @@ impl EnumConfigForGtk for RelativeId {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1428,9 +1416,7 @@ impl EnumConfigForGtk for WorkspaceTarget {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1470,9 +1456,7 @@ impl EnumConfigForGtk for WindowTarget {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1827,9 +1811,7 @@ impl EnumConfigForGtk for IdOrName {
         StringList::new(&[&t!("gtk_converters.id"), &t!("gtk_converters.name")])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -1884,9 +1866,7 @@ impl EnumConfigForGtk for HyprColor {
         StringList::new(&["RGB", "RGBA"])
     }
 
-    fn separator() -> Option<char> {
-        Some(',')
-    }
+    const SEPARATOR: Option<char> = Some(',');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -2297,9 +2277,7 @@ impl EnumConfigForGtk for HyprOpacity {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(' ')
-    }
+    const SEPARATOR: Option<char> = Some(' ');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -2851,9 +2829,7 @@ impl EnumConfigForGtk for AnimationStyle {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -2932,9 +2908,7 @@ impl EnumConfigForGtk for WindowRule {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(' ')
-    }
+    const SEPARATOR: Option<char> = Some(' ');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -3018,9 +2992,7 @@ impl EnumConfigForGtk for MoveDirection {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -3040,9 +3012,7 @@ impl EnumConfigForGtk for SwapDirection {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -3197,9 +3167,7 @@ impl EnumConfigForGtk for ChangeGroupActive {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -3378,9 +3346,7 @@ impl EnumConfigForGtk for SetProp {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(' ')
-    }
+    const SEPARATOR: Option<char> = Some(' ');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -3546,9 +3512,7 @@ impl EnumConfigForGtk for Dispatcher {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(' ')
-    }
+    const SEPARATOR: Option<char> = Some(' ');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -4702,9 +4666,7 @@ impl EnumConfigForGtk for GestureAction {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(',')
-    }
+    const SEPARATOR: Option<char> = Some(',');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5031,9 +4993,7 @@ impl EnumConfigForGtk for WorkspaceSelectorNamed {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5053,9 +5013,7 @@ impl EnumConfigForGtk for MonitorSelector {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5207,9 +5165,7 @@ impl EnumConfigForGtk for WorkspaceSelectorWindowCount {
         StringList::new(&[&t!("gtk_converters.range"), &t!("gtk_converters.single")])
     }
 
-    fn separator() -> Option<char> {
-        Some('-')
-    }
+    const SEPARATOR: Option<char> = Some('-');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5243,9 +5199,7 @@ impl EnumConfigForGtk for WorkspaceSelector {
         StringList::new(&list.iter().map(|s| s.as_str()).collect::<Vec<_>>())
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5273,9 +5227,7 @@ impl EnumConfigForGtk for IdOrNameOrWorkspaceSelector {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(',')
-    }
+    const SEPARATOR: Option<char> = Some(',');
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5316,9 +5268,7 @@ impl EnumConfigForGtk for WindowRuleParameter {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5505,9 +5455,7 @@ impl EnumConfigForGtk for LayerRule {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
@@ -5537,9 +5485,7 @@ impl EnumConfigForGtk for NamespaceOrAddress {
         ])
     }
 
-    fn separator() -> Option<char> {
-        Some(PLUG_SEPARATOR)
-    }
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
 
     fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
         match self {
