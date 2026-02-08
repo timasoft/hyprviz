@@ -2,7 +2,7 @@ use crate::{
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     utils::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
-        BindFlagsEnum, BindLeft, Cm, Dispatcher, Gesture, LayerRuleWithParameter,
+        BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleWithParameter,
         MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor,
         MonitorSelector, MonitorState, Orientation, Position, Scale, Side, UnbindRight,
         WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType, after_second_comma,
@@ -717,7 +717,37 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             });
         }
         "exec" => {
-            todo!()
+            let string_list =
+                StringList::new(&["exec-once", "execr-once", "exec", "execr", "exec-shutdown"]);
+            let dropdown = create_dropdown(&string_list);
+            dropdown.set_width_request(100);
+
+            let name_entry_clone = name_entry.clone();
+            dropdown.connect_selected_notify(move |dd| {
+                if let Some(selected) = dd.selected_item()
+                    && let Some(string_object) = selected.downcast_ref::<StringObject>()
+                {
+                    let new_name = string_object.string().to_string();
+                    name_entry_clone.set_text(&new_name);
+                }
+            });
+            let dropdown_clone = dropdown.clone();
+            name_entry.set_text("exec-once");
+            name_entry.connect_changed(move |entry| {
+                let new_name = entry.text().to_string();
+
+                for idx in 0..string_list.n_items() {
+                    if let Some(item) = string_list.item(idx) {
+                        let item_str = item.property::<String>("string");
+
+                        if item_str == new_name {
+                            dropdown_clone.set_selected(idx);
+                            break;
+                        }
+                    }
+                }
+            });
+            fancy_name_entry.append(&dropdown);
         }
         "env" => {
             todo!()
@@ -3880,9 +3910,16 @@ fn fill_fancy_value_entry(
             let layer_rule_box = LayerRuleWithParameter::to_gtk_box(value_entry);
             fancy_value_entry.append(&layer_rule_box);
         }
-        "exec" => {
-            todo!()
-        }
+        "exec" => match name {
+            "exec-once" | "exec" => {
+                let exec_with_rules_box = ExecWithRules::to_gtk_box(value_entry);
+                fancy_value_entry.append(&exec_with_rules_box);
+            }
+            _ => {
+                let exec_box = String::to_gtk_box(value_entry);
+                fancy_value_entry.append(&exec_box);
+            }
+        },
         "env" => {
             todo!()
         }

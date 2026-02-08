@@ -7334,12 +7334,16 @@ impl HasDiscriminant for Dispatcher {
                         if c == '[' {
                             in_brackets = true;
                         } else if c == ']' {
-                            rules.push(rule.parse().unwrap_or_default());
-                            rule.clear();
+                            if !rule.trim().is_empty() {
+                                rules.push(rule.parse().unwrap_or_default());
+                                rule.clear();
+                            }
                             in_brackets = false;
                         } else if c == ';' && in_brackets {
-                            rules.push(rule.parse().unwrap_or_default());
-                            rule.clear();
+                            if !rule.trim().is_empty() {
+                                rules.push(rule.parse().unwrap_or_default());
+                                rule.clear();
+                            }
                         } else if in_brackets {
                             rule.push(c);
                         } else {
@@ -7347,7 +7351,7 @@ impl HasDiscriminant for Dispatcher {
                         }
                     }
 
-                    Self::Exec(rules, command.trim().to_string())
+                    Self::Exec(rules, command.trim_start().to_string())
                 } else {
                     Self::Exec(Vec::new(), str.to_string())
                 }
@@ -7764,27 +7768,29 @@ impl FromStr for Dispatcher {
                     let mut rule = String::new();
                     let mut in_brackets = false;
                     let mut command = String::new();
-                    let mut skip_whitespace = false;
 
                     for c in params.chars() {
                         if c == '[' {
                             in_brackets = true;
                         } else if c == ']' {
-                            rules.push(rule.parse().unwrap_or_default());
-                            rule.clear();
+                            if !rule.trim().is_empty() {
+                                rules.push(rule.parse().unwrap_or_default());
+                                rule.clear();
+                            }
                             in_brackets = false;
-                            skip_whitespace = true;
                         } else if c == ';' && in_brackets {
-                            rules.push(rule.parse().unwrap_or_default());
-                            rule.clear();
+                            if !rule.trim().is_empty() {
+                                rules.push(rule.parse().unwrap_or_default());
+                                rule.clear();
+                            }
                         } else if in_brackets {
                             rule.push(c);
-                        } else if c != ' ' || !skip_whitespace {
+                        } else {
                             command.push(c);
                         }
                     }
 
-                    Ok(Dispatcher::Exec(rules, command))
+                    Ok(Dispatcher::Exec(rules, command.trim_start().to_string()))
                 } else {
                     Ok(Dispatcher::Exec(Vec::new(), params.to_string()))
                 }
@@ -8328,9 +8334,7 @@ impl FromStr for BindRight {
             None => String::new(),
         };
 
-        let dispatcher = dispatcher_str
-            .parse()
-            .unwrap_or(Dispatcher::Exec(Vec::new(), String::new()));
+        let dispatcher = dispatcher_str.parse().unwrap_or(Dispatcher::default());
 
         Ok(BindRight {
             mods,
@@ -8367,7 +8371,7 @@ fn parse_bind_with_description(bind_right_str: &str) -> BindRight {
         return BindRight {
             mods: HashSet::new(),
             key: String::new(),
-            dispatcher: Dispatcher::Exec(Vec::new(), String::new()),
+            dispatcher: Dispatcher::default(),
             description: Some(String::new()),
         };
     }
@@ -8388,9 +8392,7 @@ fn parse_bind_with_description(bind_right_str: &str) -> BindRight {
         None => String::new(),
     };
 
-    let dispatcher = dispatcher_str
-        .parse()
-        .unwrap_or(Dispatcher::Exec(Vec::new(), String::new()));
+    let dispatcher = dispatcher_str.parse().unwrap_or(Dispatcher::default());
 
     BindRight {
         mods,
@@ -8407,7 +8409,7 @@ pub fn parse_bind_right(has_description: bool, bind_right_str: &str) -> BindRigh
         BindRight::from_str(bind_right_str).unwrap_or(BindRight {
             mods: HashSet::new(),
             key: String::new(),
-            dispatcher: Dispatcher::Exec(Vec::new(), String::new()),
+            dispatcher: Dispatcher::default(),
             description: None,
         })
     }
@@ -9450,6 +9452,72 @@ impl FromStr for LayerRuleWithParameter {
 impl Display for LayerRuleWithParameter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}, {}", self.rule, self.namespace_or_address)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct ExecWithRules {
+    pub rules: Vec<WindowRule>,
+    pub command: String,
+}
+
+impl FromStr for ExecWithRules {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let str = s.trim_start();
+
+        if str.starts_with('[') {
+            let mut rules = Vec::new();
+            let mut rule = String::new();
+            let mut in_brackets = false;
+            let mut command = String::new();
+
+            for c in str.chars() {
+                if c == '[' {
+                    in_brackets = true;
+                } else if c == ']' {
+                    if !rule.trim().is_empty() {
+                        rules.push(rule.parse().unwrap_or_default());
+                        rule.clear();
+                    }
+                    in_brackets = false;
+                } else if c == ';' && in_brackets {
+                    if !rule.trim().is_empty() {
+                        rules.push(rule.parse().unwrap_or_default());
+                        rule.clear();
+                    }
+                } else if in_brackets {
+                    rule.push(c);
+                } else {
+                    command.push(c);
+                }
+            }
+
+            Ok(Self {
+                rules,
+                command: command.trim_start().to_string(),
+            })
+        } else {
+            Ok(Self {
+                rules: Vec::new(),
+                command: str.to_string(),
+            })
+        }
+    }
+}
+
+impl Display for ExecWithRules {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.rules.is_empty() {
+            true => write!(f, "{}", self.command),
+            false => write!(
+                f,
+                "[{}] {}",
+                join_with_separator(&self.rules, "; "),
+                self.command
+            ),
+        }
     }
 }
 

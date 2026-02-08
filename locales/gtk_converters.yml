@@ -1171,3 +1171,7 @@ gtk_converters.namespace_or_address:
   en: "Namespace or Address"
   ru: "Пространство имён или адрес"
   zh-CN: "命名空间或地址"
+gtk_converters.command:
+  en: "Command"
+  ru: "Команда"
+  zh-CN: "命令"

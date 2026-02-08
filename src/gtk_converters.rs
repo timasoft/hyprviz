@@ -5,18 +5,18 @@ use crate::{
     utils::{
         Angle, AnimationStyle, BorderColor, ChangeGroupActive, ContentType, CursorCorner,
         CycleNext, Direction, Dispatcher, DispatcherDiscriminant, DispatcherFullscreenState,
-        FloatValue, FullscreenMode, FullscreenState, Gesture, GestureAction, GestureDirection,
-        GestureFloating, GestureFullscreen, GroupLockAction, HasDiscriminant, HyprColor, HyprCoord,
-        HyprGradient, HyprOpacity, HyprSize, IdOrName, IdOrNameOrWorkspaceSelector,
-        IdleIngibitMode, KeyState, LayerRule, LayerRuleWithParameter, MAX_SAFE_STEP_0_01_F64,
-        MIN_SAFE_STEP_0_01_F64, Modifier, MonitorSelector, MonitorTarget, MoveDirection,
-        NamespaceOrAddress, OnOrOffOrUnset, PixelOrPercent, Range, RelativeId, ResizeParams,
-        SetProp, SetPropToggleState, Side, SizeBound, SwapDirection, SwapNext, TagToggleState,
-        ToggleState, WindowEvent, WindowGroupOption, WindowRule, WindowRuleFullscreenState,
-        WindowRuleParameter, WindowRuleWithParameters, WindowTarget, WorkspaceSelector,
-        WorkspaceSelectorFullscreen, WorkspaceSelectorNamed, WorkspaceSelectorWindowCount,
-        WorkspaceSelectorWindowCountFlags, WorkspaceTarget, ZHeight, cow_to_static_str,
-        join_with_separator, parse_modifiers,
+        ExecWithRules, FloatValue, FullscreenMode, FullscreenState, Gesture, GestureAction,
+        GestureDirection, GestureFloating, GestureFullscreen, GroupLockAction, HasDiscriminant,
+        HyprColor, HyprCoord, HyprGradient, HyprOpacity, HyprSize, IdOrName,
+        IdOrNameOrWorkspaceSelector, IdleIngibitMode, KeyState, LayerRule, LayerRuleWithParameter,
+        MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64, Modifier, MonitorSelector, MonitorTarget,
+        MoveDirection, NamespaceOrAddress, OnOrOffOrUnset, PixelOrPercent, Range, RelativeId,
+        ResizeParams, SetProp, SetPropToggleState, Side, SizeBound, SwapDirection, SwapNext,
+        TagToggleState, ToggleState, WindowEvent, WindowGroupOption, WindowRule,
+        WindowRuleFullscreenState, WindowRuleParameter, WindowRuleWithParameters, WindowTarget,
+        WorkspaceSelector, WorkspaceSelectorFullscreen, WorkspaceSelectorNamed,
+        WorkspaceSelectorWindowCount, WorkspaceSelectorWindowCountFlags, WorkspaceTarget, ZHeight,
+        cow_to_static_str, join_with_separator, parse_modifiers,
     },
 };
 use gtk::{
@@ -33,7 +33,7 @@ use std::{
 };
 use strum::IntoEnumIterator;
 
-const PLUG_SEPARATOR: char = '︲';
+pub const PLUG_SEPARATOR: char = '︲';
 
 #[derive(Debug, Clone, Default)]
 pub enum FieldLabel {
@@ -103,7 +103,7 @@ macro_rules! register_togtkbox_with_separator {
     };
 }
 
-trait ToGtkBoxWithSeparatorAndNames {
+pub trait ToGtkBoxWithSeparatorAndNames {
     fn to_gtk_box(
         entry: &Entry,
         separator: char,
@@ -3593,12 +3593,17 @@ impl EnumConfigForGtk for Dispatcher {
                         return;
                     }
                     is_updating_clone.set(true);
-                    entry_clone.set_text(&format!(
-                        "[{}]{}{}",
-                        entry.text(),
-                        separator,
-                        command_entry_clone.text()
-                    ));
+
+                    match entry.text().is_empty() {
+                        true => entry_clone.set_text(&command_entry_clone.text()),
+                        false => entry_clone.set_text(&format!(
+                            "[{}]{}{}",
+                            entry.text(),
+                            separator,
+                            command_entry_clone.text()
+                        )),
+                    }
+
                     is_updating_clone.set(false);
                 });
 
@@ -3610,12 +3615,17 @@ impl EnumConfigForGtk for Dispatcher {
                         return;
                     }
                     is_updating_clone.set(true);
-                    entry_clone.set_text(&format!(
-                        "[{}]{}{}",
-                        window_rules_entry_clone.text(),
-                        separator,
-                        entry.text()
-                    ));
+
+                    match window_rules_entry_clone.text().is_empty() {
+                        true => entry_clone.set_text(&entry.text()),
+                        false => entry_clone.set_text(&format!(
+                            "[{}]{}{}",
+                            window_rules_entry_clone.text(),
+                            separator,
+                            entry.text()
+                        )),
+                    }
+
                     is_updating_clone.set(false);
                 });
 
@@ -5617,6 +5627,90 @@ impl ToGtkBox for LayerRuleWithParameter {
     }
 }
 
+impl ToGtkBox for ExecWithRules {
+    fn to_gtk_box(entry: &Entry) -> GtkBox {
+        let is_updating = Rc::new(Cell::new(false));
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+
+        let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        window_rules_mother_box.append(&Label::new(Some(&t!("gtk_converters.window_rules"))));
+        let window_rules_entry = create_entry();
+        let window_rules_box = Vec::<WindowRule>::to_gtk_box(&window_rules_entry, ';');
+        window_rules_mother_box.append(&window_rules_box);
+        mother_box.append(&window_rules_mother_box);
+
+        let command_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        command_box.append(&Label::new(Some(&t!("gtk_converters.command"))));
+        let command_entry = create_entry();
+        command_box.append(&command_entry);
+        mother_box.append(&command_box);
+
+        let window_rules_entry_clone = window_rules_entry.clone();
+        let command_entry_clone = command_entry.clone();
+        let update_ui = move |exec_with_rules: ExecWithRules| {
+            window_rules_entry_clone.set_text(&join_with_separator(&exec_with_rules.rules, ";"));
+            command_entry_clone.set_text(&exec_with_rules.command);
+        };
+
+        update_ui(entry.text().parse().unwrap_or_default());
+
+        let command_entry_clone = command_entry.clone();
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        window_rules_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+
+            match entry.text().is_empty() {
+                true => entry_clone.set_text(&command_entry_clone.text()),
+                false => entry_clone.set_text(&format!(
+                    "[{}] {}",
+                    entry.text(),
+                    command_entry_clone.text()
+                )),
+            }
+
+            is_updating_clone.set(false);
+        });
+
+        let window_rules_entry_clone = window_rules_entry.clone();
+        let entry_clone = entry.clone();
+        let is_updating_clone = is_updating.clone();
+        command_entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+
+            match window_rules_entry_clone.text().is_empty() {
+                true => entry_clone.set_text(&entry.text()),
+                false => entry_clone.set_text(&format!(
+                    "[{}] {}",
+                    window_rules_entry_clone.text(),
+                    entry.text()
+                )),
+            }
+
+            is_updating_clone.set(false);
+        });
+
+        let is_updating_clone = is_updating.clone();
+        entry.connect_changed(move |entry| {
+            if is_updating_clone.get() {
+                return;
+            }
+            is_updating_clone.set(true);
+            let exec_with_rules: ExecWithRules = entry.text().parse().unwrap_or_default();
+            update_ui(exec_with_rules);
+            is_updating_clone.set(false);
+        });
+
+        mother_box
+    }
+}
+
 register_togtkbox!(
     (),
     String,
@@ -5685,6 +5779,7 @@ register_togtkbox!(
     LayerRule,
     NamespaceOrAddress,
     LayerRuleWithParameter,
+    ExecWithRules,
     Option<Direction>,
     Option<WindowTarget>,
     Option<Angle>,
