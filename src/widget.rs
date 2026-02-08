@@ -930,7 +930,9 @@ fn append_option_row(
         });
     });
 
-    main_box.append(&toggle_fancy_input_button);
+    if category != "top_level" {
+        main_box.append(&toggle_fancy_input_button);
+    }
     main_box.append(&delete_button);
     scrolled_window.set_child(Some(&main_box));
 
