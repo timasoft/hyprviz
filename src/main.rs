@@ -18,6 +18,7 @@ mod advanced_editors;
 mod gtk_converters;
 mod gui;
 mod guides;
+mod hyprland;
 mod system_info;
 mod utils;
 mod widget;

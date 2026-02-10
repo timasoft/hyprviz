@@ -1,14 +1,17 @@
 use crate::{
     gtk_converters::{FieldLabel, ToGtkBox, ToGtkBoxWithSeparator, ToGtkBoxWithSeparatorAndNames},
-    utils::{
+    hyprland::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
         BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleWithParameter,
-        MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, Modifier, Monitor,
-        MonitorSelector, MonitorState, Orientation, Position, Scale, Side, UnbindRight,
-        WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType, after_second_comma,
+        Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Position, Scale, Side,
+        UnbindRight, WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType,
+        animation::parse_animation, bezier_curve::parse_bezier, bind_right::parse_bind_right,
+        monitor::parse_monitor, workspace::parse_workspace,
+    },
+    utils::{
+        MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, after_second_comma,
         cow_to_static_str, get_available_monitors, get_available_resolutions_for_monitor,
-        is_modifier, join_with_separator, keycode_to_en_key, parse_animation, parse_bezier,
-        parse_bind_right, parse_coordinates, parse_monitor, parse_workspace,
+        is_modifier, join_with_separator, keycode_to_en_key, parse_coordinates,
     },
 };
 use gio::glib::SignalHandlerId;
@@ -1290,7 +1293,7 @@ fn fill_fancy_value_entry(
                         }
 
                         if skip != "position" {
-                            match monitor_state.position.clone() {
+                            match monitor_state.position {
                                 Position::Coordinates(x, y) => {
                                     monitor_position_x_spin_clone.set_value(x as f64);
                                     monitor_position_x_spin_clone.set_visible(true);
@@ -1321,7 +1324,7 @@ fn fill_fancy_value_entry(
                         }
 
                         if skip != "scale" {
-                            match monitor_state.scale.clone() {
+                            match monitor_state.scale {
                                 Scale::Auto => {
                                     monitor_scale_dropdown_clone.set_selected(0);
                                     monitor_scale_spin_clone.set_visible(false);
