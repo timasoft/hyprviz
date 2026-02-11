@@ -1,0 +1,9 @@
+_version: 2
+hyprland.swap_next.next:
+  en: "Next"
+  ru: "Следующее"
+  zh-CN: "下一个"
+hyprland.swap_next.prev:
+  en: "Prev"
+  ru: "Предыдущее"
+  zh-CN: "上一个"

@@ -19,16 +19,16 @@ pub enum Position {
 impl Position {
     pub fn get_fancy_list() -> [String; 10] {
         [
-            t!("utils.auto").to_string(),
-            t!("utils.auto_right").to_string(),
-            t!("utils.auto_left").to_string(),
-            t!("utils.auto_up").to_string(),
-            t!("utils.auto_down").to_string(),
-            t!("utils.auto_center_right").to_string(),
-            t!("utils.auto_center_left").to_string(),
-            t!("utils.auto_center_up").to_string(),
-            t!("utils.auto_center_down").to_string(),
-            t!("utils.coordinates").to_string(),
+            t!("hyprland.position.auto").to_string(),
+            t!("hyprland.position.auto_right").to_string(),
+            t!("hyprland.position.auto_left").to_string(),
+            t!("hyprland.position.auto_up").to_string(),
+            t!("hyprland.position.auto_down").to_string(),
+            t!("hyprland.position.auto_center_right").to_string(),
+            t!("hyprland.position.auto_center_left").to_string(),
+            t!("hyprland.position.auto_center_up").to_string(),
+            t!("hyprland.position.auto_center_down").to_string(),
+            t!("hyprland.position.coordinates").to_string(),
         ]
     }
 

@@ -109,11 +109,11 @@ impl Display for MonitorTarget {
 impl EnumConfigForGtk for MonitorTarget {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.direction"),
-            &t!("gtk_converters.id"),
-            &t!("gtk_converters.name"),
-            &t!("gtk_converters.current"),
-            &t!("gtk_converters.relative"),
+            &t!("hyprland.monitor_target.direction"),
+            &t!("hyprland.monitor_target.id"),
+            &t!("hyprland.monitor_target.name"),
+            &t!("hyprland.monitor_target.current"),
+            &t!("hyprland.monitor_target.relative"),
         ])
     }
 

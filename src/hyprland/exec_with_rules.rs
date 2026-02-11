@@ -81,14 +81,14 @@ impl ToGtkBox for ExecWithRules {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        window_rules_mother_box.append(&Label::new(Some(&t!("gtk_converters.window_rules"))));
+        window_rules_mother_box.append(&Label::new(Some(&t!("hyprland.exec_with_rules.window_rules"))));
         let window_rules_entry = create_entry();
         let window_rules_box = Vec::<WindowRule>::to_gtk_box(&window_rules_entry, ';');
         window_rules_mother_box.append(&window_rules_box);
         mother_box.append(&window_rules_mother_box);
 
         let command_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        command_box.append(&Label::new(Some(&t!("gtk_converters.command"))));
+        command_box.append(&Label::new(Some(&t!("hyprland.exec_with_rules.command"))));
         let command_entry = create_entry();
         command_box.append(&command_entry);
         mother_box.append(&command_box);

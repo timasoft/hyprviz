@@ -1,0 +1,57 @@
+_version: 2
+hyprland.workspace_target.first_available_empty_workspace:
+  en: "First available empty workspace"
+  ru: "Первое свободное рабочее пространство"
+  zh-CN: "首个空闲工作区"
+hyprland.workspace_target.first_available_empty_workspace_on_monitor:
+  en: "First available empty workspace on monitor"
+  ru: "Первое свободное рабочее пространство на мониторе"
+  zh-CN: "显示器上首个空闲工作区"
+hyprland.workspace_target.id:
+  en: "Id"
+  ru: "Идентификатор"
+  zh-CN: "标识符"
+hyprland.workspace_target.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+hyprland.workspace_target.next_available_empty_workspace:
+  en: "Next available empty workspace"
+  ru: "Следующее свободное рабочее пространство"
+  zh-CN: "下一个空闲工作区"
+hyprland.workspace_target.next_available_empty_workspace_on_monitor:
+  en: "Next available empty workspace on monitor"
+  ru: "Следующее свободное рабочее пространство на мониторе"
+  zh-CN: "显示器上下一个空闲工作区"
+hyprland.workspace_target.on_monitor:
+  en: "On monitor"
+  ru: "На мониторе"
+  zh-CN: "在显示器上"
+hyprland.workspace_target.on_monitor_including_empty_workspace:
+  en: "On monitor including empty workspace"
+  ru: "На мониторе, включая пустые"
+  zh-CN: "在显示器上（含空工作区）"
+hyprland.workspace_target.open:
+  en: "Open"
+  ru: "Открытое"
+  zh-CN: "已打开"
+hyprland.workspace_target.previous:
+  en: "Previous"
+  ru: "Предыдущее"
+  zh-CN: "上一个"
+hyprland.workspace_target.previous_per_monitor:
+  en: "Previous per monitor"
+  ru: "Предыдущее на мониторе"
+  zh-CN: "显示器上一个"
+hyprland.workspace_target.relative:
+  en: "Relative"
+  ru: "Относительный"
+  zh-CN: "相对"
+hyprland.workspace_target.special:
+  en: "Special"
+  ru: "Специальное"
+  zh-CN: "特殊工作区"
+hyprland.workspace_target.special_with_name:
+  en: "Special with name"
+  ru: "Специальное с именем"
+  zh-CN: "带名称的特殊工作区"

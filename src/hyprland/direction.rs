@@ -42,10 +42,10 @@ impl Display for Direction {
 impl EnumConfigForGtk for Direction {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.left"),
-            &t!("gtk_converters.right"),
-            &t!("gtk_converters.up"),
-            &t!("gtk_converters.down"),
+            &t!("hyprland.direction.left"),
+            &t!("hyprland.direction.right"),
+            &t!("hyprland.direction.up"),
+            &t!("hyprland.direction.down"),
         ])
     }
 }

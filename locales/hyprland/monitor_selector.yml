@@ -1,0 +1,13 @@
+_version: 2
+hyprland.monitor_selector.all:
+  en: "All"
+  ru: "Все"
+  zh-CN: "全部"
+hyprland.monitor_selector.description:
+  en: "Description"
+  ru: "Описание"
+  zh-CN: "描述"
+hyprland.monitor_selector.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"

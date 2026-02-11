@@ -1,0 +1,9 @@
+_version: 2
+hyprland.window_rule_with_parameter.parameters:
+  en: "Parameters"
+  ru: "Параметры"
+  zh-CN: "参数"
+hyprland.window_rule_with_parameter.rule:
+  en: "Rule"
+  ru: "Правило"
+  zh-CN: "规则"

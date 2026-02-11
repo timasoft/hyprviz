@@ -38,9 +38,9 @@ impl Display for GroupLockAction {
 impl EnumConfigForGtk for GroupLockAction {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.lock"),
-            &t!("gtk_converters.unlock"),
-            &t!("gtk_converters.toggle"),
+            &t!("hyprland.group_lock_action.lock"),
+            &t!("hyprland.group_lock_action.unlock"),
+            &t!("hyprland.group_lock_action.toggle"),
         ])
     }
 }

@@ -1,0 +1,9 @@
+_version: 2
+hyprland.scale.auto:
+  en: "Auto"
+  ru: "Автоматически"
+  zh-CN: "自动"
+hyprland.scale.manual:
+  en: "Manual"
+  ru: "Вручную"
+  zh-CN: "手动"

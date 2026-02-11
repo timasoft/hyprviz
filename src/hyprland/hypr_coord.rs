@@ -130,25 +130,25 @@ impl ToGtkBox for HyprCoord {
         mother_box.append(&y_box_box);
 
         let x_sub_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        x_sub_box.append(&Label::new(Some(&t!("gtk_converters.subtrahend_of_x"))));
+        x_sub_box.append(&Label::new(Some(&t!("hyprland.hypr_coord.subtrahend_of_x"))));
         let x_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         x_sub_box.append(&x_sub_spin_button);
         mother_box.append(&x_sub_box);
 
         let y_sub_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        y_sub_box.append(&Label::new(Some(&t!("gtk_converters.subtrahend_of_y"))));
+        y_sub_box.append(&Label::new(Some(&t!("hyprland.hypr_coord.subtrahend_of_y"))));
         let y_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         y_sub_box.append(&y_sub_spin_button);
         mother_box.append(&y_sub_box);
 
         let under_cursor_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        under_cursor_box.append(&Label::new(Some(&t!("gtk_converters.under_cursor"))));
+        under_cursor_box.append(&Label::new(Some(&t!("hyprland.hypr_coord.under_cursor"))));
         let under_cursor_switch = create_switch();
         under_cursor_box.append(&under_cursor_switch);
         mother_box.append(&under_cursor_box);
 
         let on_screen_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        on_screen_box.append(&Label::new(Some(&t!("gtk_converters.on_screen"))));
+        on_screen_box.append(&Label::new(Some(&t!("hyprland.hypr_coord.on_screen"))));
         let on_screen_switch = create_switch();
         on_screen_box.append(&on_screen_switch);
         mother_box.append(&on_screen_box);

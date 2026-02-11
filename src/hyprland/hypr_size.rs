@@ -108,33 +108,33 @@ impl ToGtkBox for HyprSize {
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
         let width_box_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        width_box_box.append(&Label::new(Some(&t!("gtk_converters.width"))));
+        width_box_box.append(&Label::new(Some(&t!("hyprland.hypr_size.width"))));
         let width_entry = create_entry();
         let width_box = PixelOrPercent::to_gtk_box(&width_entry);
         width_box_box.append(&width_box);
         mother_box.append(&width_box_box);
 
         let height_box_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        height_box_box.append(&Label::new(Some(&t!("gtk_converters.height"))));
+        height_box_box.append(&Label::new(Some(&t!("hyprland.hypr_size.height"))));
         let height_entry = create_entry();
         let height_box = PixelOrPercent::to_gtk_box(&height_entry);
         height_box_box.append(&height_box);
         mother_box.append(&height_box_box);
 
         let size_bound_string_list = StringList::new(&[
-            &t!("gtk_converters.exact"),
-            &t!("gtk_converters.max"),
-            &t!("gtk_converters.min"),
+            &t!("hyprland.hypr_size.exact"),
+            &t!("hyprland.hypr_size.max"),
+            &t!("hyprland.hypr_size.min"),
         ]);
 
         let width_bound_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        width_bound_box.append(&Label::new(Some(&t!("gtk_converters.width_bound"))));
+        width_bound_box.append(&Label::new(Some(&t!("hyprland.hypr_size.width_bound"))));
         let width_bound_dropdown = create_dropdown(&size_bound_string_list);
         width_bound_box.append(&width_bound_dropdown);
         mother_box.append(&width_bound_box);
 
         let height_bound_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        height_bound_box.append(&Label::new(Some(&t!("gtk_converters.height_bound"))));
+        height_bound_box.append(&Label::new(Some(&t!("hyprland.hypr_size.height_bound"))));
         let height_bound_dropdown = create_dropdown(&size_bound_string_list);
         height_bound_box.append(&height_bound_dropdown);
         mother_box.append(&height_bound_box);

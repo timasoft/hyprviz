@@ -49,11 +49,11 @@ impl Display for WindowEvent {
 impl EnumConfigForGtk for WindowEvent {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.maximize"),
-            &t!("gtk_converters.activate"),
-            &t!("gtk_converters.activatefocus"),
-            &t!("gtk_converters.fullscreenoutput"),
+            &t!("hyprland.window_event.fullscreen"),
+            &t!("hyprland.window_event.maximize"),
+            &t!("hyprland.window_event.activate"),
+            &t!("hyprland.window_event.activatefocus"),
+            &t!("hyprland.window_event.fullscreenoutput"),
         ])
     }
 }

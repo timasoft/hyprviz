@@ -89,9 +89,9 @@ impl Display for RelativeId {
 impl EnumConfigForGtk for RelativeId {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.absolute"),
-            &t!("gtk_converters.previous"),
-            &t!("gtk_converters.next"),
+            &t!("hyprland.relative_id.absolute"),
+            &t!("hyprland.relative_id.previous"),
+            &t!("hyprland.relative_id.next"),
         ])
     }
 

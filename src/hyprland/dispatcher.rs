@@ -1187,69 +1187,69 @@ impl Display for Dispatcher {
 impl EnumConfigForGtk for Dispatcher {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.exec"),
-            &t!("gtk_converters.execr"),
-            &t!("gtk_converters.pass"),
-            &t!("gtk_converters.send_shortcut"),
-            &t!("gtk_converters.send_key_state"),
-            &t!("gtk_converters.kill_active"),
-            &t!("gtk_converters.force_kill_active"),
-            &t!("gtk_converters.close_window"),
-            &t!("gtk_converters.kill_window"),
-            &t!("gtk_converters.signal"),
-            &t!("gtk_converters.signal_window"),
-            &t!("gtk_converters.workspace"),
-            &t!("gtk_converters.move_to_workspace"),
-            &t!("gtk_converters.move_to_workspace_silent"),
-            &t!("gtk_converters.toggle_floating"),
-            &t!("gtk_converters.set_floating"),
-            &t!("gtk_converters.set_tiled"),
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.fullscreen_state"),
-            &t!("gtk_converters.dpms"),
-            &t!("gtk_converters.pin"),
-            &t!("gtk_converters.move_focus"),
-            &t!("gtk_converters.move_window"),
-            &t!("gtk_converters.swap_window"),
-            &t!("gtk_converters.center_window"),
-            &t!("gtk_converters.resize_active"),
-            &t!("gtk_converters.move_active"),
-            &t!("gtk_converters.resize_window_pixel"),
-            &t!("gtk_converters.move_window_pixel"),
-            &t!("gtk_converters.cycle_next"),
-            &t!("gtk_converters.swap_next"),
-            &t!("gtk_converters.tag_window"),
-            &t!("gtk_converters.focus_window"),
-            &t!("gtk_converters.focus_monitor"),
-            &t!("gtk_converters.split_ratio"),
-            &t!("gtk_converters.move_cursor_to_corner"),
-            &t!("gtk_converters.move_cursor"),
-            &t!("gtk_converters.rename_workspace"),
-            &t!("gtk_converters.exit"),
-            &t!("gtk_converters.force_renderer_reload"),
-            &t!("gtk_converters.move_current_workspace_to_monitor"),
-            &t!("gtk_converters.focus_workspace_on_current_monitor"),
-            &t!("gtk_converters.move_workspace_to_monitor"),
-            &t!("gtk_converters.swap_active_workspaces"),
-            &t!("gtk_converters.bring_active_to_top"),
-            &t!("gtk_converters.alter_z_order"),
-            &t!("gtk_converters.toggle_special_workspace"),
-            &t!("gtk_converters.focus_urgent_or_last"),
-            &t!("gtk_converters.toggle_group"),
-            &t!("gtk_converters.change_group_active"),
-            &t!("gtk_converters.focus_current_or_last"),
-            &t!("gtk_converters.lock_groups"),
-            &t!("gtk_converters.lock_active_group"),
-            &t!("gtk_converters.move_into_group"),
-            &t!("gtk_converters.move_out_of_group"),
-            &t!("gtk_converters.move_window_or_group"),
-            &t!("gtk_converters.move_group_window"),
-            &t!("gtk_converters.deny_window_from_group"),
-            &t!("gtk_converters.set_ignore_group_lock"),
-            &t!("gtk_converters.global"),
-            &t!("gtk_converters.event"),
-            &t!("gtk_converters.set_prop"),
-            &t!("gtk_converters.toggle_swallow"),
+            &t!("hyprland.dispatcher.exec"),
+            &t!("hyprland.dispatcher.execr"),
+            &t!("hyprland.dispatcher.pass"),
+            &t!("hyprland.dispatcher.send_shortcut"),
+            &t!("hyprland.dispatcher.send_key_state"),
+            &t!("hyprland.dispatcher.kill_active"),
+            &t!("hyprland.dispatcher.force_kill_active"),
+            &t!("hyprland.dispatcher.close_window"),
+            &t!("hyprland.dispatcher.kill_window"),
+            &t!("hyprland.dispatcher.signal"),
+            &t!("hyprland.dispatcher.signal_window"),
+            &t!("hyprland.dispatcher.workspace"),
+            &t!("hyprland.dispatcher.move_to_workspace"),
+            &t!("hyprland.dispatcher.move_to_workspace_silent"),
+            &t!("hyprland.dispatcher.toggle_floating"),
+            &t!("hyprland.dispatcher.set_floating"),
+            &t!("hyprland.dispatcher.set_tiled"),
+            &t!("hyprland.dispatcher.fullscreen"),
+            &t!("hyprland.dispatcher.fullscreen_state"),
+            &t!("hyprland.dispatcher.dpms"),
+            &t!("hyprland.dispatcher.pin"),
+            &t!("hyprland.dispatcher.move_focus"),
+            &t!("hyprland.dispatcher.move_window"),
+            &t!("hyprland.dispatcher.swap_window"),
+            &t!("hyprland.dispatcher.center_window"),
+            &t!("hyprland.dispatcher.resize_active"),
+            &t!("hyprland.dispatcher.move_active"),
+            &t!("hyprland.dispatcher.resize_window_pixel"),
+            &t!("hyprland.dispatcher.move_window_pixel"),
+            &t!("hyprland.dispatcher.cycle_next"),
+            &t!("hyprland.dispatcher.swap_next"),
+            &t!("hyprland.dispatcher.tag_window"),
+            &t!("hyprland.dispatcher.focus_window"),
+            &t!("hyprland.dispatcher.focus_monitor"),
+            &t!("hyprland.dispatcher.split_ratio"),
+            &t!("hyprland.dispatcher.move_cursor_to_corner"),
+            &t!("hyprland.dispatcher.move_cursor"),
+            &t!("hyprland.dispatcher.rename_workspace"),
+            &t!("hyprland.dispatcher.exit"),
+            &t!("hyprland.dispatcher.force_renderer_reload"),
+            &t!("hyprland.dispatcher.move_current_workspace_to_monitor"),
+            &t!("hyprland.dispatcher.focus_workspace_on_current_monitor"),
+            &t!("hyprland.dispatcher.move_workspace_to_monitor"),
+            &t!("hyprland.dispatcher.swap_active_workspaces"),
+            &t!("hyprland.dispatcher.bring_active_to_top"),
+            &t!("hyprland.dispatcher.alter_z_order"),
+            &t!("hyprland.dispatcher.toggle_special_workspace"),
+            &t!("hyprland.dispatcher.focus_urgent_or_last"),
+            &t!("hyprland.dispatcher.toggle_group"),
+            &t!("hyprland.dispatcher.change_group_active"),
+            &t!("hyprland.dispatcher.focus_current_or_last"),
+            &t!("hyprland.dispatcher.lock_groups"),
+            &t!("hyprland.dispatcher.lock_active_group"),
+            &t!("hyprland.dispatcher.move_into_group"),
+            &t!("hyprland.dispatcher.move_out_of_group"),
+            &t!("hyprland.dispatcher.move_window_or_group"),
+            &t!("hyprland.dispatcher.move_group_window"),
+            &t!("hyprland.dispatcher.deny_window_from_group"),
+            &t!("hyprland.dispatcher.set_ignore_group_lock"),
+            &t!("hyprland.dispatcher.global"),
+            &t!("hyprland.dispatcher.event"),
+            &t!("hyprland.dispatcher.set_prop"),
+            &t!("hyprland.dispatcher.toggle_swallow"),
         ])
     }
 
@@ -1263,7 +1263,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                 let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
                 window_rules_mother_box
-                    .append(&Label::new(Some(&t!("gtk_converters.window_rules"))));
+                    .append(&Label::new(Some(&t!("hyprland.dispatcher.window_rules"))));
                 let window_rules_entry = create_entry();
                 let window_rules_box = Vec::<WindowRule>::to_gtk_box(&window_rules_entry, ';');
                 window_rules_mother_box.append(&window_rules_box);
@@ -1363,7 +1363,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
                     window_target_box
-                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
+                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -1687,7 +1687,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
                     window_target_box
-                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
+                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -1790,7 +1790,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
                     window_target_box
-                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
+                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -1901,7 +1901,7 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&toggle_state_box);
 
                     let monitor_name_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    monitor_name_box.append(&Label::new(Some(&t!("gtk_converters.monitor_name"))));
+                    monitor_name_box.append(&Label::new(Some(&t!("hyprland.dispatcher.monitor_name"))));
                     let optional_monitor_name_entry = create_entry();
                     let optional_monitor_name_box =
                         Option::<String>::to_gtk_box(&optional_monitor_name_entry);
@@ -2014,7 +2014,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
                     window_target_box
-                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
+                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -2190,7 +2190,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                     let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
                     window_target_box
-                        .append(&Label::new(Some(&t!("gtk_converters.window_target"))));
+                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
@@ -2345,12 +2345,12 @@ impl EnumConfigForGtk for Dispatcher {
             vec![],
             // Fullscreen(FullscreenMode),
             vec![FieldLabel::Named(cow_to_static_str(t!(
-                "gtk_converters.fullscreen_mode"
+                "hyprland.dispatcher.fullscreen_mode"
             )))],
             // FullscreenState(DispatcherFullscreenState, DispatcherFullscreenState),
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.internal_state"))),
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.client_state"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.internal_state"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.client_state"))),
             ],
             // other options does not need to be labelled
         ])

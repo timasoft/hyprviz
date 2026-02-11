@@ -117,10 +117,10 @@ impl Display for MoveDirection {
 impl EnumConfigForGtk for MoveDirection {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.direction"),
-            &t!("gtk_converters.direction_silent"),
-            &t!("gtk_converters.monitor"),
-            &t!("gtk_converters.monitor_silent"),
+            &t!("hyprland.move_direction.direction"),
+            &t!("hyprland.move_direction.direction_silent"),
+            &t!("hyprland.move_direction.monitor"),
+            &t!("hyprland.move_direction.monitor_silent"),
         ])
     }
 

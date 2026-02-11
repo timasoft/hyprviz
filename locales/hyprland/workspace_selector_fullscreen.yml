@@ -1,0 +1,17 @@
+_version: 2
+hyprland.workspace_selector_fullscreen.fullscreen:
+  en: "Fullscreen"
+  ru: "Полноэкранный режим"
+  zh-CN: "全屏"
+hyprland.workspace_selector_fullscreen.fullscreen_without_window_fullscreen_state_sent_to_the_window:
+  en: "Fullscreen without window fullscreen state sent to the window"
+  ru: "Полноэкранный режим без отправки состояния полноэкранности окну"
+  zh-CN: "全屏但不向窗口发送全屏状态"
+hyprland.workspace_selector_fullscreen.maximized:
+  en: "Maximized"
+  ru: "Максимизировано"
+  zh-CN: "最大化"
+hyprland.workspace_selector_fullscreen.no_fullscreen:
+  en: "No fullscreen"
+  ru: "Без полноэкранного режима"
+  zh-CN: "无全屏"

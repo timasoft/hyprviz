@@ -80,8 +80,8 @@ impl Display for NamespaceOrAddress {
 impl EnumConfigForGtk for NamespaceOrAddress {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.namespace"),
-            &t!("gtk_converters.address"),
+            &t!("hyprland.namespace_or_address.namespace"),
+            &t!("hyprland.namespace_or_address.address"),
         ])
     }
 

@@ -1,0 +1,277 @@
+_version: 2
+hyprland.dispatcher.alter_z_order:
+  en: "Alter z order"
+  ru: "Изменить z-порядок"
+  zh-CN: "调整Z轴顺序"
+hyprland.dispatcher.bring_active_to_top:
+  en: "Bring active to top"
+  ru: "Переместить активное окно наверх"
+  zh-CN: "将活动窗口置顶"
+hyprland.dispatcher.center_window:
+  en: "Center window"
+  ru: "Центрировать окно"
+  zh-CN: "居中窗口"
+hyprland.dispatcher.change_group_active:
+  en: "Change group active"
+  ru: "Изменить активное окно в группе"
+  zh-CN: "切换组内活动窗口"
+hyprland.dispatcher.client_state:
+  en: "Client state"
+  ru: "Состояние клиента"
+  zh-CN: "客户端状态"
+hyprland.dispatcher.close_window:
+  en: "Close window"
+  ru: "Закрыть окно"
+  zh-CN: "关闭窗口"
+hyprland.dispatcher.cycle_next:
+  en: "Cycle next"
+  ru: "Циклический переход к следующему"
+  zh-CN: "循环切换到下一个"
+hyprland.dispatcher.deny_window_from_group:
+  en: "Deny window from group"
+  ru: "Запретить окну присоединяться к группе"
+  zh-CN: "禁止窗口加入组"
+hyprland.dispatcher.dpms:
+  en: "Dpms"
+  ru: "Управление питанием дисплея"
+  zh-CN: "显示器电源管理"
+hyprland.dispatcher.event:
+  en: "Event"
+  ru: "Событие"
+  zh-CN: "事件"
+hyprland.dispatcher.exec:
+  en: "Exec"
+  ru: "Выполнить"
+  zh-CN: "执行"
+hyprland.dispatcher.execr:
+  en: "Execr"
+  ru: "Выполнить (относительно)"
+  zh-CN: "相对路径执行"
+hyprland.dispatcher.exit:
+  en: "Exit"
+  ru: "Выйти"
+  zh-CN: "退出"
+hyprland.dispatcher.focus_current_or_last:
+  en: "Focus current or last"
+  ru: "Фокус на текущем или последнем"
+  zh-CN: "聚焦当前或上一个窗口"
+hyprland.dispatcher.focus_monitor:
+  en: "Focus monitor"
+  ru: "Фокус на монитор"
+  zh-CN: "聚焦显示器"
+hyprland.dispatcher.focus_urgent_or_last:
+  en: "Focus urgent or last"
+  ru: "Фокус на срочном или последнем"
+  zh-CN: "聚焦紧急或上一个窗口"
+hyprland.dispatcher.focus_window:
+  en: "Focus window"
+  ru: "Фокус на окно"
+  zh-CN: "聚焦窗口"
+hyprland.dispatcher.focus_workspace_on_current_monitor:
+  en: "Focus workspace on current monitor"
+  ru: "Фокус на рабочее пространство на текущем мониторе"
+  zh-CN: "聚焦当前显示器上的工作区"
+hyprland.dispatcher.force_kill_active:
+  en: "Force kill active"
+  ru: "Принудительно завершить активное окно"
+  zh-CN: "强制终止活动窗口"
+hyprland.dispatcher.force_renderer_reload:
+  en: "Force renderer reload"
+  ru: "Принудительная перезагрузка рендерера"
+  zh-CN: "强制重载渲染器"
+hyprland.dispatcher.fullscreen:
+  en: "Fullscreen"
+  ru: "Полноэкранный режим"
+  zh-CN: "全屏模式"
+hyprland.dispatcher.fullscreen_mode:
+  en: "Fullscreen mode"
+  ru: "Режим полноэкранного отображения"
+  zh-CN: "全屏模式"
+hyprland.dispatcher.fullscreen_state:
+  en: "Fullscreen state"
+  ru: "Состояние полноэкранного режима"
+  zh-CN: "全屏状态"
+hyprland.dispatcher.global:
+  en: "Global"
+  ru: "Глобальный"
+  zh-CN: "全局"
+hyprland.dispatcher.internal_state:
+  en: "Internal state"
+  ru: "Внутреннее состояние"
+  zh-CN: "内部状态"
+hyprland.dispatcher.kill_active:
+  en: "Kill active"
+  ru: "Завершить активное окно"
+  zh-CN: "终止活动窗口"
+hyprland.dispatcher.kill_window:
+  en: "Kill window"
+  ru: "Завершить окно"
+  zh-CN: "终止窗口"
+hyprland.dispatcher.lock_active_group:
+  en: "Lock active group"
+  ru: "Заблокировать активную группу"
+  zh-CN: "锁定活动组"
+hyprland.dispatcher.lock_groups:
+  en: "Lock groups"
+  ru: "Заблокировать группы"
+  zh-CN: "锁定组"
+hyprland.dispatcher.monitor_name:
+  en: "Monitor name"
+  ru: "Имя монитора"
+  zh-CN: "显示器名称"
+hyprland.dispatcher.move_active:
+  en: "Move active"
+  ru: "Переместить активное окно"
+  zh-CN: "移动活动窗口"
+hyprland.dispatcher.move_current_workspace_to_monitor:
+  en: "Move current workspace to monitor"
+  ru: "Переместить текущее рабочее пространство на монитор"
+  zh-CN: "将当前工作区移至显示器"
+hyprland.dispatcher.move_cursor:
+  en: "Move cursor"
+  ru: "Переместить курсор"
+  zh-CN: "移动光标"
+hyprland.dispatcher.move_cursor_to_corner:
+  en: "Move cursor to corner"
+  ru: "Переместить курсор в угол"
+  zh-CN: "将光标移至角落"
+hyprland.dispatcher.move_focus:
+  en: "Move focus"
+  ru: "Переместить фокус"
+  zh-CN: "移动焦点"
+hyprland.dispatcher.move_group_window:
+  en: "Move group window"
+  ru: "Переместить окно в группе"
+  zh-CN: "移动组内窗口"
+hyprland.dispatcher.move_into_group:
+  en: "Move into group"
+  ru: "Переместить в группу"
+  zh-CN: "移入组"
+hyprland.dispatcher.move_out_of_group:
+  en: "Move out of group"
+  ru: "Переместить из группы"
+  zh-CN: "移出组"
+hyprland.dispatcher.move_to_workspace:
+  en: "Move to workspace"
+  ru: "Переместить на рабочее пространство"
+  zh-CN: "移至工作区"
+hyprland.dispatcher.move_to_workspace_silent:
+  en: "Move to workspace silent"
+  ru: "Переместить на рабочее пространство (без переключения)"
+  zh-CN: "静默移至工作区"
+hyprland.dispatcher.move_window:
+  en: "Move window"
+  ru: "Переместить окно"
+  zh-CN: "移动窗口"
+hyprland.dispatcher.move_window_or_group:
+  en: "Move window or group"
+  ru: "Переместить окно или группу"
+  zh-CN: "移动窗口或组"
+hyprland.dispatcher.move_window_pixel:
+  en: "Move window pixel"
+  ru: "Переместить окно (в пикселях)"
+  zh-CN: "按像素移动窗口"
+hyprland.dispatcher.move_workspace_to_monitor:
+  en: "Move workspace to monitor"
+  ru: "Переместить рабочее пространство на монитор"
+  zh-CN: "将工作区移至显示器"
+hyprland.dispatcher.pass:
+  en: "Pass"
+  ru: "Передать"
+  zh-CN: "传递"
+hyprland.dispatcher.pin:
+  en: "Pin"
+  ru: "Закрепить"
+  zh-CN: "固定窗口"
+hyprland.dispatcher.rename_workspace:
+  en: "Rename workspace"
+  ru: "Переименовать рабочее пространство"
+  zh-CN: "重命名工作区"
+hyprland.dispatcher.resize_active:
+  en: "Resize active"
+  ru: "Изменить размер активного окна"
+  zh-CN: "调整活动窗口大小"
+hyprland.dispatcher.resize_window_pixel:
+  en: "Resize window pixel"
+  ru: "Изменить размер окна (в пикселях)"
+  zh-CN: "按像素调整窗口大小"
+hyprland.dispatcher.send_key_state:
+  en: "Send key state"
+  ru: "Отправить состояние клавиши"
+  zh-CN: "发送按键状态"
+hyprland.dispatcher.send_shortcut:
+  en: "Send shortcut"
+  ru: "Отправить сочетание клавиш"
+  zh-CN: "发送快捷键"
+hyprland.dispatcher.set_floating:
+  en: "Set floating"
+  ru: "Установить плавающий режим"
+  zh-CN: "设置浮动模式"
+hyprland.dispatcher.set_ignore_group_lock:
+  en: "Set ignore group lock"
+  ru: "Игнорировать блокировку групп"
+  zh-CN: "忽略组锁定"
+hyprland.dispatcher.set_prop:
+  en: "Set prop"
+  ru: "Установить свойство"
+  zh-CN: "设置属性"
+hyprland.dispatcher.set_tiled:
+  en: "Set tiled"
+  ru: "Установить плиточный режим"
+  zh-CN: "设置平铺模式"
+hyprland.dispatcher.signal:
+  en: "Signal"
+  ru: "Сигнал"
+  zh-CN: "信号"
+hyprland.dispatcher.signal_window:
+  en: "Signal window"
+  ru: "Сигнал окну"
+  zh-CN: "向窗口发送信号"
+hyprland.dispatcher.split_ratio:
+  en: "Split ratio"
+  ru: "Соотношение разделения"
+  zh-CN: "分割比例"
+hyprland.dispatcher.swap_active_workspaces:
+  en: "Swap active workspaces"
+  ru: "Поменять местами активные рабочие пространства"
+  zh-CN: "交换活动工作区"
+hyprland.dispatcher.swap_next:
+  en: "Swap next"
+  ru: "Поменять местами со следующим"
+  zh-CN: "与下一个交换"
+hyprland.dispatcher.swap_window:
+  en: "Swap window"
+  ru: "Поменять местами окна"
+  zh-CN: "交换窗口"
+hyprland.dispatcher.tag_window:
+  en: "Tag window"
+  ru: "Пометить окно тегом"
+  zh-CN: "为窗口添加标签"
+hyprland.dispatcher.toggle_floating:
+  en: "Toggle floating"
+  ru: "Переключить плавающий режим"
+  zh-CN: "切换浮动模式"
+hyprland.dispatcher.toggle_group:
+  en: "Toggle group"
+  ru: "Переключить группу"
+  zh-CN: "切换组"
+hyprland.dispatcher.toggle_special_workspace:
+  en: "Toggle special workspace"
+  ru: "Переключить специальное рабочее пространство"
+  zh-CN: "切换特殊工作区"
+hyprland.dispatcher.toggle_swallow:
+  en: "Toggle swallow"
+  ru: "Переключить поглощение"
+  zh-CN: "切换窗口吞并"
+hyprland.dispatcher.window_rules:
+  en: "Window rules"
+  ru: "Правила для окон"
+  zh-CN: "窗口规则"
+hyprland.dispatcher.window_target:
+  en: "Window target"
+  ru: "Целевое окно"
+  zh-CN: "目标窗口"
+hyprland.dispatcher.workspace:
+  en: "Workspace"
+  ru: "Рабочее пространство"
+  zh-CN: "工作区"

@@ -20,10 +20,10 @@ impl Side {
 
     pub fn get_fancy_list() -> [String; 4] {
         [
-            t!("utils.left").to_string(),
-            t!("utils.right").to_string(),
-            t!("utils.top").to_string(),
-            t!("utils.bottom").to_string(),
+            t!("hyprland.side.left").to_string(),
+            t!("hyprland.side.right").to_string(),
+            t!("hyprland.side.top").to_string(),
+            t!("hyprland.side.bottom").to_string(),
         ]
     }
 
@@ -64,10 +64,10 @@ impl Display for Side {
 impl EnumConfigForGtk for Side {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.left"),
-            &t!("gtk_converters.right"),
-            &t!("gtk_converters.top"),
-            &t!("gtk_converters.bottom"),
+            &t!("hyprland.side.left"),
+            &t!("hyprland.side.right"),
+            &t!("hyprland.side.top"),
+            &t!("hyprland.side.bottom"),
         ])
     }
 }

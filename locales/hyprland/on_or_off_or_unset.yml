@@ -1,0 +1,13 @@
+_version: 2
+hyprland.on_or_off_or_unset.off:
+  en: "Off"
+  ru: "Выключено"
+  zh-CN: "关闭"
+hyprland.on_or_off_or_unset.on:
+  en: "On"
+  ru: "Включено"
+  zh-CN: "开启"
+hyprland.on_or_off_or_unset.unset:
+  en: "Unset"
+  ru: "Не задано"
+  zh-CN: "未设置"

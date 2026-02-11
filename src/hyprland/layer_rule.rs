@@ -153,18 +153,18 @@ impl Display for LayerRule {
 impl EnumConfigForGtk for LayerRule {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.unset"),
-            &t!("gtk_converters.no_anim"),
-            &t!("gtk_converters.blur"),
-            &t!("gtk_converters.blur_popups"),
-            &t!("gtk_converters.ignore_alpha"),
-            &t!("gtk_converters.ignore_zero"),
-            &t!("gtk_converters.dim_around"),
-            &t!("gtk_converters.xray"),
-            &t!("gtk_converters.animation"),
-            &t!("gtk_converters.order"),
-            &t!("gtk_converters.above_lock"),
-            &t!("gtk_converters.above_lock_interactable"),
+            &t!("hyprland.layer_rule.unset"),
+            &t!("hyprland.layer_rule.no_anim"),
+            &t!("hyprland.layer_rule.blur"),
+            &t!("hyprland.layer_rule.blur_popups"),
+            &t!("hyprland.layer_rule.ignore_alpha"),
+            &t!("hyprland.layer_rule.ignore_zero"),
+            &t!("hyprland.layer_rule.dim_around"),
+            &t!("hyprland.layer_rule.xray"),
+            &t!("hyprland.layer_rule.animation"),
+            &t!("hyprland.layer_rule.order"),
+            &t!("hyprland.layer_rule.above_lock"),
+            &t!("hyprland.layer_rule.above_lock_interactable"),
         ])
     }
 

@@ -51,14 +51,6 @@ main.failed_to_add_source_line_to__:
   en: "Failed to add 'source = ./hyprviz.conf' to %{file}: %{error}"
   ru: "Не удалось добавить 'source = ./hyprviz.conf' в %{file}: %{error}"
   zh-CN: "无法将 'source = ./hyprviz.conf' 添加到 %{file}: %{error}"
-main.available_profiles:
-  en: "Available profiles"
-  ru: "Доступные профили"
-  zh-CN: "可用的配置文件"
-main.loading_config_for_profile:
-  en: "Loading config for profile"
-  ru: "Загрузка конфигурации профиля"
-  zh-CN: "正在加载配置文件的配置"
 main.profile_not_found:
   en: "Profile not found"
   ru: "Профиль не найден"

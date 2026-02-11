@@ -150,10 +150,10 @@ impl ToGtkBox for BorderColor {
 
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let border_color_string_list = StringList::new(&[
-            &t!("gtk_converters.active_border_color"),
-            &t!("gtk_converters.active_border_gradient"),
-            &t!("gtk_converters.active_and_inactive_border_color"),
-            &t!("gtk_converters.active_and_inactive_border_gradient"),
+            &t!("hyprland.border_color.active_border_color"),
+            &t!("hyprland.border_color.active_border_gradient"),
+            &t!("hyprland.border_color.active_and_inactive_border_color"),
+            &t!("hyprland.border_color.active_and_inactive_border_gradient"),
         ]);
         let border_color_dropdown = create_dropdown(&border_color_string_list);
         border_color_dropdown.set_selected(0);
@@ -176,7 +176,7 @@ impl ToGtkBox for BorderColor {
         gradient_box.append(&vec_hypr_color_box);
         let angle_entry = create_entry();
         let angle_box = Angle::to_gtk_box(&angle_entry);
-        angle_box.prepend(&Label::new(Some(&t!("gtk_converters.angle"))));
+        angle_box.prepend(&Label::new(Some(&t!("hyprland.border_color.angle"))));
         gradient_box.append(&angle_box);
         mother_box.append(&gradient_box);
 
@@ -187,7 +187,7 @@ impl ToGtkBox for BorderColor {
         second_gradient_box.append(&second_vec_hypr_color_box);
         let opt_angle_entry = create_entry();
         let opt_angle_box = Option::<Angle>::to_gtk_box(&opt_angle_entry);
-        opt_angle_box.prepend(&Label::new(Some(&t!("gtk_converters.angle"))));
+        opt_angle_box.prepend(&Label::new(Some(&t!("hyprland.border_color.angle"))));
         second_gradient_box.append(&opt_angle_box);
         mother_box.append(&second_gradient_box);
 

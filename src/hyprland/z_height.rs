@@ -35,7 +35,7 @@ impl Display for ZHeight {
 
 impl EnumConfigForGtk for ZHeight {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("gtk_converters.top"), &t!("gtk_converters.bottom")])
+        StringList::new(&[&t!("hyprland.z_height.top"), &t!("hyprland.z_height.bottom")])
     }
 }
 

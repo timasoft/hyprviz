@@ -221,110 +221,22 @@ advanced_editors.style:
   en: "Style"
   ru: "Стиль"
   zh-CN: "样式"
-advanced_editors.animation_styles.slide:
-  en: "Slide"
-  ru: "Скольжение"
-  zh-CN: "滑动"
-advanced_editors.animation_styles.slidefade:
-  en: "Slide Fade"
-  ru: "Скольжение с затуханием"
-  zh-CN: "滑动淡出"
-advanced_editors.animation_styles.slidevert:
-  en: "Slide Vertical"
-  ru: "Вертикальное скольжение"
-  zh-CN: "垂直滑动"
-advanced_editors.animation_styles.slidefadevert:
-  en: "Slide Fade Vertical"
-  ru: "Вертикальное скольжение с затуханием"
-  zh-CN: "垂直滑动淡出"
-advanced_editors.animation_styles.popin:
-  en: "Pop In"
-  ru: "Выскакивание"
-  zh-CN: "弹出"
-advanced_editors.animation_styles.fade:
-  en: "Fade"
-  ru: "Затухание"
-  zh-CN: "淡出"
-advanced_editors.animation_styles.crossfade:
-  en: "Cross Fade"
-  ru: "Перекрёстное затухание"
-  zh-CN: "交叉淡出"
-advanced_editors.animation_styles.fadein:
-  en: "Fade In"
-  ru: "Появление"
-  zh-CN: "淡入"
-advanced_editors.is_named:
-  en: "Is Named"
-  ru: "Имеет имя"
-  zh-CN: "有名称"
-advanced_editors.starts_with:
-  en: "Starts With"
-  ru: "Начинается с"
-  zh-CN: "以开头"
-advanced_editors.ends_with:
-  en: "Ends With"
-  ru: "Заканчивается на"
-  zh-CN: "以结尾"
-advanced_editors.single_count:
-  en: "Single Count"
-  ru: "Одиночный"
-  zh-CN: "单个"
-advanced_editors.range_count:
-  en: "Range Count"
-  ru: "Диапазон"
-  zh-CN: "范围"
-advanced_editors.count_flags:
-  en: "Count Flags"
-  ru: "Флаги"
-  zh-CN: "计数标志"
-advanced_editors.tiled_windows:
-  en: "Tiled Windows"
-  ru: "Плиточные окна"
-  zh-CN: "平铺窗口"
-advanced_editors.floating_windows:
-  en: "Floating Windows"
-  ru: "Плавающие окна"
-  zh-CN: "浮动窗口"
-advanced_editors.groups_instead_of_windows:
-  en: "Groups Instead of Windows"
-  ru: "Группы вместо окон"
-  zh-CN: "组而不是窗口"
-advanced_editors.visible_windows_only:
-  en: "Visible Windows Only"
-  ru: "Только видимые окна"
-  zh-CN: "仅可见窗口"
-advanced_editors.pinned_windows_only:
-  en: "Pinned Windows Only"
-  ru: "Только закреплённые окна"
-  zh-CN: "仅固定窗口"
-advanced_editors.window_count:
-  en: "Window Count"
-  ru: "Количество окон"
-  zh-CN: "窗口计数"
-advanced_editors.range_start:
-  en: "Range Start"
-  ru: "Начало диапазона"
-  zh-CN: "范围开始"
-advanced_editors.range_end:
-  en: "Range End"
-  ru: "Конец диапазона"
-  zh-CN: "范围结束"
-advanced_editors.no_fullscreen:
-  en: "No Fullscreen"
-  ru: "Не в полном экране"
-  zh-CN: "不在全屏"
-advanced_editors.fullscreen:
-  en: "Fullscreen"
-  ru: "Полный экран"
-  zh-CN: "全屏"
-advanced_editors.maximized:
-  en: "Maximized"
-  ru: "Максимизировано"
-  zh-CN: "最大化"
-advanced_editors.fullscreen_without_window_state:
-  en: "Fullscreen Without Window State"
-  ru: "Полный экран без состояния окна"
-  zh-CN: "全屏无窗口状态"
+advanced_editors.description:
+  en: "Description"
+  ru: "Описание"
+  zh-CN: "描述"
+advanced_editors.dispatcher:
+  en: "Dispatcher"
+  ru: "Диспетчер"
+  zh-CN: "调度器"
+advanced_editors.modifiers:
+  en: "Modifiers"
+  ru: "Модификаторы"
+  zh-CN: "修饰符"
+advanced_editors.transform:
+  en: "Transform"
+  ru: "Преобразование"
+  zh-CN: "变换"
 advanced_editors.key: # env key
   en: "Key"
   ru: "Ключ"

@@ -38,9 +38,9 @@ impl Display for KeyState {
 impl EnumConfigForGtk for KeyState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.down"),
-            &t!("gtk_converters.repeat"),
-            &t!("gtk_converters.up"),
+            &t!("hyprland.key_state.down"),
+            &t!("hyprland.key_state.repeat"),
+            &t!("hyprland.key_state.up"),
         ])
     }
 }

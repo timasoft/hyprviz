@@ -1,0 +1,9 @@
+_version: 2
+hyprland.range.end:
+  en: "End"
+  ru: "Конец"
+  zh-CN: "结束"
+hyprland.range.start:
+  en: "Start"
+  ru: "Начало"
+  zh-CN: "起始"

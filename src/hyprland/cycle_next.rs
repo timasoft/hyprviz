@@ -111,31 +111,31 @@ impl ToGtkBox for CycleNext {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let is_prev_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_prev_box.append(&Label::new(Some(&t!("gtk_converters.is_previous"))));
+        is_prev_box.append(&Label::new(Some(&t!("hyprland.cycle_next.is_previous"))));
         let is_prev_switch = create_switch();
         is_prev_box.append(&is_prev_switch);
         mother_box.append(&is_prev_box);
 
         let is_tiled_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_tiled_box.append(&Label::new(Some(&t!("gtk_converters.is_tiled"))));
+        is_tiled_box.append(&Label::new(Some(&t!("hyprland.cycle_next.is_tiled"))));
         let is_tiled_switch = create_switch();
         is_tiled_box.append(&is_tiled_switch);
         mother_box.append(&is_tiled_box);
 
         let is_floating_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_floating_box.append(&Label::new(Some(&t!("gtk_converters.is_floating"))));
+        is_floating_box.append(&Label::new(Some(&t!("hyprland.cycle_next.is_floating"))));
         let is_floating_switch = create_switch();
         is_floating_box.append(&is_floating_switch);
         mother_box.append(&is_floating_box);
 
         let is_visible_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_visible_box.append(&Label::new(Some(&t!("gtk_converters.is_visible"))));
+        is_visible_box.append(&Label::new(Some(&t!("hyprland.cycle_next.is_visible"))));
         let is_visible_switch = create_switch();
         is_visible_box.append(&is_visible_switch);
         mother_box.append(&is_visible_box);
 
         let is_hist_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        is_hist_box.append(&Label::new(Some(&t!("gtk_converters.is_hist"))));
+        is_hist_box.append(&Label::new(Some(&t!("hyprland.cycle_next.is_hist"))));
         let is_hist_switch = create_switch();
         is_hist_box.append(&is_hist_switch);
         mother_box.append(&is_hist_box);

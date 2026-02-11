@@ -36,8 +36,8 @@ impl Display for GestureFullscreen {
 impl EnumConfigForGtk for GestureFullscreen {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.maximize"),
+            &t!("hyprland.gesture_fullscreen.fullscreen"),
+            &t!("hyprland.gesture_fullscreen.maximize"),
         ])
     }
 }

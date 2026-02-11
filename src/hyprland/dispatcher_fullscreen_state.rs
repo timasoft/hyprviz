@@ -54,11 +54,11 @@ impl Display for DispatcherFullscreenState {
 impl EnumConfigForGtk for DispatcherFullscreenState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.current"),
-            &t!("gtk_converters.none"),
-            &t!("gtk_converters.maximize"),
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.maximize_and_fullscreen"),
+            &t!("hyprland.dispatcher_fullscreen_state.current"),
+            &t!("hyprland.dispatcher_fullscreen_state.none"),
+            &t!("hyprland.dispatcher_fullscreen_state.maximize"),
+            &t!("hyprland.dispatcher_fullscreen_state.fullscreen"),
+            &t!("hyprland.dispatcher_fullscreen_state.maximize_and_fullscreen"),
         ])
     }
 }

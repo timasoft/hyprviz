@@ -1,0 +1,13 @@
+_version: 2
+hyprland.change_group_active.back:
+  en: "Back"
+  ru: "Назад"
+  zh-CN: "上一个"
+hyprland.change_group_active.forward:
+  en: "Forward"
+  ru: "Вперёд"
+  zh-CN: "下一个"
+hyprland.change_group_active.index:
+  en: "Index"
+  ru: "Индекс"
+  zh-CN: "索引"

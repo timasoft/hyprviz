@@ -96,9 +96,9 @@ impl Display for IdOrNameOrWorkspaceSelector {
 impl EnumConfigForGtk for IdOrNameOrWorkspaceSelector {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.id"),
-            &t!("gtk_converters.name"),
-            &t!("gtk_converters.workspace_selector"),
+            &t!("hyprland.id_or_name_or_workspace_selector.id"),
+            &t!("hyprland.id_or_name_or_workspace_selector.name"),
+            &t!("hyprland.id_or_name_or_workspace_selector.workspace_selector"),
         ])
     }
 

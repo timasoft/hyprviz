@@ -1,0 +1,17 @@
+_version: 2
+hyprland.move_direction.direction:
+  en: "Direction"
+  ru: "Направление"
+  zh-CN: "方向"
+hyprland.move_direction.direction_silent:
+  en: "Direction silent"
+  ru: "Направление (тихо)"
+  zh-CN: "方向（静默）"
+hyprland.move_direction.monitor:
+  en: "Monitor"
+  ru: "Монитор"
+  zh-CN: "显示器"
+hyprland.move_direction.monitor_silent:
+  en: "Monitor silent"
+  ru: "Монитор (тихо)"
+  zh-CN: "显示器（静默）"

@@ -33,7 +33,7 @@ impl Display for SwapNext {
 
 impl EnumConfigForGtk for SwapNext {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("gtk_converters.next"), &t!("gtk_converters.prev")])
+        StringList::new(&[&t!("hyprland.swap_next.next"), &t!("hyprland.swap_next.prev")])
     }
 }
 

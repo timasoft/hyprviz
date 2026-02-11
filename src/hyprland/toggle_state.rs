@@ -38,9 +38,9 @@ impl Display for ToggleState {
 impl EnumConfigForGtk for ToggleState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.on"),
-            &t!("gtk_converters.off"),
-            &t!("gtk_converters.toggle"),
+            &t!("hyprland.toggle_state.on"),
+            &t!("hyprland.toggle_state.off"),
+            &t!("hyprland.toggle_state.toggle"),
         ])
     }
 }

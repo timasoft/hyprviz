@@ -1,0 +1,181 @@
+_version: 2
+hyprland.set_prop.active_border_color:
+  en: "Active border color"
+  ru: "Активный цвет границы"
+  zh-CN: "活动边框颜色"
+hyprland.set_prop.allows_input:
+  en: "Allows input"
+  ru: "Разрешать ввод"
+  zh-CN: "允许输入"
+hyprland.set_prop.alpha:
+  en: "Alpha"
+  ru: "Прозрачность"
+  zh-CN: "透明度"
+hyprland.set_prop.alpha_fullscreen:
+  en: "Alpha fullscreen"
+  ru: "Прозрачность в полноэкранном режиме"
+  zh-CN: "全屏透明度"
+hyprland.set_prop.alpha_fullscreen_override:
+  en: "Alpha fullscreen override"
+  ru: "Переопределение прозрачности в полноэкранном режиме"
+  zh-CN: "全屏透明度覆盖"
+hyprland.set_prop.alpha_inactive:
+  en: "Alpha inactive"
+  ru: "Прозрачность неактивных окон"
+  zh-CN: "非活动窗口透明度"
+hyprland.set_prop.alpha_inactive_override:
+  en: "Alpha inactive override"
+  ru: "Переопределение прозрачности неактивных окон"
+  zh-CN: "非活动窗口透明度覆盖"
+hyprland.set_prop.alpha_override:
+  en: "Alpha override"
+  ru: "Переопределение прозрачности"
+  zh-CN: "透明度覆盖"
+hyprland.set_prop.animation:
+  en: "Animation"
+  ru: "Анимация"
+  zh-CN: "动画"
+hyprland.set_prop.animation_style:
+  en: "Animation style"
+  ru: "Стиль анимации"
+  zh-CN: "动画样式"
+hyprland.set_prop.border_color:
+  en: "Border color"
+  ru: "Цвет границы"
+  zh-CN: "边框颜色"
+hyprland.set_prop.border_size:
+  en: "Border size"
+  ru: "Размер границы"
+  zh-CN: "边框宽度"
+hyprland.set_prop.decorate:
+  en: "Decorate"
+  ru: "Декорирование окна"
+  zh-CN: "窗口装饰"
+hyprland.set_prop.dim_around:
+  en: "Dim around"
+  ru: "Затемнение окружающих окон"
+  zh-CN: "周围窗口变暗"
+hyprland.set_prop.focus_on_activate:
+  en: "Focus on activate"
+  ru: "Фокусировка при активации"
+  zh-CN: "激活时聚焦"
+hyprland.set_prop.force_rgbx:
+  en: "Force rgbx"
+  ru: "Принудительный RGBX-формат"
+  zh-CN: "强制 RGBX 格式"
+hyprland.set_prop.idle_ingibit:
+  en: "Idle ingibit"
+  ru: "Блокировка перехода в простой"
+  zh-CN: "禁止空闲"
+hyprland.set_prop.immediate:
+  en: "Immediate"
+  ru: "Мгновенное выполнение"
+  zh-CN: "立即生效"
+hyprland.set_prop.inactive_border_color:
+  en: "Inactive border color"
+  ru: "Цвет границы неактивного окна"
+  zh-CN: "非活动边框颜色"
+hyprland.set_prop.keep_aspect_ratio:
+  en: "Keep aspect ratio"
+  ru: "Сохранение соотношения сторон"
+  zh-CN: "保持宽高比"
+hyprland.set_prop.max_size:
+  en: "Max size"
+  ru: "Максимальный размер"
+  zh-CN: "最大大小"
+hyprland.set_prop.min_size:
+  en: "Min size"
+  ru: "Минимальный размер"
+  zh-CN: "最小大小"
+hyprland.set_prop.nearest_neighbor:
+  en: "Nearest neighbor"
+  ru: "Масштабирование «ближайший сосед»"
+  zh-CN: "最近邻缩放"
+hyprland.set_prop.no_anim:
+  en: "No anim"
+  ru: "Без анимации"
+  zh-CN: "无动画"
+hyprland.set_prop.no_blur:
+  en: "No blur"
+  ru: "Без размытия"
+  zh-CN: "无模糊"
+hyprland.set_prop.no_border:
+  en: "No border"
+  ru: "Без границы"
+  zh-CN: "无边框"
+hyprland.set_prop.no_dim:
+  en: "No dim"
+  ru: "Без затемнения"
+  zh-CN: "无变暗"
+hyprland.set_prop.no_focus:
+  en: "No focus"
+  ru: "Без фокусировки"
+  zh-CN: "无焦点"
+hyprland.set_prop.no_follow_mouse:
+  en: "No follow mouse"
+  ru: "Без следования за мышью"
+  zh-CN: "不跟随鼠标"
+hyprland.set_prop.no_max_size:
+  en: "No max size"
+  ru: "Без ограничения максимального размера"
+  zh-CN: "无最大尺寸限制"
+hyprland.set_prop.no_rounding:
+  en: "No rounding"
+  ru: "Без скругления углов"
+  zh-CN: "无圆角"
+hyprland.set_prop.no_screenshare:
+  en: "No screenshare"
+  ru: "Без демонстрации экрана"
+  zh-CN: "禁用屏幕共享"
+hyprland.set_prop.no_shadow:
+  en: "No shadow"
+  ru: "Без тени"
+  zh-CN: "无阴影"
+hyprland.set_prop.no_shortcuts_inhibit:
+  en: "No shortcuts inhibit"
+  ru: "Разрешение глобальных сочетаний клавиш"
+  zh-CN: "允许全局快捷键"
+hyprland.set_prop.no_vrr:
+  en: "No vrr"
+  ru: "Без VRR"
+  zh-CN: "禁用可变刷新率"
+hyprland.set_prop.opacity:
+  en: "Opacity"
+  ru: "Непрозрачность"
+  zh-CN: "不透明度"
+hyprland.set_prop.opaque:
+  en: "Opaque"
+  ru: "Полная непрозрачность"
+  zh-CN: "完全不透明"
+hyprland.set_prop.render_unfocused:
+  en: "Render unfocused"
+  ru: "Отрисовка неактивных окон"
+  zh-CN: "渲染非活动窗口"
+hyprland.set_prop.rounding:
+  en: "Rounding"
+  ru: "Скругление углов"
+  zh-CN: "圆角"
+hyprland.set_prop.rounding_power:
+  en: "Rounding power"
+  ru: "Сила скругления"
+  zh-CN: "圆角强度"
+hyprland.set_prop.scroll_mouse:
+  en: "Scroll mouse"
+  ru: "Прокрутка колесом мыши"
+  zh-CN: "鼠标滚轮滚动"
+hyprland.set_prop.scroll_touchpad:
+  en: "Scroll touchpad"
+  ru: "Прокрутка тачпадом"
+  zh-CN: "触控板滚动"
+hyprland.set_prop.sync_fullscreen:
+  en: "Sync fullscreen"
+  ru: "Синхронизация полноэкранного режима"
+  zh-CN: "全屏同步"
+hyprland.set_prop.tag:
+  en: "Tag"
+  ru: "Тег окна"
+  zh-CN: "窗口标签"
+hyprland.set_prop.xray:
+  en: "Xray"
+  ru: "Просвечивание"
+  zh-CN: "透视"

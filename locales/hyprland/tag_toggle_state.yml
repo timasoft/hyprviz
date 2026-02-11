@@ -1,0 +1,13 @@
+_version: 2
+hyprland.tag_toggle_state.set:
+  en: "Set"
+  ru: "Установить"
+  zh-CN: "设置"
+hyprland.tag_toggle_state.unset:
+  en: "Unset"
+  ru: "Снять"
+  zh-CN: "移除"
+hyprland.tag_toggle_state.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"

@@ -89,9 +89,9 @@ impl Display for WorkspaceSelectorNamed {
 impl EnumConfigForGtk for WorkspaceSelectorNamed {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.is_named"),
-            &t!("gtk_converters.starts_with"),
-            &t!("gtk_converters.ends_with"),
+            &t!("hyprland.workspace_selector_named.is_named"),
+            &t!("hyprland.workspace_selector_named.starts_with"),
+            &t!("hyprland.workspace_selector_named.ends_with"),
         ])
     }
 

@@ -1,0 +1,17 @@
+_version: 2
+hyprland.workspace_type.named:
+  en: "Named"
+  ru: "Именованное"
+  zh-CN: "命名"
+hyprland.workspace_type.numbered:
+  en: "Numbered"
+  ru: "Нумерованное"
+  zh-CN: "编号"
+hyprland.workspace_type.selector:
+  en: "Selector"
+  ru: "Селектор"
+  zh-CN: "选择器"
+hyprland.workspace_type.special:
+  en: "Special"
+  ru: "Специальное"
+  zh-CN: "特殊"

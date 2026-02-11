@@ -1,0 +1,41 @@
+_version: 2
+hyprland.window_target.active_window:
+  en: "Active window"
+  ru: "Активное окно"
+  zh-CN: "活动窗口"
+hyprland.window_target.address:
+  en: "Address"
+  ru: "Адрес"
+  zh-CN: "地址"
+hyprland.window_target.class:
+  en: "Class"
+  ru: "Класс"
+  zh-CN: "类"
+hyprland.window_target.floating:
+  en: "Floating"
+  ru: "Плавающее"
+  zh-CN: "浮动"
+hyprland.window_target.initial_class:
+  en: "Initial class"
+  ru: "Начальный класс"
+  zh-CN: "初始类"
+hyprland.window_target.initial_title:
+  en: "Initial title"
+  ru: "Начальный заголовок"
+  zh-CN: "初始标题"
+hyprland.window_target.pid:
+  en: "PID"
+  ru: "PID"
+  zh-CN: "PID"
+hyprland.window_target.tag:
+  en: "Tag"
+  ru: "Метка"
+  zh-CN: "标签"
+hyprland.window_target.tiled:
+  en: "Tiled"
+  ru: "Плиточные"
+  zh-CN: "平铺"
+hyprland.window_target.title:
+  en: "Title"
+  ru: "Заголовок"
+  zh-CN: "标题"

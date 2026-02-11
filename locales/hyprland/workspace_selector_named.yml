@@ -1,0 +1,13 @@
+_version: 2
+hyprland.workspace_selector_named.ends_with:
+  en: "Ends with"
+  ru: "Заканчивается на"
+  zh-CN: "以...结尾"
+hyprland.workspace_selector_named.is_named:
+  en: "Is named"
+  ru: "Именованный"
+  zh-CN: "已命名"
+hyprland.workspace_selector_named.starts_with:
+  en: "Starts with"
+  ru: "Начинается с"
+  zh-CN: "以...开头"

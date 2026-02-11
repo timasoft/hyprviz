@@ -1,0 +1,97 @@
+_version: 2
+hyprland.window_rule_parameter.class:
+  en: "Class"
+  ru: "Класс"
+  zh-CN: "类别"
+hyprland.window_rule_parameter.client_state:
+  en: "Client state"
+  ru: "Состояние клиента"
+  zh-CN: "客户端状态"
+hyprland.window_rule_parameter.content:
+  en: "Content"
+  ru: "Тип содержимого"
+  zh-CN: "内容类型"
+hyprland.window_rule_parameter.floating:
+  en: "Floating"
+  ru: "Плавающий"
+  zh-CN: "浮动"
+hyprland.window_rule_parameter.focus:
+  en: "Focus"
+  ru: "Фокус"
+  zh-CN: "聚焦"
+hyprland.window_rule_parameter.fullscreen:
+  en: "Full screen"
+  ru: "Полноэкранный"
+  zh-CN: "全屏"
+hyprland.window_rule_parameter.fullscreen_state:
+  en: "Full screen state"
+  ru: "Состояние полноэкранного режима"
+  zh-CN: "全屏状态"
+hyprland.window_rule_parameter.group:
+  en: "Group"
+  ru: "Группа"
+  zh-CN: "分组"
+hyprland.window_rule_parameter.initial_class:
+  en: "Initial class"
+  ru: "Начальный класс"
+  zh-CN: "初始类别"
+hyprland.window_rule_parameter.initial_title:
+  en: "Initial title"
+  ru: "Начальный заголовок"
+  zh-CN: "初始标题"
+hyprland.window_rule_parameter.internal_state:
+  en: "Internal state"
+  ru: "Внутреннее состояние"
+  zh-CN: "内部状态"
+hyprland.window_rule_parameter.not_floating:
+  en: "Not floating"
+  ru: "Не плавающий"
+  zh-CN: "非浮动"
+hyprland.window_rule_parameter.not_focus:
+  en: "Not focus"
+  ru: "Без фокуса"
+  zh-CN: "非聚焦"
+hyprland.window_rule_parameter.not_fullscreen:
+  en: "Not full screen"
+  ru: "Не полноэкранный"
+  zh-CN: "非全屏"
+hyprland.window_rule_parameter.not_group:
+  en: "Not group"
+  ru: "Вне группы"
+  zh-CN: "非分组"
+hyprland.window_rule_parameter.not_pinned:
+  en: "Not pinned"
+  ru: "Не закреплён"
+  zh-CN: "未固定"
+hyprland.window_rule_parameter.not_xwayland:
+  en: "Not xwayland"
+  ru: "Без XWayland"
+  zh-CN: "非 XWayland"
+hyprland.window_rule_parameter.on_workspace:
+  en: "On workspace"
+  ru: "На рабочем пространстве"
+  zh-CN: "位于工作区"
+hyprland.window_rule_parameter.pinned:
+  en: "Pinned"
+  ru: "Закреплён"
+  zh-CN: "已固定"
+hyprland.window_rule_parameter.tag:
+  en: "Tag"
+  ru: "Тег"
+  zh-CN: "标签"
+hyprland.window_rule_parameter.title:
+  en: "Title"
+  ru: "Заголовок"
+  zh-CN: "标题"
+hyprland.window_rule_parameter.workspace:
+  en: "Workspace"
+  ru: "Рабочее пространство"
+  zh-CN: "工作区"
+hyprland.window_rule_parameter.xdg_tag:
+  en: "Xdg tag"
+  ru: "Тег XDG"
+  zh-CN: "XDG 标签"
+hyprland.window_rule_parameter.xwayland:
+  en: "Xwayland"
+  ru: "XWayland"
+  zh-CN: "XWayland"

@@ -91,8 +91,8 @@ impl Display for SwapDirection {
 impl EnumConfigForGtk for SwapDirection {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.direction"),
-            &t!("gtk_converters.window"),
+            &t!("hyprland.swap_direction.direction"),
+            &t!("hyprland.swap_direction.window"),
         ])
     }
 

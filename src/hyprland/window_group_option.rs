@@ -64,16 +64,16 @@ impl Display for WindowGroupOption {
 impl EnumConfigForGtk for WindowGroupOption {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.set"),
-            &t!("gtk_converters.set_always"),
-            &t!("gtk_converters.new"),
-            &t!("gtk_converters.lock"),
-            &t!("gtk_converters.lock_always"),
-            &t!("gtk_converters.barred"),
-            &t!("gtk_converters.deny"),
-            &t!("gtk_converters.invade"),
-            &t!("gtk_converters.override"),
-            &t!("gtk_converters.unset"),
+            &t!("hyprland.window_group_option.set"),
+            &t!("hyprland.window_group_option.set_always"),
+            &t!("hyprland.window_group_option.new"),
+            &t!("hyprland.window_group_option.lock"),
+            &t!("hyprland.window_group_option.lock_always"),
+            &t!("hyprland.window_group_option.barred"),
+            &t!("hyprland.window_group_option.deny"),
+            &t!("hyprland.window_group_option.invade"),
+            &t!("hyprland.window_group_option.override"),
+            &t!("hyprland.window_group_option.unset"),
         ])
     }
 }

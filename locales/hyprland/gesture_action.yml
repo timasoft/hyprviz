@@ -1,0 +1,33 @@
+_version: 2
+hyprland.gesture_action.close:
+  en: "Close"
+  ru: "Закрыть"
+  zh-CN: "关闭"
+hyprland.gesture_action.dispatcher:
+  en: "Dispatcher"
+  ru: "Диспетчер"
+  zh-CN: "调度器"
+hyprland.gesture_action.float:
+  en: "Float"
+  ru: "Плавающий режим"
+  zh-CN: "浮动窗口"
+hyprland.gesture_action.fullscreen:
+  en: "Fullscreen"
+  ru: "Полноэкранный режим"
+  zh-CN: "全屏"
+hyprland.gesture_action.move:
+  en: "Move"
+  ru: "Переместить"
+  zh-CN: "移动"
+hyprland.gesture_action.resize:
+  en: "Resize"
+  ru: "Изменить размер"
+  zh-CN: "调整大小"
+hyprland.gesture_action.special:
+  en: "Special"
+  ru: "Специальное пространство"
+  zh-CN: "特殊工作区"
+hyprland.gesture_action.workspace:
+  en: "Workspace"
+  ru: "Рабочее пространство"
+  zh-CN: "工作区"

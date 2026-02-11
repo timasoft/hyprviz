@@ -1,0 +1,17 @@
+_version: 2
+hyprland.direction.down:
+  en: "Down"
+  ru: "Вниз"
+  zh-CN: "下"
+hyprland.direction.left:
+  en: "Left"
+  ru: "Влево"
+  zh-CN: "左"
+hyprland.direction.right:
+  en: "Right"
+  ru: "Вправо"
+  zh-CN: "右"
+hyprland.direction.up:
+  en: "Up"
+  ru: "Вверх"
+  zh-CN: "上"

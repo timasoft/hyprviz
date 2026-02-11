@@ -42,10 +42,10 @@ impl Display for IdleIngibitMode {
 impl EnumConfigForGtk for IdleIngibitMode {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.none"),
-            &t!("gtk_converters.always"),
-            &t!("gtk_converters.focus"),
-            &t!("gtk_converters.fullscreen"),
+            &t!("hyprland.idle_ingibit_mode.none"),
+            &t!("hyprland.idle_ingibit_mode.always"),
+            &t!("hyprland.idle_ingibit_mode.focus"),
+            &t!("hyprland.idle_ingibit_mode.fullscreen"),
         ])
     }
 }

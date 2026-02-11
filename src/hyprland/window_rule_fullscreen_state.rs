@@ -48,11 +48,11 @@ impl Display for WindowRuleFullscreenState {
 impl EnumConfigForGtk for WindowRuleFullscreenState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.any"),
-            &t!("gtk_converters.none"),
-            &t!("gtk_converters.maximize"),
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.maximize_and_fullscreen"),
+            &t!("hyprland.window_rule_fullscreen_state.any"),
+            &t!("hyprland.window_rule_fullscreen_state.none"),
+            &t!("hyprland.window_rule_fullscreen_state.maximize"),
+            &t!("hyprland.window_rule_fullscreen_state.fullscreen"),
+            &t!("hyprland.window_rule_fullscreen_state.maximize_and_fullscreen"),
         ])
     }
 }

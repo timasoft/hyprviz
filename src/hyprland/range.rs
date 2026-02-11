@@ -40,13 +40,13 @@ impl ToGtkBox for Range {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let start_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        start_box_box.append(&Label::new(Some(&t!("gtk_converters.start"))));
+        start_box_box.append(&Label::new(Some(&t!("hyprland.range.start"))));
         let start_spin_button = create_spin_button(1.0, i32::MAX as f64, 1.0);
         start_box_box.append(&start_spin_button);
         mother_box.append(&start_box_box);
 
         let end_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        end_box_box.append(&Label::new(Some(&t!("gtk_converters.end"))));
+        end_box_box.append(&Label::new(Some(&t!("hyprland.range.end"))));
         let end_spin_button = create_spin_button(1.0, i32::MAX as f64, 1.0);
         end_box_box.append(&end_spin_button);
         mother_box.append(&end_box_box);

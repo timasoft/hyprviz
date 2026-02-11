@@ -86,9 +86,9 @@ impl Display for ChangeGroupActive {
 impl EnumConfigForGtk for ChangeGroupActive {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.back"),
-            &t!("gtk_converters.forward"),
-            &t!("gtk_converters.index"),
+            &t!("hyprland.change_group_active.back"),
+            &t!("hyprland.change_group_active.forward"),
+            &t!("hyprland.change_group_active.index"),
         ])
     }
 

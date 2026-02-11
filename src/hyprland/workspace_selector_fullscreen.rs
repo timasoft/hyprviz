@@ -54,10 +54,10 @@ impl Display for WorkspaceSelectorFullscreen {
 impl EnumConfigForGtk for WorkspaceSelectorFullscreen {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.no_fullscreen"),
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.maximized"),
-            &t!("gtk_converters.fullscreen_without_window_fullscreen_state_sent_to_the_window"),
+            &t!("hyprland.workspace_selector_fullscreen.no_fullscreen"),
+            &t!("hyprland.workspace_selector_fullscreen.fullscreen"),
+            &t!("hyprland.workspace_selector_fullscreen.maximized"),
+            &t!("hyprland.workspace_selector_fullscreen.fullscreen_without_window_fullscreen_state_sent_to_the_window"),
         ])
     }
 }

@@ -1,0 +1,9 @@
+_version: 2
+hyprland.swap_direction.direction:
+  en: "Direction"
+  ru: "Направление"
+  zh-CN: "方向"
+hyprland.swap_direction.window:
+  en: "Window"
+  ru: "Окно"
+  zh-CN: "窗口"

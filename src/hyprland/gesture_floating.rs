@@ -39,9 +39,9 @@ impl Display for GestureFloating {
 impl EnumConfigForGtk for GestureFloating {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.toggle"),
-            &t!("gtk_converters.float"),
-            &t!("gtk_converters.tile"),
+            &t!("hyprland.gesture_floating.toggle"),
+            &t!("hyprland.gesture_floating.float"),
+            &t!("hyprland.gesture_floating.tile"),
         ])
     }
 }

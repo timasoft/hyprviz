@@ -119,20 +119,20 @@ impl ToGtkBox for Gesture {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let finger_count_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        finger_count_box.append(&Label::new(Some(&t!("gtk_converters.finger_count"))));
+        finger_count_box.append(&Label::new(Some(&t!("hyprland.gesture.finger_count"))));
         let finger_count_spin = create_spin_button(1.0, i32::MAX as f64, 1.0);
         finger_count_box.append(&finger_count_spin);
         mother_box.append(&finger_count_box);
 
         let direction_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        direction_box.append(&Label::new(Some(&t!("gtk_converters.direction"))));
+        direction_box.append(&Label::new(Some(&t!("hyprland.gesture.direction"))));
         let direction_entry = create_entry();
         let direction_ui = GestureDirection::to_gtk_box(&direction_entry);
         direction_box.append(&direction_ui);
         mother_box.append(&direction_box);
 
         let action_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        action_box.append(&Label::new(Some(&t!("gtk_converters.action"))));
+        action_box.append(&Label::new(Some(&t!("hyprland.gesture.action"))));
         let action_entry = create_entry();
         let action_ui = GestureAction::to_gtk_box(&action_entry);
         action_box.append(&action_ui);
@@ -140,7 +140,7 @@ impl ToGtkBox for Gesture {
 
         let anim_speed_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let anim_speed_switch_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        anim_speed_switch_box.append(&Label::new(Some(&t!("gtk_converters.animation_speed"))));
+        anim_speed_switch_box.append(&Label::new(Some(&t!("hyprland.gesture.animation_speed"))));
         let anim_speed_switch = create_switch();
         anim_speed_switch_box.append(&anim_speed_switch);
         anim_speed_mother_box.append(&anim_speed_switch_box);
@@ -155,7 +155,7 @@ impl ToGtkBox for Gesture {
 
         let mods_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let mods_switch_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        mods_switch_box.append(&Label::new(Some(&t!("gtk_converters.modifiers"))));
+        mods_switch_box.append(&Label::new(Some(&t!("hyprland.gesture.modifiers"))));
         let mods_switch = create_switch();
         mods_switch_box.append(&mods_switch);
         mods_mother_box.append(&mods_switch_box);

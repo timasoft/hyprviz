@@ -1,0 +1,53 @@
+_version: 2
+hyprland.bind_flags_enum.bypass:
+  en: "Bypass"
+  ru: "Обход"
+  zh-CN: "绕过"
+hyprland.bind_flags_enum.click:
+  en: "Click"
+  ru: "Щёлчок"
+  zh-CN: "点击"
+hyprland.bind_flags_enum.drag:
+  en: "Drag"
+  ru: "Перетаскивание"
+  zh-CN: "拖拽"
+hyprland.bind_flags_enum.has_description:
+  en: "Has description"
+  ru: "С описанием"
+  zh-CN: "带描述"
+hyprland.bind_flags_enum.ignore_mods:
+  en: "Ignore mods"
+  ru: "Игнорировать модификаторы"
+  zh-CN: "忽略修饰键"
+hyprland.bind_flags_enum.locked:
+  en: "Locked"
+  ru: "Заблокировано"
+  zh-CN: "锁定"
+hyprland.bind_flags_enum.long_press:
+  en: "Long press"
+  ru: "Длительное нажатие"
+  zh-CN: "长按"
+hyprland.bind_flags_enum.mouse:
+  en: "Mouse"
+  ru: "Мышь"
+  zh-CN: "鼠标"
+hyprland.bind_flags_enum.non_consuming:
+  en: "Non consuming"
+  ru: "Не потреблять"
+  zh-CN: "非消耗"
+hyprland.bind_flags_enum.release:
+  en: "Release"
+  ru: "Отпускание"
+  zh-CN: "释放"
+hyprland.bind_flags_enum.repeat:
+  en: "Repeat"
+  ru: "Повтор"
+  zh-CN: "重复"
+hyprland.bind_flags_enum.separate:
+  en: "Separate"
+  ru: "Раздельно"
+  zh-CN: "分离"
+hyprland.bind_flags_enum.transparent:
+  en: "Transparent"
+  ru: "Сквозной"
+  zh-CN: "透明"

@@ -46,10 +46,10 @@ impl Display for ContentType {
 impl EnumConfigForGtk for ContentType {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.none"),
-            &t!("gtk_converters.photo"),
-            &t!("gtk_converters.video"),
-            &t!("gtk_converters.game"),
+            &t!("hyprland.content_type.none"),
+            &t!("hyprland.content_type.photo"),
+            &t!("hyprland.content_type.video"),
+            &t!("hyprland.content_type.game"),
         ])
     }
 }

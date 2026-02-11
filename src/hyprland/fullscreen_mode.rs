@@ -54,8 +54,8 @@ impl Display for FullscreenMode {
 impl EnumConfigForGtk for FullscreenMode {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.maximize"),
+            &t!("hyprland.fullscreen_mode.fullscreen"),
+            &t!("hyprland.fullscreen_mode.maximize"),
         ])
     }
 }

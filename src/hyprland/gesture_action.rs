@@ -134,14 +134,14 @@ impl Display for GestureAction {
 impl EnumConfigForGtk for GestureAction {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.dispatcher"),
-            &t!("gtk_converters.workspace"),
-            &t!("gtk_converters.move"),
-            &t!("gtk_converters.resize"),
-            &t!("gtk_converters.special"),
-            &t!("gtk_converters.close"),
-            &t!("gtk_converters.fullscreen"),
-            &t!("gtk_converters.float"),
+            &t!("hyprland.gesture_action.dispatcher"),
+            &t!("hyprland.gesture_action.workspace"),
+            &t!("hyprland.gesture_action.move"),
+            &t!("hyprland.gesture_action.resize"),
+            &t!("hyprland.gesture_action.special"),
+            &t!("hyprland.gesture_action.close"),
+            &t!("hyprland.gesture_action.fullscreen"),
+            &t!("hyprland.gesture_action.float"),
         ])
     }
 

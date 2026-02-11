@@ -1,0 +1,9 @@
+_version: 2
+hyprland.id_or_name.id:
+  en: "Id"
+  ru: "Идентификатор"
+  zh-CN: "标识符"
+hyprland.id_or_name.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"

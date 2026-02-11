@@ -92,7 +92,7 @@ impl Display for FloatValue {
 
 impl EnumConfigForGtk for FloatValue {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("gtk_converters.relative"), &t!("gtk_converters.exact")])
+        StringList::new(&[&t!("hyprland.float_value.relative"), &t!("hyprland.float_value.exact")])
     }
 
     const SEPARATOR: Option<char> = Some(' ');

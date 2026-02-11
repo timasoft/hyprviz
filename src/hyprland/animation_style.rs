@@ -223,21 +223,21 @@ impl Display for AnimationStyle {
 impl EnumConfigForGtk for AnimationStyle {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.none"),
-            &t!("gtk_converters.slide"),
-            &t!("gtk_converters.slide_with_side"),
-            &t!("gtk_converters.popin"),
-            &t!("gtk_converters.popin_with_percent"),
-            &t!("gtk_converters.gnomed"),
-            &t!("gtk_converters.slide_vert"),
-            &t!("gtk_converters.slide_vert_with_percent"),
-            &t!("gtk_converters.fade"),
-            &t!("gtk_converters.slide_fade"),
-            &t!("gtk_converters.slide_fade_with_percent"),
-            &t!("gtk_converters.slide_fade_vert"),
-            &t!("gtk_converters.slide_fade_vert_with_percent"),
-            &t!("gtk_converters.once"),
-            &t!("gtk_converters.loop"),
+            &t!("hyprland.animation_style.none"),
+            &t!("hyprland.animation_style.slide"),
+            &t!("hyprland.animation_style.slide_with_side"),
+            &t!("hyprland.animation_style.popin"),
+            &t!("hyprland.animation_style.popin_with_percent"),
+            &t!("hyprland.animation_style.gnomed"),
+            &t!("hyprland.animation_style.slide_vert"),
+            &t!("hyprland.animation_style.slide_vert_with_percent"),
+            &t!("hyprland.animation_style.fade"),
+            &t!("hyprland.animation_style.slide_fade"),
+            &t!("hyprland.animation_style.slide_fade_with_percent"),
+            &t!("hyprland.animation_style.slide_fade_vert"),
+            &t!("hyprland.animation_style.slide_fade_vert_with_percent"),
+            &t!("hyprland.animation_style.once"),
+            &t!("hyprland.animation_style.loop"),
         ])
     }
 

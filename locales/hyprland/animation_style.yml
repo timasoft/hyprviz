@@ -1,0 +1,61 @@
+_version: 2
+hyprland.animation_style.fade:
+  en: "Fade"
+  ru: "Затухание"
+  zh-CN: "淡出"
+hyprland.animation_style.gnomed:
+  en: "Gnomed"
+  ru: "Стиль GNOME"
+  zh-CN: "GNOME 风格"
+hyprland.animation_style.loop:
+  en: "Loop"
+  ru: "Зацикливание"
+  zh-CN: "循环"
+hyprland.animation_style.none:
+  en: "None"
+  ru: "Отсутствие"
+  zh-CN: "无"
+hyprland.animation_style.once:
+  en: "Once"
+  ru: "Однократно"
+  zh-CN: "一次"
+hyprland.animation_style.popin:
+  en: "Popin"
+  ru: "Всплывание"
+  zh-CN: "弹入"
+hyprland.animation_style.popin_with_percent:
+  en: "Popin with percent"
+  ru: "Всплывание с процентом"
+  zh-CN: "带百分比的弹入"
+hyprland.animation_style.slide:
+  en: "Slide"
+  ru: "Скольжение"
+  zh-CN: "滑动"
+hyprland.animation_style.slide_fade:
+  en: "Slide fade"
+  ru: "Скольжение с затуханием"
+  zh-CN: "滑动淡出"
+hyprland.animation_style.slide_fade_vert:
+  en: "Slide fade vert"
+  ru: "Вертикальное скольжение с затуханием"
+  zh-CN: "垂直滑动淡出"
+hyprland.animation_style.slide_fade_vert_with_percent:
+  en: "Slide fade vert with percent"
+  ru: "Вертикальное скольжение с затуханием и процентом"
+  zh-CN: "带百分比的垂直滑动淡出"
+hyprland.animation_style.slide_fade_with_percent:
+  en: "Slide fade with percent"
+  ru: "Скольжение с затуханием и процентом"
+  zh-CN: "带百分比的滑动淡出"
+hyprland.animation_style.slide_vert:
+  en: "Slide vert"
+  ru: "Вертикальное скольжение"
+  zh-CN: "垂直滑动"
+hyprland.animation_style.slide_vert_with_percent:
+  en: "Slide vert with percent"
+  ru: "Вертикальное скольжение с процентом"
+  zh-CN: "带百分比的垂直滑动"
+hyprland.animation_style.slide_with_side:
+  en: "Slide with side"
+  ru: "Скольжение с указанием стороны"
+  zh-CN: "带方向的滑动"

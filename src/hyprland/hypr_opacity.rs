@@ -495,9 +495,9 @@ impl Display for HyprOpacity {
 impl EnumConfigForGtk for HyprOpacity {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.overall"),
-            &t!("gtk_converters.active_and_inactive"),
-            &t!("gtk_converters.active_and_inactive_and_fullscreen"),
+            &t!("hyprland.hypr_opacity.overall"),
+            &t!("hyprland.hypr_opacity.active_and_inactive"),
+            &t!("hyprland.hypr_opacity.active_and_inactive_and_fullscreen"),
         ])
     }
 
@@ -513,7 +513,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity_spin_button);
 
                 let override_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
+                override_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
                 let override_switch = create_switch();
                 override_box.append(&override_switch);
                 mother_box.append(&override_box);
@@ -595,7 +595,7 @@ impl EnumConfigForGtk for HyprOpacity {
                     mother_box.append(&opacity1_spin_button);
 
                     let override1_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    override1_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
+                    override1_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
                     let override1_switch = create_switch();
                     override1_box.append(&override1_switch);
                     mother_box.append(&override1_box);
@@ -605,7 +605,7 @@ impl EnumConfigForGtk for HyprOpacity {
                     mother_box.append(&opacity2_spin_button);
 
                     let override2_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    override2_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
+                    override2_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
                     let override2_switch = create_switch();
                     override2_box.append(&override2_switch);
                     mother_box.append(&override2_box);
@@ -771,7 +771,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity1_spin_button);
 
                 let override1_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override1_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
+                override1_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
                 let override1_switch = create_switch();
                 override1_box.append(&override1_switch);
                 mother_box.append(&override1_box);
@@ -780,7 +780,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity2_spin_button);
 
                 let override2_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override2_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
+                override2_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
                 let override2_switch = create_switch();
                 override2_box.append(&override2_switch);
                 mother_box.append(&override2_box);
@@ -789,7 +789,7 @@ impl EnumConfigForGtk for HyprOpacity {
                 mother_box.append(&opacity3_spin_button);
 
                 let override3_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override3_box.append(&Label::new(Some(&t!("gtk_converters.override"))));
+                override3_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
                 let override3_switch = create_switch();
                 override3_box.append(&override3_switch);
                 mother_box.append(&override3_box);

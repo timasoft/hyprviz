@@ -1,0 +1,41 @@
+_version: 2
+hyprland.window_group_option.barred:
+  en: "Barred"
+  ru: "Запрещено"
+  zh-CN: "禁止"
+hyprland.window_group_option.deny:
+  en: "Deny"
+  ru: "Отказано"
+  zh-CN: "拒绝"
+hyprland.window_group_option.invade:
+  en: "Invade"
+  ru: "Вторгаться"
+  zh-CN: "侵入"
+hyprland.window_group_option.lock:
+  en: "Lock"
+  ru: "Заблокировать"
+  zh-CN: "锁定"
+hyprland.window_group_option.lock_always:
+  en: "Lock always"
+  ru: "Всегда заблокировано"
+  zh-CN: "始终锁定"
+hyprland.window_group_option.new:
+  en: "New"
+  ru: "Новая"
+  zh-CN: "新建"
+hyprland.window_group_option.override:
+  en: "Override"
+  ru: "Переопределить"
+  zh-CN: "覆盖"
+hyprland.window_group_option.set:
+  en: "Set"
+  ru: "Установить"
+  zh-CN: "设置"
+hyprland.window_group_option.set_always:
+  en: "Set always"
+  ru: "Всегда устанавливать"
+  zh-CN: "始终设置"
+hyprland.window_group_option.unset:
+  en: "Unset"
+  ru: "Снять"
+  zh-CN: "取消设置"

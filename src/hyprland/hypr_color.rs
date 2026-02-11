@@ -164,15 +164,15 @@ impl EnumConfigForGtk for HyprColor {
     fn field_labels() -> Option<Vec<Vec<FieldLabel>>> {
         Some(vec![
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.red"))),
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.green"))),
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.blue"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.red"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.green"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.blue"))),
             ],
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.red"))),
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.green"))),
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.blue"))),
-                FieldLabel::Named(cow_to_static_str(t!("gtk_converters.alpha"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.red"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.green"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.blue"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.hypr_color.alpha"))),
             ],
         ])
     }

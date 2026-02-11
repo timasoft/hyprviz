@@ -1,0 +1,5 @@
+_version: 2
+hyprland.unbind_right.unbind_parse_error:
+  en: "Unbind parse error"
+  ru: "Ошибка разбора отвязки"
+  zh-CN: "解绑解析错误"

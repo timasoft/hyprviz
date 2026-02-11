@@ -1,0 +1,13 @@
+_version: 2
+hyprland.group_lock_action.lock:
+  en: "Lock"
+  ru: "Заблокировать"
+  zh-CN: "锁定"
+hyprland.group_lock_action.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"
+hyprland.group_lock_action.unlock:
+  en: "Unlock"
+  ru: "Разблокировать"
+  zh-CN: "解锁"

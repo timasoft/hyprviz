@@ -32,13 +32,13 @@ pub enum WorkspaceSelector {
 impl WorkspaceSelector {
     pub fn get_fancy_list() -> [String; 7] {
         [
-            t!("utils.none").to_string(),
-            t!("utils.range").to_string(),
-            t!("utils.special").to_string(),
-            t!("utils.named").to_string(),
-            t!("utils.monitor").to_string(),
-            t!("utils.window_count").to_string(),
-            t!("utils.fullscreen").to_string(),
+            t!("hyprland.workspace_selector.none").to_string(),
+            t!("hyprland.workspace_selector.range").to_string(),
+            t!("hyprland.workspace_selector.special").to_string(),
+            t!("hyprland.workspace_selector.named").to_string(),
+            t!("hyprland.workspace_selector.monitor").to_string(),
+            t!("hyprland.workspace_selector.window_count").to_string(),
+            t!("hyprland.workspace_selector.fullscreen").to_string(),
         ]
     }
 }

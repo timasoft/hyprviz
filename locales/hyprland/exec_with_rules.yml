@@ -1,0 +1,9 @@
+_version: 2
+hyprland.exec_with_rules.command:
+  en: "Command"
+  ru: "Команда"
+  zh-CN: "命令"
+hyprland.exec_with_rules.window_rules:
+  en: "Window rules"
+  ru: "Правила окна"
+  zh-CN: "窗口规则"

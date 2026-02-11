@@ -69,31 +69,31 @@ impl ToGtkBox for WorkspaceSelectorWindowCountFlags {
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
         let tiled_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        tiled_box.append(&Label::new(Some(&t!("gtk_converters.is_tiled"))));
+        tiled_box.append(&Label::new(Some(&t!("hyprland.workspace_selector_window_count_flags.is_tiled"))));
         let tiled_switch = create_switch();
         tiled_box.append(&tiled_switch);
         mother_box.append(&tiled_box);
 
         let floating_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        floating_box.append(&Label::new(Some(&t!("gtk_converters.is_floating"))));
+        floating_box.append(&Label::new(Some(&t!("hyprland.workspace_selector_window_count_flags.is_floating"))));
         let floating_switch = create_switch();
         floating_box.append(&floating_switch);
         mother_box.append(&floating_box);
 
         let groups_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        groups_box.append(&Label::new(Some(&t!("gtk_converters.is_in_group"))));
+        groups_box.append(&Label::new(Some(&t!("hyprland.workspace_selector_window_count_flags.is_in_group"))));
         let groups_switch = create_switch();
         groups_box.append(&groups_switch);
         mother_box.append(&groups_box);
 
         let visible_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        visible_box.append(&Label::new(Some(&t!("gtk_converters.is_visible"))));
+        visible_box.append(&Label::new(Some(&t!("hyprland.workspace_selector_window_count_flags.is_visible"))));
         let visible_switch = create_switch();
         visible_box.append(&visible_switch);
         mother_box.append(&visible_box);
 
         let pinned_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        pinned_box.append(&Label::new(Some(&t!("gtk_converters.is_pinned"))));
+        pinned_box.append(&Label::new(Some(&t!("hyprland.workspace_selector_window_count_flags.is_pinned"))));
         let pinned_switch = create_switch();
         pinned_box.append(&pinned_switch);
         mother_box.append(&pinned_box);

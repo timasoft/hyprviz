@@ -49,10 +49,10 @@ impl Display for SetPropToggleState {
 impl EnumConfigForGtk for SetPropToggleState {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.on"),
-            &t!("gtk_converters.off"),
-            &t!("gtk_converters.toggle"),
-            &t!("gtk_converters.unset"),
+            &t!("hyprland.set_prop_toggle_state.on"),
+            &t!("hyprland.set_prop_toggle_state.off"),
+            &t!("hyprland.set_prop_toggle_state.toggle"),
+            &t!("hyprland.set_prop_toggle_state.unset"),
         ])
     }
 }

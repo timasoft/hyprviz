@@ -60,16 +60,16 @@ impl Display for GestureDirection {
 impl EnumConfigForGtk for GestureDirection {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.swipe"),
-            &t!("gtk_converters.horizontal"),
-            &t!("gtk_converters.vertical"),
-            &t!("gtk_converters.left"),
-            &t!("gtk_converters.right"),
-            &t!("gtk_converters.up"),
-            &t!("gtk_converters.down"),
-            &t!("gtk_converters.pinch"),
-            &t!("gtk_converters.pinchin"),
-            &t!("gtk_converters.pinchout"),
+            &t!("hyprland.gesture_direction.swipe"),
+            &t!("hyprland.gesture_direction.horizontal"),
+            &t!("hyprland.gesture_direction.vertical"),
+            &t!("hyprland.gesture_direction.left"),
+            &t!("hyprland.gesture_direction.right"),
+            &t!("hyprland.gesture_direction.up"),
+            &t!("hyprland.gesture_direction.down"),
+            &t!("hyprland.gesture_direction.pinch"),
+            &t!("hyprland.gesture_direction.pinchin"),
+            &t!("hyprland.gesture_direction.pinchout"),
         ])
     }
 }

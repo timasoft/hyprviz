@@ -51,10 +51,10 @@ impl Display for CursorCorner {
 impl EnumConfigForGtk for CursorCorner {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.top_left"),
-            &t!("gtk_converters.top_right"),
-            &t!("gtk_converters.bottom_left"),
-            &t!("gtk_converters.bottom_right"),
+            &t!("hyprland.cursor_corner.top_left"),
+            &t!("hyprland.cursor_corner.top_right"),
+            &t!("hyprland.cursor_corner.bottom_left"),
+            &t!("hyprland.cursor_corner.bottom_right"),
         ])
     }
 }

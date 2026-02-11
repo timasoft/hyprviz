@@ -110,7 +110,7 @@ impl Display for ResizeParams {
 
 impl EnumConfigForGtk for ResizeParams {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("gtk_converters.relative"), &t!("gtk_converters.exact")])
+        StringList::new(&[&t!("hyprland.resize_params.relative"), &t!("hyprland.resize_params.exact")])
     }
 
     const SEPARATOR: Option<char> = Some(' ');

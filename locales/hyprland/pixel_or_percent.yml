@@ -1,0 +1,9 @@
+_version: 2
+hyprland.pixel_or_percent.percent:
+  en: "Percent"
+  ru: "Процент"
+  zh-CN: "百分比"
+hyprland.pixel_or_percent.pixel:
+  en: "Pixel"
+  ru: "Пиксель"
+  zh-CN: "像素"

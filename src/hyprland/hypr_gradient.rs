@@ -78,7 +78,7 @@ impl ToGtkBox for HyprGradient {
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
         let colors_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        colors_box.append(&Label::new(Some(&t!("gtk_converters.gradient_colors"))));
+        colors_box.append(&Label::new(Some(&t!("hyprland.hypr_gradient.gradient_colors"))));
 
         let colors_entry = create_entry();
         let colors_separator = ' ';
@@ -87,7 +87,7 @@ impl ToGtkBox for HyprGradient {
         mother_box.append(&colors_box);
 
         let angle_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        angle_box.append(&Label::new(Some(&t!("gtk_converters.gradient_angle"))));
+        angle_box.append(&Label::new(Some(&t!("hyprland.hypr_gradient.gradient_angle"))));
 
         let angle_entry = create_entry();
         let angle_ui_box = Option::<Angle>::to_gtk_box(&angle_entry);

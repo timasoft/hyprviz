@@ -83,9 +83,9 @@ impl Display for MonitorSelector {
 impl EnumConfigForGtk for MonitorSelector {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.all"),
-            &t!("gtk_converters.name"),
-            &t!("gtk_converters.description"),
+            &t!("hyprland.monitor_selector.all"),
+            &t!("hyprland.monitor_selector.name"),
+            &t!("hyprland.monitor_selector.description"),
         ])
     }
 

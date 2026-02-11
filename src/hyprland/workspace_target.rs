@@ -194,20 +194,20 @@ impl Display for WorkspaceTarget {
 impl EnumConfigForGtk for WorkspaceTarget {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.id"),
-            &t!("gtk_converters.relative"),
-            &t!("gtk_converters.on_monitor"),
-            &t!("gtk_converters.on_monitor_including_empty_workspace"),
-            &t!("gtk_converters.open"),
-            &t!("gtk_converters.name"),
-            &t!("gtk_converters.previous"),
-            &t!("gtk_converters.previous_per_monitor"),
-            &t!("gtk_converters.first_available_empty_workspace"),
-            &t!("gtk_converters.next_available_empty_workspace"),
-            &t!("gtk_converters.first_available_empty_workspace_on_monitor"),
-            &t!("gtk_converters.next_available_empty_workspace_on_monitor"),
-            &t!("gtk_converters.special"),
-            &t!("gtk_converters.special_with_name"),
+            &t!("hyprland.workspace_target.id"),
+            &t!("hyprland.workspace_target.relative"),
+            &t!("hyprland.workspace_target.on_monitor"),
+            &t!("hyprland.workspace_target.on_monitor_including_empty_workspace"),
+            &t!("hyprland.workspace_target.open"),
+            &t!("hyprland.workspace_target.name"),
+            &t!("hyprland.workspace_target.previous"),
+            &t!("hyprland.workspace_target.previous_per_monitor"),
+            &t!("hyprland.workspace_target.first_available_empty_workspace"),
+            &t!("hyprland.workspace_target.next_available_empty_workspace"),
+            &t!("hyprland.workspace_target.first_available_empty_workspace_on_monitor"),
+            &t!("hyprland.workspace_target.next_available_empty_workspace_on_monitor"),
+            &t!("hyprland.workspace_target.special"),
+            &t!("hyprland.workspace_target.special_with_name"),
         ])
     }
 
@@ -221,7 +221,7 @@ impl EnumConfigForGtk for WorkspaceTarget {
             WorkspaceTarget::OnMonitorIncludingEmptyWorkspace(_rel_id) => {
                 Some(<(RelativeId,)>::to_gtk_box)
             }
-            WorkspaceTarget::Open(_rel_id) => Some(<(bool,)>::to_gtk_box),
+            WorkspaceTarget::Open(_rel_id) => Some(<(RelativeId,)>::to_gtk_box),
             WorkspaceTarget::Name(_name) => Some(<(String,)>::to_gtk_box),
             WorkspaceTarget::Previous => None,
             WorkspaceTarget::PreviousPerMonitor => None,

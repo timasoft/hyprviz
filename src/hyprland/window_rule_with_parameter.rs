@@ -52,14 +52,14 @@ impl ToGtkBox for WindowRuleWithParameters {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let window_rule_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        window_rule_box_box.append(&Label::new(Some(&t!("gtk_converters.rule"))));
+        window_rule_box_box.append(&Label::new(Some(&t!("hyprland.window_rule_with_parameter.rule"))));
         let window_rule_entry = create_entry();
         let window_rule_box = WindowRule::to_gtk_box(&window_rule_entry);
         window_rule_box_box.append(&window_rule_box);
         mother_box.append(&window_rule_box_box);
 
         let parameters_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        parameters_box_box.append(&Label::new(Some(&t!("gtk_converters.parameters"))));
+        parameters_box_box.append(&Label::new(Some(&t!("hyprland.window_rule_with_parameter.parameters"))));
         let parameters_entry = create_entry();
         let parameters_box = Vec::<WindowRuleParameter>::to_gtk_box(&parameters_entry, ',');
         parameters_box_box.append(&parameters_box);

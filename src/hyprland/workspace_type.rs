@@ -13,10 +13,10 @@ pub enum WorkspaceType {
 impl WorkspaceType {
     pub fn get_fancy_list() -> [String; 4] {
         [
-            t!("utils.named").to_string(),
-            t!("utils.special").to_string(),
-            t!("utils.numbered").to_string(),
-            t!("utils.selector").to_string(),
+            t!("hyprland.workspace_type.named").to_string(),
+            t!("hyprland.workspace_type.special").to_string(),
+            t!("hyprland.workspace_type.numbered").to_string(),
+            t!("hyprland.workspace_type.selector").to_string(),
         ]
     }
 }

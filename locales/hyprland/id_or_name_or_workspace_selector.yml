@@ -1,0 +1,13 @@
+_version: 2
+hyprland.id_or_name_or_workspace_selector.id:
+  en: "Id"
+  ru: "Идентификатор"
+  zh-CN: "标识符"
+hyprland.id_or_name_or_workspace_selector.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+hyprland.id_or_name_or_workspace_selector.workspace_selector:
+  en: "Workspace selector"
+  ru: "Селектор рабочего пространства"
+  zh-CN: "工作区选择器"

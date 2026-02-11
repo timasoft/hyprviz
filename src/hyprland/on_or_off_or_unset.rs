@@ -37,9 +37,9 @@ impl Display for OnOrOffOrUnset {
 impl EnumConfigForGtk for OnOrOffOrUnset {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.unset"),
-            &t!("gtk_converters.on"),
-            &t!("gtk_converters.off"),
+            &t!("hyprland.on_or_off_or_unset.unset"),
+            &t!("hyprland.on_or_off_or_unset.on"),
+            &t!("hyprland.on_or_off_or_unset.off"),
         ])
     }
 }

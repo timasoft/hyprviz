@@ -152,16 +152,16 @@ impl Display for WindowTarget {
 impl EnumConfigForGtk for WindowTarget {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("gtk_converters.class"),
-            &t!("gtk_converters.initial_class"),
-            &t!("gtk_converters.title"),
-            &t!("gtk_converters.initial_title"),
-            &t!("gtk_converters.tag"),
-            &t!("gtk_converters.pid"),
-            &t!("gtk_converters.address"),
-            &t!("gtk_converters.active_window"),
-            &t!("gtk_converters.floating"),
-            &t!("gtk_converters.tiled"),
+            &t!("hyprland.window_target.class"),
+            &t!("hyprland.window_target.initial_class"),
+            &t!("hyprland.window_target.title"),
+            &t!("hyprland.window_target.initial_title"),
+            &t!("hyprland.window_target.tag"),
+            &t!("hyprland.window_target.pid"),
+            &t!("hyprland.window_target.address"),
+            &t!("hyprland.window_target.active_window"),
+            &t!("hyprland.window_target.floating"),
+            &t!("hyprland.window_target.tiled"),
         ])
     }
 

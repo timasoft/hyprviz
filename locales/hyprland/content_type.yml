@@ -1,0 +1,17 @@
+_version: 2
+hyprland.content_type.game:
+  en: "Game"
+  ru: "Игра"
+  zh-CN: "游戏"
+hyprland.content_type.none:
+  en: "None"
+  ru: "Нет"
+  zh-CN: "无"
+hyprland.content_type.photo:
+  en: "Photo"
+  ru: "Фото"
+  zh-CN: "照片"
+hyprland.content_type.video:
+  en: "Video"
+  ru: "Видео"
+  zh-CN: "视频"

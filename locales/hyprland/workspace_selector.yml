@@ -1,0 +1,29 @@
+_version: 2
+hyprland.workspace_selector.fullscreen:
+  en: "Fullscreen"
+  ru: "Полноэкранный"
+  zh-CN: "全屏"
+hyprland.workspace_selector.monitor:
+  en: "Monitor"
+  ru: "Монитор"
+  zh-CN: "显示器"
+hyprland.workspace_selector.named:
+  en: "Named"
+  ru: "Именованный"
+  zh-CN: "命名"
+hyprland.workspace_selector.none:
+  en: "None"
+  ru: "Отсутствует"
+  zh-CN: "无"
+hyprland.workspace_selector.range:
+  en: "Range"
+  ru: "Диапазон"
+  zh-CN: "范围"
+hyprland.workspace_selector.special:
+  en: "Special"
+  ru: "Специальный"
+  zh-CN: "特殊"
+hyprland.workspace_selector.window_count:
+  en: "Window count"
+  ru: "Количество окон"
+  zh-CN: "窗口数量"

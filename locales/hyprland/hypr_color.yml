@@ -1,0 +1,17 @@
+_version: 2
+hyprland.hypr_color.alpha:
+  en: "Alpha"
+  ru: "Непрозрачность"
+  zh-CN: "不透明度"
+hyprland.hypr_color.blue:
+  en: "Blue"
+  ru: "Синий"
+  zh-CN: "蓝色"
+hyprland.hypr_color.green:
+  en: "Green"
+  ru: "Зелёный"
+  zh-CN: "绿色"
+hyprland.hypr_color.red:
+  en: "Red"
+  ru: "Красный"
+  zh-CN: "红色"

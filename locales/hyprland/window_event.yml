@@ -1,0 +1,21 @@
+_version: 2
+hyprland.window_event.activate:
+  en: "Activate"
+  ru: "Активация"
+  zh-CN: "激活"
+hyprland.window_event.activatefocus:
+  en: "Activate focus"
+  ru: "Активация фокуса"
+  zh-CN: "激活焦点"
+hyprland.window_event.fullscreen:
+  en: "Fullscreen"
+  ru: "Полноэкранный режим"
+  zh-CN: "全屏"
+hyprland.window_event.fullscreenoutput:
+  en: "Fullscreen output"
+  ru: "Полноэкранный вывод"
+  zh-CN: "全屏输出"
+hyprland.window_event.maximize:
+  en: "Maximize"
+  ru: "Разворачивание"
+  zh-CN: "最大化"
