@@ -130,13 +130,17 @@ impl ToGtkBox for HyprCoord {
         mother_box.append(&y_box_box);
 
         let x_sub_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        x_sub_box.append(&Label::new(Some(&t!("hyprland.hypr_coord.subtrahend_of_x"))));
+        x_sub_box.append(&Label::new(Some(&t!(
+            "hyprland.hypr_coord.subtrahend_of_x"
+        ))));
         let x_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         x_sub_box.append(&x_sub_spin_button);
         mother_box.append(&x_sub_box);
 
         let y_sub_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        y_sub_box.append(&Label::new(Some(&t!("hyprland.hypr_coord.subtrahend_of_y"))));
+        y_sub_box.append(&Label::new(Some(&t!(
+            "hyprland.hypr_coord.subtrahend_of_y"
+        ))));
         let y_sub_spin_button = create_spin_button(0.0, i32::MAX as f64, 1.0);
         y_sub_box.append(&y_sub_spin_button);
         mother_box.append(&y_sub_box);

@@ -50,7 +50,9 @@ impl BindFlagsEnum {
             BindFlagsEnum::Transparent => t!("hyprland.bind_flags_enum.transparent").to_string(),
             BindFlagsEnum::IgnoreMods => t!("hyprland.bind_flags_enum.ignore_mods").to_string(),
             BindFlagsEnum::Separate => t!("hyprland.bind_flags_enum.separate").to_string(),
-            BindFlagsEnum::HasDescription => t!("hyprland.bind_flags_enum.has_description").to_string(),
+            BindFlagsEnum::HasDescription => {
+                t!("hyprland.bind_flags_enum.has_description").to_string()
+            }
             BindFlagsEnum::Bypass => t!("hyprland.bind_flags_enum.bypass").to_string(),
         }
     }

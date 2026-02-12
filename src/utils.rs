@@ -1141,6 +1141,8 @@ pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";
 pub const BACKUP_SUFFIX: &str = "-bak";
 
+/// 1 / 255
+pub const ONE_OVER_255: f64 = 1.0 / 255.0;
 /// 9007199254740992.0
 pub const MAX_SAFE_INTEGER_F64: f64 = (1u64 << 53) as f64; // 2^53
 /// -9007199254740992.0

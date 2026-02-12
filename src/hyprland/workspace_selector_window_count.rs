@@ -191,7 +191,10 @@ impl Display for WorkspaceSelectorWindowCount {
 
 impl EnumConfigForGtk for WorkspaceSelectorWindowCount {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("hyprland.workspace_selector_window_count.range"), &t!("hyprland.workspace_selector_window_count.single")])
+        StringList::new(&[
+            &t!("hyprland.workspace_selector_window_count.range"),
+            &t!("hyprland.workspace_selector_window_count.single"),
+        ])
     }
 
     const SEPARATOR: Option<char> = Some('-');

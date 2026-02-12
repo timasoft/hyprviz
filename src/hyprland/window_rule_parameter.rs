@@ -348,8 +348,12 @@ impl EnumConfigForGtk for WindowRuleParameter {
             vec![],
             // FullscreenState(WindowRuleFullscreenState, WindowRuleFullscreenState),
             vec![
-                FieldLabel::Named(cow_to_static_str(t!("hyprland.window_rule_parameter.internal_state"))),
-                FieldLabel::Named(cow_to_static_str(t!("hyprland.window_rule_parameter.client_state"))),
+                FieldLabel::Named(cow_to_static_str(t!(
+                    "hyprland.window_rule_parameter.internal_state"
+                ))),
+                FieldLabel::Named(cow_to_static_str(t!(
+                    "hyprland.window_rule_parameter.client_state"
+                ))),
             ],
             // Workspace(IdOrName),
             // OnWorkspace(IdOrNameOrWorkspaceSelector),

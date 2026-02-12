@@ -10,7 +10,10 @@ pub enum Scale {
 
 impl Scale {
     pub fn get_fancy_list() -> [String; 2] {
-        [t!("hyprland.scale.auto").to_string(), t!("hyprland.scale.manual").to_string()]
+        [
+            t!("hyprland.scale.auto").to_string(),
+            t!("hyprland.scale.manual").to_string(),
+        ]
     }
 
     pub fn from_id(id: usize, value: Option<f64>) -> Self {

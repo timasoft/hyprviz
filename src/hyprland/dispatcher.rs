@@ -1901,7 +1901,8 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box.append(&toggle_state_box);
 
                     let monitor_name_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    monitor_name_box.append(&Label::new(Some(&t!("hyprland.dispatcher.monitor_name"))));
+                    monitor_name_box
+                        .append(&Label::new(Some(&t!("hyprland.dispatcher.monitor_name"))));
                     let optional_monitor_name_entry = create_entry();
                     let optional_monitor_name_box =
                         Option::<String>::to_gtk_box(&optional_monitor_name_entry);

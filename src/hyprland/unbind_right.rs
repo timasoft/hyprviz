@@ -15,7 +15,11 @@ impl FromStr for UnbindRight {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let parts: Vec<String> = s.split(',').map(|s| s.trim().to_string()).collect();
         if parts.is_empty() {
-            return Err(t!("hyprland.unbind_right.unbind_parse_error", count = parts.len()).into());
+            return Err(t!(
+                "hyprland.unbind_right.unbind_parse_error",
+                count = parts.len()
+            )
+            .into());
         }
 
         let mods_str = &parts[0];

@@ -39,7 +39,9 @@ impl ToGtkBox for LayerRuleWithParameter {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         let rule_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        rule_box_box.append(&Label::new(Some(&t!("hyprland.layer_rule_with_parameter.rule"))));
+        rule_box_box.append(&Label::new(Some(&t!(
+            "hyprland.layer_rule_with_parameter.rule"
+        ))));
         let rule_entry = create_entry();
         let rule_box = LayerRule::to_gtk_box(&rule_entry);
         rule_box_box.append(&rule_box);

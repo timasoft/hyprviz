@@ -57,7 +57,9 @@ impl EnumConfigForGtk for WorkspaceSelectorFullscreen {
             &t!("hyprland.workspace_selector_fullscreen.no_fullscreen"),
             &t!("hyprland.workspace_selector_fullscreen.fullscreen"),
             &t!("hyprland.workspace_selector_fullscreen.maximized"),
-            &t!("hyprland.workspace_selector_fullscreen.fullscreen_without_window_fullscreen_state_sent_to_the_window"),
+            &t!(
+                "hyprland.workspace_selector_fullscreen.fullscreen_without_window_fullscreen_state_sent_to_the_window"
+            ),
         ])
     }
 }

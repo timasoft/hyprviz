@@ -88,7 +88,10 @@ impl Display for PixelOrPercent {
 
 impl EnumConfigForGtk for PixelOrPercent {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("hyprland.pixel_or_percent.pixel"), &t!("hyprland.pixel_or_percent.percent")])
+        StringList::new(&[
+            &t!("hyprland.pixel_or_percent.pixel"),
+            &t!("hyprland.pixel_or_percent.percent"),
+        ])
     }
 
     const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);

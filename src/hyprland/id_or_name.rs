@@ -82,7 +82,10 @@ impl Display for IdOrName {
 
 impl EnumConfigForGtk for IdOrName {
     fn dropdown_items() -> StringList {
-        StringList::new(&[&t!("hyprland.id_or_name.id"), &t!("hyprland.id_or_name.name")])
+        StringList::new(&[
+            &t!("hyprland.id_or_name.id"),
+            &t!("hyprland.id_or_name.name"),
+        ])
     }
 
     const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
