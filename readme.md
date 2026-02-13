@@ -119,7 +119,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add curve editor
 - [x] Add binds editor
 - ~~Add monitor layuot editor~~
-- [ ] Add fancy editors fdr all options
+- [x] Add fancy editors for all options
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
