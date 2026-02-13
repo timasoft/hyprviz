@@ -1,0 +1,125 @@
+_version: 2
+hyprland.animation_name.border:
+  en: "Border"
+  ru: "Граница"
+  zh-CN: "边框"
+hyprland.animation_name.borderangle:
+  en: "Border angle"
+  ru: "Угол границы"
+  zh-CN: "边框角度"
+hyprland.animation_name.fade:
+  en: "Fade"
+  ru: "Затухание"
+  zh-CN: "淡入淡出"
+hyprland.animation_name.fade_dim:
+  en: "Fade dim"
+  ru: "Затемнение"
+  zh-CN: "淡出变暗"
+hyprland.animation_name.fade_dpms:
+  en: "Fade dpms"
+  ru: "Затухание DPMS"
+  zh-CN: "DPMS 淡出"
+hyprland.animation_name.fade_in:
+  en: "Fade in"
+  ru: "Появление"
+  zh-CN: "淡入"
+hyprland.animation_name.fade_layers:
+  en: "Fade layers"
+  ru: "Затухание слоёв"
+  zh-CN: "图层淡入淡出"
+hyprland.animation_name.fade_layers_in:
+  en: "Fade layers in"
+  ru: "Появление слоёв"
+  zh-CN: "图层淡入"
+hyprland.animation_name.fade_layers_out:
+  en: "Fade layers out"
+  ru: "Исчезновение слоёв"
+  zh-CN: "图层淡出"
+hyprland.animation_name.fade_out:
+  en: "Fade out"
+  ru: "Исчезновение"
+  zh-CN: "淡出"
+hyprland.animation_name.fade_popups:
+  en: "Fade popups"
+  ru: "Затухание всплывающих окон"
+  zh-CN: "弹窗淡入淡出"
+hyprland.animation_name.fade_popups_in:
+  en: "Fade popups in"
+  ru: "Появление всплывающих окон"
+  zh-CN: "弹窗淡入"
+hyprland.animation_name.fade_popups_out:
+  en: "Fade popups out"
+  ru: "Исчезновение всплывающих окон"
+  zh-CN: "弹窗淡出"
+hyprland.animation_name.fade_shadow:
+  en: "Fade shadow"
+  ru: "Затухание тени"
+  zh-CN: "阴影淡入淡出"
+hyprland.animation_name.fade_switch:
+  en: "Fade switch"
+  ru: "Переключение с затуханием"
+  zh-CN: "切换淡入淡出"
+hyprland.animation_name.global:
+  en: "Global"
+  ru: "Глобально"
+  zh-CN: "全局"
+hyprland.animation_name.layers:
+  en: "Layers"
+  ru: "Слои"
+  zh-CN: "图层"
+hyprland.animation_name.layers_in:
+  en: "Layers in"
+  ru: "Появление слоёв"
+  zh-CN: "图层进入"
+hyprland.animation_name.layers_out:
+  en: "Layers out"
+  ru: "Исчезновение слоёв"
+  zh-CN: "图层退出"
+hyprland.animation_name.monitor_added:
+  en: "Monitor added"
+  ru: "Монитор добавлен"
+  zh-CN: "显示器已添加"
+hyprland.animation_name.special_workspace:
+  en: "Special workspace"
+  ru: "Специальное рабочее пространство"
+  zh-CN: "特殊工作区"
+hyprland.animation_name.special_workspace_in:
+  en: "Special workspace in"
+  ru: "Вход в специальное рабочее пространство"
+  zh-CN: "特殊工作区进入"
+hyprland.animation_name.special_workspace_out:
+  en: "Special workspace out"
+  ru: "Выход из специального рабочего пространства"
+  zh-CN: "特殊工作区退出"
+hyprland.animation_name.windows:
+  en: "Windows"
+  ru: "Окна"
+  zh-CN: "窗口"
+hyprland.animation_name.windows_in:
+  en: "Windows in"
+  ru: "Открытие окон"
+  zh-CN: "窗口进入"
+hyprland.animation_name.windows_move:
+  en: "Windows move"
+  ru: "Перемещение окон"
+  zh-CN: "窗口移动"
+hyprland.animation_name.windows_out:
+  en: "Windows out"
+  ru: "Закрытие окон"
+  zh-CN: "窗口退出"
+hyprland.animation_name.workspaces:
+  en: "Workspaces"
+  ru: "Рабочие пространства"
+  zh-CN: "工作区"
+hyprland.animation_name.workspaces_in:
+  en: "Workspaces in"
+  ru: "Вход в рабочие пространства"
+  zh-CN: "工作区进入"
+hyprland.animation_name.workspaces_out:
+  en: "Workspaces out"
+  ru: "Выход из рабочих пространств"
+  zh-CN: "工作区退出"
+hyprland.animation_name.zoom_factor:
+  en: "Zoom factor"
+  ru: "Коэффициент масштабирования"
+  zh-CN: "缩放系数"

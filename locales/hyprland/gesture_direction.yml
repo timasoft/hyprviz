@@ -1,0 +1,41 @@
+_version: 2
+hyprland.gesture_direction.down:
+  en: "Down"
+  ru: "Вниз"
+  zh-CN: "向下"
+hyprland.gesture_direction.horizontal:
+  en: "Horizontal"
+  ru: "Горизонтально"
+  zh-CN: "水平"
+hyprland.gesture_direction.left:
+  en: "Left"
+  ru: "Влево"
+  zh-CN: "向左"
+hyprland.gesture_direction.pinch:
+  en: "Pinch"
+  ru: "Пинч"
+  zh-CN: "捏合"
+hyprland.gesture_direction.pinchin:
+  en: "Pinch in"
+  ru: "Сведение"
+  zh-CN: "合拢"
+hyprland.gesture_direction.pinchout:
+  en: "Pinch out"
+  ru: "Разведение"
+  zh-CN: "展开"
+hyprland.gesture_direction.right:
+  en: "Right"
+  ru: "Вправо"
+  zh-CN: "向右"
+hyprland.gesture_direction.swipe:
+  en: "Swipe"
+  ru: "Свайп"
+  zh-CN: "滑动"
+hyprland.gesture_direction.up:
+  en: "Up"
+  ru: "Вверх"
+  zh-CN: "向上"
+hyprland.gesture_direction.vertical:
+  en: "Vertical"
+  ru: "Вертикально"
+  zh-CN: "垂直"

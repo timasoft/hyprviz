@@ -1,0 +1,13 @@
+_version: 2
+hyprland.key_state.down:
+  en: "Down"
+  ru: "Нажатие"
+  zh-CN: "按下"
+hyprland.key_state.repeat:
+  en: "Repeat"
+  ru: "Повтор"
+  zh-CN: "重复"
+hyprland.key_state.up:
+  en: "Up"
+  ru: "Отпускание"
+  zh-CN: "释放"

@@ -1,0 +1,9 @@
+_version: 2
+hyprland.float_value.exact:
+  en: "Exact"
+  ru: "Точное"
+  zh-CN: "精确值"
+hyprland.float_value.relative:
+  en: "Relative"
+  ru: "Относительное"
+  zh-CN: "相对值"

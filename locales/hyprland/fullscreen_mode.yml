@@ -1,0 +1,9 @@
+_version: 2
+hyprland.fullscreen_mode.fullscreen:
+  en: "Fullscreen"
+  ru: "Полный экран"
+  zh-CN: "全屏"
+hyprland.fullscreen_mode.maximize:
+  en: "Maximize"
+  ru: "Развернуть"
+  zh-CN: "最大化"

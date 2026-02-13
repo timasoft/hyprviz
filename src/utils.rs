@@ -1,14 +1,43 @@
+use crate::hyprland::MonitorSelector;
 use rust_i18n::t;
+use serde_json::Value;
 use std::{
+    borrow::Cow,
     cmp::Ordering,
-    collections::HashSet,
+    collections::{HashMap, HashSet},
     env,
     error::Error,
     fs,
     io::{self, Write},
     path::{Path, PathBuf},
     process::Command,
+    sync::{LazyLock, OnceLock},
 };
+use strum::IntoEnumIterator;
+
+static IS_DEVELOPMENT_MODE: OnceLock<bool> = OnceLock::new();
+
+pub fn initialize_development_mode() {
+    let args: Vec<String> = env::args().collect();
+
+    let has_dev_flag = args.iter().any(|arg| arg == "--dev");
+
+    let is_dev = cfg!(debug_assertions) || has_dev_flag;
+
+    IS_DEVELOPMENT_MODE
+        .set(is_dev)
+        .expect("Development mode already initialized");
+
+    if is_dev {
+        println!("Running in development mode");
+    }
+}
+
+pub fn is_development_mode() -> bool {
+    *IS_DEVELOPMENT_MODE
+        .get()
+        .expect("Development mode not initialized")
+}
 
 pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
     let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
@@ -56,15 +85,15 @@ pub fn get_latest_version(repo: &str) -> String {
                         {
                             return version.to_string();
                         }
-                        t!("version_parse_failed").to_string()
+                        t!("utils.version_parse_failed").to_string()
                     }
-                    Err(_) => t!("json_parse_error").to_string(),
+                    Err(_) => t!("utils.json_parse_error").to_string(),
                 }
             } else {
-                t!("http_error", status_code = response.status_code).to_string()
+                t!("utils.http_error", status_code = response.status_code).to_string()
             }
         }
-        Err(e) => t!("request_failed", error = e).to_string(),
+        Err(e) => t!("utils.request_failed", error = e).to_string(),
     }
 }
 
@@ -207,7 +236,7 @@ pub fn get_current_profile(file_content: &str) -> String {
     "Default".to_string()
 }
 
-/// Finds all files matching pattern `hyprviz_*.conf` in the same directory as default config file
+/// Finds all files matching pattern `*.conf` in the hyprviz profile directory
 pub fn find_all_profiles() -> Option<Vec<String>> {
     let config_path = get_config_path(true, "None");
 
@@ -712,8 +741,413 @@ pub fn get_system_locale() -> String {
         .unwrap_or_else(|_| "en".to_string())
 }
 
+type NameWithCoords = (String, Result<(f64, f64, f64, f64), String>);
+
+pub fn parse_coordinates(input: &str) -> NameWithCoords {
+    let parts: Vec<&str> = input.split(',').map(|s| s.trim()).collect();
+
+    let name = parts.first().map(|s| s.to_string()).unwrap_or_default();
+
+    if parts.len() != 5 {
+        let error = format!(
+            "Error: expected 5 parts (NAME, X0, Y0, X1, Y1), got {}",
+            parts.len()
+        );
+        return (name, Err(error));
+    }
+
+    let x0 = parts[1].parse::<f64>().map_err(|e| format!("X0: {}", e));
+    let y0 = parts[2].parse::<f64>().map_err(|e| format!("Y0: {}", e));
+    let x1 = parts[3].parse::<f64>().map_err(|e| format!("X1: {}", e));
+    let y1 = parts[4].parse::<f64>().map_err(|e| format!("Y1: {}", e));
+
+    match (x0.clone(), y0.clone(), x1.clone(), y1.clone()) {
+        (Ok(x0), Ok(y0), Ok(x1), Ok(y1)) => (name, Ok((x0, y0, x1, y1))),
+        _ => {
+            let errors = [x0.err(), y0.err(), x1.err(), y1.err()]
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>()
+                .join("; ");
+
+            (name, Err(errors))
+        }
+    }
+}
+
+pub fn after_second_comma(s: &str) -> &str {
+    let mut comma_indices = s.char_indices().filter(|&(_, c)| c == ',');
+
+    match (comma_indices.next(), comma_indices.next()) {
+        (Some((_, _)), Some((second_comma_pos, _))) => &s[second_comma_pos..],
+        _ => "",
+    }
+}
+
+static KEYCODE_MAP: LazyLock<HashMap<u32, &'static str>> = LazyLock::new(|| {
+    let mut map = HashMap::new();
+
+    map.insert(9, "Escape");
+    map.insert(67, "F1");
+    map.insert(68, "F2");
+    map.insert(69, "F3");
+    map.insert(70, "F4");
+    map.insert(71, "F5");
+    map.insert(72, "F6");
+    map.insert(73, "F7");
+    map.insert(74, "F8");
+    map.insert(75, "F9");
+    map.insert(76, "F10");
+    map.insert(95, "F11");
+    map.insert(96, "F12");
+    map.insert(127, "Pause");
+
+    map.insert(10, "1");
+    map.insert(11, "2");
+    map.insert(12, "3");
+    map.insert(13, "4");
+    map.insert(14, "5");
+    map.insert(15, "6");
+    map.insert(16, "7");
+    map.insert(17, "8");
+    map.insert(18, "9");
+    map.insert(19, "0");
+    map.insert(20, "minus");
+    map.insert(21, "equal");
+    map.insert(22, "BackSpace");
+    map.insert(23, "Tab");
+    map.insert(24, "Q");
+    map.insert(25, "W");
+    map.insert(26, "E");
+    map.insert(27, "R");
+    map.insert(28, "T");
+    map.insert(29, "Y");
+    map.insert(30, "U");
+    map.insert(31, "I");
+    map.insert(32, "O");
+    map.insert(33, "P");
+    map.insert(34, "bracketleft");
+    map.insert(35, "bracketright");
+    map.insert(36, "Return");
+
+    map.insert(38, "A");
+    map.insert(39, "S");
+    map.insert(40, "D");
+    map.insert(41, "F");
+    map.insert(42, "G");
+    map.insert(43, "H");
+    map.insert(44, "J");
+    map.insert(45, "K");
+    map.insert(46, "L");
+    map.insert(47, "semicolon");
+    map.insert(48, "apostrophe");
+    map.insert(49, "grave");
+
+    map.insert(52, "Z");
+    map.insert(53, "X");
+    map.insert(54, "C");
+    map.insert(55, "V");
+    map.insert(56, "B");
+    map.insert(57, "N");
+    map.insert(58, "M");
+    map.insert(59, "comma");
+    map.insert(60, "period");
+    map.insert(61, "slash");
+    map.insert(51, "backslash");
+
+    map.insert(50, "SHIFT");
+    map.insert(62, "SHIFT");
+    map.insert(37, "CTRL");
+    map.insert(105, "CTRL");
+    map.insert(64, "ALT");
+    map.insert(108, "ALT");
+    map.insert(133, "SUPER");
+    map.insert(134, "SUPER");
+    map.insert(66, "CAPS");
+    map.insert(77, "MOD2");
+    map.insert(78, "MOD3");
+
+    map.insert(65, "space");
+    map.insert(135, "Menu");
+
+    map.insert(110, "Home");
+    map.insert(111, "Up");
+    map.insert(112, "Page_Up");
+    map.insert(113, "Left");
+    map.insert(114, "Right");
+    map.insert(115, "End");
+    map.insert(116, "Down");
+    map.insert(117, "Page_Down");
+    map.insert(118, "Insert");
+    map.insert(119, "Delete");
+
+    map.insert(79, "KP_7");
+    map.insert(80, "KP_8");
+    map.insert(81, "KP_9");
+    map.insert(82, "KP_Subtract");
+    map.insert(83, "KP_4");
+    map.insert(84, "KP_5");
+    map.insert(85, "KP_6");
+    map.insert(86, "KP_Add");
+    map.insert(87, "KP_1");
+    map.insert(88, "KP_2");
+    map.insert(89, "KP_3");
+    map.insert(90, "KP_0");
+    map.insert(91, "KP_Decimal");
+    map.insert(104, "KP_Enter");
+    map.insert(63, "KP_Multiply");
+    map.insert(106, "KP_Divide");
+    map.insert(97, "KP_Equal");
+
+    map.insert(166, "LaunchA");
+    map.insert(167, "LaunchB");
+    map.insert(168, "LaunchC");
+    map.insert(170, "Calculator");
+    map.insert(178, "Sleep");
+    map.insert(179, "WakeUp");
+
+    map.insert(107, "Print");
+    map.insert(151, "Sys_Req");
+
+    map.insert(183, "XF86Tools");
+    map.insert(187, "XF86Mail");
+    map.insert(216, "XF86WWW");
+    map.insert(225, "XF86AudioMute");
+    map.insert(226, "XF86AudioLowerVolume");
+    map.insert(227, "XF86AudioRaiseVolume");
+    map.insert(228, "XF86AudioPlay");
+    map.insert(229, "XF86AudioStop");
+    map.insert(230, "XF86AudioPrev");
+    map.insert(231, "XF86AudioNext");
+    map.insert(232, "XF86HomePage");
+    map.insert(233, "XF86Refresh");
+    map.insert(234, "XF86Search");
+    map.insert(235, "XF86Favorites");
+    map.insert(236, "XF86Back");
+    map.insert(237, "XF86Forward");
+
+    map.insert(94, "asciitilde");
+    map.insert(102, "KP_Separator");
+
+    map
+});
+
+pub fn keycode_to_en_key(keycode: u32) -> String {
+    KEYCODE_MAP
+        .get(&keycode)
+        .map(|&s| s.to_string())
+        .unwrap_or_else(|| format!("code:{}", keycode))
+}
+
+pub fn is_modifier(key: &str) -> bool {
+    matches!(
+        key,
+        "SHIFT" | "CAPS" | "CTRL" | "ALT" | "MOD2" | "MOD3" | "SUPER" | "MOD5"
+    )
+}
+
+pub fn get_available_resolutions_for_monitor(monitor_selector: &MonitorSelector) -> Vec<String> {
+    let mut special_options = vec![
+        "disable".to_string(),
+        "addreserved".to_string(),
+        "preferred".to_string(),
+        "highres".to_string(),
+        "highrr".to_string(),
+        "maxwidth".to_string(),
+    ];
+
+    match Command::new("hyprctl").arg("monitors").arg("-j").output() {
+        Ok(output) => {
+            let mut target_monitor = None;
+            if let Ok(json_str) = String::from_utf8(output.stdout)
+                && let Ok(monitors) = serde_json::from_str::<Vec<Value>>(&json_str)
+            {
+                match monitor_selector {
+                    MonitorSelector::Name(monitor_name) => {
+                        target_monitor = monitors.iter().map(|m| m.to_owned()).find(|monitor| {
+                            if let Some(name) = monitor.get("name").and_then(|n| n.as_str()) {
+                                name == monitor_name
+                            } else {
+                                false
+                            }
+                        });
+                    }
+                    MonitorSelector::Description(monitor_description) => {
+                        target_monitor = monitors.iter().map(|m| m.to_owned()).find(|monitor| {
+                            if let Some(desc) = monitor.get("description").and_then(|d| d.as_str())
+                                && desc == monitor_description
+                            {
+                                true
+                            } else {
+                                false
+                            }
+                        });
+                    }
+                    MonitorSelector::All => {
+                        target_monitor = None;
+                    }
+                }
+            }
+            if let Some(monitor) = target_monitor
+                && let Some(modes) = monitor.get("availableModes").and_then(|m| m.as_array())
+            {
+                let mut unique_resolutions = HashSet::new();
+
+                for mode in modes {
+                    if let Some(mode_str) = mode.as_str() {
+                        unique_resolutions.insert(mode_str.to_string());
+                    }
+                }
+
+                let mut res_vec: Vec<String> = unique_resolutions.into_iter().collect();
+                res_vec.sort();
+                special_options.extend(res_vec);
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to get monitor resolutions: {}", e);
+        }
+    }
+
+    special_options
+}
+
+pub fn get_available_monitors(only_names: bool) -> HashSet<String> {
+    let mut monitors = HashSet::new();
+
+    match Command::new("hyprctl").arg("monitors").arg("-j").output() {
+        Ok(output) => {
+            if let Ok(json_str) = String::from_utf8(output.stdout)
+                && let Ok(monitors_json) = serde_json::from_str::<Vec<Value>>(&json_str)
+            {
+                for monitor in monitors_json {
+                    if let Some(name) = monitor.get("name").and_then(|n| n.as_str()) {
+                        monitors.insert(name.to_string());
+                    }
+                    if !only_names
+                        && let Some(desc) = monitor.get("description").and_then(|d| d.as_str())
+                    {
+                        monitors.insert(format!("desc:{}", desc));
+                    }
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to get monitor names: {}", e);
+        }
+    }
+
+    monitors
+}
+
+pub fn find_matching_bracket(input: &str, prefix: &str, closing: char) -> Option<usize> {
+    if !input.starts_with(prefix) {
+        return None;
+    }
+
+    let mut depth = 1;
+    let mut idx = prefix.len();
+
+    while idx < input.len() {
+        let c = input.chars().nth(idx)?;
+        if c == '[' {
+            depth += 1;
+        } else if c == closing {
+            depth -= 1;
+            if depth == 0 {
+                return Some(idx);
+            }
+        }
+        idx += 1;
+    }
+
+    None
+}
+
+pub fn parse_bool(value: &str) -> Option<bool> {
+    match value.trim().to_lowercase().as_str() {
+        "true" | "1" | "yes" | "on" => Some(true),
+        "false" | "0" | "no" | "off" => Some(false),
+        _ => None,
+    }
+}
+
+pub fn parse_int(value: &str) -> Option<i32> {
+    value.parse::<i32>().ok()
+}
+
+pub fn join_with_separator<I, T>(iterable: I, separator: &str) -> String
+where
+    I: IntoIterator<Item = T>,
+    T: ToString,
+{
+    iterable
+        .into_iter()
+        .map(|item| item.to_string())
+        .collect::<Vec<String>>()
+        .join(separator)
+}
+
+pub fn cow_to_static_str(cow: Cow<'static, str>) -> &'static str {
+    match cow {
+        Cow::Borrowed(s) => s,
+        Cow::Owned(s) => Box::leak(s.into_boxed_str()),
+    }
+}
+
+pub trait HasDiscriminant {
+    type Discriminant: IntoEnumIterator + PartialEq + Eq + Clone + Copy;
+
+    fn to_discriminant(&self) -> Self::Discriminant;
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self;
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self;
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        None
+    }
+
+    fn custom_split(_discriminant: Self::Discriminant) -> Option<fn(&str) -> Vec<&str>> {
+        None
+    }
+
+    fn variant_index(&self) -> usize {
+        let discriminant = self.to_discriminant();
+        Self::Discriminant::iter()
+            .position(|d| d == discriminant)
+            .expect("Discriminant should always be found in the iterator")
+    }
+}
+
+impl<T: IntoEnumIterator + Eq + Copy> HasDiscriminant for T {
+    type Discriminant = Self;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        *self
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        discriminant
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, _str: &str) -> Self {
+        discriminant
+    }
+}
+
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";
 pub const BACKUP_SUFFIX: &str = "-bak";
+
+/// 1 / 255
+pub const ONE_OVER_255: f64 = 1.0 / 255.0;
+/// 9007199254740992.0
 pub const MAX_SAFE_INTEGER_F64: f64 = (1u64 << 53) as f64; // 2^53
+/// -9007199254740992.0
+pub const MIN_SAFE_INTEGER_F64: f64 = -MAX_SAFE_INTEGER_F64; // -2^53
+/// 140737488355328
+pub const MAX_SAFE_STEP_0_01_F64: f64 = (1u64 << 47) as f64; // 2^47
+/// -140737488355328
+pub const MIN_SAFE_STEP_0_01_F64: f64 = -MAX_SAFE_STEP_0_01_F64; // -2^47

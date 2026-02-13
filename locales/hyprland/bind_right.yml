@@ -1,0 +1,5 @@
+_version: 2
+hyprland.bind_right.bind_parse_error:
+  en: "Bind parse error"
+  ru: "Ошибка парсинга привязки"
+  zh-CN: "绑定解析错误"

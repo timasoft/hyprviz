@@ -1,0 +1,41 @@
+_version: 2
+hyprland.position.auto:
+  en: "Auto"
+  ru: "Автоматически"
+  zh-CN: "自动"
+hyprland.position.auto_center_down:
+  en: "Auto center down"
+  ru: "Автоматически по центру снизу"
+  zh-CN: "自动居中下方"
+hyprland.position.auto_center_left:
+  en: "Auto center left"
+  ru: "Автоматически по центру слева"
+  zh-CN: "自动居中左侧"
+hyprland.position.auto_center_right:
+  en: "Auto center right"
+  ru: "Автоматически по центру справа"
+  zh-CN: "自动居中右侧"
+hyprland.position.auto_center_up:
+  en: "Auto center up"
+  ru: "Автоматически по центру сверху"
+  zh-CN: "自动居中上方"
+hyprland.position.auto_down:
+  en: "Auto down"
+  ru: "Автоматически снизу"
+  zh-CN: "自动下方"
+hyprland.position.auto_left:
+  en: "Auto left"
+  ru: "Автоматически слева"
+  zh-CN: "自动左侧"
+hyprland.position.auto_right:
+  en: "Auto right"
+  ru: "Автоматически справа"
+  zh-CN: "自动右侧"
+hyprland.position.auto_up:
+  en: "Auto up"
+  ru: "Автоматически сверху"
+  zh-CN: "自动上方"
+hyprland.position.coordinates:
+  en: "Coordinates"
+  ru: "Координаты"
+  zh-CN: "坐标"

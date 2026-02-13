@@ -1,0 +1,21 @@
+_version: 2
+hyprland.monitor_target.current:
+  en: "Current"
+  ru: "Текущий монитор"
+  zh-CN: "当前显示器"
+hyprland.monitor_target.direction:
+  en: "Direction"
+  ru: "Направление"
+  zh-CN: "方向"
+hyprland.monitor_target.id:
+  en: "Id"
+  ru: "Идентификатор"
+  zh-CN: "标识符"
+hyprland.monitor_target.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+hyprland.monitor_target.relative:
+  en: "Relative"
+  ru: "Относительный номер"
+  zh-CN: "相对编号"

@@ -1,0 +1,9 @@
+_version: 2
+hyprland.workspace_selector_window_count.range:
+  en: "Range"
+  ru: "Диапазон"
+  zh-CN: "范围"
+hyprland.workspace_selector_window_count.single:
+  en: "Single"
+  ru: "Отдельный"
+  zh-CN: "单个"

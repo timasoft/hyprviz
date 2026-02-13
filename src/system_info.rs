@@ -1,4 +1,5 @@
 use rust_i18n::t;
+use serde_json::Value;
 use std::{
     io::Read,
     {env, fs},
@@ -13,7 +14,7 @@ pub fn get_hyprland_version() -> String {
     };
 
     if !output.status.success() {
-        return t!("failed_to_get_version").to_string();
+        return t!("system_info.failed_to_get_version").to_string();
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -24,7 +25,7 @@ pub fn get_hyprland_version() -> String {
         return version.strip_prefix('v').unwrap_or(version).to_string();
     }
 
-    t!("failed_to_parse_version").to_string()
+    t!("system_info.failed_to_parse_version").to_string()
 }
 
 pub fn get_hyprviz_version() -> String {
@@ -137,7 +138,7 @@ pub fn get_os_info() -> String {
         Ok(output) if output.status.success() => {
             String::from_utf8_lossy(&output.stdout).trim().to_string()
         }
-        _ => t!("os_information_not_available").to_string(),
+        _ => t!("system_info.os_information_not_available").to_string(),
     }
 }
 
@@ -146,7 +147,7 @@ pub fn get_kernel_info() -> String {
         Ok(output) if output.status.success() => {
             String::from_utf8_lossy(&output.stdout).trim().to_string()
         }
-        Ok(_) => t!("failed_to_get_kernel_info").to_string(),
+        Ok(_) => t!("system_info.failed_to_get_kernel_info").to_string(),
         Err(e) => e,
     }
 }
@@ -221,9 +222,9 @@ pub fn get_cpu_info() -> String {
     match execute_command("nproc", &[]) {
         Ok(output) if output.status.success() => {
             let cores = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            t!("cpu_with__cores__model_unknown", n = cores).to_string()
+            t!("system_info.cpu_with__cores__model_unknown", n = cores).to_string()
         }
-        _ => t!("cpu_information_not_available").to_string(),
+        _ => t!("system_info.cpu_information_not_available").to_string(),
     }
 }
 
@@ -240,12 +241,12 @@ pub fn get_gpu_info() -> String {
                 .collect();
 
             if gpu_lines.is_empty() {
-                t!("failed_to_parse_gpu_info").to_string()
+                t!("system_info.failed_to_parse_gpu_info").to_string()
             } else {
                 gpu_lines.join("\n")
             }
         }
-        _ => t!("failed_to_get_gpu_info").to_string(),
+        _ => t!("system_info.failed_to_get_gpu_info").to_string(),
     }
 }
 
@@ -267,46 +268,164 @@ pub fn get_memory_info() -> String {
                         let used_gb = total_gb - available_gb;
                         format!("{:.2} GB / {:.2} GB", used_gb, total_gb)
                     }
-                    _ => t!("failed_to_parse_memory_info").to_string(),
+                    _ => t!("system_info.failed_to_parse_memory_info").to_string(),
                 }
             } else {
-                t!("failed_to_get_memory_info_from_/proc/meminfo").to_string()
+                t!("system_info.failed_to_get_memory_info_from_/proc/meminfo").to_string()
             }
         }
-        _ => t!("failed_to_get_memory_info").to_string(),
+        _ => t!("system_info.failed_to_get_memory_info").to_string(),
     }
 }
 
 pub fn get_monitor_info() -> String {
-    match execute_command("hyprctl", &["monitors"]) {
+    match execute_command("hyprctl", &["monitors", "-j"]) {
         Ok(output) if output.status.success() => {
             let output_str = String::from_utf8_lossy(&output.stdout);
-            let mut result = Vec::new();
 
-            for line in output_str.lines() {
-                if line.contains("Monitor") {
-                    result.push(line.trim().to_string());
-                } else if line.contains("description:")
-                    || line.contains(" at ")
-                    || line.contains("transform:")
-                    || line.contains("scale:")
-                    || line.contains("currentFormat:")
-                {
-                    result.push(format!("   {}", line.trim()));
+            match serde_json::from_str::<Value>(&output_str) {
+                Ok(Value::Array(monitors)) if !monitors.is_empty() => {
+                    let mut result = String::new();
+
+                    for (i, monitor) in monitors.iter().enumerate() {
+                        if let Some(obj) = monitor.as_object() {
+                            let id = obj.get("id").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                            let name = obj
+                                .get("name")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("Unknown");
+                            let description = obj
+                                .get("description")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("No description");
+                            let width =
+                                obj.get("width").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                            let height =
+                                obj.get("height").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                            let refresh_rate = obj
+                                .get("refreshRate")
+                                .and_then(|v| v.as_f64())
+                                .unwrap_or(60.0);
+                            let x = obj.get("x").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                            let y = obj.get("y").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                            let scale = obj.get("scale").and_then(|v| v.as_f64()).unwrap_or(1.0);
+                            let transform =
+                                obj.get("transform").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                            let current_format = obj
+                                .get("currentFormat")
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("Unknown");
+                            let focused = obj
+                                .get("focused")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false);
+                            let dpms_status = obj
+                                .get("dpmsStatus")
+                                .and_then(|v| v.as_bool())
+                                .unwrap_or(false);
+
+                            let workspace_name = obj
+                                .get("activeWorkspace")
+                                .and_then(|w| w.as_object())
+                                .and_then(|w| w.get("name"))
+                                .and_then(|v| v.as_str())
+                                .unwrap_or("N/A");
+
+                            let workspace_id = obj
+                                .get("activeWorkspace")
+                                .and_then(|w| w.as_object())
+                                .and_then(|w| w.get("id"))
+                                .and_then(|v| v.as_i64())
+                                .unwrap_or(0);
+
+                            let focus_indicator = if focused { "*" } else { " " };
+                            let dpms_text = if dpms_status {
+                                t!("system_info.dpms_on")
+                            } else {
+                                t!("system_info.dpms_off")
+                            };
+
+                            result.push_str(&format!(
+                                "{} {}: #{}: {} [{}]\n",
+                                focus_indicator,
+                                t!("system_info.monitor"),
+                                id,
+                                name,
+                                dpms_text
+                            ));
+                            result.push_str(&format!(
+                                "   {}: {}\n",
+                                t!("system_info.description"),
+                                description
+                            ));
+                            result.push_str(&format!(
+                                "   {}: {}x{} @ {:.1}Hz\n",
+                                t!("system_info.resolution"),
+                                width,
+                                height,
+                                refresh_rate
+                            ));
+                            result.push_str(&format!(
+                                "   {}: {}x{}\n",
+                                t!("system_info.position"),
+                                x,
+                                y
+                            ));
+                            result.push_str(&format!(
+                                "   {}: {:.2}x\n",
+                                t!("system_info.scale"),
+                                scale
+                            ));
+
+                            let transform_str = match transform {
+                                0 => t!("system_info.normal"),
+                                1 => t!("system_info.rotate_90"),
+                                2 => t!("system_info.rotate_180"),
+                                3 => t!("system_info.rotate_270"),
+                                4 => t!("system_info.flip"),
+                                5 => t!("system_info.flip_rotate_90"),
+                                6 => t!("system_info.flip_rotate_180"),
+                                7 => t!("system_info.flip_rotate_270"),
+                                _ => t!("system_info.unknown"),
+                            };
+
+                            result.push_str(&format!(
+                                "   {}: {}\n",
+                                t!("system_info.transform"),
+                                transform_str
+                            ));
+                            result.push_str(&format!(
+                                "   {}: {}\n",
+                                t!("system_info.current_format"),
+                                current_format
+                            ));
+                            result.push_str(&format!(
+                                "   {}: #{} ({})\n",
+                                t!("system_info.active_workspace"),
+                                workspace_id,
+                                workspace_name
+                            ));
+
+                            if i < monitors.len() - 1 {
+                                result.push('\n');
+                            }
+                        }
+                    }
+
+                    result
                 }
-            }
-
-            if result.is_empty() {
-                output_str
-                    .lines()
-                    .next()
-                    .map(|s| s.to_string())
-                    .unwrap_or_default()
-            } else {
-                result.join("\n")
+                Ok(_) => t!("system_info.no_monitors_found").into_owned(),
+                Err(e) => format!("{}: {}", t!("system_info.json_parse_error"), e),
             }
         }
-        Ok(_) => t!("failed_to_get_monitor_info").to_string(),
+        Ok(output) => {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            format!(
+                "{}: {}",
+                t!("system_info.failed_to_get_monitor_info"),
+                stderr.trim()
+            )
+        }
         Err(e) => e,
     }
 }

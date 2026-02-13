@@ -1,0 +1,17 @@
+_version: 2
+hyprland.set_prop_toggle_state.off:
+  en: "Off"
+  ru: "Выключено"
+  zh-CN: "关闭"
+hyprland.set_prop_toggle_state.on:
+  en: "On"
+  ru: "Включено"
+  zh-CN: "开启"
+hyprland.set_prop_toggle_state.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"
+hyprland.set_prop_toggle_state.unset:
+  en: "Unset"
+  ru: "Снять значение"
+  zh-CN: "取消设置"

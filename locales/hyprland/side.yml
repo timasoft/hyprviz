@@ -1,0 +1,17 @@
+_version: 2
+hyprland.side.bottom:
+  en: "Bottom"
+  ru: "Снизу"
+  zh-CN: "底部"
+hyprland.side.left:
+  en: "Left"
+  ru: "Слева"
+  zh-CN: "左侧"
+hyprland.side.right:
+  en: "Right"
+  ru: "Справа"
+  zh-CN: "右侧"
+hyprland.side.top:
+  en: "Top"
+  ru: "Сверху"
+  zh-CN: "顶部"

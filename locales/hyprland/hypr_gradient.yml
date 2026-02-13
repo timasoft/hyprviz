@@ -1,0 +1,9 @@
+_version: 2
+hyprland.hypr_gradient.gradient_angle:
+  en: "Gradient angle"
+  ru: "Угол градиента"
+  zh-CN: "渐变角度"
+hyprland.hypr_gradient.gradient_colors:
+  en: "Gradient colors"
+  ru: "Цвета градиента"
+  zh-CN: "渐变颜色"

@@ -1,0 +1,239 @@
+_version: 2
+advanced_editors.show_editor:
+  en: "Show Editor"
+  ru: "Показать редактор"
+  zh-CN: "显示编辑器"
+advanced_editors.hide_editor:
+  en: "Hide Editor"
+  ru: "Скрыть редактор"
+  zh-CN: "隐藏编辑器"
+advanced_editors.record_bind:
+  en: "Record Bind"
+  ru: "Записать привязку"
+  zh-CN: "记录绑定"
+advanced_editors.stop_recording:
+  en: "Stop Recording"
+  ru: "Остановить запись"
+  zh-CN: "停止记录"
+advanced_editors.active_combinations:
+  en: "Active Combinations:\n"
+  ru: "Активные комбинации:\n"
+  zh-CN: "激活组合:\n"
+advanced_editors.active_modifiers:
+  en: "Active Modifiers:\n"
+  ru: "Активные модификаторы:\n"
+  zh-CN: "激活修饰符:\n"
+advanced_editors.active_keys:
+  en: "Active Keys:\n"
+  ru: "Активные клавиши:\n"
+  zh-CN: "激活键:\n"
+advanced_editors.no_active_inputs:
+  en: "No active inputs\n"
+  ru: "Нет активных клавиш\n"
+  zh-CN: "没有激活的输入\n"
+
+advanced_editors.none:
+  en: "None"
+  ru: "Нет"
+  zh-CN: "无"
+advanced_editors.name:
+  en: "Name"
+  ru: "Имя"
+  zh-CN: "名称"
+advanced_editors.type:
+  en: "Type"
+  ru: "Тип"
+  zh-CN: "类型"
+advanced_editors.side:
+  en: "Side"
+  ru: "Сторона"
+  zh-CN: "侧面"
+advanced_editors.percentage:
+  en: "Percentage"
+  ru: "Процент"
+  zh-CN: "百分比"
+advanced_editors.all:
+  en: "All"
+  ru: "Все"
+  zh-CN: "全部"
+advanced_editors.center:
+  en: "Center"
+  ru: "Центр"
+  zh-CN: "中心"
+advanced_editors.resolution/mode:
+  en: "Resolution/Mode"
+  ru: "Разрешение/Режим"
+  zh-CN: "分辨率/模式"
+advanced_editors.position:
+  en: "Position"
+  ru: "Расположение"
+  zh-CN: "位置"
+advanced_editors.scale:
+  en: "Scale"
+  ru: "Масштаб"
+  zh-CN: "缩放"
+advanced_editors.mirror:
+  en: "Mirror"
+  ru: "Копирование"
+  zh-CN: "镜像"
+advanced_editors.bitdepth:
+  en: "Bitdepth"
+  ru: "Глубина цвета"
+  zh-CN: "位深度"
+advanced_editors.color_management:
+  en: "Color Management"
+  ru: "Управление цветом"
+  zh-CN: "颜色管理"
+advanced_editors.sdr_brightness:
+  en: "SDR Brightness"
+  ru: "Яркость SDR"
+  zh-CN: "SDR亮度"
+advanced_editors.sdr_saturation:
+  en: "SDR Saturation"
+  ru: "Насыщенность SDR"
+  zh-CN: "SDR饱和度"
+advanced_editors.vrr:
+  en: "VRR"
+  ru: "VRR"
+  zh-CN: "VRR"
+advanced_editors.top:
+  en: "Top"
+  ru: "Сверху"
+  zh-CN: "顶部"
+advanced_editors.bottom:
+  en: "Bottom"
+  ru: "Снизу"
+  zh-CN: "底部"
+advanced_editors.left:
+  en: "Left"
+  ru: "Слева"
+  zh-CN: "左边"
+advanced_editors.right:
+  en: "Right"
+  ru: "Справа"
+  zh-CN: "右边"
+
+advanced_editors.normal:
+  en: "Normal"
+  ru: "Нормально"
+  zh-CN: "正常"
+advanced_editors.rotate_90:
+  en: "Rotate 90°"
+  ru: "Повернуть на 90°"
+  zh-CN: "旋转90°"
+advanced_editors.rotate_180:
+  en: "Rotate 180°"
+  ru: "Повернуть на 180°"
+  zh-CN: "旋转180°"
+advanced_editors.rotate_270:
+  en: "Rotate 270°"
+  ru: "Повернуть на 270°"
+  zh-CN: "旋转270°"
+advanced_editors.flip:
+  en: "Flip"
+  ru: "Отразить"
+  zh-CN: "翻转"
+advanced_editors.flip_rotate_90:
+  en: "Flip Rotate 90°"
+  ru: "Отразить и повернуть на 90°"
+  zh-CN: "翻转旋转90°"
+advanced_editors.flip_rotate_180:
+  en: "Flip Rotate 180°"
+  ru: "Отразить и повернуть на 180°"
+  zh-CN: "翻转旋转180°"
+advanced_editors.flip_rotate_270:
+  en: "Flip Rotate 270°"
+  ru: "Отразить и повернуть на 270°"
+  zh-CN: "翻转旋转270°"
+advanced_editors.workspace_rules:
+  en: "Workspace Rules"
+  ru: "Правила рабочих пространств"
+  zh-CN: "工作区规则"
+advanced_editors.monitor:
+  en: "Monitor"
+  ru: "Монитор"
+  zh-CN: "监视器"
+advanced_editors.default:
+  en: "Default"
+  ru: "По умолчанию"
+  zh-CN: "默认"
+advanced_editors.border:
+  en: "Border"
+  ru: "Граница"
+  zh-CN: "边框"
+advanced_editors.shadow:
+  en: "Shadow"
+  ru: "Тень"
+  zh-CN: "阴影"
+advanced_editors.rounding:
+  en: "Rounding"
+  ru: "Округление"
+  zh-CN: "圆角"
+advanced_editors.decorate:
+  en: "Decorate"
+  ru: "Декорации"
+  zh-CN: "装饰"
+advanced_editors.persistent:
+  en: "Persistent"
+  ru: "Постоянный"
+  zh-CN: "持续"
+advanced_editors.on_created_empty:
+  en: "On Created Empty"
+  ru: "При создании пустого"
+  zh-CN: "创建空时"
+advanced_editors.command_to_execute:
+  en: "Command to Execute"
+  ru: "Команда для выполнения"
+  zh-CN: "要执行的命令"
+advanced_editors.default_name:
+  en: "Default Name"
+  ru: "Имя по умолчанию"
+  zh-CN: "默认名称"
+advanced_editors.default_workspace_name:
+  en: "Default Workspace Name"
+  ru: "Имя рабочего пространства по умолчанию"
+  zh-CN: "默认工作区名称"
+advanced_editors.layoutopt_orientation:
+  en: "Layoutopt Orientation"
+  ru: "Ориентация в мастер-лейауте"
+  zh-CN: "布局选项方向"
+advanced_editors.onoff:
+  en: "On/Off"
+  ru: "Вкл./Выкл."
+  zh-CN: "开/关"
+advanced_editors.speed:
+  en: "Speed"
+  ru: "Скорость"
+  zh-CN: "速度"
+advanced_editors.curve:
+  en: "Curve"
+  ru: "Кривая"
+  zh-CN: "曲线"
+advanced_editors.style:
+  en: "Style"
+  ru: "Стиль"
+  zh-CN: "样式"
+advanced_editors.description:
+  en: "Description"
+  ru: "Описание"
+  zh-CN: "描述"
+advanced_editors.dispatcher:
+  en: "Dispatcher"
+  ru: "Диспетчер"
+  zh-CN: "调度器"
+advanced_editors.modifiers:
+  en: "Modifiers"
+  ru: "Модификаторы"
+  zh-CN: "修饰符"
+advanced_editors.transform:
+  en: "Transform"
+  ru: "Преобразование"
+  zh-CN: "变换"
+advanced_editors.key: # env key
+  en: "Key"
+  ru: "Ключ"
+  zh-CN: "键"
+advanced_editors.value: # env value
+  en: "Value"
+  ru: "Значение"
+  zh-CN: "值"

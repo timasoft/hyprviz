@@ -1,0 +1,9 @@
+_version: 2
+hyprland.resize_params.exact:
+  en: "Exact"
+  ru: "Точные"
+  zh-CN: "精确"
+hyprland.resize_params.relative:
+  en: "Relative"
+  ru: "Относительные"
+  zh-CN: "相对"

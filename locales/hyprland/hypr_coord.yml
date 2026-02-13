@@ -1,0 +1,17 @@
+_version: 2
+hyprland.hypr_coord.on_screen:
+  en: "On screen"
+  ru: "На экране"
+  zh-CN: "在屏幕上"
+hyprland.hypr_coord.subtrahend_of_x:
+  en: "Subtrahend of x"
+  ru: "Смещение по X"
+  zh-CN: "X轴偏移量"
+hyprland.hypr_coord.subtrahend_of_y:
+  en: "Subtrahend of y"
+  ru: "Смещение по Y"
+  zh-CN: "Y轴偏移量"
+hyprland.hypr_coord.under_cursor:
+  en: "Under cursor"
+  ru: "Под курсором"
+  zh-CN: "光标下方"

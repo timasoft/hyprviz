@@ -1,0 +1,9 @@
+_version: 2
+gtk_converters.add:
+  en: "Add"
+  ru: "Добавить"
+  zh-CN: "添加"
+gtk_converters.remove:
+  en: "Remove"
+  ru: "Удалить"
+  zh-CN: "移除"

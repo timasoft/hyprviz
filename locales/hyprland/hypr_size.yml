@@ -1,0 +1,29 @@
+_version: 2
+hyprland.hypr_size.exact:
+  en: "Exact"
+  ru: "Точное"
+  zh-CN: "精确"
+hyprland.hypr_size.height:
+  en: "Height"
+  ru: "Высота"
+  zh-CN: "高度"
+hyprland.hypr_size.height_bound:
+  en: "Height bound"
+  ru: "Ограничение высоты"
+  zh-CN: "高度限制"
+hyprland.hypr_size.max:
+  en: "Max"
+  ru: "Максимум"
+  zh-CN: "最大"
+hyprland.hypr_size.min:
+  en: "Min"
+  ru: "Минимум"
+  zh-CN: "最小"
+hyprland.hypr_size.width:
+  en: "Width"
+  ru: "Ширина"
+  zh-CN: "宽度"
+hyprland.hypr_size.width_bound:
+  en: "Width bound"
+  ru: "Ограничение ширины"
+  zh-CN: "宽度限制"

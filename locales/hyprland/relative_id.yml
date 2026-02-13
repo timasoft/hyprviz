@@ -1,0 +1,13 @@
+_version: 2
+hyprland.relative_id.absolute:
+  en: "Absolute"
+  ru: "Абсолютный"
+  zh-CN: "绝对"
+hyprland.relative_id.next:
+  en: "Next"
+  ru: "Следующий"
+  zh-CN: "下一个"
+hyprland.relative_id.previous:
+  en: "Previous"
+  ru: "Предыдущий"
+  zh-CN: "上一个"

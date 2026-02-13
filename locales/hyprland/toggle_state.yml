@@ -1,0 +1,13 @@
+_version: 2
+hyprland.toggle_state.off:
+  en: "Off"
+  ru: "Выключено"
+  zh-CN: "关闭"
+hyprland.toggle_state.on:
+  en: "On"
+  ru: "Включено"
+  zh-CN: "开启"
+hyprland.toggle_state.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"

@@ -1,0 +1,9 @@
+_version: 2
+hyprland.z_height.bottom:
+  en: "Bottom"
+  ru: "Снизу"
+  zh-CN: "底层"
+hyprland.z_height.top:
+  en: "Top"
+  ru: "Сверху"
+  zh-CN: "顶层"

@@ -1,0 +1,17 @@
+_version: 2
+hyprland.cursor_corner.bottom_left:
+  en: "Bottom left"
+  ru: "Нижний левый"
+  zh-CN: "左下角"
+hyprland.cursor_corner.bottom_right:
+  en: "Bottom right"
+  ru: "Нижний правый"
+  zh-CN: "右下角"
+hyprland.cursor_corner.top_left:
+  en: "Top left"
+  ru: "Верхний левый"
+  zh-CN: "左上角"
+hyprland.cursor_corner.top_right:
+  en: "Top right"
+  ru: "Верхний правый"
+  zh-CN: "右上角"

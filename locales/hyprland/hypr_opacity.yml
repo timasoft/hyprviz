@@ -1,0 +1,17 @@
+_version: 2
+hyprland.hypr_opacity.active_and_inactive:
+  en: "Active and inactive"
+  ru: "Активные и неактивные"
+  zh-CN: "活动和非活动"
+hyprland.hypr_opacity.active_and_inactive_and_fullscreen:
+  en: "Active and inactive and fullscreen"
+  ru: "Активные, неактивные и полноэкранные"
+  zh-CN: "活动、非活动和全屏"
+hyprland.hypr_opacity.overall:
+  en: "Overall"
+  ru: "Общая"
+  zh-CN: "总体"
+hyprland.hypr_opacity.override:
+  en: "Override"
+  ru: "Переопределить"
+  zh-CN: "覆盖"

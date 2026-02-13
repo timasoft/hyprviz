@@ -1,7 +1,7 @@
 use crate::{
     utils::{
         BACKUP_SUFFIX, HYPRVIZ_PROFILES_PATH, atomic_write, expand_source, find_all_profiles,
-        get_config_path, reload_hyprland,
+        get_config_path, is_development_mode, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -50,7 +50,7 @@ impl ConfigGUI {
             .default_height(600)
             .build();
 
-        let title_label = Label::new(Some(&t!("hyprland_configuration")));
+        let title_label = Label::new(Some(&t!("gui.hyprland_configuration")));
 
         let header_bar = HeaderBar::builder()
             .show_title_buttons(false)
@@ -78,12 +78,12 @@ impl ConfigGUI {
         popover.set_position(gtk::PositionType::Bottom);
         popover.set_parent(&search_button);
 
-        let create_profile_button = Button::with_label(&t!("create_profile"));
-        let delete_profile_button = Button::with_label(&t!("delete_profile"));
-        let clear_backups_button = Button::with_label(&t!("clear_backups_files"));
-        let load_config_button = Button::with_label(&t!("load_hyprviz_config"));
-        let save_config_button = Button::with_label(&t!("save_hyprviz_config"));
-        let copy_button = Button::with_label(&t!("copyright"));
+        let create_profile_button = Button::with_label(&t!("gui.create_profile"));
+        let delete_profile_button = Button::with_label(&t!("gui.delete_profile"));
+        let clear_backups_button = Button::with_label(&t!("gui.clear_backups_files"));
+        let load_config_button = Button::with_label(&t!("gui.load_hyprviz_config"));
+        let save_config_button = Button::with_label(&t!("gui.save_hyprviz_config"));
+        let copy_button = Button::with_label(&t!("gui.copyright"));
 
         gear_menu_box.append(&create_profile_button);
         gear_menu_box.append(&delete_profile_button);
@@ -140,8 +140,8 @@ impl ConfigGUI {
 
         header_bar.pack_start(&locale_dropdown);
 
-        let save_button = Button::with_label(&t!("save"));
-        let undo_button = Button::with_label(&t!("undo"));
+        let save_button = Button::with_label(&t!("gui.save"));
+        let undo_button = Button::with_label(&t!("gui.undo"));
 
         let profiles = if let Some(mut profiles) = find_all_profiles() {
             if profiles.contains(&"Default".to_string()) {
@@ -159,7 +159,7 @@ impl ConfigGUI {
         let profile_dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
         profile_dropdown.set_halign(gtk::Align::End);
         profile_dropdown.set_width_request(100);
-        let current_profile_label = Label::new(Some(&t!("profile")));
+        let current_profile_label = Label::new(Some(&t!("gui.profile")));
 
         header_bar.pack_end(&save_button);
         header_bar.pack_end(&undo_button);
@@ -214,7 +214,7 @@ impl ConfigGUI {
                 let gui = Rc::clone(&gui_clone);
 
                 let dialog_window = Window::builder()
-                    .title(t!("create_new_profile").to_string())
+                    .title(t!("gui.create_new_profile").to_string())
                     .modal(true)
                     .transient_for(&gui.borrow().window)
                     .destroy_with_parent(true)
@@ -227,9 +227,9 @@ impl ConfigGUI {
                 dialog_box.set_margin_start(10);
                 dialog_box.set_margin_end(10);
 
-                let label = Label::new(Some(&t!("enter_profile_name")));
+                let label = Label::new(Some(&t!("gui.enter_profile_name")));
                 let entry = Entry::new();
-                entry.set_placeholder_text(Some(&t!("new_profile")));
+                entry.set_placeholder_text(Some(&t!("gui.new_profile")));
 
                 dialog_box.append(&label);
                 dialog_box.append(&entry);
@@ -237,8 +237,8 @@ impl ConfigGUI {
                 let buttons_box = Box::new(Orientation::Horizontal, 5);
                 buttons_box.set_halign(gtk::Align::End);
 
-                let cancel_button = Button::with_label(&t!("cancel"));
-                let create_button = Button::with_label(&t!("create"));
+                let cancel_button = Button::with_label(&t!("gui.cancel"));
+                let create_button = Button::with_label(&t!("gui.create"));
 
                 buttons_box.append(&cancel_button);
                 buttons_box.append(&create_button);
@@ -258,8 +258,8 @@ impl ConfigGUI {
                     let profile_name = entry_clone.text().to_string();
                     if profile_name.is_empty() || profile_name == "Default" {
                         gui_clone.borrow().custom_error_popup(
-                            &t!("invalid_profile_name"),
-                            &t!("profile_name_cannot_be_empty_or_default"),
+                            &t!("gui.invalid_profile_name"),
+                            &t!("gui.profile_name_cannot_be_empty_or_default"),
                         );
                         return;
                     }
@@ -268,8 +268,8 @@ impl ConfigGUI {
 
                     if hyprviz_path.exists() {
                         gui_clone.borrow().custom_error_popup(
-                            &t!("profile_exists"),
-                            &t!("profile__already_exists", name = profile_name),
+                            &t!("gui.profile_exists"),
+                            &t!("gui.profile__already_exists", name = profile_name),
                         );
                         return;
                     }
@@ -279,8 +279,11 @@ impl ConfigGUI {
                         Ok(s) => s,
                         Err(e) => {
                             gui_clone.borrow().custom_error_popup_critical(
-                                &t!("reading_failed"),
-                                &t!("failed_to_read_the_default_configuration_file_", error = e),
+                                &t!("gui.reading_failed"),
+                                &t!(
+                                    "gui.failed_to_read_the_default_configuration_file_",
+                                    error = e
+                                ),
                             );
                             return;
                         }
@@ -288,8 +291,8 @@ impl ConfigGUI {
 
                     if let Err(e) = atomic_write(&hyprviz_path, &config_str) {
                         gui_clone.borrow().custom_error_popup(
-                            &t!("failed_to_create_profile"),
-                            &t!("failed_to_create_profile_file_", error = e),
+                            &t!("gui.failed_to_create_profile"),
+                            &t!("gui.failed_to_create_profile_file_", error = e),
                         );
                         return;
                     }
@@ -337,14 +340,14 @@ impl ConfigGUI {
 
                 if profile_name == "Default" {
                     gui.borrow().custom_error_popup(
-                        &t!("cannot_delete_profile"),
-                        &t!("the_default_profile_cannot_be_deleted"),
+                        &t!("gui.cannot_delete_profile"),
+                        &t!("gui.the_default_profile_cannot_be_deleted"),
                     );
                     return;
                 }
 
                 let dialog_window = Window::builder()
-                    .title(t!("delete_profile"))
+                    .title(t!("gui.delete_profile"))
                     .modal(true)
                     .transient_for(&gui.borrow().window)
                     .destroy_with_parent(true)
@@ -358,7 +361,7 @@ impl ConfigGUI {
                 dialog_box.set_margin_end(10);
 
                 let label = Label::new(Some(&t!(
-                    "are_you_sure_you_want_to_delete_the_profile_",
+                    "gui.are_you_sure_you_want_to_delete_the_profile_",
                     name = profile_name
                 )));
                 label.set_wrap(true);
@@ -371,8 +374,8 @@ impl ConfigGUI {
                 let buttons_box = Box::new(Orientation::Horizontal, 5);
                 buttons_box.set_halign(gtk::Align::End);
 
-                let cancel_button = Button::with_label(&t!("cancel"));
-                let delete_button = Button::with_label(&t!("delete"));
+                let cancel_button = Button::with_label(&t!("gui.cancel"));
+                let delete_button = Button::with_label(&t!("gui.delete"));
 
                 buttons_box.append(&cancel_button);
                 buttons_box.append(&delete_button);
@@ -415,8 +418,8 @@ impl ConfigGUI {
                         }
                         Err(e) => {
                             gui_clone.borrow().custom_error_popup(
-                                &t!("failed_to_delete_profile"),
-                                &t!("failed_to_delete_profile_file_", error = e),
+                                &t!("gui.failed_to_delete_profile"),
+                                &t!("gui.failed_to_delete_profile_file_", error = e),
                             );
                         }
                     }
@@ -449,14 +452,14 @@ impl ConfigGUI {
 
             if backup_files.is_empty() {
                 gui.borrow().custom_info_popup(
-                    &t!("no_backup_files"),
-                    &t!("no_backup_files_found_to_delete"),
+                    &t!("gui.no_backup_files"),
+                    &t!("gui.no_backup_files_found_to_delete"),
                 );
                 return;
             }
 
             let dialog_window = Window::builder()
-                .title(t!("clear_backups_files"))
+                .title(t!("gui.clear_backups_files"))
                 .modal(true)
                 .transient_for(&gui.borrow().window)
                 .destroy_with_parent(true)
@@ -472,10 +475,10 @@ impl ConfigGUI {
             let label = Label::new(Some(&format!(
                 "{}\n{}.",
                 &t!(
-                    "are_you_sure_you_want_to_delete__backup_files",
+                    "gui.are_you_sure_you_want_to_delete__backup_files",
                     n = backup_files.len()
                 ),
-                &t!("this_operation_cannot_be_undone"),
+                &t!("gui.this_operation_cannot_be_undone"),
             )));
             label.set_wrap(true);
             label.set_width_chars(50);
@@ -487,8 +490,8 @@ impl ConfigGUI {
             let buttons_box = Box::new(Orientation::Horizontal, 5);
             buttons_box.set_halign(gtk::Align::End);
 
-            let cancel_button = Button::with_label(&t!("cancel"));
-            let clear_button = Button::with_label(&t!("clear"));
+            let cancel_button = Button::with_label(&t!("gui.cancel"));
+            let clear_button = Button::with_label(&t!("gui.clear"));
 
             buttons_box.append(&cancel_button);
             buttons_box.append(&clear_button);
@@ -513,7 +516,7 @@ impl ConfigGUI {
                         Ok(_) => deleted_count += 1,
                         Err(e) => {
                             error_message.push_str(&t!(
-                                "failed_to_delete__",
+                                "gui.failed_to_delete__",
                                 file = file_path.display(),
                                 error = e
                             ));
@@ -526,21 +529,21 @@ impl ConfigGUI {
 
                 if !error_message.is_empty() {
                     gui_clone.borrow().custom_error_popup(
-                        &t!("partial_success"),
+                        &t!("gui.partial_success"),
                         &format!(
                             "{}.\n{}",
                             &t!(
-                                "deleted__of__backup_files",
+                                "gui.deleted__of__backup_files",
                                 n = deleted_count,
                                 all = backup_files_clone.len()
                             ),
-                            &t!("errors_", errors = error_message),
+                            &t!("gui.errors_", errors = error_message),
                         ),
                     );
                 } else {
                     gui_clone.borrow().custom_info_popup(
-                        &t!("success"),
-                        &t!("successfully_deleted__backup_files", n = deleted_count),
+                        &t!("gui.success"),
+                        &t!("gui.successfully_deleted__backup_files", n = deleted_count),
                     );
                 }
             });
@@ -554,8 +557,8 @@ impl ConfigGUI {
 
             glib::MainContext::default().spawn_local(async move {
                 let dialog = FileDialog::builder()
-                    .title(t!("load_hyprviz_config"))
-                    .accept_label(t!("open"))
+                    .title(t!("gui.load_hyprviz_config"))
+                    .accept_label(t!("gui.open"))
                     .build();
                 let window = gui.borrow().window.clone();
 
@@ -573,9 +576,9 @@ impl ConfigGUI {
 
             glib::MainContext::default().spawn_local(async move {
                 let dialog = FileDialog::builder()
-                    .title(t!("save_hyprviz_config"))
+                    .title(t!("gui.save_hyprviz_config"))
                     .initial_name("hyprviz_config.json")
-                    .accept_label(t!("save"))
+                    .accept_label(t!("gui.save"))
                     .build();
                 let window = gui.borrow().window.clone();
 
@@ -617,13 +620,13 @@ along with this program; if not, see
 
                     gui_clone.borrow_mut().reload_ui();
                     gui_clone.borrow().custom_info_popup(
-                        &t!("language_changed"),
-                        &t!("language_changed_to_", language = new_locale),
+                        &t!("gui.language_changed"),
+                        &t!("gui.language_changed_to_", language = new_locale),
                     )
                 } else {
                     gui_clone.borrow().custom_error_popup(
-                        &t!("failed_to_get_selected_language"),
-                        &t!("failed_to_get_selected_language"),
+                        &t!("gui.failed_to_get_selected_language"),
+                        &t!("gui.failed_to_get_selected_language"),
                     )
                 }
             });
@@ -666,20 +669,20 @@ along with this program; if not, see
                         }
                     }
                     self.custom_info_popup(
-                        &t!("config_loaded"),
-                        &t!("hyprviz_configuration_loaded_successfully"),
+                        &t!("gui.config_loaded"),
+                        &t!("gui.hyprviz_configuration_loaded_successfully"),
                     );
                 } else {
                     self.custom_error_popup(
-                        &t!("invalid_config"),
-                        &t!("failed_to_parse_the_configuration_file"),
+                        &t!("gui.invalid_config"),
+                        &t!("gui.failed_to_parse_the_configuration_file"),
                     );
                 }
             }
             Err(e) => {
                 self.custom_error_popup(
-                    &t!("loading_failed"),
-                    &t!("failed_to_read_the_configuration_file_", error = e),
+                    &t!("gui.loading_failed"),
+                    &t!("gui.failed_to_read_the_configuration_file_", error = e),
                 );
             }
         }
@@ -697,21 +700,21 @@ along with this program; if not, see
             Ok(json) => match atomic_write(path, &json) {
                 Ok(_) => {
                     self.custom_info_popup(
-                        &t!("config_saved"),
-                        &t!("hyprviz_configuration_saved_successfully"),
+                        &t!("gui.config_saved"),
+                        &t!("gui.hyprviz_configuration_saved_successfully"),
                     );
                 }
                 Err(e) => {
                     self.custom_error_popup(
-                        &t!("saving_failed"),
-                        &t!("failed_to_write_the_configuration_file_", error = e),
+                        &t!("gui.saving_failed"),
+                        &t!("gui.failed_to_write_the_configuration_file_", error = e),
                     );
                 }
             },
             Err(e) => {
                 self.custom_error_popup(
-                    &t!("serialization_failed"),
-                    &t!("failed_to_serialize_the_configuration_", error = e),
+                    &t!("gui.serialization_failed"),
+                    &t!("gui.failed_to_serialize_the_configuration_", error = e),
                 );
             }
         }
@@ -786,8 +789,8 @@ along with this program; if not, see
             && let Err(e) = fs::File::create(&path)
         {
             self.custom_error_popup_critical(
-                &t!("failed_to_create_hyprviz_config_file"),
-                &t!("failed_to_create_hyprviz_config_file_", error = e),
+                &t!("gui.failed_to_create_hyprviz_config_file"),
+                &t!("gui.failed_to_create_hyprviz_config_file_", error = e),
             );
         }
 
@@ -795,8 +798,8 @@ along with this program; if not, see
             Ok(s) => s,
             Err(e) => {
                 self.custom_error_popup_critical(
-                    &t!("reading_failed"),
-                    &t!("failed_to_read_the_configuration_file_", error = e),
+                    &t!("gui.reading_failed"),
+                    &t!("gui.failed_to_read_the_configuration_file_", error = e),
                 );
                 return;
             }
@@ -808,8 +811,8 @@ along with this program; if not, see
         if !changes.borrow().is_empty() {
             if let Err(e) = fs::copy(&path, &backup_path) {
                 self.custom_error_popup(
-                    &t!("backup_failed"),
-                    &t!("failed_to_create_backup_", error = e),
+                    &t!("gui.backup_failed"),
+                    &t!("gui.failed_to_create_backup_", error = e),
                 );
             }
 
@@ -830,6 +833,7 @@ along with this program; if not, see
                         }
 
                         category_widget.load_config(
+                            &self.window,
                             &parsed_config,
                             &profile_name,
                             category,
@@ -848,13 +852,16 @@ along with this program; if not, see
                 Err(e) => {
                     let _ = fs::remove_file(&temp_path);
                     self.custom_error_popup(
-                        &t!("saving_failed"),
-                        &t!("failed_to_save_the_configuration_automatically_", error = e),
+                        &t!("gui.saving_failed"),
+                        &t!(
+                            "gui.failed_to_save_the_configuration_automatically_",
+                            error = e
+                        ),
                     );
                 }
             }
         } else {
-            self.custom_error_popup(&t!("saving_failed"), &t!("no_changes_to_save"));
+            self.custom_error_popup(&t!("gui.saving_failed"), &t!("gui.no_changes_to_save"));
         }
     }
 
@@ -882,7 +889,7 @@ along with this program; if not, see
         if backup_path.exists() {
             match fs::rename(&backup_path, &path) {
                 Ok(_) => {
-                    println!("{}", &t!("configuration_restored_from_backup"));
+                    println!("{}", &t!("gui.configuration_restored_from_backup"));
                     reload_hyprland();
                     if let Ok(config_str) = expand_source(&path_for_read) {
                         let parsed_config = parse_config(&config_str);
@@ -891,22 +898,22 @@ along with this program; if not, see
                         self.changed_options.clone().borrow_mut().clear();
                     } else {
                         self.custom_error_popup(
-                            &t!("reload_failed"),
-                            &t!("failed_to_reload_the_configuration_after_undo"),
+                            &t!("gui.reload_failed"),
+                            &t!("gui.failed_to_reload_the_configuration_after_undo"),
                         );
                     }
                 }
                 Err(e) => {
                     self.custom_error_popup(
-                        &t!("undo_failed"),
-                        &t!("failed_to_restore_from_backup_", error = e),
+                        &t!("gui.undo_failed"),
+                        &t!("gui.failed_to_restore_from_backup_", error = e),
                     );
                 }
             }
         } else {
             self.custom_error_popup(
-                &t!("undo_failed"),
-                &t!("no_backup_file_found_save_changes_to_create_a_backup"),
+                &t!("gui.undo_failed"),
+                &t!("gui.no_backup_file_found_save_changes_to_create_a_backup"),
             );
         }
     }
@@ -1003,35 +1010,39 @@ along with this program; if not, see
             }
         });
 
-        let categories = [
-            (t!("general").to_string(), "general"),
-            (t!("decoration").to_string(), "decoration"),
-            (t!("animations_settings").to_string(), "animations"),
-            (t!("input").to_string(), "input"),
-            (t!("gestures_settings").to_string(), "gestures"),
-            (t!("misc").to_string(), "misc"),
-            (t!("bind_settings").to_string(), "binds"),
-            (t!("group").to_string(), "group"),
-            (t!("layouts").to_string(), "layouts"),
+        let mut categories = vec![
+            (t!("gui.general").to_string(), "general"),
+            (t!("gui.decoration").to_string(), "decoration"),
+            (t!("gui.animations_settings").to_string(), "animations"),
+            (t!("gui.input").to_string(), "input"),
+            (t!("gui.gestures_settings").to_string(), "gestures"),
+            (t!("gui.misc").to_string(), "misc"),
+            (t!("gui.bind_settings").to_string(), "binds"),
+            (t!("gui.group").to_string(), "group"),
+            (t!("gui.layouts").to_string(), "layouts"),
             ("XWayland".to_string(), "xwayland"),
             ("OpenGL".to_string(), "opengl"),
-            (t!("render").to_string(), "render"),
-            (t!("cursor").to_string(), "cursor"),
-            (t!("ecosystem").to_string(), "ecosystem"),
-            (t!("experimental").to_string(), "experimental"),
-            (t!("debug").to_string(), "debug"),
-            (t!("monitors").to_string(), "monitor"),
-            (t!("workspaces").to_string(), "workspace"),
-            (t!("animations").to_string(), "animation"),
-            (t!("binds").to_string(), "bind"),
-            (t!("gestures").to_string(), "gesture"),
-            (t!("window_rules").to_string(), "windowrule"),
-            (t!("layer_rules").to_string(), "layerrule"),
-            (t!("execs").to_string(), "exec"),
-            (t!("envs").to_string(), "env"),
-            (t!("all_top_level").to_string(), "top_level"),
-            (t!("system_info").to_string(), "systeminfo"),
+            (t!("gui.render").to_string(), "render"),
+            (t!("gui.cursor").to_string(), "cursor"),
+            (t!("gui.ecosystem").to_string(), "ecosystem"),
+            (t!("gui.experimental").to_string(), "experimental"),
+            (t!("gui.debug").to_string(), "debug"),
+            (t!("gui.monitors").to_string(), "monitor"),
+            (t!("gui.workspaces").to_string(), "workspace"),
+            (t!("gui.animations").to_string(), "animation"),
+            (t!("gui.binds").to_string(), "bind"),
+            (t!("gui.gestures").to_string(), "gesture"),
+            (t!("gui.window_rules").to_string(), "windowrule"),
+            (t!("gui.layer_rules").to_string(), "layerrule"),
+            (t!("gui.execs").to_string(), "exec"),
+            (t!("gui.envs").to_string(), "env"),
+            (t!("gui.all_top_level").to_string(), "top_level"),
+            (t!("gui.system_info").to_string(), "systeminfo"),
         ];
+
+        if is_development_mode() {
+            categories.push((t!("gui.togtkbox_test").to_string(), "togtkbox_test"));
+        }
 
         for (display_name, category) in &categories {
             let widget = ConfigWidget::new(category, display_name);
@@ -1042,7 +1053,13 @@ along with this program; if not, see
 
         for (_, category) in &categories {
             if let Some(widget) = self.config_widgets.get(*category) {
-                widget.load_config(config, profile_name, category, self.changed_options.clone());
+                widget.load_config(
+                    &self.window,
+                    config,
+                    profile_name,
+                    category,
+                    self.changed_options.clone(),
+                );
             }
         }
 
@@ -1213,8 +1230,8 @@ along with this program; if not, see
             Ok(config) => config,
             Err(e) => {
                 self.custom_error_popup(
-                    &t!("reading_failed"),
-                    &t!("failed_to_read_the_configuration_file_", error = e),
+                    &t!("gui.reading_failed"),
+                    &t!("gui.failed_to_read_the_configuration_file_", error = e),
                 );
                 return;
             }
@@ -1229,19 +1246,22 @@ along with this program; if not, see
             self.stack.set_visible_child(&child);
         }
 
-        self.title_label.set_label(&t!("hyprland_configuration"));
-        self.current_profile_label.set_label(&t!("profile"));
-        self.undo_button.set_label(&t!("undo"));
-        self.save_button.set_label(&t!("save"));
+        self.title_label
+            .set_label(&t!("gui.hyprland_configuration"));
+        self.current_profile_label.set_label(&t!("gui.profile"));
+        self.undo_button.set_label(&t!("gui.undo"));
+        self.save_button.set_label(&t!("gui.save"));
 
-        self.create_profile_button.set_label(&t!("create_profile"));
-        self.delete_profile_button.set_label(&t!("delete_profile"));
+        self.create_profile_button
+            .set_label(&t!("gui.create_profile"));
+        self.delete_profile_button
+            .set_label(&t!("gui.delete_profile"));
         self.clear_backups_button
-            .set_label(&t!("clear_backups_files"));
+            .set_label(&t!("gui.clear_backups_files"));
         self.load_config_button
-            .set_label(&t!("load_hyprviz_config"));
+            .set_label(&t!("gui.load_hyprviz_config"));
         self.save_config_button
-            .set_label(&t!("save_hyprviz_config"));
-        self.copy_button.set_label(&t!("copyright"));
+            .set_label(&t!("gui.save_hyprviz_config"));
+        self.copy_button.set_label(&t!("gui.copyright"));
     }
 }

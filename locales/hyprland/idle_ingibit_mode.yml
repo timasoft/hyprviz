@@ -1,0 +1,17 @@
+_version: 2
+hyprland.idle_ingibit_mode.always:
+  en: "Always"
+  ru: "Всегда"
+  zh-CN: "始终"
+hyprland.idle_ingibit_mode.focus:
+  en: "Focus"
+  ru: "При фокусе"
+  zh-CN: "聚焦时"
+hyprland.idle_ingibit_mode.fullscreen:
+  en: "Full screen"
+  ru: "В полноэкранном режиме"
+  zh-CN: "全屏时"
+hyprland.idle_ingibit_mode.none:
+  en: "None"
+  ru: "Нет"
+  zh-CN: "无"
