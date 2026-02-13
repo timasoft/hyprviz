@@ -236,4 +236,4 @@ impl EnumConfigForGtk for WorkspaceTarget {
 }
 
 register_togtkbox!(WorkspaceTarget);
-register_togtkbox_with_separator_names!((u32,), (i32,), (RelativeId,), (String,),);
+register_togtkbox_with_separator_names!((RelativeId,));

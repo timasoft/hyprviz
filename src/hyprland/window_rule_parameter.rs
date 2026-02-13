@@ -365,9 +365,6 @@ impl EnumConfigForGtk for WindowRuleParameter {
 
 register_togtkbox!(WindowRuleParameter);
 register_togtkbox_with_separator_names!(
-    (String,),
     (WindowRuleFullscreenState, WindowRuleFullscreenState),
-    (IdOrName,),
     (IdOrNameOrWorkspaceSelector,),
-    (ContentType,),
 );

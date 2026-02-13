@@ -44,6 +44,9 @@ pub trait EnumConfigForGtk {
     }
 }
 
+#[allow(dead_code)]
+pub struct RegistrationGuard;
+
 pub trait ToGtkBox {
     fn to_gtk_box(entry: &Entry) -> GtkBox;
 }
@@ -52,10 +55,15 @@ pub struct ToGtkBoxImplementation {
     pub constructor: fn(&Entry) -> GtkBox,
 }
 inventory::collect!(ToGtkBoxImplementation);
+#[allow(dead_code)]
+pub trait RegisteredToGtkBox<T> {}
 #[macro_export]
 macro_rules! register_togtkbox {
     ($($ty:ty),* $(,)?) => {
         $(
+            impl $crate::gtk_converters::RegisteredToGtkBox<$ty>
+                for $crate::gtk_converters::RegistrationGuard {}
+
             inventory::submit! {
                 $crate::gtk_converters::ToGtkBoxImplementation {
                     name: stringify!($ty),
@@ -74,10 +82,15 @@ pub struct ToGtkBoxWithSeparatorImplementation {
     pub constructor: fn(&Entry, char) -> GtkBox,
 }
 inventory::collect!(ToGtkBoxWithSeparatorImplementation);
+#[allow(dead_code)]
+pub trait RegisteredToGtkBoxWithSeparator<T> {}
 #[macro_export]
 macro_rules! register_togtkbox_with_separator {
     ($($ty:ty),* $(,)?) => {
         $(
+            impl $crate::gtk_converters::RegisteredToGtkBoxWithSeparator<$ty>
+                for $crate::gtk_converters::RegistrationGuard {}
+
             inventory::submit! {
                 $crate::gtk_converters::ToGtkBoxWithSeparatorImplementation {
                     name: stringify!($ty),
@@ -101,10 +114,15 @@ pub struct ToGtkBoxWithSeparatorAndNamesImplementation {
     pub constructor: ToGtkBoxWithSeparatorAndNamesBuilder,
 }
 inventory::collect!(ToGtkBoxWithSeparatorAndNamesImplementation);
+#[allow(dead_code)]
+pub trait RegisteredToGtkBoxWithSeparatorAndNames<T> {}
 #[macro_export]
 macro_rules! register_togtkbox_with_separator_names {
     ($($ty:ty),* $(,)?) => {
         $(
+            impl $crate::gtk_converters::RegisteredToGtkBoxWithSeparatorAndNames<$ty>
+                for $crate::gtk_converters::RegistrationGuard {}
+
             inventory::submit! {
                 $crate::gtk_converters::ToGtkBoxWithSeparatorAndNamesImplementation {
                     name: stringify!($ty),

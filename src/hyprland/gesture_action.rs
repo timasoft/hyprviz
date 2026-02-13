@@ -162,9 +162,4 @@ impl EnumConfigForGtk for GestureAction {
 }
 
 register_togtkbox!(GestureAction);
-register_togtkbox_with_separator_names!(
-    (Dispatcher,),
-    (String,),
-    (GestureFullscreen,),
-    (GestureFloating,)
-);
+register_togtkbox_with_separator_names!((Dispatcher,), (GestureFullscreen,), (GestureFloating,));

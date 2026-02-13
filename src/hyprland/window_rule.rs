@@ -455,13 +455,5 @@ register_togtkbox_with_separator_names!(
     (HyprCoord,),
     (HyprSize,),
     (IdOrName,),
-    (WorkspaceTarget,),
     (ContentType,),
-    (u32,),
-    (AnimationStyle,),
-    (BorderColor,),
-    (IdleIngibitMode,),
-    (HyprOpacity,),
-    (TagToggleState, String),
-    (u32, u32),
 );

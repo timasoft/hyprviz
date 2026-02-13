@@ -3,7 +3,7 @@ use crate::{
         EnumConfigForGtk, FieldLabel, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
         ToGtkBoxWithSeparatorAndNamesBuilder, create_spin_button_builder,
     },
-    register_togtkbox, register_togtkbox_with_separator_names,
+    register_togtkbox,
     utils::HasDiscriminant,
 };
 use gtk::StringList;
@@ -117,4 +117,3 @@ impl EnumConfigForGtk for PixelOrPercent {
 }
 
 register_togtkbox!(PixelOrPercent);
-register_togtkbox_with_separator_names!((i32,));

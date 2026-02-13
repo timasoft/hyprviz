@@ -3,7 +3,7 @@ use crate::{
         EnumConfigForGtk, FieldLabel, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
         ToGtkBoxWithSeparatorAndNamesBuilder,
     },
-    register_togtkbox, register_togtkbox_with_separator_names,
+    register_togtkbox,
     utils::HasDiscriminant,
 };
 use gtk::StringList;
@@ -100,4 +100,3 @@ impl EnumConfigForGtk for NamespaceOrAddress {
 }
 
 register_togtkbox!(NamespaceOrAddress);
-register_togtkbox_with_separator_names!((String,));

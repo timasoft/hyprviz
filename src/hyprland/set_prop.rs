@@ -712,14 +712,9 @@ impl EnumConfigForGtk for SetProp {
 
 register_togtkbox!(SetProp);
 register_togtkbox_with_separator_names!(
-    (bool,),
-    (String,),
-    (AnimationStyle,),
     (BorderColor,),
     (IdleIngibitMode,),
     (HyprOpacity,),
     (TagToggleState, String),
-    (u32, u32),
-    (u32,),
     (SetPropToggleState,),
 );

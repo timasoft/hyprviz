@@ -3,7 +3,7 @@ use crate::{
     advanced_editors::{create_entry, create_spin_button, create_switch},
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     hyprland::modifier::parse_modifiers,
-    register_togtkbox, register_togtkbox_with_separator,
+    register_togtkbox,
     utils::{MAX_SAFE_STEP_0_01_F64, join_with_separator},
 };
 use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
@@ -336,4 +336,3 @@ impl ToGtkBox for Gesture {
 }
 
 register_togtkbox!(Gesture);
-register_togtkbox_with_separator!(HashSet<Modifier>);

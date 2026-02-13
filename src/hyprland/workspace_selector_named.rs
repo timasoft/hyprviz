@@ -3,7 +3,7 @@ use crate::{
         EnumConfigForGtk, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
         ToGtkBoxWithSeparatorAndNamesBuilder,
     },
-    register_togtkbox, register_togtkbox_with_separator_names,
+    register_togtkbox,
     utils::{HasDiscriminant, parse_bool},
 };
 use gtk::StringList;
@@ -107,4 +107,3 @@ impl EnumConfigForGtk for WorkspaceSelectorNamed {
 }
 
 register_togtkbox!(WorkspaceSelectorNamed);
-register_togtkbox_with_separator_names!((bool,), (String,));

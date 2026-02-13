@@ -2,7 +2,7 @@ use super::WindowRule;
 use crate::{
     advanced_editors::create_entry,
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
-    register_togtkbox, register_togtkbox_with_separator,
+    register_togtkbox,
     utils::join_with_separator,
 };
 use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
@@ -162,4 +162,3 @@ impl ToGtkBox for ExecWithRules {
 }
 
 register_togtkbox!(ExecWithRules);
-register_togtkbox_with_separator!(Vec<WindowRule>);

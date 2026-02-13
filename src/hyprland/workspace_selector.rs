@@ -231,7 +231,6 @@ impl EnumConfigForGtk for WorkspaceSelector {
 register_togtkbox!(WorkspaceSelector);
 register_togtkbox_with_separator_names!(
     (Range,),
-    (bool,),
     (WorkspaceSelectorNamed,),
     (MonitorSelector,),
     (WorkspaceSelectorWindowCount,),

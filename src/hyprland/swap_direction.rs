@@ -4,7 +4,7 @@ use crate::{
         EnumConfigForGtk, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
         ToGtkBoxWithSeparatorAndNamesBuilder,
     },
-    register_togtkbox, register_togtkbox_with_separator_names,
+    register_togtkbox,
     utils::HasDiscriminant,
 };
 use gtk::StringList;
@@ -107,4 +107,3 @@ impl EnumConfigForGtk for SwapDirection {
 }
 
 register_togtkbox!(SwapDirection);
-register_togtkbox_with_separator_names!((Direction,), (WindowTarget,));

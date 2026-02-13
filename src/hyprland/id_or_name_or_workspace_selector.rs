@@ -4,7 +4,7 @@ use crate::{
         EnumConfigForGtk, ToGtkBoxWithSeparator, ToGtkBoxWithSeparatorAndNames,
         ToGtkBoxWithSeparatorAndNamesBuilder,
     },
-    register_togtkbox, register_togtkbox_with_separator, register_togtkbox_with_separator_names,
+    register_togtkbox, register_togtkbox_with_separator,
     utils::{HasDiscriminant, join_with_separator},
 };
 use gtk::StringList;
@@ -117,4 +117,3 @@ impl EnumConfigForGtk for IdOrNameOrWorkspaceSelector {
 
 register_togtkbox!(IdOrNameOrWorkspaceSelector);
 register_togtkbox_with_separator!(Vec<WorkspaceSelector>);
-register_togtkbox_with_separator_names!((u32,), (String,));

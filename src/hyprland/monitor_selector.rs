@@ -3,7 +3,7 @@ use crate::{
         EnumConfigForGtk, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
         ToGtkBoxWithSeparatorAndNamesBuilder,
     },
-    register_togtkbox, register_togtkbox_with_separator_names,
+    register_togtkbox,
     utils::HasDiscriminant,
 };
 use gtk::StringList;
@@ -101,4 +101,3 @@ impl EnumConfigForGtk for MonitorSelector {
 }
 
 register_togtkbox!(MonitorSelector);
-register_togtkbox_with_separator_names!((String,));
