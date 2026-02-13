@@ -32,14 +32,6 @@ advanced_editors.no_active_inputs:
   ru: "Нет активных клавиш\n"
   zh-CN: "没有激活的输入\n"
 
-advanced_editors.bind:
-  en: "Bind"
-  ru: "Привязать"
-  zh-CN: "绑定"
-advanced_editors.unbind:
-  en: "Unbind"
-  ru: "Отвязать"
-  zh-CN: "解绑"
 advanced_editors.none:
   en: "None"
   ru: "Нет"

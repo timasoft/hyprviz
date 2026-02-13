@@ -549,8 +549,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
         "bind" => {
             let bind_left_box = Box::new(GtkOrientation::Horizontal, 5);
 
-            let bind_type_string_list =
-                StringList::new(&[&t!("advanced_editors.bind"), &t!("advanced_editors.unbind")]);
+            let bind_type_string_list = StringList::new(&["bind", "unbind"]);
             let bind_type_dropdown = create_dropdown(&bind_type_string_list);
             bind_left_box.append(&Label::new(Some(&t!("advanced_editors.type"))));
             bind_left_box.append(&bind_type_dropdown);
