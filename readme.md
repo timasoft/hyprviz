@@ -10,6 +10,8 @@
 **Fork** of [HyprGUI](https://github.com/MarkusVolk/hyprgui) — an unofficial GUI for configuring Hyprland, built with GTK4 and Rust. 🚀🦀<br>
 Comes with a custom [hyprparser](https://crates.io/crates/hyprparser) for Hyprland's configuration file. (Rust btw) 🦀
 
+> **Note:** Hyprland 0.52 is not supported yet.
+
 ![Preview](.github/preview.png)
 
 </div>
@@ -120,6 +122,8 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add binds editor
 - ~~Add monitor layuot editor~~
 - [x] Add fancy editors for all options
+- [ ] Add symlink support
+- [ ] Replace hyprparser with [hyprlang-rs](https://github.com/spinualexandru/hyprlang-rs)
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
 
