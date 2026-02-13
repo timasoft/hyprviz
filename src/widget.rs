@@ -24,7 +24,7 @@ use crate::{
         ToGtkBoxWithSeparatorImplementation,
     },
     guides::create_guide,
-    hyprland::{FontWeight, HyprGradient},
+    hyprland::{FontWeight, HyprGradient, Vec2},
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
         get_latest_version, parse_top_level_options,
@@ -876,6 +876,17 @@ fn add_font_weight_option(
     default: &str,
 ) {
     add_to_gtk_box_option::<FontWeight>(container, options, name, label, description, default);
+}
+
+fn add_vec2_option(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+) {
+    add_to_gtk_box_option::<Vec2>(container, options, name, label, description, default);
 }
 
 fn append_option_row(
@@ -1745,13 +1756,13 @@ impl ConfigWidget {
                     &t!("widget.decoration_category.shadow.color_inactive_description"),
                     "",
                 );
-                add_string_option(
+                add_vec2_option(
                     &container,
                     &mut options,
                     "shadow:offset",
                     &t!("widget.decoration_category.shadow.offset_label"),
                     &t!("widget.decoration_category.shadow.offset_description"),
-                    "[0, 0]",
+                    "0 0",
                 );
                 add_float_option(
                     &container,
@@ -2246,13 +2257,13 @@ impl ConfigWidget {
                     &t!("widget.input_category.tablet.output_description"),
                     "",
                 );
-                add_string_option(
+                add_vec2_option(
                     &container,
                     &mut options,
                     "tablet:region_position",
                     &t!("widget.input_category.tablet.region_position_label"),
                     &t!("widget.input_category.tablet.region_position_description"),
-                    "[0, 0]",
+                    "0 0",
                 );
                 add_bool_option(
                     &container,
@@ -2262,13 +2273,13 @@ impl ConfigWidget {
                     &t!("widget.input_category.tablet.absolute_position_description"),
                     "false",
                 );
-                add_string_option(
+                add_vec2_option(
                     &container,
                     &mut options,
                     "tablet:region_size",
                     &t!("widget.input_category.tablet.region_size_label"),
                     &t!("widget.input_category.tablet.region_size_description"),
-                    "[0, 0]",
+                    "0 0",
                 );
                 add_bool_option(
                     &container,
@@ -2286,21 +2297,21 @@ impl ConfigWidget {
                     &t!("widget.input_category.tablet.left_handed_description"),
                     "false",
                 );
-                add_string_option(
+                add_vec2_option(
                     &container,
                     &mut options,
                     "tablet:active_area_size",
                     &t!("widget.input_category.tablet.active_area_size_label"),
                     &t!("widget.input_category.tablet.active_area_size_description"),
-                    "[0, 0]",
+                    "0 0",
                 );
-                add_string_option(
+                add_vec2_option(
                     &container,
                     &mut options,
                     "tablet:active_area_position",
                     &t!("widget.input_category.tablet.active_area_position_label"),
                     &t!("widget.input_category.tablet.active_area_position_description"),
-                    "[0, 0]",
+                    "0 0",
                 );
 
                 add_section(
