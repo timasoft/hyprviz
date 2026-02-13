@@ -18,10 +18,11 @@ use crate::{
         create_bind_editor, create_curve_editor, create_entry, create_fancy_boxline,
     },
     gtk_converters::{
-        FieldLabel, ToGtkBoxImplementation, ToGtkBoxWithSeparatorAndNamesImplementation,
+        FieldLabel, ToGtkBox, ToGtkBoxImplementation, ToGtkBoxWithSeparatorAndNamesImplementation,
         ToGtkBoxWithSeparatorImplementation,
     },
     guides::create_guide,
+    hyprland::HyprGradient,
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
         get_latest_version, parse_top_level_options,
@@ -768,6 +769,91 @@ fn add_color_option(
     );
 }
 
+fn add_gradient_option(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+) {
+    let hbox = Box::new(Orientation::Horizontal, 10);
+    hbox.set_margin_start(10);
+    hbox.set_margin_end(10);
+    hbox.set_margin_top(5);
+    hbox.set_margin_bottom(5);
+
+    let label_box = Box::new(Orientation::Horizontal, 5);
+    label_box.set_hexpand(true);
+
+    let label_widget = Label::new(None);
+    label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
+
+    let popover = Popover::new();
+    let description_label = Label::new(Some(description));
+    description_label.set_wrap(true);
+    description_label.set_width_chars(40);
+    description_label.set_max_width_chars(60);
+    description_label.set_justify(Justification::Fill);
+    description_label.set_xalign(0.0);
+    description_label.set_margin_top(5);
+    description_label.set_margin_bottom(5);
+    description_label.set_margin_start(5);
+    description_label.set_margin_end(5);
+    popover.set_child(Some(&description_label));
+    popover.set_position(gtk::PositionType::Right);
+
+    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    tooltip_button.set_has_frame(false);
+    tooltip_button.connect_clicked(move |button| {
+        popover.set_parent(button);
+        popover.popup();
+    });
+
+    label_box.append(&label_widget);
+    label_box.append(&tooltip_button);
+
+    let entry = Entry::new();
+    let gradient_box = HyprGradient::to_gtk_box(&entry);
+    gradient_box.set_halign(gtk::Align::End);
+    gradient_box.set_width_request(100);
+
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_valign(gtk::Align::Center);
+    reset_button.set_has_frame(false);
+
+    let entry_clone = entry.clone();
+    let parsed_default: HyprGradient = default
+        .parse()
+        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
+
+    reset_button.connect_clicked(move |_| {
+        entry_clone.set_text(&parsed_default.to_string());
+    });
+
+    hbox.append(&label_box);
+    hbox.append(&gradient_box);
+    hbox.append(&reset_button);
+
+    container.append(&hbox);
+
+    options.insert(
+        name.to_string(),
+        WidgetData {
+            widget: entry.upcast(),
+            default: default.to_string(),
+        },
+    );
+}
+
 fn append_option_row(
     window: &ApplicationWindow,
     gtkbox: &Box,
@@ -1290,7 +1376,7 @@ impl ConfigWidget {
                     &t!("widget.general_category.colors_section_description"),
                     first_section.clone(),
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.inactive_border",
@@ -1298,7 +1384,7 @@ impl ConfigWidget {
                     &t!("widget.general_category.col_inactive_border_description"),
                     "#444444FF",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.active_border",
@@ -1306,7 +1392,7 @@ impl ConfigWidget {
                     &t!("widget.general_category.col_active_border_description"),
                     "#FFFFFFFF",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.nogroup_border",
@@ -1314,7 +1400,7 @@ impl ConfigWidget {
                     &t!("widget.general_category.col_nogroup_border_description"),
                     "#FFAAFFFF",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.nogroup_border_active",
@@ -2420,7 +2506,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.group_on_movetoworkspace_description"),
                     "false",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.border_active",
@@ -2428,7 +2514,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.col_border_active_description"),
                     "#FFFF0066",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.border_inactive",
@@ -2436,7 +2522,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.col_border_inactive_description"),
                     "#77770066",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.border_locked_active",
@@ -2444,7 +2530,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.col_border_locked_active_description"),
                     "#FF550066",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "col.border_locked_inactive",
@@ -2652,7 +2738,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.text_color_locked_inactive_description"),
                     "",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "groupbar:col.active",
@@ -2660,7 +2746,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.col_active_description"),
                     "#66FFFF00",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "groupbar:col.inactive",
@@ -2668,7 +2754,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.col_inactive_description"),
                     "#77770066",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "groupbar:col.locked_active",
@@ -2676,7 +2762,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.col_locked_active_description"),
                     "#FF550066",
                 );
-                add_color_option(
+                add_gradient_option(
                     &container,
                     &mut options,
                     "groupbar:col.locked_inactive",

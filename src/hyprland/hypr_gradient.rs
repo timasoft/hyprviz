@@ -18,7 +18,7 @@ pub struct HyprGradient {
 impl Default for HyprGradient {
     fn default() -> Self {
         HyprGradient {
-            colors: vec![HyprColor::default(), HyprColor::default()],
+            colors: vec![HyprColor::default()],
             angle: None,
         }
     }
@@ -51,9 +51,6 @@ impl FromStr for HyprGradient {
 
         if colors.is_empty() {
             colors.push(HyprColor::default());
-            colors.push(HyprColor::default());
-        } else if colors.len() == 1 {
-            colors.push(colors[0]);
         }
 
         Ok(HyprGradient {
