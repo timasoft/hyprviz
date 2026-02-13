@@ -9,8 +9,10 @@ use std::{
     cell::RefCell,
     cmp::Ordering,
     collections::{HashMap, VecDeque},
+    fmt::Display,
     fs,
     rc::Rc,
+    str::FromStr,
 };
 
 use crate::{
@@ -22,7 +24,7 @@ use crate::{
         ToGtkBoxWithSeparatorImplementation,
     },
     guides::create_guide,
-    hyprland::HyprGradient,
+    hyprland::{FontWeight, HyprGradient},
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
         get_latest_version, parse_top_level_options,
@@ -769,7 +771,7 @@ fn add_color_option(
     );
 }
 
-fn add_gradient_option(
+fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     container: &Box,
     options: &mut HashMap<String, WidgetData>,
     name: &str,
@@ -821,7 +823,7 @@ fn add_gradient_option(
     label_box.append(&tooltip_button);
 
     let entry = Entry::new();
-    let gradient_box = HyprGradient::to_gtk_box(&entry);
+    let gradient_box = T::to_gtk_box(&entry);
     gradient_box.set_halign(gtk::Align::End);
     gradient_box.set_width_request(100);
 
@@ -831,7 +833,7 @@ fn add_gradient_option(
     reset_button.set_has_frame(false);
 
     let entry_clone = entry.clone();
-    let parsed_default: HyprGradient = default
+    let parsed_default: T = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
 
@@ -852,6 +854,28 @@ fn add_gradient_option(
             default: default.to_string(),
         },
     );
+}
+
+fn add_gradient_option(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+) {
+    add_to_gtk_box_option::<HyprGradient>(container, options, name, label, description, default);
+}
+
+fn add_font_weight_option(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+) {
+    add_to_gtk_box_option::<FontWeight>(container, options, name, label, description, default);
 }
 
 fn append_option_row(
@@ -2570,7 +2594,7 @@ impl ConfigWidget {
                     "8",
                     (2.0, 64.0, 1.0),
                 );
-                add_string_option(
+                add_font_weight_option(
                     &container,
                     &mut options,
                     "groupbar:font_weight_active",
@@ -2578,7 +2602,7 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.font_weight_active_description"),
                     "normal",
                 );
-                add_string_option(
+                add_font_weight_option(
                     &container,
                     &mut options,
                     "groupbar:font_weight_inactive",

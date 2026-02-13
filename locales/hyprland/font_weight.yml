@@ -1,0 +1,53 @@
+_version: 2
+hyprland.font_weight.thin:
+  en: "Thin"
+  ru: "Тонкий"
+  zh-CN: "极细"
+hyprland.font_weight.ultralight:
+  en: "Ultra Light"
+  ru: "Ультралёгкий"
+  zh-CN: "特细"
+hyprland.font_weight.light:
+  en: "Light"
+  ru: "Светлый"
+  zh-CN: "细"
+hyprland.font_weight.semilight:
+  en: "Semi Light"
+  ru: "Полусветлый"
+  zh-CN: "半细"
+hyprland.font_weight.book:
+  en: "Book"
+  ru: "Книжный"
+  zh-CN: "正文"
+hyprland.font_weight.normal:
+  en: "Normal"
+  ru: "Обычный"
+  zh-CN: "常规"
+hyprland.font_weight.medium:
+  en: "Medium"
+  ru: "Средний"
+  zh-CN: "中等"
+hyprland.font_weight.semibold:
+  en: "Semi Bold"
+  ru: "Полужирный"
+  zh-CN: "中粗"
+hyprland.font_weight.bold:
+  en: "Bold"
+  ru: "Жирный"
+  zh-CN: "粗"
+hyprland.font_weight.ultrabold:
+  en: "Ultra Bold"
+  ru: "Ультражирный"
+  zh-CN: "特粗"
+hyprland.font_weight.heavy:
+  en: "Heavy"
+  ru: "Чёрный"
+  zh-CN: "重"
+hyprland.font_weight.ultraheavy:
+  en: "Ultra Heavy"
+  ru: "Ультрачёрный"
+  zh-CN: "特黑"
+hyprland.font_weight.integer:
+  en: "Integer value"
+  ru: "Целочисленное значение"
+  zh-CN: "整数值"
