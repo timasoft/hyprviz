@@ -887,26 +887,40 @@ along with this program; if not, see
         ));
 
         if backup_path.exists() {
-            match fs::rename(&backup_path, &path) {
-                Ok(_) => {
-                    println!("{}", &t!("gui.configuration_restored_from_backup"));
-                    reload_hyprland();
-                    if let Ok(config_str) = expand_source(&path_for_read) {
-                        let parsed_config = parse_config(&config_str);
+            match fs::read_to_string(&backup_path) {
+                Ok(backup_content) => match atomic_write(&path, &backup_content) {
+                    Ok(_) => {
+                        if let Err(e) = fs::remove_file(&backup_path) {
+                            self.custom_error_popup(
+                                &t!("gui.warning"),
+                                &t!("gui.backup_file_not_deleted_", error = e),
+                            );
+                        }
 
-                        self.load_config(&parsed_config, &profile_name);
-                        self.changed_options.clone().borrow_mut().clear();
-                    } else {
+                        println!("{}", &t!("gui.configuration_restored_from_backup"));
+                        reload_hyprland();
+                        if let Ok(config_str) = expand_source(&path_for_read) {
+                            let parsed_config = parse_config(&config_str);
+                            self.load_config(&parsed_config, &profile_name);
+                            self.changed_options.clone().borrow_mut().clear();
+                        } else {
+                            self.custom_error_popup(
+                                &t!("gui.reload_failed"),
+                                &t!("gui.failed_to_reload_the_configuration_after_undo"),
+                            );
+                        }
+                    }
+                    Err(e) => {
                         self.custom_error_popup(
-                            &t!("gui.reload_failed"),
-                            &t!("gui.failed_to_reload_the_configuration_after_undo"),
+                            &t!("gui.undo_failed"),
+                            &t!("gui.failed_to_restore_from_backup_", error = e),
                         );
                     }
-                }
+                },
                 Err(e) => {
                     self.custom_error_popup(
                         &t!("gui.undo_failed"),
-                        &t!("gui.failed_to_restore_from_backup_", error = e),
+                        &t!("gui.failed_to_read_backup_file_", error = e),
                     );
                 }
             }

@@ -151,21 +151,112 @@ pub fn check_last_non_empty_line_contains(file_content: &str, expected_text: &st
 }
 
 pub fn atomic_write(path: &Path, data: &str) -> io::Result<()> {
-    let temp_path = path.with_extension("tmp");
+    let final_path = resolve_symlink_fully(path)?;
 
-    let result = || -> Result<(), io::Error> {
-        let mut temp_file = fs::File::create(&temp_path)?;
-        temp_file.write_all(data.as_bytes())?;
-        temp_file.sync_all()?;
-        fs::rename(&temp_path, path)?;
-        Ok(())
-    }();
+    if let Some(parent) = final_path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+
+    let temp_path = generate_temp_path(&final_path)?;
+
+    let result = atomic_replace(&temp_path, &final_path, data);
 
     if result.is_err() {
         let _ = fs::remove_file(&temp_path);
     }
 
     result
+}
+
+pub fn resolve_symlink_fully(path: &Path) -> io::Result<PathBuf> {
+    let mut current = path.to_path_buf();
+    let mut iterations = 0;
+    const MAX_DEPTH: u32 = 40;
+
+    loop {
+        let meta = match fs::symlink_metadata(&current) {
+            Ok(m) => m,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => break,
+            Err(e) => return Err(e),
+        };
+
+        if !meta.file_type().is_symlink() {
+            break;
+        }
+
+        if iterations >= MAX_DEPTH {
+            return Err(io::Error::other("too many levels of symbolic links"));
+        }
+
+        let target = fs::read_link(&current)?;
+        current = if target.is_absolute() {
+            target
+        } else {
+            current
+                .parent()
+                .ok_or_else(|| {
+                    io::Error::new(
+                        io::ErrorKind::InvalidInput,
+                        "cannot resolve symlink in root directory",
+                    )
+                })?
+                .join(target)
+        };
+
+        iterations += 1;
+    }
+
+    Ok(current)
+}
+
+fn generate_temp_path(final_path: &Path) -> io::Result<PathBuf> {
+    let parent = final_path.parent().ok_or_else(|| {
+        io::Error::new(io::ErrorKind::InvalidInput, "path has no parent directory")
+    })?;
+
+    let stem = final_path
+        .file_name()
+        .and_then(|s| s.to_str())
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "invalid filename"))?;
+
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+
+    Ok(parent.join(format!(".{}.{}.tmp", stem, timestamp)))
+}
+
+fn atomic_replace(temp_path: &Path, final_path: &Path, data: &str) -> io::Result<()> {
+    let mut temp_file = fs::File::create(temp_path)?;
+    temp_file.write_all(data.as_bytes())?;
+    temp_file.sync_all()?;
+
+    match fs::rename(temp_path, final_path) {
+        Ok(_) => {
+            if let Some(parent) = final_path.parent() {
+                fs::File::open(parent)?.sync_all()?;
+            }
+            Ok(())
+        }
+        // EXDEV
+        Err(ref e) if e.raw_os_error() == Some(18) => {
+            let temp_in_target = final_path.with_extension(".tmp");
+            let mut temp_target = fs::File::create(&temp_in_target)?;
+            temp_target.write_all(data.as_bytes())?;
+            temp_target.sync_all()?;
+
+            fs::rename(&temp_in_target, final_path)
+                .and_then(|_| fs::remove_file(temp_path))
+                .inspect_err(|_| {
+                    let _ = fs::remove_file(&temp_in_target);
+                })
+        }
+        Err(e) => {
+            let _ = fs::remove_file(temp_path);
+            Err(e)
+        }
+    }
 }
 
 /// Updates the source line in Hyprland config for the specified profile

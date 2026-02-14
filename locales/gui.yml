@@ -247,6 +247,14 @@ gui.no_changes_to_save:
   en: "No changes to save"
   ru: "Нет изменений для сохранения"
   zh-CN: "没有需要保存的更改"
+gui.warning:
+  en: "Warning"
+  ru: "Предупреждение"
+  zh-CN: "警告"
+gui.backup_file_not_deleted_:
+  en: "Backup file was not deleted: %{error}"
+  ru: "Файл резервной копии не был удалён: %{error}"
+  zh-CN: "备份文件未删除：%{error}"
 gui.configuration_restored_from_backup:
   en: "Configuration restored from backup"
   ru: "Конфигурация восстановлена из резервной копии"
@@ -267,6 +275,10 @@ gui.failed_to_restore_from_backup_:
   en: "Failed to restore from backup: %{error}"
   ru: "Не удалось восстановить из резервной копии: %{error}"
   zh-CN: "从备份恢复失败：%{error}"
+gui.failed_to_read_backup_file_:
+  en: "Failed to read backup file: %{error}"
+  ru: "Не удалось прочитать файл резервной копии: %{error}"
+  zh-CN: "读取备份文件失败：%{error}"
 gui.no_backup_file_found_save_changes_to_create_a_backup:
   en: "No backup file found. Save changes to create a backup."
   ru: "Файл резервной копии не найден. Сохраните изменения, чтобы создать резервную копию."
