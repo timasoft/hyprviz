@@ -1,4 +1,4 @@
-![Showcase](https://user-images.githubusercontent.com/43317083/179357849-321f042c-f536-44b3-9e6f-371df5321836.gif)
+![master1](https://user-images.githubusercontent.com/43317083/179357849-321f042c-f536-44b3-9e6f-371df5321836.gif)
 
 ## Dispatchers
 
@@ -28,17 +28,14 @@
 
 Parameters for the commands are separated by a single space.
 
-{{< callout type=info >}}
-
-Example usage:
-
-```ini
-bind = MOD, KEY, layoutmsg, cyclenext
-# behaves like xmonads promote feature (https://hackage.haskell.org/package/xmonad-contrib-0.17.1/docs/XMonad-Actions-Promote.html)
-bind = MOD, KEY, layoutmsg, swapwithmaster master
-```
-
-{{< /callout >}}
+> [!NOTE]
+> Example usage:
+> 
+> ```ini
+> bind = MOD, KEY, layoutmsg, cyclenext
+> # behaves like xmonads promote feature (https://hackage.haskell.org/package/xmonad-contrib-0.17.1/docs/XMonad-Actions-Promote.html)
+> bind = MOD, KEY, layoutmsg, swapwithmaster master
+> ```
 
 ## Workspace Rules
 
