@@ -122,7 +122,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - [x] Add binds editor
 - ~~Add monitor layuot editor~~
 - [x] Add fancy editors for all options
-- [ ] Add symlink support
+- [x] Add symlink support
 - [ ] Replace hyprparser with [hyprlang-rs](https://github.com/spinualexandru/hyprlang-rs)
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
