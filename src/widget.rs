@@ -1404,6 +1404,14 @@ impl ConfigWidget {
                     &t!("widget.general_category.allow_tearing_description"),
                     "false",
                 );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "modal_parent_blocking",
+                    &t!("widget.general_category.modal_parent_blocking_label"),
+                    &t!("widget.general_category.modal_parent_blocking_description"),
+                    "true",
+                );
 
                 add_section(
                     &container,
@@ -1925,6 +1933,15 @@ impl ConfigWidget {
                     &t!("widget.input_category.force_no_accel_label"),
                     &t!("widget.input_category.force_no_accel_description"),
                     "false",
+                );
+                add_int_option(
+                    &container,
+                    &mut options,
+                    "rotation",
+                    &t!("widget.input_category.rotation_label"),
+                    &t!("widget.input_category.rotation_description"),
+                    "0",
+                    (0.0, 359.0, 1.0),
                 );
                 add_bool_option(
                     &container,
@@ -3110,9 +3127,9 @@ impl ConfigWidget {
                 add_bool_option(
                     &container,
                     &mut options,
-                    "disable_hyprland_qtutils_check",
-                    &t!("widget.misc_category.disable_hyprland_qtutils_check_label"),
-                    &t!("widget.misc_category.disable_hyprland_qtutils_check_description"),
+                    "disable_hyprland_guiutils_check",
+                    &t!("widget.misc_category.disable_hyprland_guiutils_check_label"),
+                    &t!("widget.misc_category.disable_hyprland_guiutils_check_description"),
                     "false",
                 );
                 add_int_option(
@@ -3139,7 +3156,7 @@ impl ConfigWidget {
                     &t!("widget.misc_category.anr_missed_pings_label"),
                     &t!("widget.misc_category.anr_missed_pings_description"),
                     "1",
-                    (1.0, 10.0, 1.0),
+                    (1.0, 20.0, 5.0),
                 );
                 add_bool_option(
                     &container,
@@ -3155,6 +3172,14 @@ impl ConfigWidget {
                     "disable_scale_notification",
                     &t!("widget.misc_category.disable_scale_notification_label"),
                     &t!("widget.misc_category.disable_scale_notification_description"),
+                    "false",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "size_limits_tiled",
+                    &t!("widget.misc_category.size_limits_tiled_label"),
+                    &t!("widget.misc_category.size_limits_tiled_description"),
                     "false",
                 );
             }
@@ -3439,6 +3464,33 @@ impl ConfigWidget {
                     &t!("widget.render_category.new_render_scheduling_description"),
                     "false",
                 );
+                add_dropdown_option(
+                    &container,
+                    &mut options,
+                    "non_shader_cm",
+                    &t!("widget.render_category.non_shader_cm_label"),
+                    &t!("widget.render_category.non_shader_cm_description"),
+                    &[
+                        &t!("widget.render_category.non_shader_cm_disable"),
+                        &t!("widget.render_category.non_shader_cm_always"),
+                        &t!("widget.render_category.non_shader_cm_ondemand"),
+                        &t!("widget.render_category.non_shader_cm_ignore"),
+                    ],
+                    "0",
+                );
+                add_dropdown_option(
+                    &container,
+                    &mut options,
+                    "cm_sdr_eotf",
+                    &t!("widget.render_category.cm_sdr_eotf_label"),
+                    &t!("widget.render_category.cm_sdr_eotf_description"),
+                    &[
+                        &t!("widget.render_category.cm_sdr_eotf_srgb"),
+                        &t!("widget.render_category.cm_sdr_eotf_gamma22"),
+                        &t!("widget.render_category.cm_sdr_eotf_gamma22force"),
+                    ],
+                    "0",
+                );
             }
             "cursor" => {
                 add_section(
@@ -3581,6 +3633,14 @@ impl ConfigWidget {
                     "zoom_rigid",
                     &t!("widget.cursor_category.zoom_rigid_label"),
                     &t!("widget.cursor_category.zoom_rigid_description"),
+                    "false",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "zoom_disable_aa",
+                    &t!("widget.cursor_category.zoom_disable_aa_label"),
+                    &t!("widget.cursor_category.zoom_disable_aa_description"),
                     "false",
                 );
                 add_bool_option(
