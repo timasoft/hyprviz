@@ -266,20 +266,8 @@ fn build_ui(app: &Application) {
                     }
                     let gui = Rc::clone(&gui_clone);
 
-                    let config_str_for_read = match expand_source(&config_path_full) {
-                        Ok(s) => s,
-                        Err(e) => {
-                            gui.borrow().custom_error_popup_critical(
-                                &t!("main.reading_failed"),
-                                &t!("main.failed_to_read_the_configuration_file_", error = e),
-                            );
-                            String::new()
-                        }
-                    };
-
-                    let parsed_config = parse_config(&config_str_for_read);
                     glib::MainContext::default().spawn_local(async move {
-                        gui.borrow_mut().load_config(&parsed_config, &profile_name);
+                        gui.borrow_mut().reload_ui();
                     });
                 }
             });

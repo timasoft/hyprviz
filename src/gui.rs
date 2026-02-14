@@ -1223,7 +1223,7 @@ along with this program; if not, see
         *config = new_config;
     }
 
-    fn reload_ui(&mut self) {
+    pub fn reload_ui(&mut self) {
         let current_profile = {
             let selected_index = self.profile_dropdown.selected();
             let model = self.profile_dropdown.model().unwrap();
