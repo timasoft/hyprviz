@@ -2,6 +2,7 @@ use crate::utils::markdown_to_pango;
 use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
 use rust_i18n::{locale, t};
 
+#[derive(Debug)]
 enum ContentBlock {
     Text(String),
     Code {
@@ -137,45 +138,38 @@ fn parse_lines(lines: &[&str], guide_name: &str) -> Vec<ContentBlock> {
     let mut table_lines = Vec::new();
     let mut in_callout = false;
     let mut callout_type = String::new();
-    let mut callout_lines = Vec::new();
+    let mut callout_lines = Vec::<&str>::new();
 
     for line in lines {
-        if line.trim_start().starts_with("{{< callout ") {
-            if let Some(type_start) = line.find("type=") {
-                let type_start = type_start + 5;
-                let type_str = &line[type_start..];
-                let type_str = type_str.trim_start_matches(|c: char| ['"', '\'', ' '].contains(&c));
-                let type_str = type_str.split_whitespace().next().unwrap_or_default();
-                let type_str = type_str.trim_end_matches(|c: char| ['"', '\'', ' '].contains(&c));
-                callout_type = type_str.to_string();
-            } else {
-                callout_type = "".to_string();
-            }
-            in_callout = true;
-            continue;
-        }
-
-        if (line.trim_start().starts_with("{{< /callout >}}")
-            || line.trim_start().starts_with("{{</ callout >}"))
-            && in_callout
-        {
-            let callout_blocks = parse_lines(&callout_lines, guide_name);
-            blocks.push(ContentBlock::Callout {
-                callout_type: callout_type.clone(),
-                content: callout_blocks,
-            });
-            callout_type.clear();
-            callout_lines.clear();
-            in_callout = false;
+        if line.starts_with("weight:") || line.starts_with("title:") || line == &"---" {
             continue;
         }
 
         if in_callout {
-            callout_lines.push(line);
-            continue;
+            if let Some(callout_line) = line.strip_prefix("> ") {
+                callout_lines.push(callout_line);
+                continue;
+            } else if *line == ">" {
+                callout_lines.push("");
+                continue;
+            } else {
+                let callout_blocks = parse_lines(&callout_lines, guide_name);
+                blocks.push(ContentBlock::Callout {
+                    callout_type: callout_type.clone(),
+                    content: callout_blocks,
+                });
+                callout_type.clear();
+                callout_lines.clear();
+                in_callout = false;
+            }
         }
 
-        if line.starts_with("weight:") || line.starts_with("title:") || line == &"---" {
+        if line.trim_start().starts_with("> [!")
+            && let (Some(bang_idx), Some(close_bracket_idx)) = (line.find('!'), line.find(']'))
+        {
+            callout_type = line[bang_idx + 1..close_bracket_idx].trim().to_lowercase();
+
+            in_callout = true;
             continue;
         }
 
@@ -466,9 +460,9 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .build();
 
     let title = match callout_type {
-        "info" => &format!("<b>{}</b>", t!("guides.information")),
-        "warning" => &format!("<b>{}</b>", t!("guides.warning")),
-        "error" => &format!("<b>{}</b>", t!("guides.error")),
+        "info" | "note" | "tip" | "important" => &format!("<b>{}</b>", t!("guides.information")),
+        "warning" | "caution" => &format!("<b>{}</b>", t!("guides.warning")),
+        "error" | "danger" => &format!("<b>{}</b>", t!("guides.error")),
         _ => &format!("<b>{}</b>", callout_type),
     };
 
