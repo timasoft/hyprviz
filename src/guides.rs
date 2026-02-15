@@ -459,11 +459,13 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .margin_bottom(20)
         .build();
 
-    let title = match callout_type {
-        "info" | "note" | "tip" | "important" => &format!("<b>{}</b>", t!("guides.information")),
-        "warning" | "caution" => &format!("<b>{}</b>", t!("guides.warning")),
-        "error" | "danger" => &format!("<b>{}</b>", t!("guides.error")),
-        _ => &format!("<b>{}</b>", callout_type),
+    let (title, style_class) = match callout_type.to_lowercase().as_str() {
+        "info" | "note" | "tip" | "important" => {
+            (&format!("<b>{}</b>", t!("guides.information")), "info")
+        }
+        "warning" | "caution" => (&format!("<b>{}</b>", t!("guides.warning")), "warning"),
+        "error" | "danger" => (&format!("<b>{}</b>", t!("guides.error")), "error"),
+        _ => (&format!("<b>{}</b>", callout_type), "card"),
     };
 
     let header = Label::builder()
@@ -508,6 +510,8 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
     }
 
     let frame = Frame::builder().margin_start(15).margin_end(15).build();
+
+    frame.add_css_class(style_class);
 
     frame.set_child(Some(&vbox));
 
