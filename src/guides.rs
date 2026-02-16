@@ -118,10 +118,10 @@ fn get_content(name: &str) -> Vec<ContentBlock> {
             "zh-CN" => include_str!("../guides/zh-CN/Execs.md"),
             _ => include_str!("../guides/en/Execs.md"),
         },
-        "Envs" => match current_locale.as_str() {
-            "ru" => include_str!("../guides/ru/Envs.md"),
-            "zh-CN" => include_str!("../guides/zh-CN/Envs.md"),
-            _ => include_str!("../guides/en/Envs.md"),
+        "Enviroment-variables" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Enviroment-variables.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Enviroment-variables.md"),
+            _ => include_str!("../guides/en/Enviroment-variables.md"),
         },
         name => panic!("Invalid content name: {name}"),
     };
