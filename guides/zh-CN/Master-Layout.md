@@ -1,10 +1,7 @@
-![Showcase](https://user-images.githubusercontent.com/43317083/179357849-321f042c-f536-44b3-9e6f-371df5321836.gif)
+> [!NOTE]
+> 由 Qwen3.5-Plus 从 en 翻译
 
-{{< callout type=info >}}
-
-Translated from en by qwen3
-
-{{</ callout >}}
+![master1](https://user-images.githubusercontent.com/43317083/179357849-321f042c-f536-44b3-9e6f-371df5321836.gif)
 
 ## 调度器
 
@@ -34,17 +31,14 @@ Translated from en by qwen3
 
 命令的参数用单个空格分隔。
 
-{{< callout type=info >}}
-
-示例用法：
-
-```ini
-bind = MOD, KEY, layoutmsg, cyclenext
-# 行为类似于 xmonad 的 promote 功能 (https://hackage.haskell.org/package/xmonad-contrib-0.17.1/docs/XMonad-Actions-Promote.html)
-bind = MOD, KEY, layoutmsg, swapwithmaster master
-```
-
-{{< /callout >}}
+> [!NOTE]
+> 示例用法：
+> 
+> ```ini
+> bind = MOD, KEY, layoutmsg, cyclenext
+> # 行为类似于 xmonad 的 promote 功能 (https://hackage.haskell.org/package/xmonad-contrib-0.17.1/docs/XMonad-Actions-Promote.html)
+> bind = MOD, KEY, layoutmsg, swapwithmaster master
+> ```
 
 ## 工作区规则
 

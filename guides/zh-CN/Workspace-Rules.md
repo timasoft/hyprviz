@@ -3,11 +3,8 @@ weight: 8
 title: 工作区规则
 ---
 
-{{< callout type=info >}}
-
-Translated from en by qwen3
-
-{{</ callout >}}
+> [!NOTE]
+> 由 Qwen3.5-Plus 从 en 翻译
 
 您可以设置工作区规则以实现特定于工作区的行为。例如，
 您可以定义一个所有窗口都无边框和间隙的工作区。
@@ -97,7 +94,6 @@ windowrule = rounding 0, floating:0, onworkspace:f[1]s[false]
 | persistent:[b] | 即使工作区为空且非活动，也保持该工作区存活 | 布尔值 |
 | on-created-empty:[c] | 一旦工作区被创建为空（即不是通过移动窗口到它而创建的），要执行的命令。参见[命令语法](../Dispatchers#executing-with-rules) | 字符串 |
 | defaultName:[s] | 工作区的默认名称 | 字符串 |
-| layoutopt:orientation:[o] | 设置工作区的布局方向。可用方向请参见[布局->方向](../Master-Layout#orientation)。 | 字符串 |
 
 ### 示例规则
 

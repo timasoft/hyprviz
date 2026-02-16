@@ -1,27 +1,24 @@
-{{< callout type=info >}}
+> [!NOTE]
+> 由 Qwen3.5-Plus 从 en 翻译
 
-Translated from en by qwen3
+## Layer 规则
 
-{{</ callout >}}
-
-## 层规则
-
-在 Wayland 中，有些元素不是窗口，而是层（layers）。例如：
+在 Wayland 中，有些元素不是窗口，而是层。例如：
 应用程序启动器、状态栏或壁纸。
 
-这些元素有特定的规则，与窗口规则分开：
+这些元素有特定的规则，与窗口分开：
 
 ```ini
-layerrule = 规则, 命名空间
+layerrule = rule, namespace
 # 或
-layerrule = 规则, 地址
+layerrule = rule, address
 ```
 
-其中 `规则` 是规则，`命名空间` 是命名空间正则表达式（可在 `hyprctl layers` 中查找命名空间）或 `地址` 是形式为 `address:0x[十六进制]` 的地址。
+其中 `rule` 是规则，`namespace` 是命名空间正则表达式（可在 `hyprctl layers` 中查找命名空间）或 `address` 是形式为 `address:0x[十六进制]` 的地址。
 
 ### 规则
 
-| 规则 | 说明 |
+| rule | description |
 | ---- | ----------- |
 | unset | 移除之前为选定命名空间正则表达式设置的所有层规则。请注意必须_完全匹配_。 |
 | noanim | 禁用动画。 |
