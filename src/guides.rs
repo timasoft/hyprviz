@@ -173,6 +173,14 @@ fn parse_lines(lines: &[&str], guide_name: &str) -> Vec<ContentBlock> {
             continue;
         }
 
+        if let Some(stripped) = line.trim_start().strip_prefix("> ") {
+            callout_type = String::new();
+
+            in_callout = true;
+            callout_lines.push(stripped);
+            continue;
+        }
+
         if let Some(stripped) = line.strip_prefix("```") {
             if in_code_block {
                 if !code_lines.is_empty() {
@@ -479,7 +487,9 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .build();
     header.set_markup(title);
 
-    vbox.append(&header);
+    if !title.is_empty() {
+        vbox.append(&header);
+    }
 
     for block in content_blocks {
         match block {
