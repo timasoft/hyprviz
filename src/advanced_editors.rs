@@ -625,6 +625,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                                 flags.has_description = switch.is_active()
                             }
                             BindFlagsEnum::Bypass => flags.bypass = switch.is_active(),
+                            BindFlagsEnum::SubmapUniversal => {
+                                flags.submap_universal = switch.is_active()
+                            }
                         }
 
                         name_entry_clone.set_text(&bind_left.to_string());
@@ -667,6 +670,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                                     BindFlagsEnum::Separate => flags.separate,
                                     BindFlagsEnum::HasDescription => flags.has_description,
                                     BindFlagsEnum::Bypass => flags.bypass,
+                                    BindFlagsEnum::SubmapUniversal => flags.submap_universal,
                                 };
                                 switch.set_active(flag_value);
                             }

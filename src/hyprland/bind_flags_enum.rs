@@ -16,10 +16,11 @@ pub enum BindFlagsEnum {
     Separate,
     HasDescription,
     Bypass,
+    SubmapUniversal,
 }
 
 impl BindFlagsEnum {
-    pub fn get_all() -> [BindFlagsEnum; 13] {
+    pub fn get_all() -> [BindFlagsEnum; 14] {
         [
             BindFlagsEnum::Locked,
             BindFlagsEnum::Release,
@@ -34,6 +35,7 @@ impl BindFlagsEnum {
             BindFlagsEnum::Separate,
             BindFlagsEnum::HasDescription,
             BindFlagsEnum::Bypass,
+            BindFlagsEnum::SubmapUniversal,
         ]
     }
 
@@ -54,6 +56,9 @@ impl BindFlagsEnum {
                 t!("hyprland.bind_flags_enum.has_description").to_string()
             }
             BindFlagsEnum::Bypass => t!("hyprland.bind_flags_enum.bypass").to_string(),
+            BindFlagsEnum::SubmapUniversal => {
+                t!("hyprland.bind_flags_enum.submap_universal").to_string()
+            }
         }
     }
 }
