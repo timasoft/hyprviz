@@ -282,6 +282,14 @@ widget.general_category.allow_tearing_description:
   en: "Master switch for allowing tearing to occur.\nSee the Hyprland's Tearing page."
   ru: "Главный переключатель для разрешения разрыва.\nСм. страницу Hyprland о разрыве."
   zh-CN: "允许撕裂的总开关。\n请参阅 Hyprland 的撕裂页面。"
+widget.general_category.modal_parent_blocking_label:
+  en: "Modal Parent Blocking"
+  ru: "Блокировка родительских окон"
+  zh-CN: "模态父窗口阻塞"
+widget.general_category.modal_parent_blocking_description:
+  en: "If true, parent windows of modals will not be interactive."
+  ru: "При включении родительские окна модальных диалогов становятся неинтерактивными."
+  zh-CN: "启用后，模态窗口的父窗口将无法交互。"
 
 widget.general_category.colors_section_title:
   en: "Colors"
@@ -794,6 +802,14 @@ widget.input_category.force_no_accel_description:
   en: "Force no cursor acceleration.\nThis bypasses most of your pointer settings to get as raw of a signal as possible.\nEnabling this is not recommended due to potential cursor desynchronization."
   ru: "Принудительно отключить ускорение курсора.\nЭто обходит большинство настроек указателя, чтобы получить максимально \"сырой\" сигнал.\nВключать это не рекомендуется из-за потенциальной десинхронизации курсора."
   zh-CN: "强制不使用光标加速。\n这会绕过大部分指针设置以获得尽可能原始的信号。\n不建议启用此选项，因为它可能导致光标不同步。"
+widget.input_category.rotation_label:
+  en: "Rotation"
+  ru: "Поворот"
+  zh-CN: "旋转"
+widget.input_category.rotation_description:
+  en: "Sets the rotation of a device in degrees clockwise off the logical neutral position. Value is clamped to the range 0 to 359."
+  ru: "Задаёт поворот устройства в градусах по часовой стрелке от логической нейтральной позиции. Значение ограничено диапазоном от 0 до 359."
+  zh-CN: "设置设备从逻辑中立位置顺时针旋转的度数。数值被限制在 0 到 359 度范围内。"
 widget.input_category.left_handed_label:
   en: "Left Handed"
   ru: "Для левшей"
@@ -2045,14 +2061,14 @@ widget.misc_category.disable_xdg_env_checks_description:
   en: "Disable the warning if XDG environment is externally managed"
   ru: "Отключить предупреждение, если окружение XDG управляется извне"
   zh-CN: "如果 XDG 环境由外部管理，则禁用警告"
-widget.misc_category.disable_hyprland_qtutils_check_label:
-  en: "Disable Hyprland Qtutils Check"
-  ru: "Отключить проверку Hyprland Qtutils"
-  zh-CN: "禁用 Hyprland Qtutils 检查"
-widget.misc_category.disable_hyprland_qtutils_check_description:
-  en: "Disable the warning if hyprland-qtutils is not installed"
-  ru: "Отключить предупреждение, если hyprland-qtutils не установлен"
-  zh-CN: "如果未安装 hyprland-qtutils，则禁用警告"
+widget.misc_category.disable_hyprland_guiutils_check_label:
+  en: "Disable Hyprland Guiutils Check"
+  ru: "Отключить проверку Hyprland Guiutils"
+  zh-CN: "禁用 Hyprland Guiutils 检查"
+widget.misc_category.disable_hyprland_guiutils_check_description:
+  en: "Disable the warning if hyprland-guiutils is not installed"
+  ru: "Отключить предупреждение, если hyprland-guiutils не установлен"
+  zh-CN: "如果未安装 hyprland-guiutils，则禁用警告"
 widget.misc_category.lockdead_screen_delay_label:
   en: "Lock Dead Screen Delay"
   ru: "Задержка мёртвого экрана блокировки"
@@ -2093,6 +2109,14 @@ widget.misc_category.disable_scale_notification_description:
   en: "Disables notification popup when a monitor fails to set a suitable scale and falls back to suggested."
   ru: "Отключает всплывающее уведомление, когда монитор не может установить подходящий масштаб и возвращается к предложенному."
   zh-CN: "当显示器无法设置合适的缩放比例并回退到建议值时，禁用通知弹窗。"
+widget.misc_category.size_limits_tiled_label:
+  en: "Size Limits Tiled"
+  ru: "Ограничения размера для плиточных окон"
+  zh-CN: "平铺窗口尺寸限制"
+widget.misc_category.size_limits_tiled_description:
+  en: "Whether to apply minsize and maxsize rules to tiled windows."
+  ru: "Применять ли правила minsize и maxsize к окнам в плиточном режиме."
+  zh-CN: "是否将 minsize 和 maxsize 规则应用于平铺窗口。"
 
 widget.binds_category.bind_settings_section_title:
   en: "Bind Settings"
@@ -2410,6 +2434,50 @@ widget.render_category.new_render_scheduling_description:
   en: "Automatically uses triple buffering when needed, improves FPS on underpowered devices."
   ru: "Автоматически использует тройную буферизацию, когда это нужно, улучшает FPS на слабых устройствах."
   zh-CN: "在需要时自动使用三重缓冲，在性能不足的设备上提高 FPS。"
+widget.render_category.non_shader_cm_label:
+  en: "Non-Shader CM"
+  ru: "Управление цветом без шейдеров"
+  zh-CN: "非着色器色彩管理"
+widget.render_category.non_shader_cm_description:
+  en: "Enable CM without shader."
+  ru: "Включить управление цветом без использования шейдеров."
+  zh-CN: "启用无需着色器的色彩管理。"
+widget.render_category.non_shader_cm_disable:
+  en: "Disable"
+  ru: "Отключить"
+  zh-CN: "禁用"
+widget.render_category.non_shader_cm_always:
+  en: "Whenever possible"
+  ru: "Всегда, когда возможно"
+  zh-CN: "尽可能启用"
+widget.render_category.non_shader_cm_ondemand:
+  en: "DS and passthrough only"
+  ru: "Только для Direct Scanout и passthrough"
+  zh-CN: "仅限 DS 和直通模式"
+widget.render_category.non_shader_cm_ignore:
+  en: "disable and ignore CM issues"
+  ru: "Отключить и игнорировать проблемы с управлением цветом"
+  zh-CN: "禁用并忽略色彩管理问题"
+widget.render_category.cm_sdr_eotf_label:
+  en: "CM SDR EOTF"
+  ru: "Передаточная функция SDR"
+  zh-CN: "SDR 电光转换函数"
+widget.render_category.cm_sdr_eotf_description:
+  en: "Default transfer function for displaying SDR apps."
+  ru: "Функция преобразования яркости по умолчанию для отображения приложений в SDR."
+  zh-CN: "显示 SDR 应用程序的默认亮度转换函数。"
+widget.render_category.cm_sdr_eotf_srgb:
+  en: "Treat unspecified as sRGB"
+  ru: "Считать неуказанные как sRGB"
+  zh-CN: "将未指定的视为 sRGB"
+widget.render_category.cm_sdr_eotf_gamma22:
+  en: "Treat unspecified as Gamma 2.2"
+  ru: "Считать неуказанные как Gamma 2.2"
+  zh-CN: "将未指定的视为 Gamma 2.2"
+widget.render_category.cm_sdr_eotf_gamma22force:
+  en: "Treat unspecified and sRGB as Gamma 2.2"
+  ru: "Считать неуказанные и sRGB как Gamma 2.2"
+  zh-CN: "将未指定的和 sRGB 均视为 Gamma 2.2"
 
 widget.cursor_category.cursor_settings_section_title:
   en: "Cursor Settings"
@@ -2579,6 +2647,14 @@ widget.cursor_category.zoom_rigid_description:
   en: "Whether the zoom should follow the cursor rigidly (cursor is always centered if it can be) or loosely."
   ru: "Должно ли масштабирование следовать за курсором жёстко (курсор всегда центрирован, если это возможно) или свободно."
   zh-CN: "缩放是应该严格跟随光标（光标尽可能居中）还是松散跟随。"
+widget.cursor_category.zoom_disable_aa_label:
+  en: "Disable Antialiasing"
+  ru: "Отключить сглаживание"
+  zh-CN: "禁用抗锯齿"
+widget.cursor_category.zoom_disable_aa_description:
+  en: "If enabled, when zooming, no antialiasing will be used (zoom will be pixelated)."
+  ru: "При включении при увеличении масштаба не будет применяться сглаживание (изображение станет пикселизованным)."
+  zh-CN: "启用后，放大时将不使用抗锯齿（放大效果将呈现像素化）。"
 widget.cursor_category.enable_hyprcursor_label:
   en: "Enable Hyprcursor"
   ru: "Включить Hyprcursor"

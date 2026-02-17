@@ -3,13 +3,10 @@ weight: 5
 title: 键位绑定
 ---
 
-{{< callout type=info >}}
+> [!NOTE]
+> 由 Qwen3.5-Plus 从 en 翻译
 
-Translated from en by qwen3
-
-{{</ callout >}}
-
-## 基本用法
+## 基本
 
 ```ini
 bind = MODS, key, dispatcher, params
@@ -21,23 +18,20 @@ bind = MODS, key, dispatcher, params
 bind = SUPER_SHIFT, Q, exec, firefox
 ```
 
-将绑定 <key>SUPER</key> + <key>SHIFT</key> + <key>Q</key> 来打开 Firefox
+将绑定打开 Firefox 到 <key>SUPER</key> + <key>SHIFT</key> + <key>Q</key>
 
-{{< callout type=info >}}
+> [!NOTE]
+> 对于没有修饰键的绑定，将其留空：
+>
+> ```ini
+> bind = , Print, exec, grim
+> ```
 
-对于不需要修饰键的绑定，将其留空：
+_完整修饰键列表，请参阅 [Variables](../Variables/#variable-types)。_
 
-```ini
-bind = , Print, exec, grim
-```
+_调度器列表可在 [Dispatchers](../Dispatchers/#list-of-dispatchers) 中找到。_
 
-{{< /callout >}}
-
-_完整修饰键列表，请参阅 [变量](../Variables/#variable-types)。_
-
-_调度器(dispatcher)列表可在[调度器](../Dispatchers/#list-of-dispatchers)中找到。_
-
-## 非常见符号 / 按键码绑定
+## 非常见符号 / 使用按键码绑定
 
 请参阅 [xkbcommon-keysyms.h 头文件](https://github.com/xkbcommon/libxkbcommon/blob/master/include/xkbcommon/xkbcommon-keysyms.h) 获取所有 keysyms。您应使用的名称是 `XKB_KEY_` 之后的部分。
 
@@ -49,24 +43,18 @@ bind = SUPER, code:28, exec, amongus
 
 这将绑定 <key>SUPER</key> + <key>t</key>，因为 <key>t</key> 的按键码是 28。
 
-{{< callout type=info >}}
-
-如果您不确定按键的名称或按键码，可以使用 [`wev`](https://github.com/jwrdegoede/wev) 来查找。
-
-{{< /callout >}}
+> [!NOTE]
+> 如果您不确定按键的名称或按键码，可以使用 [`wev`](https://github.com/jwrdegoede/wev) 来查找。
 
 ## 其他
 
 ### 非 QWERTY 布局的工作区绑定
 
-用于键位绑定的键需要在您的布局中无需修饰键即可访问。  
-例如，[法语 AZERTY](https://en.wikipedia.org/wiki/AZERTY) 布局使用 <key>SHIFT</key> + _`未修饰键`_ 来输入 `0-9` 数字。因此，此布局的工作区键位绑定需要使用 _`未修饰键`_ 的名称，而不能使用 `0-9` 数字。
+用于键位绑定的键需要在您的布局中无需任何修饰键即可访问。  
+例如，[法语 AZERTY](https://zh.wikipedia.org/wiki/AZERTY) 布局使用 <key>SHIFT</key> + _`未修饰键`_ 来输入 `0-9` 数字。因此，此布局的工作区键位绑定需要使用 _`未修饰键`_ 的名称，而不能在使用 `0-9` 数字时工作。
 
-{{< callout type=info >}}
-
-要获取 `unmodified_key` 的正确名称，请参阅[非常见符号部分](#非常见符号--按键码绑定)
-
-{{< /callout >}}
+> [!NOTE]
+> 要获取 `unmodified_key` 的正确名称，请参阅 [非常见符号部分](#uncommon-syms--binding-with-a-keycode)
 
 ```ini
 # 在法语布局中，而不是：
@@ -76,7 +64,7 @@ bind = SUPER, code:28, exec, amongus
 bind = $mainMod, ampersand, workspace,  1
 ```
 
-有关配置法语 AZERTY 布局的帮助，请参阅此[文章](https://rherault.dev/articles/hyprland-fr-layout)。
+有关配置法语 AZERTY 布局的帮助，请参阅此 [文章](https://rherault.dev/articles/hyprland-fr-layout)。
 
 ### 解除绑定
 
@@ -92,16 +80,14 @@ unbind = SUPER, O
 hyprctl keyword unbind SUPER, O
 ```
 
-{{< callout type=info >}}
-在 `unbind` 中，键是区分大小写的。它必须与您要解除绑定的 `bind` 中的大小写完全匹配。
-
-```ini
-bind = SUPER, TAB, workspace, e+1
-unbind = SUPER, Tab # 这将不会解除绑定
-unbind = SUPER, TAB # 这将解除绑定
-```
-
-{{< /callout >}}
+> [!NOTE]
+> 在 `unbind` 中，键是区分大小写的。它必须与您要解除绑定的 `bind` 中的大小写完全匹配。
+>
+> ```ini
+> bind = SUPER, TAB, workspace, e+1
+> unbind = SUPER, Tab # 这将不会解除绑定
+> unbind = SUPER, TAB # 这将解除绑定
+> ```
 
 ## 绑定标志
 
@@ -121,24 +107,24 @@ bindrl = MOD, KEY, exec, amongus
 
 | 标志 | 名称 | 说明 |
 |------|------|-------------|
-| `l` | locked | 即使在输入抑制器(例如锁屏)激活时也能工作。 |
+| `l` | locked | 即使在输入抑制器 (例如锁屏) 激活时也能工作。 |
 | `r` | release | 将在按键释放时触发。 |
 | `c` | click | 只要鼠标光标保持在 `binds:drag_threshold` 内，将在按键或按钮释放时触发。 |
 | `g` | drag | 只要鼠标光标移动到 `binds:drag_threshold` 之外，将在按键或按钮释放时触发。 |
 | `o` | long press | 将在长按按键时触发。 |
 | `e` | repeat | 按住时会重复触发。 |
 | `n` | non-consuming | 键/鼠标事件将传递给活动窗口，同时触发调度器。 |
-| `m` | mouse | 请参阅专门的[鼠标绑定](#鼠标绑定)部分。 |
+| `m` | mouse | 请参阅专门的 [鼠标绑定](#mouse-binds) 部分。 |
 | `t` | transparent | 不能被其他绑定覆盖。 |
 | `i` | ignore mods | 将忽略修饰键。 |
-| `s` | separate | 将任意组合每个修饰键/键之间的键，请参阅[Keysym 组合](#keysym-组合)。 |
+| `s` | separate | 将任意组合每个修饰键/键之间的键，请参阅 [Keysym 组合](#keysym-combos)。 |
 | `d` | has description | 允许您为绑定编写描述。 |
 | `p` | bypass | 绕过应用程序请求抑制键位绑定。 |
 
 示例用法：
 
 ```ini
-# 示例音量按钮，允许按住并保持，音量限制为150%
+# 示例音量按钮，允许按住并保持，音量限制为 150%
 binde = , XF86AudioRaiseVolume, exec, wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+
 
 # 示例音量按钮，即使在输入抑制器激活时也会激活
@@ -148,9 +134,9 @@ bindl = , XF86AudioLowerVolume, exec, wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
 bindr = SUPER, SUPER_L, exec, pkill wofi || wofi
 
 # 描述一个绑定
-bindd = SUPER, Q, 打开我最喜欢的终端, exec, kitty
+bindd = SUPER, Q, 打开我最喜欢的终端，exec, kitty
 
-# 长按时跳过播放器，正常按下时仅跳过5秒
+# 长按时跳过播放器，正常按下时仅跳过 5 秒
 bindo = SUPER, XF86AudioNext, exec, playerctl next
 bind = SUPER, XF86AudioNext, exec, playerctl position +5
 ```
@@ -165,7 +151,7 @@ bind = SUPER, mouse:272, exec, amongus  # 将 `exec amogus` 绑定到 SUPER + �
 
 ### 仅绑定修饰键
 
-要仅绑定修饰键，您需要使用 TARGET 修饰掩码(带激活修饰键)和 `r` 标志，例如：
+要仅绑定修饰键，您需要使用 TARGET 修饰掩码 (带激活修饰键) 和 `r` 标志，例如：
 
 ```ini
 bindr = SUPER ALT, Alt_L, exec, amongus  # 将 `exec amongus` 绑定到 SUPER + ALT。
@@ -186,12 +172,9 @@ binds = Control_R&Super_R&Alt_L, J&K&L, exec, kitty
 binds = Escape&Apostrophe&F7, T&O&A&D, exec, battletoads 2: retoaded
 ```
 
-{{< callout type=info >}}
-
-请注意，这仅对 keysym 有效，并且会使所有修饰键变为 keysym。  
-如果您不知道什么是 keysym，请使用 `wev` 并按下您要使用的键。
-
-{{< /callout >}}
+> [!NOTE]
+> 请注意，这仅对 keysym 有效，并且会使所有修饰键变为 keysym。  
+> 如果您不知道什么是 keysym，请使用 `wev` 并按下您要使用的键。
 
 ### 鼠标滚轮
 
@@ -201,11 +184,8 @@ binds = Escape&Apostrophe&F7, T&O&A&D, exec, battletoads 2: retoaded
 bind = SUPER, mouse_down, workspace, e-1
 ```
 
-{{< callout type=info >}}
-
-您可以使用 `binds:scroll_event_delay` 控制重置时间。
-
-{{< /callout >}}
+> [!NOTE]
+> 您可以使用 `binds:scroll_event_delay` 控制重置时间。
 
 ### 开关
 
@@ -220,21 +200,15 @@ bindl = , switch:on:[开关名称], exec, hyprctl keyword monitor "eDP-1, disabl
 bindl = , switch:off:[开关名称], exec, hyprctl keyword monitor "eDP-1, 2560x1600, 0x0, 1"
 ```
 
-{{< callout type=warning >}}
+> [!WARNING]
+> Systemd `HandleLidSwitch` 设置在 `logind.conf` 中可能与 Hyprland 的笔记本电脑盖子开关配置冲突。
 
-Systemd `HandleLidSwitch` 设置在 `logind.conf` 中可能与 Hyprland 的笔记本电脑盖子开关配置冲突。
-
-{{< /callout >}}
-
-{{< callout type=info >}}
-
-您可以使用 `hyprctl devices` 查看您的开关。
-
-{{< /callout >}}
+> [!NOTE]
+> 您可以使用 `hyprctl devices` 查看您的开关。
 
 ### 一个键多个绑定
 
-您可以通过多次分配同一个键绑定，使用不同的 `dispatcher` 和 `param` 来触发多个操作：
+您可以通过多次分配同一个键绑定，使用不同的 `disapatcher` 和 `param` 来触发多个操作：
 
 ```ini
 # 在浮动工作区中切换窗口：
@@ -242,16 +216,13 @@ bind = SUPER, Tab, cyclenext         # 更改焦点到另一个窗口
 bind = SUPER, Tab, bringactivetotop  # 将其带到顶部
 ```
 
-{{< callout type=warning >}}
-
-键绑定将自上而下按编写顺序执行。
-
-{{< /callout >}}
+> [!WARNING]
+> 键绑定将自上而下按编写顺序执行。
 
 ### 描述
 
 您可以使用 `d` 标志描述您的键绑定。  
-您的描述始终位于 `dispatcher` 前面，并且不得包含逗号(`,`)！
+您的描述始终位于 `dispatcher` 前面，并且不得包含逗号 (`,`)！
 
 ```ini
 bindd = MODS, key, description, dispatcher, params
@@ -260,7 +231,7 @@ bindd = MODS, key, description, dispatcher, params
 例如：
 
 ```ini
-bindd = SUPER, Q, 打开我最喜欢的终端, exec, kitty
+bindd = SUPER, Q, 打开我最喜欢的终端，exec, kitty
 ```
 
 如果您想访问您的描述，可以使用 `hyprctl binds`。  
@@ -273,9 +244,9 @@ bindd = SUPER, Q, 打开我最喜欢的终端, exec, kitty
 
 ```ini
 binds {
-    drag_threshold = 10  # 仅在拖动超过10px后触发拖动事件
+    drag_threshold = 10  # 仅在拖动超过 10px 后触发拖动事件
 }
-bindm = ALT, mouse:272, movewindow      # ALT + 左键：通过拖动超过10px移动窗口。
+bindm = ALT, mouse:272, movewindow      # ALT + 左键：通过拖动超过 10px 移动窗口。
 bindc = ALT, mouse:272, togglefloating  # ALT + 左键：通过点击浮动窗口
 ```
 
@@ -286,7 +257,7 @@ bindc = ALT, mouse:272, togglefloating  # ALT + 左键：通过点击浮动窗�
 | movewindow | 移动活动窗口 | 无 |
 | resizewindow | 调整活动窗口大小 | `1` -> 调整大小并保持窗口宽高比。 <br> `2` -> 调整大小并忽略 `keepaspectratio` 窗口规则/属性。 <br> 无或任何其他值表示正常调整大小 |
 
-常见鼠标按钮按键码(检查 `wev` 以获取其他按钮)：
+常见鼠标按钮按键码 (检查 `wev` 以获取其他按钮)：
 
 ```txt
 左键 -> 272
@@ -294,12 +265,10 @@ bindc = ALT, mouse:272, togglefloating  # ALT + 左键：通过点击浮动窗�
 中键 -> 274
 ```
 
-{{< callout type=info >}}
-
-鼠标绑定，尽管其名称，其行为类似于普通绑定。  
-您可以自由使用任何键/修饰键。当按下时，鼠标功能将被激活。
-
-{{< /callout >}}
+> [!NOTE]
+> 鼠标绑定，尽管其名称，其行为类似于普通绑定。  
+> 您可以自由使用任何键 / 修饰键。当按下时，鼠标功能将被
+> 激活。
 
 ### 触摸板
 
@@ -319,14 +288,14 @@ bindm = SUPER, ALT_L, resizewindow
 是的，您没听错，Hyprland 确实支持_所有_应用程序的全局键绑定，
 包括 OBS、Discord、Firefox 等。
 
-有关键绑定，请参阅 [`pass`](../Dispatchers/#list-of-dispatchers) 和
+请参阅 [`pass`](../Dispatchers/#list-of-dispatchers) 和
 [`sendshortcut`](../Dispatchers/#list-of-dispatchers) 调度器。
 
 以 OBS 为例："开始/停止录制" 键绑定设置为
 <key>SUPER</key> + <key>F10</key>，要使其全局工作，只需添加：
 
 ```ini
-bind = SUPER, F10, pass, class:^(com.obsproject.Studio)$
+bind = SUPER, F10, pass, class:^(com\.obsproject\.Studio)$
 ```
 
 到您的配置中即可。
@@ -341,15 +310,12 @@ bind = , mouse:276, pass, class:^(TeamSpeak 3)$  # 将 MOUSE5 传递给 TeamSpea
 您也可以添加快捷方式，将其他键传递给窗口。
 
 ```ini
-bind = SUPER, F10, sendshortcut, SUPER, F4, class:^(com.obsproject.Studio)$  # 当按下 SUPER + F10 时，将 SUPER + F4 发送给 OBS。
+bind = SUPER, F10, sendshortcut, SUPER, F4, class:^(com\.obsproject\.Studio)$  # 当按下 SUPER + F10 时，将 SUPER + F4 发送给 OBS。
 ```
 
-{{< callout type=warning >}}
-
-这与所有原生 Wayland 应用程序完美配合，但 XWayland 有点不稳定。  
-确保您传递的是"全局 Xorg 键绑定"，否则从其他 XWayland 应用程序传递可能无法工作。
-
-{{< /callout >}}
+> [!WARNING]
+> 这与所有原生 Wayland 应用程序完美配合，但 XWayland 有点不稳定。  
+> 确保您传递的是"全局 Xorg 键绑定"，否则从其他 XWayland 应用程序传递可能无法工作。
 
 ### DBus 全局快捷键
 
@@ -365,11 +331,9 @@ bind = SUPER, F10, sendshortcut, SUPER, F4, class:^(com.obsproject.Studio)$  # �
 bind = SUPERSHIFT, A, global, coolApp:myToggle
 ```
 
-{{< callout type=info >}}
-
-请注意，此功能_仅_与 [XDPH](../../Hypr-Ecosystem/xdg-desktop-portal-hyprland) 一起工作。
-
-{{</ callout >}}
+> [!NOTE]
+> 请注意，此功能_仅_与
+> [XDPH](../../Hypr-Ecosystem/xdg-desktop-portal-hyprland) 一起工作。
 
 ## 子映射
 
@@ -399,14 +363,11 @@ submap = reset
 # 后续键位绑定将再次为全局...
 ```
 
-{{< callout type=warning >}}
-
-不要忘记在内部时重置键映射的键绑定(`escape`，在本例中)！
-
-如果您卡在键映射内部，可以使用 `hyprctl dispatch submap reset` 返回。  
-如果您没有打开终端，那就倒霉了。您已被警告。
-
-{{< /callout >}}
+> [!WARNING]
+> 不要忘记在内部时重置键映射的键绑定 (`escape`，在本例中)！
+>
+> 如果您卡在键映射内部，可以使用 `hyprctl dispatch submap reset` 返回。  
+> 如果您没有打开终端，那就倒霉了。您已被警告。
 
 您也可以设置相同的键绑定执行多个操作，例如调整大小
 并关闭子映射，如下所示：

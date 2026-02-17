@@ -802,6 +802,7 @@ fn escape_pango(text: &str) -> String {
             "{{< relref \"#executing-with-rules\" >}}",
             "#executing-with-rules",
         )
+        .replace("{{< relref \"#workspaces\" >}}", "#workspaces")
 }
 
 fn resolve_hyprwiki_url(url: &str, guide_name: &str) -> String {

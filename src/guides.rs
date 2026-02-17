@@ -2,6 +2,7 @@ use crate::utils::markdown_to_pango;
 use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
 use rust_i18n::{locale, t};
 
+#[derive(Debug)]
 enum ContentBlock {
     Text(String),
     Code {
@@ -117,10 +118,10 @@ fn get_content(name: &str) -> Vec<ContentBlock> {
             "zh-CN" => include_str!("../guides/zh-CN/Execs.md"),
             _ => include_str!("../guides/en/Execs.md"),
         },
-        "Envs" => match current_locale.as_str() {
-            "ru" => include_str!("../guides/ru/Envs.md"),
-            "zh-CN" => include_str!("../guides/zh-CN/Envs.md"),
-            _ => include_str!("../guides/en/Envs.md"),
+        "Environment-variables" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Environment-variables.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Environment-variables.md"),
+            _ => include_str!("../guides/en/Environment-variables.md"),
         },
         name => panic!("Invalid content name: {name}"),
     };
@@ -137,45 +138,46 @@ fn parse_lines(lines: &[&str], guide_name: &str) -> Vec<ContentBlock> {
     let mut table_lines = Vec::new();
     let mut in_callout = false;
     let mut callout_type = String::new();
-    let mut callout_lines = Vec::new();
+    let mut callout_lines = Vec::<&str>::new();
 
     for line in lines {
-        if line.trim_start().starts_with("{{< callout ") {
-            if let Some(type_start) = line.find("type=") {
-                let type_start = type_start + 5;
-                let type_str = &line[type_start..];
-                let type_str = type_str.trim_start_matches(|c: char| ['"', '\'', ' '].contains(&c));
-                let type_str = type_str.split_whitespace().next().unwrap_or_default();
-                let type_str = type_str.trim_end_matches(|c: char| ['"', '\'', ' '].contains(&c));
-                callout_type = type_str.to_string();
-            } else {
-                callout_type = "".to_string();
-            }
-            in_callout = true;
-            continue;
-        }
-
-        if (line.trim_start().starts_with("{{< /callout >}}")
-            || line.trim_start().starts_with("{{</ callout >}"))
-            && in_callout
-        {
-            let callout_blocks = parse_lines(&callout_lines, guide_name);
-            blocks.push(ContentBlock::Callout {
-                callout_type: callout_type.clone(),
-                content: callout_blocks,
-            });
-            callout_type.clear();
-            callout_lines.clear();
-            in_callout = false;
+        if line.starts_with("weight:") || line.starts_with("title:") || line == &"---" {
             continue;
         }
 
         if in_callout {
-            callout_lines.push(line);
+            if let Some(callout_line) = line.strip_prefix("> ") {
+                callout_lines.push(callout_line);
+                continue;
+            } else if *line == ">" {
+                callout_lines.push("");
+                continue;
+            } else {
+                let callout_blocks = parse_lines(&callout_lines, guide_name);
+                blocks.push(ContentBlock::Callout {
+                    callout_type: callout_type.clone(),
+                    content: callout_blocks,
+                });
+                callout_type.clear();
+                callout_lines.clear();
+                in_callout = false;
+            }
+        }
+
+        if line.trim_start().starts_with("> [!")
+            && let (Some(bang_idx), Some(close_bracket_idx)) = (line.find('!'), line.find(']'))
+        {
+            callout_type = line[bang_idx + 1..close_bracket_idx].trim().to_lowercase();
+
+            in_callout = true;
             continue;
         }
 
-        if line.starts_with("weight:") || line.starts_with("title:") || line == &"---" {
+        if let Some(stripped) = line.trim_start().strip_prefix("> ") {
+            callout_type = String::new();
+
+            in_callout = true;
+            callout_lines.push(stripped);
             continue;
         }
 
@@ -465,11 +467,13 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .margin_bottom(20)
         .build();
 
-    let title = match callout_type {
-        "info" => &format!("<b>{}</b>", t!("guides.information")),
-        "warning" => &format!("<b>{}</b>", t!("guides.warning")),
-        "error" => &format!("<b>{}</b>", t!("guides.error")),
-        _ => &format!("<b>{}</b>", callout_type),
+    let (title, style_class) = match callout_type.to_lowercase().as_str() {
+        "info" | "note" | "tip" | "important" => {
+            (&format!("<b>{}</b>", t!("guides.information")), "info")
+        }
+        "warning" | "caution" => (&format!("<b>{}</b>", t!("guides.warning")), "warning"),
+        "error" | "danger" => (&format!("<b>{}</b>", t!("guides.error")), "error"),
+        _ => (&format!("<b>{}</b>", callout_type), "card"),
     };
 
     let header = Label::builder()
@@ -483,7 +487,9 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         .build();
     header.set_markup(title);
 
-    vbox.append(&header);
+    if !title.is_empty() {
+        vbox.append(&header);
+    }
 
     for block in content_blocks {
         match block {
@@ -514,6 +520,8 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
     }
 
     let frame = Frame::builder().margin_start(15).margin_end(15).build();
+
+    frame.add_css_class(style_class);
 
     frame.set_child(Some(&vbox));
 

@@ -1,0 +1,13 @@
+_version: 2
+hyprland.fullscreen_action.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"
+hyprland.fullscreen_action.set:
+  en: "Set"
+  ru: "Включить"
+  zh-CN: "启用"
+hyprland.fullscreen_action.unset:
+  en: "Unset"
+  ru: "Выключить"
+  zh-CN: "禁用"

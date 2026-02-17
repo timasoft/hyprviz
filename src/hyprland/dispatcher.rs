@@ -1,17 +1,19 @@
 use super::{
-    ChangeGroupActive, CursorCorner, CycleNext, Direction, DispatcherFullscreenState, FloatValue,
-    FullscreenMode, GroupLockAction, KeyState, Modifier, MonitorTarget, MoveDirection,
-    ResizeParams, SetProp, SwapDirection, SwapNext, TagToggleState, ToggleState, WindowRule,
-    WindowTarget, WorkspaceTarget, ZHeight, modifier::parse_modifiers,
+    ChangeGroupActive, CursorCorner, CycleNext, Direction, DispatcherFullscreenState,
+    DispatcherFullscreenStateAction, FloatValue, FullscreenAction, FullscreenMode, GroupLockAction,
+    KeyState, Modifier, MonitorTarget, MoveDirection, ResizeParams, SetProp, SwapDirection,
+    SwapNext, TagToggleState, ToggleState, WindowRule, WindowTarget, WorkspaceTarget, ZHeight,
+    modifier::parse_modifiers,
 };
 use crate::{
     advanced_editors::create_entry,
     gtk_converters::{
         EnumConfigForGtk, FieldLabel, ToGtkBox, ToGtkBoxWithSeparator,
         ToGtkBoxWithSeparatorAndNames, ToGtkBoxWithSeparatorAndNamesBuilder,
+        create_spin_button_builder,
     },
     register_togtkbox, register_togtkbox_with_separator, register_togtkbox_with_separator_names,
-    utils::{HasDiscriminant, cow_to_static_str, join_with_separator},
+    utils::{HasDiscriminant, MAX_SAFE_STEP_0_01_F64, cow_to_static_str, join_with_separator},
 };
 use gtk::{Box as GtkBox, Label, Orientation as GtkOrientation, StringList, prelude::*};
 use rust_i18n::t;
@@ -39,9 +41,14 @@ pub enum Dispatcher {
     ToggleFloating(Option<WindowTarget>),
     SetFloating(Option<WindowTarget>),
     SetTiled(Option<WindowTarget>),
-    Fullscreen(FullscreenMode),
-    FullscreenState(DispatcherFullscreenState, DispatcherFullscreenState),
+    Fullscreen(FullscreenMode, FullscreenAction),
+    FullscreenState(
+        DispatcherFullscreenState,
+        DispatcherFullscreenState,
+        DispatcherFullscreenStateAction,
+    ),
     Dpms(ToggleState, Option<String>),
+    ForceIdle(f64),
     Pin(Option<WindowTarget>),
     MoveFocus(Direction),
     MoveWindow(MoveDirection),
@@ -126,12 +133,16 @@ impl HasDiscriminant for Dispatcher {
             Self::Discriminant::ToggleFloating => Self::ToggleFloating(None),
             Self::Discriminant::SetFloating => Self::SetFloating(None),
             Self::Discriminant::SetTiled => Self::SetTiled(None),
-            Self::Discriminant::Fullscreen => Self::Fullscreen(FullscreenMode::default()),
+            Self::Discriminant::Fullscreen => {
+                Self::Fullscreen(FullscreenMode::default(), FullscreenAction::default())
+            }
             Self::Discriminant::FullscreenState => Self::FullscreenState(
                 DispatcherFullscreenState::default(),
                 DispatcherFullscreenState::default(),
+                DispatcherFullscreenStateAction::default(),
             ),
             Self::Discriminant::Dpms => Self::Dpms(ToggleState::default(), None),
+            Self::Discriminant::ForceIdle => Self::ForceIdle(1.0),
             Self::Discriminant::Pin => Self::Pin(None),
             Self::Discriminant::MoveFocus => Self::MoveFocus(Direction::default()),
             Self::Discriminant::MoveWindow => Self::MoveWindow(MoveDirection::default()),
@@ -319,16 +330,17 @@ impl HasDiscriminant for Dispatcher {
                 }
             }
             Self::Discriminant::Fullscreen => {
-                Self::Fullscreen(FullscreenMode::from_num(str.parse().unwrap_or(0)))
+                let (mode, action) = str.split_once(' ').unwrap_or((str, ""));
+                let mode = mode.parse().unwrap_or_default();
+                let action = action.parse().unwrap_or_default();
+                Self::Fullscreen(mode, action)
             }
             Self::Discriminant::FullscreenState => {
-                let (internal, client) = str.split_once(' ').unwrap_or((str, ""));
-                let internal = internal.parse().unwrap_or(0);
-                let client = client.parse().unwrap_or(0);
-                Self::FullscreenState(
-                    DispatcherFullscreenState::from_num(internal),
-                    DispatcherFullscreenState::from_num(client),
-                )
+                let parts: Vec<&str> = str.split(' ').collect();
+                let internal = parts.first().unwrap_or(&"").parse().unwrap_or_default();
+                let client = parts.get(1).unwrap_or(&"").parse().unwrap_or_default();
+                let action = parts.get(2).unwrap_or(&"").parse().unwrap_or_default();
+                Self::FullscreenState(internal, client, action)
             }
             Self::Discriminant::Dpms => {
                 let (state, monitor_name) = str.split_once(' ').unwrap_or((str, ""));
@@ -338,6 +350,9 @@ impl HasDiscriminant for Dispatcher {
                     name => Some(name.to_string()),
                 };
                 Self::Dpms(state, monitor_name)
+            }
+            Self::Discriminant::ForceIdle => {
+                Self::ForceIdle(str.parse::<f64>().unwrap_or(1.0).abs())
             }
             Self::Discriminant::Pin => {
                 if str.is_empty() || str == "active" {
@@ -535,12 +550,13 @@ impl HasDiscriminant for Dispatcher {
             Dispatcher::SetFloating(Some(window_target)) => Some(window_target.to_string()),
             Dispatcher::SetTiled(None) => None,
             Dispatcher::SetTiled(Some(window_target)) => Some(window_target.to_string()),
-            Dispatcher::Fullscreen(mode) => Some(mode.to_num().to_string()),
-            Dispatcher::FullscreenState(internal, client) => {
-                Some(format!("{} {}", internal.to_num(), client.to_num()))
+            Dispatcher::Fullscreen(mode, action) => Some(format!("{} {}", mode, action)),
+            Dispatcher::FullscreenState(internal, client, action) => {
+                Some(format!("{} {} {}", internal, client, action))
             }
             Dispatcher::Dpms(state, None) => Some(state.to_string()),
             Dispatcher::Dpms(state, Some(name)) => Some(format!("{} {}", state, name)),
+            Dispatcher::ForceIdle(float) => Some(float.abs().to_string()),
             Dispatcher::Pin(None) => None,
             Dispatcher::Pin(Some(window_target)) => Some(window_target.to_string()),
             Dispatcher::MoveFocus(direction) => Some(direction.to_string()),
@@ -787,18 +803,20 @@ impl FromStr for Dispatcher {
                     )))
                 }
             }
-            "fullscreen" => Ok(Dispatcher::Fullscreen(FullscreenMode::from_num(
-                params.parse().unwrap_or(0),
-            ))),
-            "fullscreenstate" => {
-                let (internal, client) = params.split_once(' ').unwrap_or((params, ""));
-                let internal = internal.parse().unwrap_or(0);
-                let client = client.parse().unwrap_or(0);
+            "fullscreen" => {
+                let (mode, action) = params.split_once(' ').unwrap_or((params, ""));
+                let mode = mode.parse().unwrap_or_default();
+                let action = action.parse().unwrap_or_default();
 
-                Ok(Dispatcher::FullscreenState(
-                    DispatcherFullscreenState::from_num(internal),
-                    DispatcherFullscreenState::from_num(client),
-                ))
+                Ok(Dispatcher::Fullscreen(mode, action))
+            }
+            "fullscreenstate" => {
+                let parts: Vec<&str> = params.split(' ').collect();
+                let internal = parts.first().unwrap_or(&"").parse().unwrap_or_default();
+                let client = parts.get(1).unwrap_or(&"").parse().unwrap_or_default();
+                let action = parts.get(2).unwrap_or(&"").parse().unwrap_or_default();
+
+                Ok(Dispatcher::FullscreenState(internal, client, action))
             }
             "dpms" => {
                 let (state, monitor_name) = params.split_once(' ').unwrap_or((params, ""));
@@ -811,6 +829,9 @@ impl FromStr for Dispatcher {
 
                 Ok(Dispatcher::Dpms(state, monitor_name))
             }
+            "forceidle" => Ok(Dispatcher::ForceIdle(
+                params.parse::<f64>().unwrap_or(1.0).abs(),
+            )),
             "pin" => {
                 if params.is_empty() || params == "active" {
                     Ok(Dispatcher::Pin(None))
@@ -1052,15 +1073,18 @@ impl Display for Dispatcher {
             }
             Dispatcher::SetTiled(None) => write!(f, "settiled"),
             Dispatcher::SetTiled(Some(window_target)) => write!(f, "settiled, {}", window_target),
-            Dispatcher::Fullscreen(mode) => write!(f, "fullscreen, {}", mode.to_num()),
-            Dispatcher::FullscreenState(internal, client) => {
-                write!(f, "fullscreen, {} {}", internal.to_num(), client.to_num())
+            Dispatcher::Fullscreen(mode, action) => write!(f, "fullscreen, {} {}", mode, action),
+            Dispatcher::FullscreenState(internal, client, action) => {
+                write!(f, "fullscreenstate, {} {} {}", internal, client, action)
             }
             Dispatcher::Dpms(state, None) => {
                 write!(f, "dpms, {}", state)
             }
             Dispatcher::Dpms(state, Some(name)) => {
                 write!(f, "dpms, {} {}", state, name)
+            }
+            Dispatcher::ForceIdle(float) => {
+                write!(f, "forceidle, {}", float.abs())
             }
             Dispatcher::Pin(None) => write!(f, "pin"),
             Dispatcher::Pin(Some(window_target)) => write!(f, "pin, {}", window_target),
@@ -1207,6 +1231,7 @@ impl EnumConfigForGtk for Dispatcher {
             &t!("hyprland.dispatcher.fullscreen"),
             &t!("hyprland.dispatcher.fullscreen_state"),
             &t!("hyprland.dispatcher.dpms"),
+            &t!("hyprland.dispatcher.force_idle"),
             &t!("hyprland.dispatcher.pin"),
             &t!("hyprland.dispatcher.move_focus"),
             &t!("hyprland.dispatcher.move_window"),
@@ -1887,9 +1912,17 @@ impl EnumConfigForGtk for Dispatcher {
             | Self::SetTiled(_optional_window_target) => {
                 Some(|entry, _separator, _names, _| Option::<WindowTarget>::to_gtk_box(entry))
             }
-            Self::Fullscreen(_fullscreen_mode) => Some(<(FullscreenMode,)>::to_gtk_box),
-            Self::FullscreenState(_fullscreen_state1, _fullscreen_state2) => {
-                Some(<(DispatcherFullscreenState, DispatcherFullscreenState)>::to_gtk_box)
+            Self::Fullscreen(_fullscreen_mode, _fullscreen_action) => {
+                Some(<(FullscreenMode, FullscreenAction)>::to_gtk_box)
+            }
+            Self::FullscreenState(_fullscreen_state1, _fullscreen_state2, _fullscreen_action) => {
+                Some(
+                    <(
+                        DispatcherFullscreenState,
+                        DispatcherFullscreenState,
+                        DispatcherFullscreenStateAction,
+                    )>::to_gtk_box,
+                )
             }
             Self::Dpms(_toggle_state, _optional_monitor_name) => {
                 Some(|entry, separator, _names, _| {
@@ -1986,6 +2019,12 @@ impl EnumConfigForGtk for Dispatcher {
                     mother_box
                 })
             }
+            Self::ForceIdle(_float) => Some(|entry, _separator, names, _| {
+                create_spin_button_builder(0.0, MAX_SAFE_STEP_0_01_F64, 0.01)(
+                    entry,
+                    names.first().unwrap_or(&FieldLabel::Unnamed),
+                )
+            }),
             Self::Pin(_optional_window_target) => {
                 Some(|entry, _separator, _names, _| Option::<WindowTarget>::to_gtk_box(entry))
             }
@@ -2345,14 +2384,22 @@ impl EnumConfigForGtk for Dispatcher {
             // SetTiled(Option<WindowTarget>),
             vec![],
             // Fullscreen(FullscreenMode),
-            vec![FieldLabel::Named(cow_to_static_str(t!(
-                "hyprland.dispatcher.fullscreen_mode"
-            )))],
+            vec![
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.fullscreen_mode"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.action"))),
+            ],
             // FullscreenState(DispatcherFullscreenState, DispatcherFullscreenState),
             vec![
                 FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.internal_state"))),
                 FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.client_state"))),
+                FieldLabel::Named(cow_to_static_str(t!("hyprland.dispatcher.action"))),
             ],
+            // Dpms(ToggleState, Option<String>),
+            vec![],
+            // ForceIdle(f64),
+            vec![FieldLabel::Named(cow_to_static_str(t!(
+                "hyprland.dispatcher.seconds"
+            )))],
             // other options does not need to be labelled
         ])
     }
@@ -2365,8 +2412,12 @@ register_togtkbox_with_separator_names!(
     (WindowTarget,),
     (WindowTarget, String),
     (WorkspaceTarget,),
-    (FullscreenMode,),
-    (DispatcherFullscreenState, DispatcherFullscreenState),
+    (FullscreenMode, FullscreenAction),
+    (
+        DispatcherFullscreenState,
+        DispatcherFullscreenState,
+        DispatcherFullscreenStateAction
+    ),
     (Direction,),
     (MoveDirection,),
     (SwapDirection,),

@@ -33,6 +33,8 @@ pub enum WindowRuleParameter {
     NotFocus,
     Group,
     NotGroup,
+    Modal,
+    NotModal,
     FullscreenState(WindowRuleFullscreenState, WindowRuleFullscreenState),
     Workspace(IdOrName),
     OnWorkspace(IdOrNameOrWorkspaceSelector),
@@ -66,6 +68,8 @@ impl HasDiscriminant for WindowRuleParameter {
             Self::Discriminant::NotFocus => Self::NotFocus,
             Self::Discriminant::Group => Self::Group,
             Self::Discriminant::NotGroup => Self::NotGroup,
+            Self::Discriminant::Modal => Self::Modal,
+            Self::Discriminant::NotModal => Self::NotModal,
             Self::Discriminant::FullscreenState => Self::FullscreenState(
                 WindowRuleFullscreenState::default(),
                 WindowRuleFullscreenState::default(),
@@ -98,6 +102,8 @@ impl HasDiscriminant for WindowRuleParameter {
             Self::Discriminant::NotFocus => Self::NotFocus,
             Self::Discriminant::Group => Self::Group,
             Self::Discriminant::NotGroup => Self::NotGroup,
+            Self::Discriminant::Modal => Self::Modal,
+            Self::Discriminant::NotModal => Self::NotModal,
             Self::Discriminant::FullscreenState => {
                 let (state1, state2) = str.split_once(' ').unwrap_or((str, ""));
                 Self::FullscreenState(
@@ -131,6 +137,8 @@ impl HasDiscriminant for WindowRuleParameter {
             WindowRuleParameter::NotFocus => Some("0".to_string()),
             WindowRuleParameter::Group => Some("1".to_string()),
             WindowRuleParameter::NotGroup => Some("0".to_string()),
+            WindowRuleParameter::Modal => Some("1".to_string()),
+            WindowRuleParameter::NotModal => Some("0".to_string()),
             WindowRuleParameter::FullscreenState(state1, state2) => {
                 Some(format!("{} {}", state1, state2))
             }
@@ -192,6 +200,11 @@ impl FromStr for WindowRuleParameter {
                 Some(false) => Ok(WindowRuleParameter::NotGroup),
                 None => Ok(WindowRuleParameter::Group),
             },
+            "modal" => match parse_bool(part2) {
+                Some(true) => Ok(WindowRuleParameter::Modal),
+                Some(false) => Ok(WindowRuleParameter::NotModal),
+                None => Ok(WindowRuleParameter::Modal),
+            },
             "fullscreenState" => {
                 let (state1, state2) = part2.split_once(' ').unwrap_or((part2, ""));
                 Ok(WindowRuleParameter::FullscreenState(
@@ -238,6 +251,8 @@ impl Display for WindowRuleParameter {
             WindowRuleParameter::NotFocus => write!(f, "focus:0"),
             WindowRuleParameter::Group => write!(f, "group:1"),
             WindowRuleParameter::NotGroup => write!(f, "group:0"),
+            WindowRuleParameter::Modal => write!(f, "modal:1"),
+            WindowRuleParameter::NotModal => write!(f, "modal:0"),
             WindowRuleParameter::FullscreenState(state1, state2) => {
                 write!(f, "fullscreenState:{} {}", state1, state2)
             }
@@ -271,6 +286,8 @@ impl EnumConfigForGtk for WindowRuleParameter {
             &t!("hyprland.window_rule_parameter.not_focus"),
             &t!("hyprland.window_rule_parameter.group"),
             &t!("hyprland.window_rule_parameter.not_group"),
+            &t!("hyprland.window_rule_parameter.modal"),
+            &t!("hyprland.window_rule_parameter.not_modal"),
             &t!("hyprland.window_rule_parameter.fullscreen_state"),
             &t!("hyprland.window_rule_parameter.workspace"),
             &t!("hyprland.window_rule_parameter.on_workspace"),
@@ -300,6 +317,8 @@ impl EnumConfigForGtk for WindowRuleParameter {
             Self::NotFocus => None,
             Self::Group => None,
             Self::NotGroup => None,
+            Self::Modal => None,
+            Self::NotModal => None,
             Self::FullscreenState(_state, _state2) => {
                 Some(<(WindowRuleFullscreenState,)>::to_gtk_box)
             }
@@ -345,6 +364,10 @@ impl EnumConfigForGtk for WindowRuleParameter {
             // Group,
             vec![],
             // NotGroup,
+            vec![],
+            // Modal,
+            vec![],
+            // NotModal,
             vec![],
             // FullscreenState(WindowRuleFullscreenState, WindowRuleFullscreenState),
             vec![

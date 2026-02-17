@@ -43,6 +43,10 @@ hyprland.window_rule_parameter.internal_state:
   en: "Internal state"
   ru: "Внутреннее состояние"
   zh-CN: "内部状态"
+hyprland.window_rule_parameter.modal:
+  en: "Modal"
+  ru: "Модальное"
+  zh-CN: "模态"
 hyprland.window_rule_parameter.not_floating:
   en: "Not floating"
   ru: "Не плавающий"
@@ -59,6 +63,10 @@ hyprland.window_rule_parameter.not_group:
   en: "Not group"
   ru: "Вне группы"
   zh-CN: "非分组"
+hyprland.window_rule_parameter.not_modal:
+  en: "Not modal"
+  ru: "Не модальное"
+  zh-CN: "非模态"
 hyprland.window_rule_parameter.not_pinned:
   en: "Not pinned"
   ru: "Не закреплён"
