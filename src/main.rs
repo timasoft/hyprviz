@@ -10,8 +10,8 @@ use std::{
 use utils::{
     CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
     check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
-    get_current_profile, get_system_locale, initialize_development_mode, reload_hyprland,
-    update_source_line,
+    get_current_profile, get_system_locale, initialize_development_mode, mute_stdout,
+    reload_hyprland, update_source_line,
 };
 
 mod advanced_editors;
@@ -98,7 +98,7 @@ fn build_ui(app: &Application) {
         };
 
         if !check_last_non_empty_line_contains(&config_str, "source = ./hyprviz") {
-            let mut parsed_config = parse_config(&config_str);
+            let mut parsed_config = mute_stdout(|| parse_config(&config_str));
 
             parsed_config.add_entry_headless("#", "Source for hyprviz");
             parsed_config.add_entry_headless("source", "./hyprviz.conf");
@@ -178,7 +178,7 @@ fn build_ui(app: &Application) {
             }
         };
 
-        let parsed_config = parse_config(&config_str_for_read);
+        let parsed_config = mute_stdout(|| parse_config(&config_str_for_read));
 
         gui.borrow_mut().load_config(&parsed_config, &profile);
 

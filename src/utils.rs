@@ -8,7 +8,9 @@ use std::{
     env,
     error::Error,
     fs,
+    fs::File,
     io::{self, Write},
+    os::unix::io::AsRawFd,
     path::{Path, PathBuf},
     process::Command,
     sync::{LazyLock, OnceLock},
@@ -362,18 +364,29 @@ pub fn find_all_profiles() -> Option<Vec<String>> {
 /// Expands all `source = <path>` occurrences in file `entry_path` recursively from str
 pub fn expand_source_str(entry_path: &Path, entry: &str) -> Result<String, Box<dyn Error>> {
     let mut visited = HashSet::new();
-    expand_file_recursive(entry_path, &mut visited, entry)
+
+    let mut env_vars = HashMap::new();
+    let home = env::var("HOME").unwrap_or_default();
+    env_vars.insert("HOME".to_string(), home.clone());
+
+    expand_file_recursive(entry_path, &mut visited, &mut env_vars, entry)
 }
 
 /// Expand all `source = <path>` occurrences in file `entry_path` recursively.
 pub fn expand_source(entry_path: &Path) -> Result<String, Box<dyn Error>> {
     let mut visited = HashSet::new();
-    expand_file_recursive(entry_path, &mut visited, "")
+
+    let mut env_vars = HashMap::new();
+    let home = env::var("HOME").unwrap_or_default();
+    env_vars.insert("HOME".to_string(), home.clone());
+
+    expand_file_recursive(entry_path, &mut visited, &mut env_vars, "")
 }
 
 fn expand_file_recursive(
     path: &Path,
     visited: &mut HashSet<PathBuf>,
+    env_vars: &mut HashMap<String, String>,
     entry: &str,
 ) -> Result<String, Box<dyn Error>> {
     let resolved = expand_tilde(path)?;
@@ -399,14 +412,21 @@ fn expand_file_recursive(
     let mut out = String::with_capacity(content.len());
 
     for line in content.lines() {
-        if let Some(include_path_str) = parse_source_line(line) {
+        if let Some((name, value)) = parse_env_var_line(line) {
+            env_vars.insert(name, value);
+            continue;
+        }
+
+        let processed_line = substitute_env_vars(line, env_vars);
+
+        if let Some(include_path_str) = parse_source_line(&processed_line) {
             let include_path = resolve_relative(&include_path_str, &resolved);
-            let included_text = expand_file_recursive(&include_path, visited, "")
+            let included_text = expand_file_recursive(&include_path, visited, env_vars, "")
                 .map_err(|e| format!("while including {}: {}", include_path.display(), e))?;
             out.push_str(&included_text);
             out.push('\n');
         } else {
-            out.push_str(line);
+            out.push_str(&processed_line);
             out.push('\n');
         }
     }
@@ -440,7 +460,7 @@ fn parse_source_line(line: &str) -> Option<String> {
     skip_whitespace(&mut chars);
     let mut ident = String::new();
     while let Some(&c) = chars.peek() {
-        if c.is_alphanumeric() {
+        if c.is_alphanumeric() || c == '_' {
             ident.push(c);
             chars.next();
         } else {
@@ -504,6 +524,143 @@ fn parse_source_line(line: &str) -> Option<String> {
         let res = out.trim_end().to_string();
         if res.is_empty() { None } else { Some(res) }
     }
+}
+
+/// Parse a line and return Some((name, value)) if the line is a `$var = ...` assignment.
+fn parse_env_var_line(line: &str) -> Option<(String, String)> {
+    let mut chars = line.chars().peekable();
+
+    fn skip_whitespace(chars: &mut std::iter::Peekable<std::str::Chars>) {
+        while let Some(&c) = chars.peek() {
+            if c.is_whitespace() {
+                chars.next();
+            } else {
+                break;
+            }
+        }
+    }
+
+    skip_whitespace(&mut chars);
+
+    match chars.peek() {
+        Some('$') => {
+            chars.next();
+        }
+        _ => return None,
+    }
+
+    let mut name = String::new();
+    while let Some(&c) = chars.peek() {
+        if c.is_alphanumeric() || c == '_' {
+            name.push(c);
+            chars.next();
+        } else {
+            break;
+        }
+    }
+
+    if name.is_empty() {
+        return None;
+    }
+
+    skip_whitespace(&mut chars);
+
+    match chars.peek() {
+        Some('=') => {
+            chars.next();
+        }
+        _ => return None,
+    }
+
+    skip_whitespace(&mut chars);
+
+    let rhs = chars.collect::<String>();
+    let rhs = rhs.trim_start();
+
+    if rhs.is_empty() {
+        return None;
+    }
+
+    let first = rhs.chars().next().unwrap();
+    let value = if first == '"' || first == '\'' {
+        let quote = first;
+        let mut out = String::new();
+        let mut escaped = false;
+        let chars = rhs.chars().skip(1);
+        for c in chars {
+            if escaped {
+                out.push(c);
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == quote {
+                if out.is_empty() {
+                    return None;
+                } else {
+                    return Some((name, out));
+                }
+            } else {
+                out.push(c);
+            }
+        }
+        if out.is_empty() {
+            return None;
+        } else {
+            out
+        }
+    } else {
+        let mut out = String::new();
+        for c in rhs.chars() {
+            if c == '#' {
+                break;
+            } else {
+                out.push(c);
+            }
+        }
+        let res = out.trim_end().to_string();
+        if res.is_empty() {
+            return None;
+        } else {
+            res
+        }
+    };
+
+    Some((name, value))
+}
+
+/// Substitute occurrences of `$var` in `line` with values from `env_vars`.
+fn substitute_env_vars(line: &str, env_vars: &HashMap<String, String>) -> String {
+    let mut out = String::with_capacity(line.len());
+    let mut chars = line.chars().peekable();
+
+    while let Some(c) = chars.next() {
+        if c == '$' {
+            let mut var_name = String::new();
+            while let Some(&next_c) = chars.peek() {
+                if next_c.is_alphanumeric() || next_c == '_' {
+                    var_name.push(chars.next().unwrap());
+                } else {
+                    break;
+                }
+            }
+
+            if !var_name.is_empty() {
+                if let Some(val) = env_vars.get(&var_name) {
+                    out.push_str(val);
+                    continue;
+                } else {
+                    out.push('$');
+                    out.push_str(&var_name);
+                }
+            } else {
+                out.push('$');
+            }
+        } else {
+            out.push(c);
+        }
+    }
+
+    out
 }
 
 /// Resolve a possibly relative include path `p` (string) relative to `base_file`'s parent.
@@ -1185,6 +1342,34 @@ pub fn cow_to_static_str(cow: Cow<'static, str>) -> &'static str {
         Cow::Borrowed(s) => s,
         Cow::Owned(s) => Box::leak(s.into_boxed_str()),
     }
+}
+
+pub fn mute_stdout<F, R>(f: F) -> R
+where
+    F: FnOnce() -> R,
+{
+    let stdout = io::stdout();
+    let stdout_fd = stdout.as_raw_fd();
+
+    let saved_stdout = unsafe { libc::dup(stdout_fd) };
+
+    let null = File::open("/dev/null").unwrap();
+    let null_fd = null.as_raw_fd();
+
+    unsafe {
+        libc::dup2(null_fd, stdout_fd);
+    }
+
+    let result = f();
+
+    unsafe {
+        libc::dup2(saved_stdout, stdout_fd);
+        libc::close(saved_stdout);
+    }
+
+    io::stdout().flush().unwrap();
+
+    result
 }
 
 pub trait HasDiscriminant {
