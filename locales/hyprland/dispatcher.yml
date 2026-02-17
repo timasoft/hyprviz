@@ -1,4 +1,8 @@
 _version: 2
+hyprland.dispatcher.action:
+  en: "Action"
+  ru: "Действие"
+  zh-CN: "操作"
 hyprland.dispatcher.alter_z_order:
   en: "Alter z order"
   ru: "Изменить z-порядок"
@@ -71,6 +75,10 @@ hyprland.dispatcher.focus_workspace_on_current_monitor:
   en: "Focus workspace on current monitor"
   ru: "Фокус на рабочее пространство на текущем мониторе"
   zh-CN: "聚焦当前显示器上的工作区"
+hyprland.dispatcher.force_idle:
+  en: "Force idle"
+  ru: "Принудительное бездействие"
+  zh-CN: "强制空闲"
 hyprland.dispatcher.force_kill_active:
   en: "Force kill active"
   ru: "Принудительно завершить активное окно"
@@ -195,6 +203,10 @@ hyprland.dispatcher.resize_window_pixel:
   en: "Resize window pixel"
   ru: "Изменить размер окна (в пикселях)"
   zh-CN: "按像素调整窗口大小"
+hyprland.dispatcher.seconds:
+  en: "Seconds"
+  ru: "Секунды"
+  zh-CN: "秒"
 hyprland.dispatcher.send_key_state:
   en: "Send key state"
   ru: "Отправить состояние клавиши"

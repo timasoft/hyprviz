@@ -1,0 +1,9 @@
+_version: 2
+hyprland.dispatcher_fullscreen_state_action.toggle:
+  en: "Toggle"
+  ru: "Переключить"
+  zh-CN: "切换"
+hyprland.dispatcher_fullscreen_state_action.set:
+  en: "Set"
+  ru: "Установить"
+  zh-CN: "设置"
