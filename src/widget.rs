@@ -4602,7 +4602,7 @@ impl ConfigWidget {
                             &t!("widget.env_category.envs_section_description"),
                             first_section.clone(),
                         );
-                        add_guide(&container, "Enviroment-variables", true);
+                        add_guide(&container, "Environment-variables", true);
                     }
                     "top_level" => {
                         add_section(
