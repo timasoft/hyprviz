@@ -8,7 +8,9 @@ use std::{
     env,
     error::Error,
     fs,
+    fs::File,
     io::{self, Write},
+    os::unix::io::AsRawFd,
     path::{Path, PathBuf},
     process::Command,
     sync::{LazyLock, OnceLock},
@@ -1340,6 +1342,34 @@ pub fn cow_to_static_str(cow: Cow<'static, str>) -> &'static str {
         Cow::Borrowed(s) => s,
         Cow::Owned(s) => Box::leak(s.into_boxed_str()),
     }
+}
+
+pub fn mute_stdout<F, R>(f: F) -> R
+where
+    F: FnOnce() -> R,
+{
+    let stdout = io::stdout();
+    let stdout_fd = stdout.as_raw_fd();
+
+    let saved_stdout = unsafe { libc::dup(stdout_fd) };
+
+    let null = File::open("/dev/null").unwrap();
+    let null_fd = null.as_raw_fd();
+
+    unsafe {
+        libc::dup2(null_fd, stdout_fd);
+    }
+
+    let result = f();
+
+    unsafe {
+        libc::dup2(saved_stdout, stdout_fd);
+        libc::close(saved_stdout);
+    }
+
+    io::stdout().flush().unwrap();
+
+    result
 }
 
 pub trait HasDiscriminant {

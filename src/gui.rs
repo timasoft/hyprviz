@@ -1,7 +1,7 @@
 use crate::{
     utils::{
         BACKUP_SUFFIX, HYPRVIZ_PROFILES_PATH, atomic_write, expand_source, find_all_profiles,
-        get_config_path, is_development_mode, reload_hyprland,
+        get_config_path, is_development_mode, mute_stdout, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -805,7 +805,7 @@ along with this program; if not, see
             }
         };
 
-        let mut parsed_config = parse_config(&config_str);
+        let mut parsed_config = mute_stdout(|| parse_config(&config_str));
         let changes = self.changed_options.clone();
 
         if !changes.borrow().is_empty() {
@@ -900,7 +900,7 @@ along with this program; if not, see
                         println!("{}", &t!("gui.configuration_restored_from_backup"));
                         reload_hyprland();
                         if let Ok(config_str) = expand_source(&path_for_read) {
-                            let parsed_config = parse_config(&config_str);
+                            let parsed_config = mute_stdout(|| parse_config(&config_str));
                             self.load_config(&parsed_config, &profile_name);
                             self.changed_options.clone().borrow_mut().clear();
                         } else {
@@ -1219,7 +1219,7 @@ along with this program; if not, see
             }
         }
 
-        let new_config = parse_config(&lines.join("\n"));
+        let new_config = mute_stdout(|| parse_config(&lines.join("\n")));
         *config = new_config;
     }
 
@@ -1251,7 +1251,7 @@ along with this program; if not, see
             }
         };
 
-        let parsed_config = parse_config(&config_str);
+        let parsed_config = mute_stdout(|| parse_config(&config_str));
         self.load_config(&parsed_config, &current_profile);
 
         if let Some(page) = current_page
