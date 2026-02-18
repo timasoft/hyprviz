@@ -331,10 +331,10 @@ gui.ecosystem:
   en: "Ecosystem"
   ru: "Экосистема"
   zh-CN: "生态系统"
-gui.experimental:
-  en: "Experimental"
-  ru: "Экспериментальные"
-  zh-CN: "实验性"
+gui.quirks:
+  en: "Quirks"
+  ru: "Особенности"
+  zh-CN: "特殊设置"
 gui.debug:
   en: "Debug"
   ru: "Отладка"
