@@ -64,10 +64,10 @@ workspace = w[tg1-4], shadow:false
 ```ini
 workspace = w[tv1], gapsout:0, gapsin:0
 workspace = f[1], gapsout:0, gapsin:0
-windowrule = bordersize 0, floating:0, onworkspace:w[tv1]
-windowrule = rounding 0, floating:0, onworkspace:w[tv1]
-windowrule = bordersize 0, floating:0, onworkspace:f[1]
-windowrule = rounding 0, floating:0, onworkspace:f[1]
+windowrule = border_size 0, match:float 0, match:workspace w[tv1]
+windowrule = rounding 0, match:float 0, match:workspace w[tv1]
+windowrule = border_size 0, match:float 0, match:workspace f[1]
+windowrule = rounding 0, match:float 0, match:workspace f[1]
 ```
 
 #### Умные отступы (игнорирование специальных рабочих пространств)
@@ -77,10 +77,10 @@ windowrule = rounding 0, floating:0, onworkspace:f[1]
 ```ini
 workspace = w[tv1]s[false], gapsout:0, gapsin:0
 workspace = f[1]s[false], gapsout:0, gapsin:0
-windowrule = bordersize 0, floating:0, onworkspace:w[tv1]s[false]
-windowrule = rounding 0, floating:0, onworkspace:w[tv1]s[false]
-windowrule = bordersize 0, floating:0, onworkspace:f[1]s[false]
-windowrule = rounding 0, floating:0, onworkspace:f[1]s[false]
+windowrule = border_size 0, match:float 0, match:workspace w[tv1]s[false]
+windowrule = rounding 0, match:float 0, match:workspace w[tv1]s[false]
+windowrule = border_size 0, match:float 0, match:workspace f[1]s[false]
+windowrule = rounding 0, match:float 0, match:workspace f[1]s[false]
 ```
 
 ## Правила
