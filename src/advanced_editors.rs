@@ -863,20 +863,45 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
     );
     fancy_boxline.append(&fancy_value_entry);
 
+    let old_name = Rc::new(RefCell::new(name_entry.text().trim().to_string()));
     let fancy_value_entry_clone = fancy_value_entry.clone();
     let value_entry_clone = value_entry.clone();
     let category_clone = category.to_string();
     name_entry.connect_changed(move |entry| {
-        while let Some(child) = fancy_value_entry.first_child() {
-            fancy_value_entry.remove(&child);
+        let new_name = entry.text().trim().to_string();
+
+        let update_ui = {
+            let old_name_ref = old_name.borrow();
+            let old_name_str = old_name_ref.as_str();
+
+            let new_is_bezier = new_name == "bezier";
+            let old_is_bezier = old_name_str == "bezier";
+            let bezier_mode_changed = new_is_bezier != old_is_bezier;
+
+            let new_is_exec = new_name == "exec" || new_name == "exec-once";
+            let old_is_exec = old_name_str == "exec" || old_name_str == "exec-once";
+            let exec_group_changed = new_is_exec != old_is_exec;
+
+            let has_desc_new = matches!(BindLeft::from_str(&new_name), Ok(BindLeft::Bind(flags)) if flags.has_description);
+            let has_desc_old = matches!(BindLeft::from_str(old_name_str), Ok(BindLeft::Bind(flags)) if flags.has_description);
+            let description_flag_changed = has_desc_new != has_desc_old;
+
+            bezier_mode_changed || exec_group_changed || description_flag_changed
+        };
+
+        if update_ui {
+            while let Some(child) = fancy_value_entry.first_child() {
+                fancy_value_entry.remove(&child);
+            }
+            fill_fancy_value_entry(
+                &fancy_value_entry_clone,
+                &value_entry_clone,
+                &category_clone,
+                &new_name,
+            );
         }
-        let new_name = entry.text().to_string();
-        fill_fancy_value_entry(
-            &fancy_value_entry_clone,
-            &value_entry_clone,
-            &category_clone,
-            &new_name,
-        );
+
+        *old_name.borrow_mut() = new_name;
     });
 
     fancy_boxline
