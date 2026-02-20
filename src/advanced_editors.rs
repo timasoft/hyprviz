@@ -693,13 +693,64 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             }
         }
         "gesture" => {
+            let gesture_content_box = Box::new(GtkOrientation::Horizontal, 5);
+
             let label = Label::new(Some("gesture"));
             label.set_width_request(100);
             label.set_selectable(true);
-            fancy_name_entry.append(&label);
+
+            let bypass_switch_label = Label::new(Some(&t!("advanced_editors.bypass")));
+            let bypass_switch = create_switch();
+
+            let bypass_switch_box = Box::new(GtkOrientation::Horizontal, 5);
+            bypass_switch_box.set_margin_start(10);
+            bypass_switch_box.append(&bypass_switch_label);
+            bypass_switch_box.append(&bypass_switch);
+
+            gesture_content_box.append(&label);
+            gesture_content_box.append(&bypass_switch_box);
+            fancy_name_entry.append(&gesture_content_box);
+
             name_entry.set_text("gesture");
+
+            let name_entry_clone = name_entry.clone();
+            let is_updating_clone = is_updating.clone();
+            bypass_switch.connect_state_notify(move |switch| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+
+                let current_text = name_entry_clone.text().to_string();
+                let base_text = current_text.trim().trim_end_matches('p').trim_end();
+
+                let new_text = if switch.is_active() {
+                    format!("{}p", base_text)
+                } else {
+                    base_text.to_string()
+                };
+                name_entry_clone.set_text(&new_text);
+
+                is_updating_clone.set(false);
+            });
+
+            let label_clone = label.clone();
+            let bypass_switch_clone = bypass_switch.clone();
+            let is_updating_clone = is_updating.clone();
             name_entry.connect_changed(move |entry| {
-                label.set_text(&entry.text());
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+
+                let text = entry.text().to_string();
+                let has_p = text.trim().ends_with('p');
+                let clean_text = text.trim().trim_end_matches('p').trim_end();
+
+                label_clone.set_text(clean_text);
+                bypass_switch_clone.set_active(has_p);
+
+                is_updating_clone.set(false);
             });
         }
         "windowrule" => {
