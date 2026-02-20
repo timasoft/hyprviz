@@ -4,7 +4,7 @@ title: 工作区规则
 ---
 
 > [!NOTE]
-> 由 Qwen3.5-Plus 从 en 翻译
+> 翻译自英文版，使用 Qwen3.5-Plus
 
 您可以设置工作区规则以实现特定于工作区的行为。例如，
 您可以定义一个所有窗口都无边框和间隙的工作区。
@@ -42,7 +42,7 @@ workspace = WORKSPACE, RULES
   [调度器->工作区](../Dispatchers#workspaces)）。此字段是必需的。
   这_可以是_一个工作区选择器，但请注意
   工作区选择器只能匹配_已存在_的工作区。
-- RULES 是此处[规则](#规则)中描述的一个（或多个）规则。
+- RULES 是此处 [规则](#规则) 中描述的一个（或多个）规则。
 
 ### 示例
 
@@ -59,10 +59,10 @@ workspace = w[tg1-4], shadow:false
 ```ini
 workspace = w[tv1], gapsout:0, gapsin:0
 workspace = f[1], gapsout:0, gapsin:0
-windowrule = bordersize 0, floating:0, onworkspace:w[tv1]
-windowrule = rounding 0, floating:0, onworkspace:w[tv1]
-windowrule = bordersize 0, floating:0, onworkspace:f[1]
-windowrule = rounding 0, floating:0, onworkspace:f[1]
+windowrule = border_size 0, match:float 0, match:workspace w[tv1]
+windowrule = rounding 0, match:float 0, match:workspace w[tv1]
+windowrule = border_size 0, match:float 0, match:workspace f[1]
+windowrule = rounding 0, match:float 0, match:workspace f[1]
 ```
 
 #### 智能间隙（忽略特殊工作区）
@@ -72,27 +72,27 @@ windowrule = rounding 0, floating:0, onworkspace:f[1]
 ```ini
 workspace = w[tv1]s[false], gapsout:0, gapsin:0
 workspace = f[1]s[false], gapsout:0, gapsin:0
-windowrule = bordersize 0, floating:0, onworkspace:w[tv1]s[false]
-windowrule = rounding 0, floating:0, onworkspace:w[tv1]s[false]
-windowrule = bordersize 0, floating:0, onworkspace:f[1]s[false]
-windowrule = rounding 0, floating:0, onworkspace:f[1]s[false]
+windowrule = border_size 0, match:float 0, match:workspace w[tv1]s[false]
+windowrule = rounding 0, match:float 0, match:workspace w[tv1]s[false]
+windowrule = border_size 0, match:float 0, match:workspace f[1]s[false]
+windowrule = rounding 0, match:float 0, match:workspace f[1]s[false]
 ```
 
 ## 规则
 
 | 规则 | 说明 | 类型 |
 | --- | --- | --- |
-| monitor:[m] | 将工作区绑定到显示器。参见[语法](#语法)和[显示器](../Monitors)。 | 字符串 |
+| monitor:[m] | 将工作区绑定到显示器。参见 [语法](#语法) 和 [显示器](../Monitors)。 | 字符串 |
 | default:[b] | 该工作区是否应作为给定显示器的默认工作区 | 布尔值 |
-| gapsin:[x] | 设置窗口之间的间隙（等同于[常规->gaps_in](../Variables#general)） | 整数 |
-| gapsout:[x] | 设置窗口与显示器边缘之间的间隙（等同于[常规->gaps_out](../Variables#general)） | 整数 |
-| bordersize:[x] | 设置窗口周围的边框大小（等同于[常规->border_size](../Variables#general)） | 整数 |
+| gapsin:[x] | 设置窗口之间的间隙（等同于 [常规->gaps_in](../Variables#general)） | 整数 |
+| gapsout:[x] | 设置窗口与显示器边缘之间的间隙（等同于 [常规->gaps_out](../Variables#general)） | 整数 |
+| bordersize:[x] | 设置窗口周围的边框大小（等同于 [常规->border_size](../Variables#general)） | 整数 |
 | border:[b] | 是否绘制边框 | 布尔值 |
 | shadow:[b] | 是否绘制阴影 | 布尔值 |
 | rounding:[b] | 是否绘制圆角窗口 | 布尔值 |
 | decorate:[b] | 是否绘制窗口装饰 | 布尔值 |
 | persistent:[b] | 即使工作区为空且非活动，也保持该工作区存活 | 布尔值 |
-| on-created-empty:[c] | 一旦工作区被创建为空（即不是通过移动窗口到它而创建的），要执行的命令。参见[命令语法](../Dispatchers#executing-with-rules) | 字符串 |
+| on-created-empty:[c] | 一旦工作区被创建为空（即不是通过移动窗口到它而创建的），要执行的命令。参见 [命令语法](../Dispatchers#executing-with-rules) | 字符串 |
 | defaultName:[s] | 工作区的默认名称 | 字符串 |
 
 ### 示例规则

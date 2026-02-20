@@ -4,7 +4,7 @@ title: 键位绑定
 ---
 
 > [!NOTE]
-> 由 Qwen3.5-Plus 从 en 翻译
+> 翻译自英文版，使用 Qwen3.5-Plus
 
 ## 基本
 
@@ -120,6 +120,7 @@ bindrl = MOD, KEY, exec, amongus
 | `s` | separate | 将任意组合每个修饰键/键之间的键，请参阅 [Keysym 组合](#keysym-combos)。 |
 | `d` | has description | 允许您为绑定编写描述。 |
 | `p` | bypass | 绕过应用程序请求抑制键位绑定。 |
+| `u` | submap universal | 无论当前子映射为何，都将保持激活。 |
 
 示例用法：
 
@@ -386,6 +387,12 @@ submap = reset
 
 这之所以有效，是因为绑定按出现顺序执行，并且
 每个绑定可以分配多个操作。
+
+您可以使用 submap universal 绑定标志设置一个无论当前子映射为何都将保持激活的键位绑定。
+
+```ini
+bindu = $mainMod, K, exec, kitty
+```
 
 ### 嵌套
 
