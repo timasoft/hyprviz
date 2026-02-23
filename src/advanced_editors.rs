@@ -4,7 +4,7 @@ use crate::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
         BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleWithParameter,
         Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Position, Scale, Side,
-        UnbindRight, WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType,
+        UnbindRight, WindowRuleEffectOrProp, Workspace, WorkspaceSelector, WorkspaceType,
         animation::parse_animation, bezier_curve::parse_bezier, bind_right::parse_bind_right,
         monitor::parse_monitor, workspace::parse_workspace,
     },
@@ -4043,7 +4043,7 @@ fn fill_fancy_value_entry(
             fancy_value_entry.append(&gesture_box);
         }
         "windowrule" => {
-            let window_rule_box = WindowRuleWithParameters::to_gtk_box(value_entry);
+            let window_rule_box = Vec::<WindowRuleEffectOrProp>::to_gtk_box(value_entry, ',');
             fancy_value_entry.append(&window_rule_box);
         }
         "layerrule" => {

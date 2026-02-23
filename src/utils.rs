@@ -1372,6 +1372,31 @@ where
     result
 }
 
+pub fn strip_outer_parens(s: &str) -> Option<&str> {
+    if !s.starts_with('(') || !s.ends_with(')') {
+        return None;
+    }
+    let mut depth = 0;
+    for (i, c) in s.chars().enumerate() {
+        match c {
+            '(' => depth += 1,
+            ')' => {
+                depth -= 1;
+
+                if depth == 0 && i < s.len() - 1 {
+                    return None;
+                }
+            }
+            _ => {}
+        }
+    }
+    if depth == 0 {
+        Some(&s[1..s.len() - 1])
+    } else {
+        None
+    }
+}
+
 pub trait HasDiscriminant {
     type Discriminant: IntoEnumIterator + PartialEq + Eq + Clone + Copy;
 

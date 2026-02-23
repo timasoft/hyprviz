@@ -13,6 +13,31 @@ pub enum ContentType {
     Game,
 }
 
+impl TryFrom<u8> for ContentType {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::None),
+            1 => Ok(Self::Photo),
+            2 => Ok(Self::Video),
+            3 => Ok(Self::Game),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<ContentType> for u8 {
+    fn from(value: ContentType) -> Self {
+        match value {
+            ContentType::None => 0,
+            ContentType::Photo => 1,
+            ContentType::Video => 2,
+            ContentType::Game => 3,
+        }
+    }
+}
+
 impl FromStr for ContentType {
     type Err = ();
 
@@ -20,6 +45,12 @@ impl FromStr for ContentType {
         let s = s.trim();
         if s.is_empty() {
             return Err(());
+        }
+
+        if let Ok(num) = s.parse::<u8>()
+            && let Ok(content_type) = num.try_into()
+        {
+            return Ok(content_type);
         }
 
         match s {
