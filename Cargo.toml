@@ -19,7 +19,7 @@ edition = "2024"
 gio = "0.21.5"
 gtk = { version = "0.10.0", package = "gtk4", features = ["v4_14"] }
 hyprparser = "0.1.6"
-inventory = "0.3.21"
+inventory = "0.3.22"
 libc = "0.2"
 minreq = { version = "2.14.1", features = ["https"] }
 rust-i18n = "3.1.5"
