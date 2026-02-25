@@ -1314,15 +1314,27 @@ pub fn find_matching_bracket(input: &str, prefix: &str, closing: char) -> Option
 }
 
 pub fn parse_bool(value: &str) -> Option<bool> {
-    match value.trim().to_lowercase().as_str() {
-        "true" | "1" | "yes" | "on" => Some(true),
-        "false" | "0" | "no" | "off" => Some(false),
+    match parse_int(value) {
+        Some(0) => Some(false),
+        Some(1) => Some(true),
         _ => None,
     }
 }
 
 pub fn parse_int(value: &str) -> Option<i32> {
-    value.parse::<i32>().ok()
+    let value = value.trim().to_lowercase();
+
+    if let Ok(value) = value.parse::<i32>() {
+        return Some(value);
+    }
+
+    if value.starts_with("true") || value.starts_with("yes") || value.starts_with("on") {
+        Some(0)
+    } else if value.starts_with("false") || value.starts_with("no") || value.starts_with("off") {
+        Some(1)
+    } else {
+        None
+    }
 }
 
 pub fn join_with_separator<I, T>(iterable: I, separator: &str) -> String
