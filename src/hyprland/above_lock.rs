@@ -5,6 +5,7 @@ use std::{fmt::Display, str::FromStr};
 use strum::EnumIter;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
+#[allow(clippy::enum_variant_names)]
 pub enum AboveLock {
     #[default]
     BelowLock,
