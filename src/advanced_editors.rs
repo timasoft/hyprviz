@@ -2,7 +2,7 @@ use crate::{
     gtk_converters::{FieldLabel, ToGtkBox, ToGtkBoxWithSeparator, ToGtkBoxWithSeparatorAndNames},
     hyprland::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
-        BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleWithParameter,
+        BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleEffectOrProp,
         Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Position, Scale, Side,
         UnbindRight, WindowRuleEffectOrProp, Workspace, WorkspaceSelector, WorkspaceType,
         animation::parse_animation, bezier_curve::parse_bezier, bind_right::parse_bind_right,
@@ -4047,7 +4047,7 @@ fn fill_fancy_value_entry(
             fancy_value_entry.append(&window_rule_box);
         }
         "layerrule" => {
-            let layer_rule_box = LayerRuleWithParameter::to_gtk_box(value_entry);
+            let layer_rule_box = Vec::<LayerRuleEffectOrProp>::to_gtk_box(value_entry, ',');
             fancy_value_entry.append(&layer_rule_box);
         }
         "exec" => match name {
