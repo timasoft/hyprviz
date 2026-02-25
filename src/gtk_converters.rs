@@ -152,7 +152,9 @@ where
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let dropdown = create_dropdown(&string_list);
         dropdown.set_selected(0);
-        mother_box.append(&dropdown);
+        if T::Discriminant::iter().count() > 1 {
+            mother_box.append(&dropdown);
+        }
 
         let stack = Stack::new();
         let mut variant_entries = Vec::new();
