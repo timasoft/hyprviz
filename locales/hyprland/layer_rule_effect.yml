@@ -1,0 +1,65 @@
+_version: 2
+hyprland.layer_rule_effect.above_lock:
+  en: "Above Lock"
+  ru: "Над экраном блокировки"
+  zh-CN: "锁屏之上"
+hyprland.layer_rule_effect.animation:
+  en: "Animation"
+  ru: "Анимация"
+  zh-CN: "动画"
+hyprland.layer_rule_effect.blur_off:
+  en: "Blur Off"
+  ru: "Размытие выкл"
+  zh-CN: "模糊关闭"
+hyprland.layer_rule_effect.blur_on:
+  en: "Blur On"
+  ru: "Размытие вкл"
+  zh-CN: "模糊开启"
+hyprland.layer_rule_effect.blur_popups_off:
+  en: "Blur Popups Off"
+  ru: "Размытие всплывающих окон выкл"
+  zh-CN: "弹出窗口模糊关闭"
+hyprland.layer_rule_effect.blur_popups_on:
+  en: "Blur Popups On"
+  ru: "Размытие всплывающих окон вкл"
+  zh-CN: "弹出窗口模糊开启"
+hyprland.layer_rule_effect.dim_around_off:
+  en: "Dim Around Off"
+  ru: "Затемнение вокруг выкл"
+  zh-CN: "周围变暗关闭"
+hyprland.layer_rule_effect.dim_around_on:
+  en: "Dim Around On"
+  ru: "Затемнение вокруг вкл"
+  zh-CN: "周围变暗开启"
+hyprland.layer_rule_effect.ignore_alpha:
+  en: "Ignore Alpha"
+  ru: "Игнорировать альфа-канал"
+  zh-CN: "忽略 Alpha 通道"
+hyprland.layer_rule_effect.no_anim_off:
+  en: "No Animation Off"
+  ru: "Без анимации выкл"
+  zh-CN: "无动画关闭"
+hyprland.layer_rule_effect.no_anim_on:
+  en: "No Animation On"
+  ru: "Без анимации вкл"
+  zh-CN: "无动画开启"
+hyprland.layer_rule_effect.no_screen_share_off:
+  en: "No Screen Share Off"
+  ru: "Без демонстрации экрана выкл"
+  zh-CN: "无屏幕共享关闭"
+hyprland.layer_rule_effect.no_screen_share_on:
+  en: "No Screen Share On"
+  ru: "Без демонстрации экрана вкл"
+  zh-CN: "无屏幕共享开启"
+hyprland.layer_rule_effect.order:
+  en: "Order"
+  ru: "Порядок"
+  zh-CN: "顺序"
+hyprland.layer_rule_effect.xray_off:
+  en: "XRay Off"
+  ru: "Рентген выкл"
+  zh-CN: "X 光关闭"
+hyprland.layer_rule_effect.xray_on:
+  en: "XRay On"
+  ru: "Рентген вкл"
+  zh-CN: "X 光开启"

@@ -1,0 +1,17 @@
+_version: 2
+hyprland.hypr_expression.float:
+  en: "Float"
+  ru: "Дробное число"
+  zh-CN: "浮点数"
+hyprland.hypr_expression.uint:
+  en: "Unsigned Integer"
+  ru: "Беззнаковое целое"
+  zh-CN: "无符号整数"
+hyprland.hypr_expression.variable:
+  en: "Variable"
+  ru: "Переменная"
+  zh-CN: "变量"
+hyprland.hypr_expression.formula:
+  en: "Formula"
+  ru: "Формула"
+  zh-CN: "公式"

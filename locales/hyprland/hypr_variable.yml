@@ -1,0 +1,33 @@
+_version: 2
+hyprland.hypr_variable.cursor_x:
+  en: "Cursor X Position"
+  ru: "Позиция курсора X"
+  zh-CN: "光标 X 位置"
+hyprland.hypr_variable.cursor_y:
+  en: "Cursor Y Position"
+  ru: "Позиция курсора Y"
+  zh-CN: "光标 Y 位置"
+hyprland.hypr_variable.monitor_h:
+  en: "Monitor Height"
+  ru: "Высота монитора"
+  zh-CN: "显示器高度"
+hyprland.hypr_variable.monitor_w:
+  en: "Monitor Width"
+  ru: "Ширина монитора"
+  zh-CN: "显示器宽度"
+hyprland.hypr_variable.window_h:
+  en: "Window Height"
+  ru: "Высота окна"
+  zh-CN: "窗口高度"
+hyprland.hypr_variable.window_w:
+  en: "Window Width"
+  ru: "Ширина окна"
+  zh-CN: "窗口宽度"
+hyprland.hypr_variable.window_x:
+  en: "Window X Position"
+  ru: "Позиция окна X"
+  zh-CN: "窗口 X 位置"
+hyprland.hypr_variable.window_y:
+  en: "Window Y Position"
+  ru: "Позиция окна Y"
+  zh-CN: "窗口 Y 位置"

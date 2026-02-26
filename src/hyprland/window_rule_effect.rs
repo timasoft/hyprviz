@@ -95,8 +95,8 @@ impl Display for WindowRuleEffect {
 impl EnumConfigForGtk for WindowRuleEffect {
     fn dropdown_items() -> StringList {
         StringList::new(&[
-            &t!("hyprland.window_rule_effect_or_prop.static_effect"),
-            &t!("hyprland.window_rule_effect_or_prop.dynamic_effect"),
+            &t!("hyprland.window_rule_effect.static_effect"),
+            &t!("hyprland.window_rule_effect.dynamic_effect"),
         ])
     }
 

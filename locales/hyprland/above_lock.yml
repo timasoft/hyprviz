@@ -1,0 +1,13 @@
+_version: 2
+hyprland.above_lock.above_lock:
+  en: "Above Lock"
+  ru: "Над экраном блокировки"
+  zh-CN: "锁屏之上"
+hyprland.above_lock.above_lock_interactable:
+  en: "Above Lock (Interactable)"
+  ru: "Над экраном блокировки (интерактивный)"
+  zh-CN: "锁屏之上（可交互）"
+hyprland.above_lock.below_lock:
+  en: "Below Lock"
+  ru: "Под экраном блокировки"
+  zh-CN: "锁屏之下"

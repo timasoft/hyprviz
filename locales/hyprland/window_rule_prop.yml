@@ -1,0 +1,97 @@
+_version: 2
+hyprland.window_rule_prop.rs.class:
+  en: "Window Class"
+  ru: "Класс окна"
+  zh-CN: "窗口类"
+hyprland.window_rule_prop.rs.content:
+  en: "Window Content"
+  ru: "Содержимое окна"
+  zh-CN: "窗口内容"
+hyprland.window_rule_prop.rs.floating:
+  en: "Floating"
+  ru: "Плавающее"
+  zh-CN: "浮动"
+hyprland.window_rule_prop.rs.focus:
+  en: "Focused"
+  ru: "В фокусе"
+  zh-CN: "已聚焦"
+hyprland.window_rule_prop.rs.fullscreen:
+  en: "Fullscreen"
+  ru: "Полноэкранный"
+  zh-CN: "全屏"
+hyprland.window_rule_prop.rs.fullscreen_state_client:
+  en: "Fullscreen State (Client)"
+  ru: "Состояние полноэкранного режима (клиент)"
+  zh-CN: "全屏状态（客户端）"
+hyprland.window_rule_prop.rs.fullscreen_state_internal:
+  en: "Fullscreen State (Internal)"
+  ru: "Состояние полноэкранного режима (внутреннее)"
+  zh-CN: "全屏状态（内部）"
+hyprland.window_rule_prop.rs.group:
+  en: "Grouped"
+  ru: "В группе"
+  zh-CN: "已分组"
+hyprland.window_rule_prop.rs.initial_class:
+  en: "Initial Class"
+  ru: "Начальный класс"
+  zh-CN: "初始类"
+hyprland.window_rule_prop.rs.initial_title:
+  en: "Initial Title"
+  ru: "Начальный заголовок"
+  zh-CN: "初始标题"
+hyprland.window_rule_prop.rs.modal:
+  en: "Modal"
+  ru: "Модальное"
+  zh-CN: "模态"
+hyprland.window_rule_prop.rs.not_floating:
+  en: "Not Floating"
+  ru: "Не плавающее"
+  zh-CN: "非浮动"
+hyprland.window_rule_prop.rs.not_focus:
+  en: "Not Focused"
+  ru: "Не в фокусе"
+  zh-CN: "未聚焦"
+hyprland.window_rule_prop.rs.not_fullscreen:
+  en: "Not Fullscreen"
+  ru: "Не полноэкранный"
+  zh-CN: "非全屏"
+hyprland.window_rule_prop.rs.not_group:
+  en: "Not Grouped"
+  ru: "Не в группе"
+  zh-CN: "未分组"
+hyprland.window_rule_prop.rs.not_modal:
+  en: "Not Modal"
+  ru: "Не модальное"
+  zh-CN: "非模态"
+hyprland.window_rule_prop.rs.not_pin:
+  en: "Not Pinned"
+  ru: "Не закреплённое"
+  zh-CN: "未固定"
+hyprland.window_rule_prop.rs.not_xwayland:
+  en: "Not XWayland"
+  ru: "Не XWayland"
+  zh-CN: "非 XWayland"
+hyprland.window_rule_prop.rs.pin:
+  en: "Pinned"
+  ru: "Закреплённое"
+  zh-CN: "已固定"
+hyprland.window_rule_prop.rs.tag:
+  en: "Tag"
+  ru: "Тег"
+  zh-CN: "标签"
+hyprland.window_rule_prop.rs.title:
+  en: "Window Title"
+  ru: "Заголовок окна"
+  zh-CN: "窗口标题"
+hyprland.window_rule_prop.rs.workspace:
+  en: "Workspace"
+  ru: "Рабочее пространство"
+  zh-CN: "工作区"
+hyprland.window_rule_prop.rs.xdg_tag:
+  en: "XDG Tag"
+  ru: "XDG тег"
+  zh-CN: "XDG 标签"
+hyprland.window_rule_prop.rs.xwayland:
+  en: "XWayland"
+  ru: "XWayland"
+  zh-CN: "XWayland"

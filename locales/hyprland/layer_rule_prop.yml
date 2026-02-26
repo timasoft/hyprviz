@@ -1,0 +1,5 @@
+_version: 2
+hyprland.layer_rule_prop.namespace:
+  en: "Namespace"
+  ru: "Пространство имён"
+  zh-CN: "命名空间"

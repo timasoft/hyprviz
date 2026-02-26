@@ -1,0 +1,9 @@
+_version: 2
+hyprland.layer_rule_effect_or_prop.effect:
+  en: "Effect"
+  ru: "Эффект"
+  zh-CN: "效果"
+hyprland.layer_rule_effect_or_prop.prop:
+  en: "Property"
+  ru: "Свойство"
+  zh-CN: "属性"

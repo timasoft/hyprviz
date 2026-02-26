@@ -1,0 +1,145 @@
+_version: 2
+hyprland.window_rule_dynamic_effect.allows_input:
+  en: "Allows Input"
+  ru: "Разрешить ввод"
+  zh-CN: "允许输入"
+hyprland.window_rule_dynamic_effect.animation:
+  en: "Animation"
+  ru: "Анимация"
+  zh-CN: "动画"
+hyprland.window_rule_dynamic_effect.border_color:
+  en: "Border Color"
+  ru: "Цвет границы"
+  zh-CN: "边框颜色"
+hyprland.window_rule_dynamic_effect.border_size:
+  en: "Border Size"
+  ru: "Размер границы"
+  zh-CN: "边框大小"
+hyprland.window_rule_dynamic_effect.decorate:
+  en: "Decorate"
+  ru: "Декорации"
+  zh-CN: "装饰"
+hyprland.window_rule_dynamic_effect.dim_around:
+  en: "Dim Around"
+  ru: "Затемнить вокруг"
+  zh-CN: "周围变暗"
+hyprland.window_rule_dynamic_effect.focus_on_activate:
+  en: "Focus on Activate"
+  ru: "Фокус при активации"
+  zh-CN: "激活时聚焦"
+hyprland.window_rule_dynamic_effect.force_rgbx:
+  en: "Force RGBX"
+  ru: "Принудительно RGBX"
+  zh-CN: "强制 RGBX"
+hyprland.window_rule_dynamic_effect.idle_ingibit:
+  en: "Idle Inhibit"
+  ru: "Блокировка бездействия"
+  zh-CN: "阻止空闲"
+hyprland.window_rule_dynamic_effect.immediate:
+  en: "Immediate"
+  ru: "Немедленно"
+  zh-CN: "立即"
+hyprland.window_rule_dynamic_effect.keep_aspect_ratio:
+  en: "Keep Aspect Ratio"
+  ru: "Сохранять пропорции"
+  zh-CN: "保持宽高比"
+hyprland.window_rule_dynamic_effect.max_size:
+  en: "Max Size"
+  ru: "Максимальный размер"
+  zh-CN: "最大尺寸"
+hyprland.window_rule_dynamic_effect.min_size:
+  en: "Min Size"
+  ru: "Минимальный размер"
+  zh-CN: "最小尺寸"
+hyprland.window_rule_dynamic_effect.nearest_neighbor:
+  en: "Nearest Neighbor"
+  ru: "Ближайший сосед"
+  zh-CN: "最近邻"
+hyprland.window_rule_dynamic_effect.no_anim:
+  en: "No Animation"
+  ru: "Без анимации"
+  zh-CN: "无动画"
+hyprland.window_rule_dynamic_effect.no_blur:
+  en: "No Blur"
+  ru: "Без размытия"
+  zh-CN: "无模糊"
+hyprland.window_rule_dynamic_effect.no_dim:
+  en: "No Dim"
+  ru: "Без затемнения"
+  zh-CN: "无变暗"
+hyprland.window_rule_dynamic_effect.no_focus:
+  en: "No Focus"
+  ru: "Без фокуса"
+  zh-CN: "无焦点"
+hyprland.window_rule_dynamic_effect.no_follow_mouse:
+  en: "No Follow Mouse"
+  ru: "Без следования за мышью"
+  zh-CN: "不跟随鼠标"
+hyprland.window_rule_dynamic_effect.no_max_size:
+  en: "No Max Size"
+  ru: "Без макс. размера"
+  zh-CN: "无最大尺寸"
+hyprland.window_rule_dynamic_effect.no_screen_share:
+  en: "No Screen Share"
+  ru: "Без демонстрации экрана"
+  zh-CN: "无屏幕共享"
+hyprland.window_rule_dynamic_effect.no_shadow:
+  en: "No Shadow"
+  ru: "Без тени"
+  zh-CN: "无阴影"
+hyprland.window_rule_dynamic_effect.no_shortcuts_inhibit:
+  en: "No Shortcuts Inhibit"
+  ru: "Без блокировки горячих клавиш"
+  zh-CN: "无快捷键阻止"
+hyprland.window_rule_dynamic_effect.no_vrr:
+  en: "No VRR"
+  ru: "Без VRR"
+  zh-CN: "无可变刷新率"
+hyprland.window_rule_dynamic_effect.opacity:
+  en: "Opacity"
+  ru: "Непрозрачность"
+  zh-CN: "不透明度"
+hyprland.window_rule_dynamic_effect.opaque:
+  en: "Opaque"
+  ru: "Непрозрачный"
+  zh-CN: "不透明"
+hyprland.window_rule_dynamic_effect.persistent_size:
+  en: "Persistent Size"
+  ru: "Постоянный размер"
+  zh-CN: "持久尺寸"
+hyprland.window_rule_dynamic_effect.render_unfocused:
+  en: "Render Unfocused"
+  ru: "Рендерить неактивные"
+  zh-CN: "渲染未聚焦"
+hyprland.window_rule_dynamic_effect.rounding:
+  en: "Rounding"
+  ru: "Скругление"
+  zh-CN: "圆角"
+hyprland.window_rule_dynamic_effect.rounding_power:
+  en: "Rounding Power"
+  ru: "Сила скругления"
+  zh-CN: "圆角强度"
+hyprland.window_rule_dynamic_effect.scroll_mouse:
+  en: "Scroll Mouse"
+  ru: "Прокрутка мышью"
+  zh-CN: "鼠标滚动"
+hyprland.window_rule_dynamic_effect.scroll_touchpad:
+  en: "Scroll Touchpad"
+  ru: "Прокрутка тачпадом"
+  zh-CN: "触控板滚动"
+hyprland.window_rule_dynamic_effect.stay_focused:
+  en: "Stay Focused"
+  ru: "Оставаться в фокусе"
+  zh-CN: "保持聚焦"
+hyprland.window_rule_dynamic_effect.sync_fullscreen:
+  en: "Sync Fullscreen"
+  ru: "Синхронизировать полноэкранный"
+  zh-CN: "同步全屏"
+hyprland.window_rule_dynamic_effect.tag:
+  en: "Tag"
+  ru: "Тег"
+  zh-CN: "标签"
+hyprland.window_rule_dynamic_effect.xray:
+  en: "XRay"
+  ru: "Рентген"
+  zh-CN: "X 光"

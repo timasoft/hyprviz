@@ -1,9 +1,0 @@
-_version: 2
-hyprland.layer_rule_with_parameter.namespace_or_address:
-  en: "Namespace or address"
-  ru: "Пространство имён или адрес"
-  zh-CN: "命名空间或地址"
-hyprland.layer_rule_with_parameter.rule:
-  en: "Rule"
-  ru: "Правило слоя"
-  zh-CN: "层规则"

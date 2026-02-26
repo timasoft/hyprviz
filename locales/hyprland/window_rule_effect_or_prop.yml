@@ -1,0 +1,13 @@
+_version: 2
+hyprland.window_rule_effect_or_prop.dynamic_effect:
+  en: "Dynamic Effect"
+  ru: "Динамический эффект"
+  zh-CN: "动态效果"
+hyprland.window_rule_effect_or_prop.prop:
+  en: "Property"
+  ru: "Свойство"
+  zh-CN: "属性"
+hyprland.window_rule_effect_or_prop.static_effect:
+  en: "Static Effect"
+  ru: "Статический эффект"
+  zh-CN: "静态效果"

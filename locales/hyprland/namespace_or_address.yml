@@ -1,9 +1,0 @@
-_version: 2
-hyprland.namespace_or_address.address:
-  en: "Address"
-  ru: "Адрес"
-  zh-CN: "地址"
-hyprland.namespace_or_address.namespace:
-  en: "Namespace"
-  ru: "Пространство имён"
-  zh-CN: "命名空间"
