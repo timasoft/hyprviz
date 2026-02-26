@@ -5,7 +5,8 @@ use crate::{
     utils::HasDiscriminant,
 };
 use gtk::{
-    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, prelude::*,
+    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, StringObject,
+    prelude::*,
 };
 use rust_i18n::t;
 use std::{
@@ -152,8 +153,18 @@ where
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let dropdown = create_dropdown(&string_list);
         dropdown.set_selected(0);
+
         if T::Discriminant::iter().count() > 1 {
             mother_box.append(&dropdown);
+        } else {
+            let label = if let Some(item) = string_list.item(0)
+                && let Some(string_object) = item.downcast_ref::<StringObject>()
+            {
+                Label::new(Some(&string_object.string()))
+            } else {
+                Label::new(None)
+            };
+            mother_box.append(&label);
         }
 
         let stack = Stack::new();
