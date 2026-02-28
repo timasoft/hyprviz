@@ -1,6 +1,6 @@
 use super::{
-    ContentType, FullscreenState, HyprExpression, IdOrName, WindowEvent, WindowGroupOption,
-    WorkspaceTarget,
+    ContentType, FullscreenState, HyprCoord, HyprExpression, HyprSize, IdOrName, WindowEvent,
+    WindowGroupOption, WorkspaceTarget,
 };
 use crate::{
     gtk_converters::{
@@ -193,24 +193,28 @@ impl FromStr for WindowRuleStaticEffect {
             "float" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::FloatOn),
                 Some(false) => Ok(WindowRuleStaticEffect::FloatOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::FloatOn),
                 None => Ok(WindowRuleStaticEffect::FloatOff),
             },
             "tile" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::TileOn),
                 Some(false) => Ok(WindowRuleStaticEffect::TileOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::TileOn),
                 None => Ok(WindowRuleStaticEffect::TileOff),
             },
             "fullscreen" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::FullscreenOn),
                 Some(false) => Ok(WindowRuleStaticEffect::FullscreenOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::FullscreenOn),
                 None => Ok(WindowRuleStaticEffect::FullscreenOff),
             },
             "maximize" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::MaximizeOn),
                 Some(false) => Ok(WindowRuleStaticEffect::MaximizeOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::MaximizeOn),
                 None => Ok(WindowRuleStaticEffect::MaximizeOff),
             },
-            "fullscreenstate" => {
+            "fullscreen_state" | "fullscreenstate" => {
                 let (internal, client) = part2.split_once(' ').unwrap_or((part2, ""));
                 Ok(WindowRuleStaticEffect::FullscreenState(
                     FullscreenState::from_num(internal.parse().unwrap_or_default()),
@@ -219,26 +223,58 @@ impl FromStr for WindowRuleStaticEffect {
             }
             "move" => {
                 let (x, y) = part2.split_once(' ').unwrap_or((part2, ""));
-                Ok(WindowRuleStaticEffect::Move(
-                    x.parse().unwrap_or_default(),
-                    y.parse().unwrap_or_default(),
-                ))
+                let x = x.trim_end();
+                let y = y.trim_start();
+
+                if x.starts_with("onscreen")
+                    || x.starts_with("cursor")
+                    || y.starts_with("onscreen")
+                    || y.starts_with("cursor")
+                    || x.contains("%")
+                    || y.contains("%")
+                {
+                    let (x_expr, y_expr) = HyprCoord::from_str(part2)
+                        .unwrap_or_default()
+                        .to_expressions();
+                    Ok(WindowRuleStaticEffect::Move(x_expr, y_expr))
+                } else {
+                    Ok(WindowRuleStaticEffect::Move(
+                        x.parse().unwrap_or_default(),
+                        y.parse().unwrap_or_default(),
+                    ))
+                }
             }
             "size" => {
                 let (w, h) = part2.split_once(' ').unwrap_or((part2, ""));
-                Ok(WindowRuleStaticEffect::Size(
-                    w.parse().unwrap_or_default(),
-                    h.parse().unwrap_or_default(),
-                ))
+
+                if w.contains("<")
+                    || w.contains(">")
+                    || w.contains("%")
+                    || h.contains("<")
+                    || h.contains(">")
+                    || h.contains("%")
+                {
+                    let (w_expr, h_expr) = HyprSize::from_str(part2)
+                        .unwrap_or_default()
+                        .to_expressions();
+                    Ok(WindowRuleStaticEffect::Size(w_expr, h_expr))
+                } else {
+                    Ok(WindowRuleStaticEffect::Size(
+                        w.parse().unwrap_or_default(),
+                        h.parse().unwrap_or_default(),
+                    ))
+                }
             }
             "center" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::CenterOn),
                 Some(false) => Ok(WindowRuleStaticEffect::CenterOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::CenterOn),
                 None => Ok(WindowRuleStaticEffect::CenterOff),
             },
             "pseudo" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::PseudoOn),
                 Some(false) => Ok(WindowRuleStaticEffect::PseudoOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::PseudoOn),
                 None => Ok(WindowRuleStaticEffect::PseudoOff),
             },
             "monitor" => Ok(WindowRuleStaticEffect::Monitor(
@@ -247,14 +283,16 @@ impl FromStr for WindowRuleStaticEffect {
             "workspace" => Ok(WindowRuleStaticEffect::Workspace(
                 part2.parse().unwrap_or_default(),
             )),
-            "noinitialfocus" => match parse_bool(part2) {
+            "no_initial_focus" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::NoInitialFocusOn),
                 Some(false) => Ok(WindowRuleStaticEffect::NoInitialFocusOff),
                 None => Ok(WindowRuleStaticEffect::NoInitialFocusOff),
             },
+            "noinitialfocus" => Ok(WindowRuleStaticEffect::NoInitialFocusOn),
             "pin" => match parse_bool(part2) {
                 Some(true) => Ok(WindowRuleStaticEffect::PinOn),
                 Some(false) => Ok(WindowRuleStaticEffect::PinOff),
+                None if part2.is_empty() => Ok(WindowRuleStaticEffect::PinOn),
                 None => Ok(WindowRuleStaticEffect::PinOff),
             },
             "group" => Ok(WindowRuleStaticEffect::Group(
@@ -263,7 +301,7 @@ impl FromStr for WindowRuleStaticEffect {
                     .map(|s| WindowGroupOption::from_str(s).unwrap_or_default())
                     .collect(),
             )),
-            "suppress" => Ok(WindowRuleStaticEffect::SuppressEvent(
+            "suppress_event" | "suppressevent" => Ok(WindowRuleStaticEffect::SuppressEvent(
                 part2
                     .split(' ')
                     .map(|s| WindowEvent::from_str(s).unwrap_or_default())
@@ -272,7 +310,7 @@ impl FromStr for WindowRuleStaticEffect {
             "content" => Ok(WindowRuleStaticEffect::Content(
                 part2.parse().unwrap_or_default(),
             )),
-            "noclosefor" => Ok(WindowRuleStaticEffect::NoCloseFor(
+            "no_close_for" | "noclosefor" => Ok(WindowRuleStaticEffect::NoCloseFor(
                 part2.parse().unwrap_or_default(),
             )),
             _ => Err(()),
@@ -293,7 +331,7 @@ impl Display for WindowRuleStaticEffect {
             WindowRuleStaticEffect::MaximizeOff => write!(f, "maximize off"),
             WindowRuleStaticEffect::FullscreenState(internal, client) => write!(
                 f,
-                "fullscreenstate {} {}",
+                "fullscreen_state {} {}",
                 internal.to_num(),
                 client.to_num()
             ),
@@ -305,19 +343,23 @@ impl Display for WindowRuleStaticEffect {
             WindowRuleStaticEffect::PseudoOff => write!(f, "pseudo off"),
             WindowRuleStaticEffect::Monitor(monitor) => write!(f, "monitor {}", monitor),
             WindowRuleStaticEffect::Workspace(workspace) => write!(f, "workspace {}", workspace),
-            WindowRuleStaticEffect::NoInitialFocusOn => write!(f, "noinitialfocus on"),
-            WindowRuleStaticEffect::NoInitialFocusOff => write!(f, "noinitialfocus off"),
+            WindowRuleStaticEffect::NoInitialFocusOn => write!(f, "no_initial_focus on"),
+            WindowRuleStaticEffect::NoInitialFocusOff => write!(f, "no_initial_focus off"),
             WindowRuleStaticEffect::PinOn => write!(f, "pin on"),
             WindowRuleStaticEffect::PinOff => write!(f, "pin off"),
             WindowRuleStaticEffect::Group(group) => {
                 write!(f, "group {}", join_with_separator(group, " "))
             }
-            WindowRuleStaticEffect::SuppressEvent(suppress) => {
-                write!(f, "suppress {}", join_with_separator(suppress, " "))
+            WindowRuleStaticEffect::SuppressEvent(suppress_event) => {
+                write!(
+                    f,
+                    "suppress_event {}",
+                    join_with_separator(suppress_event, " ")
+                )
             }
             WindowRuleStaticEffect::Content(content) => write!(f, "content {}", content),
             WindowRuleStaticEffect::NoCloseFor(no_close_for) => {
-                write!(f, "noclosefor {}", no_close_for)
+                write!(f, "no_close_for {}", no_close_for)
             }
         }
     }

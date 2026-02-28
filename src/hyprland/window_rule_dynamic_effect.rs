@@ -345,28 +345,31 @@ impl FromStr for WindowRuleDynamicEffect {
         let parts = s.split_whitespace().collect::<Vec<_>>();
 
         match parts[0].to_lowercase().as_str() {
-            "persistentsize" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "persistent_size" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::PersistentSizeOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::PersistentSizeOff),
                 None => Ok(WindowRuleDynamicEffect::PersistentSizeOff),
             },
-            "nomaxsize" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "persistentsize" => Ok(WindowRuleDynamicEffect::PersistentSizeOn),
+            "no_max_size" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoMaxSizeOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoMaxSizeOff),
                 None => Ok(WindowRuleDynamicEffect::NoMaxSizeOff),
             },
-            "stayfocused" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "nomaxsize" => Ok(WindowRuleDynamicEffect::NoMaxSizeOn),
+            "stay_focused" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::StayFocusedOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::StayFocusedOff),
                 None => Ok(WindowRuleDynamicEffect::StayFocusedOff),
             },
+            "stayfocused" => Ok(WindowRuleDynamicEffect::StayFocusedOn),
             "animation" => Ok(WindowRuleDynamicEffect::Animation(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
-            "bordercolor" => Ok(WindowRuleDynamicEffect::BorderColor(
+            "border_color" | "bordercolor" => Ok(WindowRuleDynamicEffect::BorderColor(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
-            "idleingibit" => Ok(WindowRuleDynamicEffect::IdleIngibit(
+            "idle_inhibit" | "idleinhibit" => Ok(WindowRuleDynamicEffect::IdleIngibit(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
             "opacity" => Ok(WindowRuleDynamicEffect::Opacity(
@@ -391,7 +394,7 @@ impl FromStr for WindowRuleDynamicEffect {
                     ))
                 }
             }
-            "maxsize" => {
+            "max_size" | "maxsize" => {
                 let width = parts.get(1).unwrap_or(&"");
                 let height = parts.get(2).unwrap_or(&"");
                 Ok(WindowRuleDynamicEffect::MaxSize(
@@ -399,7 +402,7 @@ impl FromStr for WindowRuleDynamicEffect {
                     height.parse().unwrap_or_default(),
                 ))
             }
-            "minsize" => {
+            "min_size" | "minsize" => {
                 let width = parts.get(1).unwrap_or(&"");
                 let height = parts.get(2).unwrap_or(&"");
                 Ok(WindowRuleDynamicEffect::MinSize(
@@ -407,21 +410,21 @@ impl FromStr for WindowRuleDynamicEffect {
                     height.parse().unwrap_or_default(),
                 ))
             }
-            "bordersize" => Ok(WindowRuleDynamicEffect::BorderSize(
+            "border_size" | "bordersize" => Ok(WindowRuleDynamicEffect::BorderSize(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
             "rounding" => Ok(WindowRuleDynamicEffect::Rounding(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
-            "roundingpower" => Ok(WindowRuleDynamicEffect::RoundingPower(
+            "rounding_power" | "roundingpower" => Ok(WindowRuleDynamicEffect::RoundingPower(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
-            "allowsinput" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "allows_input" | "allowsinput" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::AllowsInputOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::AllowsInputOff),
                 None => Ok(WindowRuleDynamicEffect::AllowsInputOff),
             },
-            "dimaround" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "dim_around" | "dimaround" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::DimAroundOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::DimAroundOff),
                 None => Ok(WindowRuleDynamicEffect::DimAroundOff),
@@ -431,62 +434,69 @@ impl FromStr for WindowRuleDynamicEffect {
                 Some(false) => Ok(WindowRuleDynamicEffect::DecorateOff),
                 None => Ok(WindowRuleDynamicEffect::DecorateOff),
             },
-            "focusonactivate" => match parse_bool(parts.get(1).unwrap_or(&"")) {
-                Some(true) => Ok(WindowRuleDynamicEffect::FocusOnActivateOn),
-                Some(false) => Ok(WindowRuleDynamicEffect::FocusOnActivateOff),
-                None => Ok(WindowRuleDynamicEffect::FocusOnActivateOff),
-            },
-            "keepaspectratio" => match parse_bool(parts.get(1).unwrap_or(&"")) {
-                Some(true) => Ok(WindowRuleDynamicEffect::KeepAspectRatioOn),
-                Some(false) => Ok(WindowRuleDynamicEffect::KeepAspectRatioOff),
-                None => Ok(WindowRuleDynamicEffect::KeepAspectRatioOff),
-            },
-            "nearestneighbor" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "focus_on_activate" | "focusonactivate" => {
+                match parse_bool(parts.get(1).unwrap_or(&"")) {
+                    Some(true) => Ok(WindowRuleDynamicEffect::FocusOnActivateOn),
+                    Some(false) => Ok(WindowRuleDynamicEffect::FocusOnActivateOff),
+                    None => Ok(WindowRuleDynamicEffect::FocusOnActivateOff),
+                }
+            }
+            "keep_aspect_ratio" | "keepaspectratio" => {
+                match parse_bool(parts.get(1).unwrap_or(&"")) {
+                    Some(true) => Ok(WindowRuleDynamicEffect::KeepAspectRatioOn),
+                    Some(false) => Ok(WindowRuleDynamicEffect::KeepAspectRatioOff),
+                    None => Ok(WindowRuleDynamicEffect::KeepAspectRatioOff),
+                }
+            }
+            "nearest_neighbor" | "nearestneighbor" => match parse_bool(parts.get(1).unwrap_or(&""))
+            {
                 Some(true) => Ok(WindowRuleDynamicEffect::NearestNeighborOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NearestNeighborOff),
                 None => Ok(WindowRuleDynamicEffect::NearestNeighborOff),
             },
-            "noanim" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_anim" | "noanim" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoAnimOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoAnimOff),
                 None => Ok(WindowRuleDynamicEffect::NoAnimOff),
             },
-            "noblur" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_blur" | "noblur" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoBlurOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoBlurOff),
                 None => Ok(WindowRuleDynamicEffect::NoBlurOff),
             },
-            "nodim" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_dim" | "nodim" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoDimOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoDimOff),
                 None => Ok(WindowRuleDynamicEffect::NoDimOff),
             },
-            "nofocus" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_focus" | "nofocus" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoFocusOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoFocusOff),
                 None => Ok(WindowRuleDynamicEffect::NoFocusOff),
             },
-            "nofollowmouse" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_follow_mouse" | "nofollowmouse" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoFollowMouseOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoFollowMouseOff),
                 None => Ok(WindowRuleDynamicEffect::NoFollowMouseOff),
             },
-            "noshadow" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_shadow" | "noshadow" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoShadowOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoShadowOff),
                 None => Ok(WindowRuleDynamicEffect::NoShadowOff),
             },
-            "noshortcutsinhibit" => match parse_bool(parts.get(1).unwrap_or(&"")) {
-                Some(true) => Ok(WindowRuleDynamicEffect::NoShortcutsInhibitOn),
-                Some(false) => Ok(WindowRuleDynamicEffect::NoShortcutsInhibitOff),
-                None => Ok(WindowRuleDynamicEffect::NoShortcutsInhibitOff),
-            },
-            "noscreenshare" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_shortcuts_inhibit" | "noshortcutsinhibit" => {
+                match parse_bool(parts.get(1).unwrap_or(&"")) {
+                    Some(true) => Ok(WindowRuleDynamicEffect::NoShortcutsInhibitOn),
+                    Some(false) => Ok(WindowRuleDynamicEffect::NoShortcutsInhibitOff),
+                    None => Ok(WindowRuleDynamicEffect::NoShortcutsInhibitOff),
+                }
+            }
+            "no_screen_share" | "noscreenshare" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoScreenShareOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoScreenShareOff),
                 None => Ok(WindowRuleDynamicEffect::NoScreenShareOff),
             },
-            "novrr" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "no_vrr" | "novrr" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::NoVRROn),
                 Some(false) => Ok(WindowRuleDynamicEffect::NoVRROff),
                 None => Ok(WindowRuleDynamicEffect::NoVRROff),
@@ -496,12 +506,12 @@ impl FromStr for WindowRuleDynamicEffect {
                 Some(false) => Ok(WindowRuleDynamicEffect::OpaqueOff),
                 None => Ok(WindowRuleDynamicEffect::OpaqueOff),
             },
-            "forcergbx" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "force_rgbx" | "forcergbx" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::ForceRGBXOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::ForceRGBXOff),
                 None => Ok(WindowRuleDynamicEffect::ForceRGBXOff),
             },
-            "syncfullscreen" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "sync_fullscreen" | "syncfullscreen" => match parse_bool(parts.get(1).unwrap_or(&"")) {
                 Some(true) => Ok(WindowRuleDynamicEffect::SyncFullscreenOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::SyncFullscreenOff),
                 None => Ok(WindowRuleDynamicEffect::SyncFullscreenOff),
@@ -516,15 +526,16 @@ impl FromStr for WindowRuleDynamicEffect {
                 Some(false) => Ok(WindowRuleDynamicEffect::XrayOff),
                 None => Ok(WindowRuleDynamicEffect::XrayOff),
             },
-            "renderunfocused" => match parse_bool(parts.get(1).unwrap_or(&"")) {
+            "render_unfocused" | "renderunfocused" => match parse_bool(parts.get(1).unwrap_or(&""))
+            {
                 Some(true) => Ok(WindowRuleDynamicEffect::RenderUnfocusedOn),
                 Some(false) => Ok(WindowRuleDynamicEffect::RenderUnfocusedOff),
                 None => Ok(WindowRuleDynamicEffect::RenderUnfocusedOff),
             },
-            "scrollmouse" => Ok(WindowRuleDynamicEffect::ScrollMouse(
+            "scroll_mouse" | "scrollmouse" => Ok(WindowRuleDynamicEffect::ScrollMouse(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
-            "scrolltouchpad" => Ok(WindowRuleDynamicEffect::ScrollTouchpad(
+            "scroll_touchpad" | "scrolltouchpad" => Ok(WindowRuleDynamicEffect::ScrollTouchpad(
                 parts.get(1).unwrap_or(&"").parse().unwrap_or_default(),
             )),
             _ => Err(()),
@@ -535,74 +546,76 @@ impl FromStr for WindowRuleDynamicEffect {
 impl Display for WindowRuleDynamicEffect {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            WindowRuleDynamicEffect::PersistentSizeOn => write!(f, "persistentsize on"),
-            WindowRuleDynamicEffect::PersistentSizeOff => write!(f, "persistentsize off"),
-            WindowRuleDynamicEffect::NoMaxSizeOn => write!(f, "nomaxsize on"),
-            WindowRuleDynamicEffect::NoMaxSizeOff => write!(f, "nomaxsize off"),
-            WindowRuleDynamicEffect::StayFocusedOn => write!(f, "stayfocused on"),
-            WindowRuleDynamicEffect::StayFocusedOff => write!(f, "stayfocused off"),
+            WindowRuleDynamicEffect::PersistentSizeOn => write!(f, "persistent_size on"),
+            WindowRuleDynamicEffect::PersistentSizeOff => write!(f, "persistent_size off"),
+            WindowRuleDynamicEffect::NoMaxSizeOn => write!(f, "no_max_size on"),
+            WindowRuleDynamicEffect::NoMaxSizeOff => write!(f, "no_max_size off"),
+            WindowRuleDynamicEffect::StayFocusedOn => write!(f, "stay_focused on"),
+            WindowRuleDynamicEffect::StayFocusedOff => write!(f, "stay_focused off"),
             WindowRuleDynamicEffect::Animation(animation) => write!(f, "animation {}", animation),
             WindowRuleDynamicEffect::BorderColor(border_color) => {
-                write!(f, "bordercolor {}", border_color)
+                write!(f, "border_color {}", border_color)
             }
-            WindowRuleDynamicEffect::IdleIngibit(mode) => write!(f, "idleingibit {}", mode),
+            WindowRuleDynamicEffect::IdleIngibit(mode) => write!(f, "idle_inhibit {}", mode),
             WindowRuleDynamicEffect::Opacity(opacity) => write!(f, "opacity {}", opacity),
             WindowRuleDynamicEffect::Tag(TagToggleState::Set, tag) => write!(f, "tag +{}", tag),
             WindowRuleDynamicEffect::Tag(TagToggleState::Unset, tag) => write!(f, "tag -{}", tag),
             WindowRuleDynamicEffect::Tag(TagToggleState::Toggle, tag) => write!(f, "tag {}", tag),
             WindowRuleDynamicEffect::MaxSize(width, height) => {
-                write!(f, "maxsize {} {}", width, height)
+                write!(f, "max_size {} {}", width, height)
             }
             WindowRuleDynamicEffect::MinSize(width, height) => {
-                write!(f, "minsize {} {}", width, height)
+                write!(f, "min_size {} {}", width, height)
             }
-            WindowRuleDynamicEffect::BorderSize(size) => write!(f, "bordersize {}", size),
+            WindowRuleDynamicEffect::BorderSize(size) => write!(f, "border_size {}", size),
             WindowRuleDynamicEffect::Rounding(size) => write!(f, "rounding {}", size),
-            WindowRuleDynamicEffect::RoundingPower(power) => write!(f, "roundingpower {}", power),
-            WindowRuleDynamicEffect::AllowsInputOn => write!(f, "allowsinput on"),
-            WindowRuleDynamicEffect::AllowsInputOff => write!(f, "allowsinput off"),
-            WindowRuleDynamicEffect::DimAroundOn => write!(f, "dimaround on"),
-            WindowRuleDynamicEffect::DimAroundOff => write!(f, "dimaround off"),
+            WindowRuleDynamicEffect::RoundingPower(power) => write!(f, "rounding_power {}", power),
+            WindowRuleDynamicEffect::AllowsInputOn => write!(f, "allows_input on"),
+            WindowRuleDynamicEffect::AllowsInputOff => write!(f, "allows_input off"),
+            WindowRuleDynamicEffect::DimAroundOn => write!(f, "dim_around on"),
+            WindowRuleDynamicEffect::DimAroundOff => write!(f, "dim_around off"),
             WindowRuleDynamicEffect::DecorateOn => write!(f, "decorate on"),
             WindowRuleDynamicEffect::DecorateOff => write!(f, "decorate off"),
-            WindowRuleDynamicEffect::FocusOnActivateOn => write!(f, "focusonactivate on"),
-            WindowRuleDynamicEffect::FocusOnActivateOff => write!(f, "focusonactivate off"),
-            WindowRuleDynamicEffect::KeepAspectRatioOn => write!(f, "keepaspectratio on"),
-            WindowRuleDynamicEffect::KeepAspectRatioOff => write!(f, "keepaspectratio off"),
-            WindowRuleDynamicEffect::NearestNeighborOn => write!(f, "nearestneighbor on"),
-            WindowRuleDynamicEffect::NearestNeighborOff => write!(f, "nearestneighbor off"),
-            WindowRuleDynamicEffect::NoAnimOn => write!(f, "noanim on"),
-            WindowRuleDynamicEffect::NoAnimOff => write!(f, "noanim off"),
-            WindowRuleDynamicEffect::NoBlurOn => write!(f, "noblur on"),
-            WindowRuleDynamicEffect::NoBlurOff => write!(f, "noblur off"),
-            WindowRuleDynamicEffect::NoDimOn => write!(f, "nodim on"),
-            WindowRuleDynamicEffect::NoDimOff => write!(f, "nodim off"),
-            WindowRuleDynamicEffect::NoFocusOn => write!(f, "nofocus on"),
-            WindowRuleDynamicEffect::NoFocusOff => write!(f, "nofocus off"),
-            WindowRuleDynamicEffect::NoFollowMouseOn => write!(f, "nofollowmouse on"),
-            WindowRuleDynamicEffect::NoFollowMouseOff => write!(f, "nofollowmouse off"),
-            WindowRuleDynamicEffect::NoShadowOn => write!(f, "noshadow on"),
-            WindowRuleDynamicEffect::NoShadowOff => write!(f, "noshadow off"),
-            WindowRuleDynamicEffect::NoShortcutsInhibitOn => write!(f, "noshortcutsinhibit on"),
-            WindowRuleDynamicEffect::NoShortcutsInhibitOff => write!(f, "noshortcutsinhibit off"),
-            WindowRuleDynamicEffect::NoScreenShareOn => write!(f, "noscreenshare on"),
-            WindowRuleDynamicEffect::NoScreenShareOff => write!(f, "noscreenshare off"),
-            WindowRuleDynamicEffect::NoVRROn => write!(f, "novrr on"),
-            WindowRuleDynamicEffect::NoVRROff => write!(f, "novrr off"),
+            WindowRuleDynamicEffect::FocusOnActivateOn => write!(f, "focus_on_activate on"),
+            WindowRuleDynamicEffect::FocusOnActivateOff => write!(f, "focus_on_activate off"),
+            WindowRuleDynamicEffect::KeepAspectRatioOn => write!(f, "keep_aspect_ratio on"),
+            WindowRuleDynamicEffect::KeepAspectRatioOff => write!(f, "keep_aspect_ratio off"),
+            WindowRuleDynamicEffect::NearestNeighborOn => write!(f, "nearest_neighbor on"),
+            WindowRuleDynamicEffect::NearestNeighborOff => write!(f, "nearest_neighbor off"),
+            WindowRuleDynamicEffect::NoAnimOn => write!(f, "no_anim on"),
+            WindowRuleDynamicEffect::NoAnimOff => write!(f, "no_anim off"),
+            WindowRuleDynamicEffect::NoBlurOn => write!(f, "no_blur on"),
+            WindowRuleDynamicEffect::NoBlurOff => write!(f, "no_blur off"),
+            WindowRuleDynamicEffect::NoDimOn => write!(f, "no_dim on"),
+            WindowRuleDynamicEffect::NoDimOff => write!(f, "no_dim off"),
+            WindowRuleDynamicEffect::NoFocusOn => write!(f, "no_focus on"),
+            WindowRuleDynamicEffect::NoFocusOff => write!(f, "no_focus off"),
+            WindowRuleDynamicEffect::NoFollowMouseOn => write!(f, "no_follow_mouse on"),
+            WindowRuleDynamicEffect::NoFollowMouseOff => write!(f, "no_follow_mouse off"),
+            WindowRuleDynamicEffect::NoShadowOn => write!(f, "no_shadow on"),
+            WindowRuleDynamicEffect::NoShadowOff => write!(f, "no_shadow off"),
+            WindowRuleDynamicEffect::NoShortcutsInhibitOn => write!(f, "no_shortcuts_inhibit on"),
+            WindowRuleDynamicEffect::NoShortcutsInhibitOff => write!(f, "no_shortcuts_inhibit off"),
+            WindowRuleDynamicEffect::NoScreenShareOn => write!(f, "no_screen_share on"),
+            WindowRuleDynamicEffect::NoScreenShareOff => write!(f, "no_screen_share off"),
+            WindowRuleDynamicEffect::NoVRROn => write!(f, "no_vrr on"),
+            WindowRuleDynamicEffect::NoVRROff => write!(f, "no_vrr off"),
             WindowRuleDynamicEffect::OpaqueOn => write!(f, "opaque on"),
             WindowRuleDynamicEffect::OpaqueOff => write!(f, "opaque off"),
-            WindowRuleDynamicEffect::ForceRGBXOn => write!(f, "forcergbx on"),
-            WindowRuleDynamicEffect::ForceRGBXOff => write!(f, "forcergbx off"),
-            WindowRuleDynamicEffect::SyncFullscreenOn => write!(f, "syncfullscreen on"),
-            WindowRuleDynamicEffect::SyncFullscreenOff => write!(f, "syncfullscreen off"),
+            WindowRuleDynamicEffect::ForceRGBXOn => write!(f, "force_rgbx on"),
+            WindowRuleDynamicEffect::ForceRGBXOff => write!(f, "force_rgbx off"),
+            WindowRuleDynamicEffect::SyncFullscreenOn => write!(f, "sync_fullscreen on"),
+            WindowRuleDynamicEffect::SyncFullscreenOff => write!(f, "sync_fullscreen off"),
             WindowRuleDynamicEffect::ImmediateOn => write!(f, "immediate on"),
             WindowRuleDynamicEffect::ImmediateOff => write!(f, "immediate off"),
             WindowRuleDynamicEffect::XrayOn => write!(f, "xray on"),
             WindowRuleDynamicEffect::XrayOff => write!(f, "xray off"),
-            WindowRuleDynamicEffect::RenderUnfocusedOn => write!(f, "renderunfocused on"),
-            WindowRuleDynamicEffect::RenderUnfocusedOff => write!(f, "renderunfocused off"),
-            WindowRuleDynamicEffect::ScrollMouse(speed) => write!(f, "scrollmouse {}", speed),
-            WindowRuleDynamicEffect::ScrollTouchpad(speed) => write!(f, "scrolltouchpad {}", speed),
+            WindowRuleDynamicEffect::RenderUnfocusedOn => write!(f, "render_unfocused on"),
+            WindowRuleDynamicEffect::RenderUnfocusedOff => write!(f, "render_unfocused off"),
+            WindowRuleDynamicEffect::ScrollMouse(speed) => write!(f, "scroll_mouse {}", speed),
+            WindowRuleDynamicEffect::ScrollTouchpad(speed) => {
+                write!(f, "scroll_touchpad {}", speed)
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
-use super::{WindowRuleDynamicEffect, WindowRuleProp, WindowRuleStaticEffect};
+use super::{
+    WindowRuleDynamicEffect, WindowRuleFullscreenState, WindowRuleProp, WindowRuleStaticEffect,
+};
 use crate::{
     gtk_converters::{
         EnumConfigForGtk, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
@@ -77,6 +79,50 @@ impl FromStr for WindowRuleEffectOrProp {
 
         if s.is_empty() {
             return Err(());
+        }
+
+        // windowrulev2
+        if let Some((parameter, value)) = s.split_once(':')
+            && parameter.trim() != "match"
+        {
+            let value = value.trim();
+            let parameter_new = match parameter.trim() {
+                "inicialClass" => "inicial_class",
+                "inicialTitle" => "inicial_title",
+                "floating" => "float",
+                "pinned" => "pin",
+                "fullscreenstate" => {
+                    let mut parts = value.split_whitespace();
+
+                    let internal_state = parts
+                        .next()
+                        .and_then(|s| WindowRuleFullscreenState::from_str(s).ok());
+
+                    let client_state = parts
+                        .next()
+                        .and_then(|s| WindowRuleFullscreenState::from_str(s).ok());
+
+                    if let Some(state) = client_state {
+                        return Ok(Self::Prop(WindowRuleProp::FullscreenStateClient(state)));
+                    }
+
+                    if let Some(state) = internal_state {
+                        return Ok(Self::Prop(WindowRuleProp::FullscreenStateInternal(state)));
+                    }
+
+                    return Ok(Self::Prop(WindowRuleProp::FullscreenStateClient(
+                        WindowRuleFullscreenState::default(),
+                    )));
+                }
+                "onworkspace" => "workspace",
+                "xdgTag" => "xdg_tag",
+                parameter => parameter,
+            };
+
+            let prop = format!("{} {}", parameter_new, value);
+            if let Ok(prop) = WindowRuleProp::from_str(&prop) {
+                return Ok(Self::Prop(prop));
+            }
         }
 
         if let Some(prop) = s.strip_prefix("match:") {

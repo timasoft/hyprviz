@@ -1,4 +1,4 @@
-use super::{ContentType, IdOrNameOrWorkspaceSelector, WindowRuleFullscreenState};
+use super::{ContentTypeInt, IdOrNameOrWorkspaceSelector, WindowRuleFullscreenState};
 use crate::{
     gtk_converters::{
         EnumConfigForGtk, PLUG_SEPARATOR, ToGtkBoxWithSeparatorAndNames,
@@ -38,7 +38,7 @@ pub enum WindowRuleProp {
     FullscreenStateClient(WindowRuleFullscreenState),
     FullscreenStateInternal(WindowRuleFullscreenState),
     Workspace(IdOrNameOrWorkspaceSelector),
-    Content(ContentType),
+    Content(ContentTypeInt),
     XdgTag(String),
 }
 
@@ -79,7 +79,7 @@ impl HasDiscriminant for WindowRuleProp {
             Self::Discriminant::Workspace => {
                 Self::Workspace(IdOrNameOrWorkspaceSelector::default())
             }
-            Self::Discriminant::Content => Self::Content(ContentType::default()),
+            Self::Discriminant::Content => Self::Content(ContentTypeInt::default()),
             Self::Discriminant::XdgTag => Self::XdgTag(String::new()),
         }
     }
@@ -313,7 +313,7 @@ impl EnumConfigForGtk for WindowRuleProp {
                 Some(<(WindowRuleFullscreenState,)>::to_gtk_box)
             }
             Self::Workspace(_) => Some(<(IdOrNameOrWorkspaceSelector,)>::to_gtk_box),
-            Self::Content(_) => Some(<(ContentType,)>::to_gtk_box),
+            Self::Content(_) => Some(<(ContentTypeInt,)>::to_gtk_box),
             Self::XdgTag(_) => Some(<(String,)>::to_gtk_box),
         }
     }

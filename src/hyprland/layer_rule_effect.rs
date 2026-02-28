@@ -125,9 +125,11 @@ impl FromStr for LayerRuleEffect {
                 Some(false) => Ok(LayerRuleEffect::NoAnimOff),
                 None => Ok(LayerRuleEffect::NoAnimOff),
             },
+            "noanim" => Ok(LayerRuleEffect::NoAnimOn),
             "blur" => match parse_bool(part2) {
                 Some(true) => Ok(LayerRuleEffect::BlurOn),
                 Some(false) => Ok(LayerRuleEffect::BlurOff),
+                None if part2.is_empty() => Ok(LayerRuleEffect::BlurOn),
                 None => Ok(LayerRuleEffect::BlurOff),
             },
             "blur_popups" => match parse_bool(part2) {
@@ -135,14 +137,17 @@ impl FromStr for LayerRuleEffect {
                 Some(false) => Ok(LayerRuleEffect::BlurPopupsOff),
                 None => Ok(LayerRuleEffect::BlurPopupsOff),
             },
-            "ignore_alpha" => Ok(LayerRuleEffect::IgnoreAlpha(
+            "blurpopups" => Ok(LayerRuleEffect::BlurPopupsOn),
+            "ignore_alpha" | "ignorealpha" => Ok(LayerRuleEffect::IgnoreAlpha(
                 part2.parse().unwrap_or(0.0f64).clamp(0.0, 1.0),
             )),
+            "ignorezero" => Ok(LayerRuleEffect::IgnoreAlpha(0.0)),
             "dim_around" => match parse_bool(part2) {
                 Some(true) => Ok(LayerRuleEffect::DimAroundOn),
                 Some(false) => Ok(LayerRuleEffect::DimAroundOff),
                 None => Ok(LayerRuleEffect::DimAroundOff),
             },
+            "dimaround" => Ok(LayerRuleEffect::DimAroundOn),
             "xray" => match parse_bool(part2) {
                 Some(true) => Ok(LayerRuleEffect::XrayOn),
                 Some(false) => Ok(LayerRuleEffect::XrayOff),
@@ -155,7 +160,12 @@ impl FromStr for LayerRuleEffect {
             "above_lock" => Ok(LayerRuleEffect::AboveLock(
                 part2.parse().unwrap_or_default(),
             )),
-            "no_screen_share" => match parse_bool(part2) {
+            "abovelock" => match parse_bool(part2) {
+                Some(true) => Ok(LayerRuleEffect::AboveLock(AboveLock::AboveLockInteractable)),
+                Some(false) => Ok(LayerRuleEffect::AboveLock(AboveLock::AboveLock)),
+                None => Ok(LayerRuleEffect::AboveLock(AboveLock::AboveLock)),
+            },
+            "no_screen_share" | "noscreenshare" => match parse_bool(part2) {
                 Some(true) => Ok(LayerRuleEffect::NoScreenShareOn),
                 Some(false) => Ok(LayerRuleEffect::NoScreenShareOff),
                 None => Ok(LayerRuleEffect::NoScreenShareOff),

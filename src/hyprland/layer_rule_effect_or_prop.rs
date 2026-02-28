@@ -75,6 +75,8 @@ impl FromStr for LayerRuleEffectOrProp {
             ))
         } else if let Ok(effect) = LayerRuleEffect::from_str(s) {
             Ok(Self::Effect(effect))
+        } else if let Ok(prop) = LayerRuleProp::from_str(s) {
+            Ok(Self::Prop(prop))
         } else {
             Err(())
         }
