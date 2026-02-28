@@ -1329,9 +1329,9 @@ pub fn parse_int(value: &str) -> Option<i32> {
     }
 
     if value.starts_with("true") || value.starts_with("yes") || value.starts_with("on") {
-        Some(0)
-    } else if value.starts_with("false") || value.starts_with("no") || value.starts_with("off") {
         Some(1)
+    } else if value.starts_with("false") || value.starts_with("no") || value.starts_with("off") {
+        Some(0)
     } else {
         None
     }
