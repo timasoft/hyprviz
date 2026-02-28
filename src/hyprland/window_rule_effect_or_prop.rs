@@ -87,8 +87,8 @@ impl FromStr for WindowRuleEffectOrProp {
         {
             let value = value.trim();
             let parameter_new = match parameter.trim() {
-                "inicialClass" => "inicial_class",
-                "inicialTitle" => "inicial_title",
+                "initialClass" => "initial_class",
+                "initialTitle" => "initial_title",
                 "floating" => "float",
                 "pinned" => "pin",
                 "fullscreenstate" => {
