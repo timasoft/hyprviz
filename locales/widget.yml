@@ -1764,6 +1764,14 @@ widget.group_category.groupbar.keep_upper_gap_description:
   en: "Add or remove upper gap"
   ru: "Добавить или удалить верхний отступ"
   zh-CN: "添加或移除顶部间距"
+widget.group_category.groupbar.text_padding_label:
+  en: "Text Padding"
+  ru: "Отступ текста"
+  zh-CN: "文本内边距"
+widget.group_category.groupbar.text_padding_description:
+  en: "Set horizontal padding for a text."
+  ru: "Настроить горизонтальные отступы для текста."
+  zh-CN: "设置文本的水平内边距。"
 widget.group_category.groupbar.blur_label:
   en: "Blur"
   ru: "Размытие"
@@ -2479,26 +2487,17 @@ widget.render_category.cm_sdr_eotf_label:
   ru: "Передаточная функция SDR"
   zh-CN: "SDR 电光转换函数"
 widget.render_category.cm_sdr_eotf_description:
-  en: "Default transfer function for displaying SDR apps."
-  ru: "Функция преобразования яркости по умолчанию для отображения приложений в SDR."
-  zh-CN: "显示 SDR 应用程序的默认亮度转换函数。"
-widget.render_category.cm_sdr_eotf_default:
-  en: "Use default value (Gamma 2.2)"
-  ru: "Использовать значение по умолчанию (Gamma 2.2)"
-  zh-CN: "使用默认值 (Gamma 2.2)"
-widget.render_category.cm_sdr_eotf_gamma22:
-  en: "Treat unspecified as Gamma 2.2"
-  ru: "Считать неуказанные как Gamma 2.2"
-  zh-CN: "将未指定的视为 Gamma 2.2"
-widget.render_category.cm_sdr_eotf_gamma22force:
-  en: "Treat unspecified and sRGB as Gamma 2.2"
-  ru: "Считать неуказанные и sRGB как Gamma 2.2"
-  zh-CN: "将未指定的和 sRGB 均视为 Gamma 2.2"
-widget.render_category.cm_sdr_eotf_srgb:
-  en: "Treat unspecified as sRGB"
-  ru: "Считать неуказанные как sRGB"
-  zh-CN: "将未指定的视为 sRGB"
-
+  en: "Default transfer function for displaying SDR apps.\ndefault - Use default value (Gamma 2.2),\ngamma22 - Treat unspecified as Gamma 2.2,\ngamma22force - Treat unspecified and sRGB as Gamma 2.2,\nsrgb - Treat unspecified as sRGB"
+  ru: "Функция передачи по умолчанию для отображения SDR-приложений.\ndefault - Использовать значение по умолчанию (Gamma 2.2),\ngamma22 - Интерпретировать неуказанные как Gamma 2.2,\ngamma22force - Интерпретировать неуказанные и sRGB как Gamma 2.2,\nsrgb - Интерпретировать неуказанные как sRGB"
+  zh-CN: "显示 SDR 应用的默认传输函数。\ndefault - 使用默认值 (Gamma 2.2),\ngamma22 - 将未指定的视为 Gamma 2.2,\ngamma22force - 将未指定的和 sRGB 视为 Gamma 2.2,\nsrgb - 将未指定的视为 sRGB"
+widget.render_category.commit_timing_enabled_label:
+  en: "Commit Timing Enabled"
+  ru: "Включить Commit Timing"
+  zh-CN: "启用 Commit Timing"
+widget.render_category.commit_timing_enabled_description:
+  en: "Enable commit timing proto. Requires restart."
+  ru: "Включить протокол Commit Timing. Требуется перезапуск."
+  zh-CN: "启用 Commit Timing 协议。需要重启。"
 widget.cursor_category.cursor_settings_section_title:
   en: "Cursor Settings"
   ru: "Настройки курсора"
@@ -2805,6 +2804,14 @@ widget.quirks_category.prefer_hdr_gamescope_only:
   en: "Gamescope Only"
   ru: "Только Gamescope"
   zh-CN: "仅 Gamescope"
+widget.quirks_category.skip_non_kms_dmabuf_formats_label:
+  en: "Skip non-KMS/DMABUF formats"
+  ru: "Пропускать форматы, не совместимые с KMS/DMABUF"
+  zh-CN: "跳过非 KMS/DMABUF 格式"
+widget.quirks_category.skip_non_kms_dmabuf_formats_description:
+  en: "Do not report dmabuf formats which cannot be imported into KMS."
+  ru: "Не сообщать о форматах dmabuf, которые невозможно импортировать в KMS."
+  zh-CN: "不报告无法导入到 KMS 的 dmabuf 格式。"
 
 widget.debug_category.debug_settings_section_title:
   en: "Debug Settings"
@@ -2830,6 +2837,14 @@ widget.debug_category.damage_blink_description:
   en: "Flash areas updated with damage tracking."
   ru: "Мигание областей, обновлённых с отслеживанием повреждений."
   zh-CN: "闪烁用损坏跟踪更新的区域。"
+widget.debug_category.gl_debugging_label:
+  en: "GL Debugging"
+  ru: "Отладка GL"
+  zh-CN: "GL 调试"
+widget.debug_category.gl_debugging_description:
+  en: "Enable OpenGL debugging and error checking, they hurt performance."
+  ru: "Включает отладку OpenGL и проверку ошибок; это снижает производительность."
+  zh-CN: "启用 OpenGL 调试和错误检查，会降低性能。"
 widget.debug_category.disable_logs_label:
   en: "Disable Logs"
   ru: "Отключить логи"
@@ -2946,6 +2961,38 @@ widget.debug_category.full_cm_proto_description:
   en: "Claims support for all cm proto features (requires restart)."
   ru: "Заявляет о поддержке всех функций cm proto (требуется перезапуск)."
   zh-CN: "声明支持所有 cm proto 功能（需要重启）。"
+widget.debug_category.ds_handle_same_buffer_label:
+  en: "DS Handle Same Buffer"
+  ru: "Обработка одинакового буфера DS"
+  zh-CN: "DS 处理相同缓冲区"
+widget.debug_category.ds_handle_same_buffer_description:
+  en: "Special case for DS with unmodified buffer."
+  ru: "Специальный случай для DS с неизмененным буфером."
+  zh-CN: "DS 未修改缓冲区的特殊情况。"
+widget.debug_category.ds_handle_same_buffer_fifo_label:
+  en: "DS Handle Same Buffer FIFO"
+  ru: "Обработка одинакового буфера DS FIFO"
+  zh-CN: "DS 处理相同缓冲区 FIFO"
+widget.debug_category.ds_handle_same_buffer_fifo_description:
+  en: "Special case for DS with unmodified buffer unlocks fifo."
+  ru: "Специальный случай для DS с неизмененным буфером разблокирует FIFO."
+  zh-CN: "DS 未修改缓冲区的特殊情况可解锁 FIFO。"
+widget.debug_category.fifo_pending_workaround_label:
+  en: "FIFO Pending Workaround"
+  ru: "Обходное решение ожидания FIFO"
+  zh-CN: "FIFO 待处理项绕过方案"
+widget.debug_category.fifo_pending_workaround_description:
+  en: "Fifo workaround for empty pending list."
+  ru: "Обходное решение FIFO для пустого списка ожидающих."
+  zh-CN: "针对空待处理列表的 FIFO 绕过方案。"
+widget.debug_category.render_solitary_wo_damage_label:
+  en: "Render Solitary WO Damage"
+  ru: "Отрисовка одиночного окна без Damage"
+  zh-CN: "渲染无 Damage 的单独窗口"
+widget.debug_category.render_solitary_wo_damage_description:
+  en: "Render solitary window with empty damage."
+  ru: "Отрисовывать одиночное окно с пустым списком damage."
+  zh-CN: "渲染损伤区域为空的单独窗口。"
 
 widget.layouts_category.layout_settings_section_title:
   en: "Layout Settings"
@@ -2955,6 +3002,22 @@ widget.layouts_category.layout_settings_section_description:
   en: "Configure layout behavior."
   ru: "Настройка поведения лайаута."
   zh-CN: "配置布局行为。"
+widget.layouts_category.layout.single_window_aspect_ratio_label:
+  en: "Single Window Aspect Ratio"
+  ru: "Соотношение сторон одиночного окна"
+  zh-CN: "单个窗口纵横比"
+widget.layouts_category.layout.single_window_aspect_ratio_description:
+  en: "If specified, whenever only a single window is open, it will be coerced into the specified aspect ratio. Ignored if the y-value is zero."
+  ru: "Если задано, то когда открыто только одно окно, оно будет принудительно приведено к указанному соотношению сторон. Игнорируется, если значение Y равно нулю."
+  zh-CN: "如果指定，当仅打开一个窗口时，它将强制设置为指定的纵横比。如果 Y 值为零则忽略。"
+widget.layouts_category.layout.single_window_aspect_ratio_tolerance_label:
+  en: "Single Window Aspect Ratio Tolerance"
+  ru: "Допуск соотношения сторон одиночного окна"
+  zh-CN: "单个窗口纵横比容差"
+widget.layouts_category.layout.single_window_aspect_ratio_tolerance_description:
+  en: "Minimum distance for single_window_aspect_ratio to take effect, in fractions of the monitor's size."
+  ru: "Минимальное отклонение для применения single_window_aspect_ratio, в долях размера монитора."
+  zh-CN: "single_window_aspect_ratio 生效的最小距离，以显示器大小的分数表示。"
 
 widget.layouts_category.dwindle.layout_section_title:
   en: "Dwindle Layout"
@@ -3072,30 +3135,14 @@ widget.layouts_category.dwindle.split_bias_current_window:
   en: "Current Window"
   ru: "Текущее окно"
   zh-CN: "当前窗口"
-widget.layouts_category.precise_mouse_move_label:
+widget.layouts_category.dwindle.precise_mouse_move_label:
   en: "Precise Mouse Move"
   ru: "Точное движение мыши"
   zh-CN: "精确鼠标移动"
-widget.layouts_category.precise_mouse_move_description:
+widget.layouts_category.dwindle.precise_mouse_move_description:
   en: "Bindm movewindow will drop the window more precisely depending on where your mouse is."
   ru: "Bindm movewindow будет сбрасывать окно более точно в зависимости от того, где ваша мышь."
   zh-CN: "Bindm movewindow 将根据鼠标位置更精确地放置窗口。"
-widget.layouts_category.single_window_aspect_ratio_label:
-  en: "Single Window Aspect Ratio"
-  ru: "Соотношение сторон одного окна"
-  zh-CN: "单窗口宽高比"
-widget.layouts_category.single_window_aspect_ratio_description:
-  en: "Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio.\nA value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with padding to the sides.\nx y"
-  ru: "Когда на экране отображается только одно окно, добавить отступы, чтобы оно соответствовало указанному соотношению сторон.\nЗначение вроде 4 3 на экране 16:9 сделает его окном 4:3 посередине с отступами по бокам.\nx y"
-  zh-CN: "当屏幕上只显示一个窗口时，添加填充以使其符合指定的宽高比。\n在 16:9 屏幕上，值如 4 3 将使其成为中间的 4:3 窗口，两侧有填充。\nx y"
-widget.layouts_category.single_window_aspect_ratio_tolerance_label:
-  en: "Single Window Aspect Ratio Tolerance"
-  ru: "Допуск соотношения сторон одного окна"
-  zh-CN: "单窗口宽高比容差"
-widget.layouts_category.single_window_aspect_ratio_tolerance_description:
-  en: "Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to adjust the window size.\n[0.0 - 1.0]"
-  ru: "Устанавливает допуск для single_window_aspect_ratio, так что если добавленный отступ будет меньше указанной доли высоты или ширины экрана, он не будет пытаться изменить размер окна.\n[0.0 - 1.0]"
-  zh-CN: "为 single_window_aspect_ratio 设置容差，这样如果要添加的填充小于屏幕高度或宽度的指定分数，它将不会尝试调整窗口大小。\n[0.0 - 1.0]"
 
 widget.layouts_category.master.layout_section_title:
   en: "Master Layout"
@@ -3201,6 +3248,88 @@ widget.layouts_category.master.always_keep_position_description:
   en: "Whether to keep the master window in its configured position when there are no slave windows"
   ru: "Сохранять ли мастер-окно в его сконфигурированной позиции, когда нет ведомых окон"
   zh-CN: "当没有从窗口时是否将主窗口保留在其配置位置"
+
+widget.layouts_category.scrolling.layout_section_title:
+  en: "Scrolling Layout"
+  ru: "Лайаут Scrolling"
+  zh-CN: "滚动布局"
+widget.layouts_category.scrolling.layout_section_description:
+  en: "Scrolling is a layout where windows get positioned on an infinitely growing tape."
+  ru: "Scrolling — это лайаут, где окна располагаются на бесконечно растущей ленте."
+  zh-CN: "Scrolling 是一种窗口定位在无限增长带上的布局。"
+widget.layouts_category.scrolling.fullscreen_on_one_column_label:
+  en: "Fullscreen on One Column"
+  ru: "Полноэкранный режим для одной колонки"
+  zh-CN: "单列全屏"
+widget.layouts_category.scrolling.fullscreen_on_one_column_description:
+  en: "When enabled, a single column on a workspace will always span the entire screen."
+  ru: "Если включено, одиночная колонка на рабочем пространстве всегда будет занимать весь экран."
+  zh-CN: "启用时，工作区上的单列将始终跨越整个屏幕。"
+widget.layouts_category.scrolling.column_width_label:
+  en: "Column Width"
+  ru: "Ширина колонки"
+  zh-CN: "列宽"
+widget.layouts_category.scrolling.column_width_description:
+  en: "The default width of a column."
+  ru: "Ширина колонки по умолчанию."
+  zh-CN: "列的默认宽度。"
+widget.layouts_category.scrolling.focus_fit_method_label:
+  en: "Focus Fit Method"
+  ru: "Метод подгонки фокуса"
+  zh-CN: "焦点适配方法"
+widget.layouts_category.scrolling.focus_fit_method_description:
+  en: "When a column is focused, what method should be used to bring it into view."
+  ru: "Когда колонка в фокусе, какой метод использовать для её отображения."
+  zh-CN: "当列获得焦点时，应使用何种方法将其带入视野。"
+widget.layouts_category.scrolling.focus_fit_method_center:
+  en: "Center"
+  ru: "По центру"
+  zh-CN: "居中"
+widget.layouts_category.scrolling.focus_fit_method_fit:
+  en: "Fit"
+  ru: "Вместить"
+  zh-CN: "适配"
+widget.layouts_category.scrolling.follow_focus_label:
+  en: "Follow Focus"
+  ru: "Следовать за фокусом"
+  zh-CN: "跟随焦点"
+widget.layouts_category.scrolling.follow_focus_description:
+  en: "When a window is focused, should the layout move to bring it into view automatically."
+  ru: "Когда окно в фокусе, должен ли лайаут автоматически перемещаться, чтобы показать его."
+  zh-CN: "当窗口获得焦点时，布局是否应自动移动以将其带入视野。"
+widget.layouts_category.scrolling.follow_min_visible_label:
+  en: "Follow Min Visible"
+  ru: "Минимум видимости для следования"
+  zh-CN: "跟随最小可见度"
+widget.layouts_category.scrolling.follow_min_visible_description:
+  en: "When a window is focused, require that at least a given fraction of it is visible for focus to follow."
+  ru: "Когда окно в фокусе, требует, чтобы как минимум заданная доля его была видна для срабатывания следования."
+  zh-CN: "当窗口获得焦点时，要求至少可见给定比例的部分才触发跟随。"
+widget.layouts_category.scrolling.explicit_column_widths_label:
+  en: "Explicit Column Widths"
+  ru: "Явные ширины колонок"
+  zh-CN: "显式列宽"
+widget.layouts_category.scrolling.explicit_column_widths_description:
+  en: "A comma-separated list of preconfigured widths for colresize +conf/-conf"
+  ru: "Разделенный запятыми список предустановленных ширин для colresize +conf/-conf"
+  zh-CN: "用于 colresize +conf/-conf 的预配置宽度逗号分隔列表。"
+widget.layouts_category.scrolling.direction_label:
+  en: "Direction"
+  ru: "Направление"
+  zh-CN: "方向"
+widget.layouts_category.scrolling.direction_description:
+  en: "Direction in which new windows appear and the layout scrolls."
+  ru: "Направление, в котором появляются новые окна и прокручивается лайаут."
+  zh-CN: "新窗口出现和布局滚动的方向。"
+
+widget.layouts_category.monocle.layout_section_title:
+  en: "Monocle Layout"
+  ru: "Лайаут Monocle"
+  zh-CN: "Monocle 布局"
+widget.layouts_category.monocle.layout_section_description:
+  en: "Monocle is a layout where windows are always taking up the entire available space."
+  ru: "Monocle — это лайаут, где окна всегда занимают всё доступное пространство."
+  zh-CN: "Monocle 是一种窗口始终占据所有可用空间的布局。"
 
 widget.system_info_category.system_info_section_title:
   en: "System Info"

@@ -1222,7 +1222,7 @@ impl ConfigWidget {
                     "layout",
                     &t!("widget.general_category.layout_label"),
                     &t!("widget.general_category.layout_description"),
-                    &["dwindle", "master"],
+                    &["dwindle", "master", "scrolling", "monocle"],
                     "dwindle",
                 );
 
@@ -2848,6 +2848,15 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.keep_upper_gap_description"),
                     "true",
                 );
+                add_int_option(
+                    &container,
+                    &mut options,
+                    "groupbar:text_padding",
+                    &t!("widget.group_category.groupbar.text_padding_label"),
+                    &t!("widget.group_category.groupbar.text_padding_description"),
+                    "0",
+                    (0.0, 20.0, 1.0),
+                );
                 add_bool_option(
                     &container,
                     &mut options,
@@ -3500,13 +3509,16 @@ impl ConfigWidget {
                     "cm_sdr_eotf",
                     &t!("widget.render_category.cm_sdr_eotf_label"),
                     &t!("widget.render_category.cm_sdr_eotf_description"),
-                    &[
-                        &t!("widget.render_category.cm_sdr_eotf_default"),
-                        &t!("widget.render_category.cm_sdr_eotf_gamma22"),
-                        &t!("widget.render_category.cm_sdr_eotf_gamma22force"),
-                        &t!("widget.render_category.cm_sdr_eotf_srgb"),
-                    ],
-                    "0",
+                    &["default", "gamma22", "gamma22force", "srgb"],
+                    "default",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "commit_timing_enabled",
+                    &t!("widget.render_category.commit_timing_enabled_label"),
+                    &t!("widget.render_category.commit_timing_enabled_description"),
+                    "true",
                 );
             }
             "cursor" => {
@@ -3774,23 +3786,15 @@ impl ConfigWidget {
                     ],
                     "0",
                 );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "skip_non_kms_dmabuf_formats",
+                    &t!("widget.quirks_category.skip_non_kms_dmabuf_formats_label"),
+                    &t!("widget.quirks_category.skip_non_kms_dmabuf_formats_description"),
+                    "false",
+                );
             }
-            // "experimental" => {
-            //     add_section(
-            //         &container,
-            //         &t!("widget.experimental_category.experimental_settings_section_title"),
-            //         &t!("widget.experimental_category.experimental_settings_section_description"),
-            //         first_section.clone(),
-            //     );
-            //     add_bool_option(
-            //         &container,
-            //         &mut options,
-            //         "xx_color_management_v4",
-            //         &t!("widget.experimental_category.xx_color_management_v4_label"),
-            //         &t!("widget.experimental_category.xx_color_management_v4_description"),
-            //         "false",
-            //     );
-            // }
             "debug" => {
                 add_section(
                     &container,
@@ -3812,6 +3816,14 @@ impl ConfigWidget {
                     "damage_blink",
                     &t!("widget.debug_category.damage_blink_label"),
                     &t!("widget.debug_category.damage_blink_description"),
+                    "false",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "gl_debugging",
+                    &t!("widget.debug_category.gl_debugging_label"),
+                    &t!("widget.debug_category.gl_debugging_description"),
                     "false",
                 );
                 add_bool_option(
@@ -3920,6 +3932,38 @@ impl ConfigWidget {
                     &t!("widget.debug_category.full_cm_proto_description"),
                     "false",
                 );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "ds_handle_same_buffer",
+                    &t!("widget.debug_category.ds_handle_same_buffer_label"),
+                    &t!("widget.debug_category.ds_handle_same_buffer_description"),
+                    "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "ds_handle_same_buffer_fifo",
+                    &t!("widget.debug_category.ds_handle_same_buffer_fifo_label"),
+                    &t!("widget.debug_category.ds_handle_same_buffer_fifo_description"),
+                    "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "fifo_pending_workaround",
+                    &t!("widget.debug_category.fifo_pending_workaround_label"),
+                    &t!("widget.debug_category.fifo_pending_workaround_description"),
+                    "false",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "render_solitary_wo_damage",
+                    &t!("widget.debug_category.render_solitary_wo_damage_label"),
+                    &t!("widget.debug_category.render_solitary_wo_damage_description"),
+                    "false",
+                );
             }
             "layouts" => {
                 add_section(
@@ -3927,6 +3971,27 @@ impl ConfigWidget {
                     &t!("widget.layouts_category.layout_settings_section_title"),
                     &t!("widget.layouts_category.layout_settings_section_description"),
                     first_section.clone(),
+                );
+                add_vec2_option(
+                    &container,
+                    &mut options,
+                    "layout:single_window_aspect_ratio",
+                    &t!("widget.layouts_category.layout.single_window_aspect_ratio_label"),
+                    &t!("widget.layouts_category.layout.single_window_aspect_ratio_description"),
+                    "0 0",
+                );
+                add_float_option(
+                    &container,
+                    &mut options,
+                    "layout:single_window_aspect_ratio_tolerance",
+                    &t!(
+                        "widget.layouts_category.layout.single_window_aspect_ratio_tolerance_label"
+                    ),
+                    &t!(
+                        "widget.layouts_category.layout.single_window_aspect_ratio_tolerance_description"
+                    ),
+                    "0.1",
+                    (0.0, 1.0, 0.01),
                 );
 
                 add_section(
@@ -4041,27 +4106,10 @@ impl ConfigWidget {
                 add_bool_option(
                     &container,
                     &mut options,
-                    "precise_mouse_move",
-                    &t!("widget.layouts_category.precise_mouse_move_label"),
-                    &t!("widget.layouts_category.precise_mouse_move_description"),
+                    "dwindle:precise_mouse_move",
+                    &t!("widget.layouts_category.dwindle.precise_mouse_move_label"),
+                    &t!("widget.layouts_category.dwindle.precise_mouse_move_description"),
                     "false",
-                );
-                add_string_option(
-                    &container,
-                    &mut options,
-                    "single_window_aspect_ratio",
-                    &t!("widget.layouts_category.single_window_aspect_ratio_label"),
-                    &t!("widget.layouts_category.single_window_aspect_ratio_description"),
-                    "0 0",
-                );
-                add_float_option(
-                    &container,
-                    &mut options,
-                    "single_window_aspect_ratio_tolerance",
-                    &t!("widget.layouts_category.single_window_aspect_ratio_tolerance_label"),
-                    &t!("widget.layouts_category.single_window_aspect_ratio_tolerance_description"),
-                    "0.1",
-                    (0.0, 1.0, 0.01),
                 );
 
                 add_section(
@@ -4173,7 +4221,86 @@ impl ConfigWidget {
                     &t!("widget.layouts_category.master.always_keep_position_label"),
                     &t!("widget.layouts_category.master.always_keep_position_description"),
                     "false",
-                )
+                );
+
+                add_section(
+                    &container,
+                    &t!("widget.layouts_category.scrolling.layout_section_title"),
+                    &t!("widget.layouts_category.scrolling.layout_section_description"),
+                    first_section.clone(),
+                );
+                add_guide(&container, "Scrolling-Layout", true);
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "scrolling:fullscreen_on_one_column",
+                    &t!("widget.layouts_category.scrolling.fullscreen_on_one_column_label"),
+                    &t!("widget.layouts_category.scrolling.fullscreen_on_one_column_description"),
+                    "true",
+                );
+                add_float_option(
+                    &container,
+                    &mut options,
+                    "scrolling:column_width",
+                    &t!("widget.layouts_category.scrolling.column_width_label"),
+                    &t!("widget.layouts_category.scrolling.column_width_description"),
+                    "0.5",
+                    (0.1, 1.0, 0.01),
+                );
+                add_dropdown_option(
+                    &container,
+                    &mut options,
+                    "scrolling:focus_fit_method",
+                    &t!("widget.layouts_category.scrolling.focus_fit_method_label"),
+                    &t!("widget.layouts_category.scrolling.focus_fit_method_description"),
+                    &[
+                        &t!("widget.layouts_category.scrolling.focus_fit_method_center"),
+                        &t!("widget.layouts_category.scrolling.focus_fit_method_fit"),
+                    ],
+                    "0",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "scrolling:follow_focus",
+                    &t!("widget.layouts_category.scrolling.follow_focus_label"),
+                    &t!("widget.layouts_category.scrolling.follow_focus_description"),
+                    "true",
+                );
+                add_float_option(
+                    &container,
+                    &mut options,
+                    "scrolling:follow_min_visible",
+                    &t!("widget.layouts_category.scrolling.follow_min_visible_label"),
+                    &t!("widget.layouts_category.scrolling.follow_min_visible_description"),
+                    "0.4",
+                    (0.0, 1.0, 0.01),
+                );
+                add_string_option(
+                    &container,
+                    &mut options,
+                    "scrolling:explicit_column_widths",
+                    &t!("widget.layouts_category.scrolling.explicit_column_widths_label"),
+                    &t!("widget.layouts_category.scrolling.explicit_column_widths_description"),
+                    "0.333, 0.5, 0.667, 1.0",
+                );
+                add_dropdown_option(
+                    &container,
+                    &mut options,
+                    "scrolling:direction",
+                    &t!("widget.layouts_category.scrolling.direction_label"),
+                    &t!("widget.layouts_category.scrolling.direction_description"),
+                    &["right", "left", "down", "up"],
+                    "right",
+                );
+
+                add_section(
+                    &container,
+                    &t!("widget.layouts_category.monocle.layout_section_title"),
+                    &t!("widget.layouts_category.monocle.layout_section_description"),
+                    first_section.clone(),
+                );
+                add_guide(&container, "Monocle-Layout", true);
             }
             "systeminfo" => {
                 add_section(
