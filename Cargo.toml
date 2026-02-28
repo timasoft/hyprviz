@@ -1,6 +1,6 @@
 [package]
 name = "hyprviz"
-version = "0.8.0"
+version = "0.8.1"
 authors = ["timasoft <tima.klester@yandex.ru>", "Nyx <nnyyxxxx@protonmail.com>", "Adam Perkowski <adas1per@protonmail.com>"]
 license = "GPL-2.0"
 description = "GUI for configuring Hyprland!"
