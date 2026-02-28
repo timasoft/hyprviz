@@ -5,18 +5,19 @@ use crate::{
     utils::HasDiscriminant,
 };
 use gtk::{
-    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, prelude::*,
+    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, StringObject,
+    prelude::*,
 };
 use rust_i18n::t;
 use std::{
     cell::{Cell, RefCell},
     collections::HashSet,
-    fmt::Display,
+    fmt::{Debug, Display},
     hash::Hash,
     rc::Rc,
     str::FromStr,
 };
-use strum::IntoEnumIterator;
+use strum::{EnumDiscriminants, EnumIter, IntoEnumIterator};
 
 pub const PLUG_SEPARATOR: char = '︲';
 
@@ -152,32 +153,39 @@ where
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let dropdown = create_dropdown(&string_list);
         dropdown.set_selected(0);
-        mother_box.append(&dropdown);
+
+        if T::Discriminant::iter().count() > 1 {
+            mother_box.append(&dropdown);
+        } else {
+            let label = if let Some(item) = string_list.item(0)
+                && let Some(string_object) = item.downcast_ref::<StringObject>()
+            {
+                Label::new(Some(&string_object.string()))
+            } else {
+                Label::new(None)
+            };
+            mother_box.append(&label);
+        }
 
         let stack = Stack::new();
         let mut variant_entries = Vec::new();
+        let mut variant_builders = Vec::new();
+        let mut variant_initialized = Vec::new();
         let field_labels = T::field_labels().unwrap_or_default();
 
-        if let Some(separator) = T::SEPARATOR {
+        if let Some(_separator) = T::SEPARATOR {
             for (i, discriminant) in T::Discriminant::iter().enumerate() {
                 let param_entry = create_entry();
                 variant_entries.push(param_entry.clone());
 
-                if let Some(builder) = T::from_discriminant(discriminant).parameter_builder() {
-                    let labels = field_labels.get(i).unwrap_or(&empty_vec);
-                    let variant_box = builder(
-                        &param_entry,
-                        separator,
-                        labels,
-                        T::custom_split(discriminant),
-                    );
-                    stack.add_named(&variant_box, Some(&format!("v{}", i)));
-                } else {
-                    stack.add_named(
-                        &GtkBox::new(GtkOrientation::Vertical, 0),
-                        Some(&format!("v{}", i)),
-                    );
-                }
+                let builder = T::from_discriminant(discriminant).parameter_builder();
+                let labels = field_labels.get(i).unwrap_or(&empty_vec).clone();
+                let custom_split = T::custom_split(discriminant);
+                variant_builders.push((builder, labels, custom_split));
+                variant_initialized.push(Rc::new(Cell::new(false)));
+
+                let placeholder_box = GtkBox::new(GtkOrientation::Vertical, 0);
+                stack.add_named(&placeholder_box, Some(&format!("v{}", i)));
             }
             mother_box.append(&stack);
         }
@@ -202,6 +210,8 @@ where
         let dropdown_clone = dropdown.clone();
         let stack_clone = stack.clone();
         let variant_entries_clone = variant_entries.clone();
+        let variant_builders_clone = variant_builders.clone();
+        let variant_initialized_clone = variant_initialized.clone();
         let update_ui = move |value: T| {
             let variant_index = value.variant_index();
             let current_selection = dropdown_clone.selected() as usize;
@@ -210,6 +220,29 @@ where
             }
 
             if let Some(_separator) = T::SEPARATOR {
+                if let Some((builder, labels, custom_split)) =
+                    variant_builders_clone.get(variant_index)
+                {
+                    let is_init = variant_initialized_clone.get(variant_index).unwrap();
+                    if !is_init.get() {
+                        if let Some(builder_fn) = builder {
+                            let param_entry = variant_entries_clone.get(variant_index).unwrap();
+                            let variant_box =
+                                builder_fn(param_entry, _separator, labels, *custom_split);
+                            if let Some(old_child) =
+                                stack_clone.child_by_name(&format!("v{}", variant_index))
+                            {
+                                stack_clone.remove(&old_child);
+                            }
+                            stack_clone
+                                .add_named(&variant_box, Some(&format!("v{}", variant_index)));
+                        }
+                        variant_initialized_clone
+                            .get(variant_index)
+                            .unwrap()
+                            .set(true);
+                    }
+                }
                 stack_clone.set_visible_child_name(&format!("v{}", variant_index));
             }
 
@@ -1265,4 +1298,89 @@ impl ToGtkBox for bool {
     }
 }
 
-register_togtkbox!((), String, u8, u32, i32, bool,);
+#[derive(Debug, Clone, PartialEq, Eq, Hash, EnumDiscriminants, Default)]
+#[strum_discriminants(derive(EnumIter))]
+#[strum_discriminants(name(TestRecursiveDiscriminant))]
+pub enum TestRecursive {
+    #[default]
+    A,
+    B(Box<TestRecursive>),
+}
+
+impl HasDiscriminant for TestRecursive {
+    type Discriminant = TestRecursiveDiscriminant;
+
+    fn to_discriminant(&self) -> Self::Discriminant {
+        self.into()
+    }
+
+    fn from_discriminant(discriminant: Self::Discriminant) -> Self {
+        match discriminant {
+            TestRecursiveDiscriminant::A => TestRecursive::A,
+            TestRecursiveDiscriminant::B => TestRecursive::B(Box::default()),
+        }
+    }
+
+    fn from_discriminant_and_str(discriminant: Self::Discriminant, str: &str) -> Self {
+        match discriminant {
+            TestRecursiveDiscriminant::A => TestRecursive::A,
+            TestRecursiveDiscriminant::B => {
+                TestRecursive::B(Box::new(str.parse().unwrap_or_default()))
+            }
+        }
+    }
+
+    fn to_str_without_discriminant(&self) -> Option<String> {
+        match self {
+            TestRecursive::A => None,
+            TestRecursive::B(b) => Some(b.to_string()),
+        }
+    }
+}
+
+impl FromStr for TestRecursive {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let s = s.trim();
+        if s.is_empty() {
+            return Err(());
+        }
+
+        if s.to_lowercase() == "a" {
+            Ok(TestRecursive::A)
+        } else if s.to_lowercase().starts_with("b") {
+            let b = s[1..].trim();
+            Ok(TestRecursive::B(Box::new(b.parse().unwrap_or_default())))
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl Display for TestRecursive {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TestRecursive::A => write!(f, "A"),
+            TestRecursive::B(b) => write!(f, "B{}", b),
+        }
+    }
+}
+
+impl EnumConfigForGtk for TestRecursive {
+    fn dropdown_items() -> StringList {
+        StringList::new(&["A", "B"])
+    }
+
+    const SEPARATOR: Option<char> = Some(PLUG_SEPARATOR);
+
+    fn parameter_builder(&self) -> Option<ToGtkBoxWithSeparatorAndNamesBuilder> {
+        match self {
+            TestRecursive::A => None,
+            TestRecursive::B(_b) => Some(<(TestRecursive,)>::to_gtk_box),
+        }
+    }
+}
+
+register_togtkbox!((), String, u8, u32, i32, bool, TestRecursive);
+register_togtkbox_with_separator_names!((TestRecursive,));

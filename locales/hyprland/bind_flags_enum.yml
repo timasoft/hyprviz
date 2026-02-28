@@ -51,3 +51,7 @@ hyprland.bind_flags_enum.transparent:
   en: "Transparent"
   ru: "Сквозной"
   zh-CN: "透明"
+hyprland.bind_flags_enum.submap_universal:
+  en: "Submap universal"
+  ru: "Глобальный"
+  zh-CN: "全局"

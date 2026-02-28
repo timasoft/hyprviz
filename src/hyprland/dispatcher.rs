@@ -1,9 +1,9 @@
 use super::{
     ChangeGroupActive, CursorCorner, CycleNext, Direction, DispatcherFullscreenState,
     DispatcherFullscreenStateAction, FloatValue, FullscreenAction, FullscreenMode, GroupLockAction,
-    KeyState, Modifier, MonitorTarget, MoveDirection, ResizeParams, SetProp, SwapDirection,
-    SwapNext, TagToggleState, ToggleState, WindowRule, WindowTarget, WorkspaceTarget, ZHeight,
-    modifier::parse_modifiers,
+    KeyState, Modifier, MonitorTarget, MoveDirection, ResizeParams, SwapDirection, SwapNext,
+    TagToggleState, ToggleState, WindowRuleDynamicEffect, WindowRuleEffect, WindowTarget,
+    WorkspaceTarget, ZHeight, modifier::parse_modifiers,
 };
 use crate::{
     advanced_editors::create_entry,
@@ -24,7 +24,7 @@ use strum::{EnumDiscriminants, EnumIter};
 #[strum_discriminants(derive(EnumIter))]
 #[strum_discriminants(name(DispatcherDiscriminant))]
 pub enum Dispatcher {
-    Exec(Vec<WindowRule>, String),
+    Exec(Vec<WindowRuleEffect>, String),
     Execr(String),
     Pass(WindowTarget),
     SendShortcut(HashSet<Modifier>, String, Option<WindowTarget>),
@@ -90,7 +90,7 @@ pub enum Dispatcher {
     SetIgnoreGroupLock(ToggleState),
     Global(String),
     Event(String),
-    SetProp(SetProp),
+    SetProp(WindowTarget, WindowRuleDynamicEffect),
     ToggleSwallow,
 }
 
@@ -208,7 +208,9 @@ impl HasDiscriminant for Dispatcher {
             }
             Self::Discriminant::Global => Self::Global("".to_string()),
             Self::Discriminant::Event => Self::Event("".to_string()),
-            Self::Discriminant::SetProp => Self::SetProp(SetProp::default()),
+            Self::Discriminant::SetProp => {
+                Self::SetProp(WindowTarget::default(), WindowRuleDynamicEffect::default())
+            }
             Self::Discriminant::ToggleSwallow => Self::ToggleSwallow,
         }
     }
@@ -487,7 +489,13 @@ impl HasDiscriminant for Dispatcher {
             }
             Self::Discriminant::Global => Self::Global(str.to_string()),
             Self::Discriminant::Event => Self::Event(str.to_string()),
-            Self::Discriminant::SetProp => Self::SetProp(str.parse().unwrap_or_default()),
+            Self::Discriminant::SetProp => {
+                let (window_target, dynamic_effect) = str.split_once(' ').unwrap_or((str, ""));
+                Self::SetProp(
+                    window_target.parse().unwrap_or_default(),
+                    dynamic_effect.parse().unwrap_or_default(),
+                )
+            }
             Self::Discriminant::ToggleSwallow => Self::ToggleSwallow,
         }
     }
@@ -631,7 +639,9 @@ impl HasDiscriminant for Dispatcher {
             Dispatcher::SetIgnoreGroupLock(toggle_state) => Some(toggle_state.to_string()),
             Dispatcher::Global(name) => Some(name.clone()),
             Dispatcher::Event(event) => Some(event.clone()),
-            Dispatcher::SetProp(set_prop) => Some(set_prop.to_string()),
+            Dispatcher::SetProp(window_target, dynamic_effect) => {
+                Some(format!("{} {}", window_target, dynamic_effect))
+            }
             Dispatcher::ToggleSwallow => None,
         }
     }
@@ -991,7 +1001,14 @@ impl FromStr for Dispatcher {
             )),
             "global" => Ok(Dispatcher::Global(params.to_string())),
             "event" => Ok(Dispatcher::Event(params.to_string())),
-            "setprop" => Ok(Dispatcher::SetProp(params.parse().unwrap_or_default())),
+            "setprop" => {
+                let (window_target, dynamic_effect) =
+                    params.split_once(' ').unwrap_or((params, ""));
+                Ok(Dispatcher::SetProp(
+                    window_target.parse().unwrap_or_default(),
+                    dynamic_effect.parse().unwrap_or_default(),
+                ))
+            }
             "toggleswallow" => Ok(Dispatcher::ToggleSwallow),
             _ => Err(()),
         }
@@ -1202,7 +1219,9 @@ impl Display for Dispatcher {
             }
             Dispatcher::Global(name) => write!(f, "global, {}", name),
             Dispatcher::Event(event) => write!(f, "event, {}", event),
-            Dispatcher::SetProp(set_prop) => write!(f, "setprop, {}", set_prop),
+            Dispatcher::SetProp(target, dynamic_effect) => {
+                write!(f, "setprop, {} {}", target, dynamic_effect)
+            }
             Dispatcher::ToggleSwallow => write!(f, "toggleswallow"),
         }
     }
@@ -1290,7 +1309,8 @@ impl EnumConfigForGtk for Dispatcher {
                 window_rules_mother_box
                     .append(&Label::new(Some(&t!("hyprland.dispatcher.window_rules"))));
                 let window_rules_entry = create_entry();
-                let window_rules_box = Vec::<WindowRule>::to_gtk_box(&window_rules_entry, ';');
+                let window_rules_box =
+                    Vec::<WindowRuleEffect>::to_gtk_box(&window_rules_entry, ';');
                 window_rules_mother_box.append(&window_rules_box);
                 mother_box.append(&window_rules_mother_box);
 
@@ -1299,7 +1319,7 @@ impl EnumConfigForGtk for Dispatcher {
 
                 let window_rules_entry_clone = window_rules_entry.clone();
                 let command_entry_clone = command_entry.clone();
-                let update_ui = move |(window_rules, command): (Vec<WindowRule>, String)| {
+                let update_ui = move |(window_rules, command): (Vec<WindowRuleEffect>, String)| {
                     window_rules_entry_clone.set_text(&join_with_separator(&window_rules, ";"));
                     command_entry_clone.set_text(&command);
                 };
@@ -2342,14 +2362,16 @@ impl EnumConfigForGtk for Dispatcher {
             Self::SetIgnoreGroupLock(_toggle_state) => Some(<(ToggleState,)>::to_gtk_box),
             Self::Global(_name) => Some(<(String,)>::to_gtk_box),
             Self::Event(_data) => Some(<(String,)>::to_gtk_box),
-            Self::SetProp(_set_prop) => Some(<(SetProp,)>::to_gtk_box),
+            Self::SetProp(_target, _dynamic_effect) => {
+                Some(<(WindowTarget, WindowRuleDynamicEffect)>::to_gtk_box)
+            }
             Self::ToggleSwallow => None,
         }
     }
 
     fn field_labels() -> Option<Vec<Vec<FieldLabel>>> {
         Some(vec![
-            // Exec(Vec<WindowRule>, String),
+            // Exec(Vec<WindowRuleEffect>, String),
             vec![],
             // Execr(String),
             vec![FieldLabel::Unnamed],
@@ -2406,7 +2428,7 @@ impl EnumConfigForGtk for Dispatcher {
 }
 
 register_togtkbox!(Dispatcher);
-register_togtkbox_with_separator!(Vec<WindowRule>, HashSet<Modifier>);
+register_togtkbox_with_separator!(Vec<WindowRuleEffect>, HashSet<Modifier>);
 register_togtkbox_with_separator_names!(
     (String,),
     (WindowTarget,),
@@ -2436,5 +2458,5 @@ register_togtkbox_with_separator_names!(
     (ChangeGroupActive,),
     (GroupLockAction,),
     (ToggleState,),
-    (SetProp,),
+    (WindowRuleDynamicEffect,),
 );

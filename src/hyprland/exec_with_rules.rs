@@ -1,4 +1,4 @@
-use super::WindowRule;
+use super::WindowRuleEffect;
 use crate::{
     advanced_editors::create_entry,
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
@@ -11,7 +11,7 @@ use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct ExecWithRules {
-    pub rules: Vec<WindowRule>,
+    pub rules: Vec<WindowRuleEffect>,
     pub command: String,
 }
 
@@ -85,7 +85,7 @@ impl ToGtkBox for ExecWithRules {
             "hyprland.exec_with_rules.window_rules"
         ))));
         let window_rules_entry = create_entry();
-        let window_rules_box = Vec::<WindowRule>::to_gtk_box(&window_rules_entry, ';');
+        let window_rules_box = Vec::<WindowRuleEffect>::to_gtk_box(&window_rules_entry, ';');
         window_rules_mother_box.append(&window_rules_box);
         mother_box.append(&window_rules_mother_box);
 

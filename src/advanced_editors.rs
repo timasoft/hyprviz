@@ -2,9 +2,9 @@ use crate::{
     gtk_converters::{FieldLabel, ToGtkBox, ToGtkBoxWithSeparator, ToGtkBoxWithSeparatorAndNames},
     hyprland::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
-        BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleWithParameter,
+        BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleEffectOrProp,
         Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Position, Scale, Side,
-        UnbindRight, WindowRuleWithParameters, Workspace, WorkspaceSelector, WorkspaceType,
+        UnbindRight, WindowRuleEffectOrProp, Workspace, WorkspaceSelector, WorkspaceType,
         animation::parse_animation, bezier_curve::parse_bezier, bind_right::parse_bind_right,
         monitor::parse_monitor, workspace::parse_workspace,
     },
@@ -625,6 +625,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                                 flags.has_description = switch.is_active()
                             }
                             BindFlagsEnum::Bypass => flags.bypass = switch.is_active(),
+                            BindFlagsEnum::SubmapUniversal => {
+                                flags.submap_universal = switch.is_active()
+                            }
                         }
 
                         name_entry_clone.set_text(&bind_left.to_string());
@@ -667,6 +670,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                                     BindFlagsEnum::Separate => flags.separate,
                                     BindFlagsEnum::HasDescription => flags.has_description,
                                     BindFlagsEnum::Bypass => flags.bypass,
+                                    BindFlagsEnum::SubmapUniversal => flags.submap_universal,
                                 };
                                 switch.set_active(flag_value);
                             }
@@ -689,13 +693,64 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             }
         }
         "gesture" => {
+            let gesture_content_box = Box::new(GtkOrientation::Horizontal, 5);
+
             let label = Label::new(Some("gesture"));
             label.set_width_request(100);
             label.set_selectable(true);
-            fancy_name_entry.append(&label);
+
+            let bypass_switch_label = Label::new(Some(&t!("advanced_editors.bypass")));
+            let bypass_switch = create_switch();
+
+            let bypass_switch_box = Box::new(GtkOrientation::Horizontal, 5);
+            bypass_switch_box.set_margin_start(10);
+            bypass_switch_box.append(&bypass_switch_label);
+            bypass_switch_box.append(&bypass_switch);
+
+            gesture_content_box.append(&label);
+            gesture_content_box.append(&bypass_switch_box);
+            fancy_name_entry.append(&gesture_content_box);
+
             name_entry.set_text("gesture");
+
+            let name_entry_clone = name_entry.clone();
+            let is_updating_clone = is_updating.clone();
+            bypass_switch.connect_state_notify(move |switch| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+
+                let current_text = name_entry_clone.text().to_string();
+                let base_text = current_text.trim().trim_end_matches('p').trim_end();
+
+                let new_text = if switch.is_active() {
+                    format!("{}p", base_text)
+                } else {
+                    base_text.to_string()
+                };
+                name_entry_clone.set_text(&new_text);
+
+                is_updating_clone.set(false);
+            });
+
+            let label_clone = label.clone();
+            let bypass_switch_clone = bypass_switch.clone();
+            let is_updating_clone = is_updating.clone();
             name_entry.connect_changed(move |entry| {
-                label.set_text(&entry.text());
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+
+                let text = entry.text().to_string();
+                let has_p = text.trim().ends_with('p');
+                let clean_text = text.trim().trim_end_matches('p').trim_end();
+
+                label_clone.set_text(clean_text);
+                bypass_switch_clone.set_active(has_p);
+
+                is_updating_clone.set(false);
             });
         }
         "windowrule" => {
@@ -752,36 +807,65 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             fancy_name_entry.append(&dropdown);
         }
         "env" => {
-            let string_list = StringList::new(&["env", "envd"]);
-            let dropdown = create_dropdown(&string_list);
-            dropdown.set_width_request(100);
+            let env_content_box = Box::new(GtkOrientation::Horizontal, 5);
+
+            let label = Label::new(Some("env"));
+            label.set_width_request(100);
+            label.set_selectable(true);
+
+            let dbus_switch_label = Label::new(Some("D-Bus"));
+            let dbus_switch = create_switch();
+
+            let dbus_switch_box = Box::new(GtkOrientation::Horizontal, 5);
+            dbus_switch_box.set_margin_start(10);
+            dbus_switch_box.append(&dbus_switch_label);
+            dbus_switch_box.append(&dbus_switch);
+
+            env_content_box.append(&label);
+            env_content_box.append(&dbus_switch_box);
+            fancy_name_entry.append(&env_content_box);
+
+            name_entry.set_text("env");
 
             let name_entry_clone = name_entry.clone();
-            dropdown.connect_selected_notify(move |dd| {
-                if let Some(selected) = dd.selected_item()
-                    && let Some(string_object) = selected.downcast_ref::<StringObject>()
-                {
-                    let new_name = string_object.string().to_string();
-                    name_entry_clone.set_text(&new_name);
+            let is_updating_clone = is_updating.clone();
+            dbus_switch.connect_state_notify(move |switch| {
+                if is_updating_clone.get() {
+                    return;
                 }
+                is_updating_clone.set(true);
+
+                let current_text = name_entry_clone.text().to_string();
+                let base_text = current_text.trim().trim_end_matches('d').trim_end();
+
+                let new_text = if switch.is_active() {
+                    format!("{}d", base_text)
+                } else {
+                    base_text.to_string()
+                };
+                name_entry_clone.set_text(&new_text);
+
+                is_updating_clone.set(false);
             });
-            let dropdown_clone = dropdown.clone();
-            name_entry.set_text("env");
+
+            let label_clone = label.clone();
+            let dbus_switch_clone = dbus_switch.clone();
+            let is_updating_clone = is_updating.clone();
             name_entry.connect_changed(move |entry| {
-                let new_name = entry.text().to_string();
-
-                for idx in 0..string_list.n_items() {
-                    if let Some(item) = string_list.item(idx) {
-                        let item_str = item.property::<String>("string");
-
-                        if item_str == new_name {
-                            dropdown_clone.set_selected(idx);
-                            break;
-                        }
-                    }
+                if is_updating_clone.get() {
+                    return;
                 }
+                is_updating_clone.set(true);
+
+                let text = entry.text().to_string();
+                let has_d = text.trim().ends_with('d');
+                let clean_text = text.trim().trim_end_matches('d').trim_end();
+
+                label_clone.set_text(clean_text);
+                dbus_switch_clone.set_active(has_d);
+
+                is_updating_clone.set(false);
             });
-            fancy_name_entry.append(&dropdown);
         }
         "top_level" => {
             // maybe in future i will implement this
@@ -808,20 +892,45 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
     );
     fancy_boxline.append(&fancy_value_entry);
 
+    let old_name = Rc::new(RefCell::new(name_entry.text().trim().to_string()));
     let fancy_value_entry_clone = fancy_value_entry.clone();
     let value_entry_clone = value_entry.clone();
     let category_clone = category.to_string();
     name_entry.connect_changed(move |entry| {
-        while let Some(child) = fancy_value_entry.first_child() {
-            fancy_value_entry.remove(&child);
+        let new_name = entry.text().trim().to_string();
+
+        let update_ui = {
+            let old_name_ref = old_name.borrow();
+            let old_name_str = old_name_ref.as_str();
+
+            let new_is_bezier = new_name == "bezier";
+            let old_is_bezier = old_name_str == "bezier";
+            let bezier_mode_changed = new_is_bezier != old_is_bezier;
+
+            let new_is_exec = new_name == "exec" || new_name == "exec-once";
+            let old_is_exec = old_name_str == "exec" || old_name_str == "exec-once";
+            let exec_group_changed = new_is_exec != old_is_exec;
+
+            let has_desc_new = matches!(BindLeft::from_str(&new_name), Ok(BindLeft::Bind(flags)) if flags.has_description);
+            let has_desc_old = matches!(BindLeft::from_str(old_name_str), Ok(BindLeft::Bind(flags)) if flags.has_description);
+            let description_flag_changed = has_desc_new != has_desc_old;
+
+            bezier_mode_changed || exec_group_changed || description_flag_changed
+        };
+
+        if update_ui {
+            while let Some(child) = fancy_value_entry.first_child() {
+                fancy_value_entry.remove(&child);
+            }
+            fill_fancy_value_entry(
+                &fancy_value_entry_clone,
+                &value_entry_clone,
+                &category_clone,
+                &new_name,
+            );
         }
-        let new_name = entry.text().to_string();
-        fill_fancy_value_entry(
-            &fancy_value_entry_clone,
-            &value_entry_clone,
-            &category_clone,
-            &new_name,
-        );
+
+        *old_name.borrow_mut() = new_name;
     });
 
     fancy_boxline
@@ -3934,11 +4043,11 @@ fn fill_fancy_value_entry(
             fancy_value_entry.append(&gesture_box);
         }
         "windowrule" => {
-            let window_rule_box = WindowRuleWithParameters::to_gtk_box(value_entry);
+            let window_rule_box = Vec::<WindowRuleEffectOrProp>::to_gtk_box(value_entry, ',');
             fancy_value_entry.append(&window_rule_box);
         }
         "layerrule" => {
-            let layer_rule_box = LayerRuleWithParameter::to_gtk_box(value_entry);
+            let layer_rule_box = Vec::<LayerRuleEffectOrProp>::to_gtk_box(value_entry, ',');
             fancy_value_entry.append(&layer_rule_box);
         }
         "exec" => match name {

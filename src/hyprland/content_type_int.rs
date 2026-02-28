@@ -5,7 +5,7 @@ use std::{fmt::Display, str::FromStr};
 use strum::EnumIter;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default, EnumIter)]
-pub enum ContentType {
+pub enum ContentTypeInt {
     #[default]
     None,
     Photo,
@@ -13,7 +13,7 @@ pub enum ContentType {
     Game,
 }
 
-impl TryFrom<u8> for ContentType {
+impl TryFrom<u8> for ContentTypeInt {
     type Error = ();
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
@@ -27,18 +27,18 @@ impl TryFrom<u8> for ContentType {
     }
 }
 
-impl From<ContentType> for u8 {
-    fn from(value: ContentType) -> Self {
+impl From<ContentTypeInt> for u8 {
+    fn from(value: ContentTypeInt) -> Self {
         match value {
-            ContentType::None => 0,
-            ContentType::Photo => 1,
-            ContentType::Video => 2,
-            ContentType::Game => 3,
+            ContentTypeInt::None => 0,
+            ContentTypeInt::Photo => 1,
+            ContentTypeInt::Video => 2,
+            ContentTypeInt::Game => 3,
         }
     }
 }
 
-impl FromStr for ContentType {
+impl FromStr for ContentTypeInt {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -54,27 +54,27 @@ impl FromStr for ContentType {
         }
 
         match s {
-            "none" => Ok(ContentType::None),
-            "photo" => Ok(ContentType::Photo),
-            "video" => Ok(ContentType::Video),
-            "game" => Ok(ContentType::Game),
+            "none" => Ok(ContentTypeInt::None),
+            "photo" => Ok(ContentTypeInt::Photo),
+            "video" => Ok(ContentTypeInt::Video),
+            "game" => Ok(ContentTypeInt::Game),
             _ => Err(()),
         }
     }
 }
 
-impl Display for ContentType {
+impl Display for ContentTypeInt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ContentType::None => write!(f, "none"),
-            ContentType::Photo => write!(f, "photo"),
-            ContentType::Video => write!(f, "video"),
-            ContentType::Game => write!(f, "game"),
+            ContentTypeInt::None => write!(f, "0"),
+            ContentTypeInt::Photo => write!(f, "1"),
+            ContentTypeInt::Video => write!(f, "2"),
+            ContentTypeInt::Game => write!(f, "3"),
         }
     }
 }
 
-impl EnumConfigForGtk for ContentType {
+impl EnumConfigForGtk for ContentTypeInt {
     fn dropdown_items() -> StringList {
         StringList::new(&[
             &t!("hyprland.content_type.none"),
@@ -85,4 +85,4 @@ impl EnumConfigForGtk for ContentType {
     }
 }
 
-register_togtkbox!(ContentType);
+register_togtkbox!(ContentTypeInt);

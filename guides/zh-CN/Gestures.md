@@ -4,20 +4,21 @@ title: 手势
 ---
 
 > [!NOTE]
-> 由 Qwen3.5-Plus 从 en 翻译
+> 翻译自英文版，使用 Qwen3.5-Plus
 
 ## 通用
 
-Hyprland 支持触控板的 1:1 手势操作，用于某些功能。基本语法如下：
+Hyprland 支持 触控 板 的 1:1 手势 操作，用于 某些 功能。基本 语法 如下：
 
 ```ini
 gesture = fingers, direction, action, options
 ```
 
-各种动作可能有各自的选项，也可能没有。如果动作不需要选项，您可以直接在动作参数处结束。
+各种 动作 可能 有 各自 的 选项，或 可能 没有。您 可以 丢弃 选项 完全 并 结束
+在 动作 参数 处 如果 动作 需要 无。
 
-您还可以通过在 `direction` 后添加 `, mod: [MODMASK]` 来将手势限制在特定修饰键上，
-或通过添加 `scale: [SCALE]` 来按浮点数缩放动画速度。
+您 可以 也 限制 手势 到 一个 修饰 键 通过 添加 `, mod: [MODMASK]` 在 `direction` 后，
+或 缩放 动画 的 速度 通过 一个 浮点 数 通过 添加 `scale: [SCALE]`。
 
 示例：
 
@@ -30,28 +31,44 @@ gesture = 3, left, scale: 1.5, float
 
 ### 方向
 
-支持以下方向：
+以下 方向 是 支持 的：
 | `direction` | 描述 |
 | -- | -- |
-| `swipe` | 任意滑动 |
-| `horizontal` | 水平滑动 |
-| `vertical` | 垂直滑动 |
-| `left`, `right`, `up`, `down` | 滑动方向 |
-| `pinch` | 任意捏合 |
-| `pinchin`, `pinchout` | 方向性捏合 |
+| `swipe` | 任意 滑动 |
+| `horizontal` | 水平 滑动 |
+| `vertical` | 垂直 滑动 |
+| `left`, `right`, `up`, `down` | 滑动 方向 |
+| `pinch` | 任意 捏合 |
+| `pinchin`, `pinchout` | 方向 性 捏合 |
+
 
 
 ### 动作
 
-将 `unset` 指定为动作将取消之前设置的特定手势。请注意，它需要与原始手势的所有内容完全匹配，包括方向、修饰键、手指数量和缩放比例。
+指定 `unset` 作为 动作 将 取消 一个 特定 手势 那 是 之前 设置。请 注意 它 需要 完全 匹配 一切
+从 原始 手势 包括 方向、修饰 键、手指 数量 和 缩放 比例。
 
 | `action` | 描述 | 参数 |
 | -- | -- | -- |
-| `dispatcher` | 最基本的动作，在手势结束时执行调度器 | `dispatcher, params` |
-| `workspace` | 工作区滑动手势，用于切换工作区 | |
-| `move` | 移动活动窗口 | 无 |
-| `resize` | 调整活动窗口大小 | 无 |
-| `special` | 切换特殊工作区 | 特殊工作区名称（不含 `special:` 前缀），例如 `mySpecialWorkspace` |
-| `close` | 关闭活动窗口 | 无 |
-| `fullscreen` | 将活动窗口全屏 | 无表示全屏，`maximize` 表示最大化 |
-| `float` | 将活动窗口浮动 | 无表示切换，`float` 或 `tile` 表示单向操作 |
+| `dispatcher` | 最 基本，执行 一个 调度 器 一旦 手势 结束 | `dispatcher, params` |
+| `workspace` | 工作 区 滑动 手势，用于 切换 工作 区 | |
+| `move` | 移动 活动 窗口 | 无 |
+| `resize` | 调整 活动 窗口 大小 | 无 |
+| `special` | 切换 一个 特殊 工作 区 | 特殊 工作 区 名称 不含 `special:` 前缀，例如 `mySpecialWorkspace` |
+| `close` | 关闭 活动 窗口 | 无 |
+| `fullscreen` | 将 活动 窗口 全屏 | 无 表示 全屏，`maximize` 表示 最大化 |
+| `float` | 将 活动 窗口 浮动 | 无 表示 切换，`float` 或 `tile` 表示 单向 操作 |
+
+### 标志
+
+手势 支持 标志 通过 以下 语法：
+
+```ini
+gesture[flags] = ...
+```
+
+支持 的 标志：
+
+| 标志 | 名称 | 描述 |
+| -- | -- | -- |
+| `p` | bypass | 允许 手势 绕过 快捷 键 抑制 器。 |

@@ -15,6 +15,7 @@ pub struct BindFlags {
     pub separate: bool,
     pub has_description: bool,
     pub bypass: bool,
+    pub submap_universal: bool,
 }
 
 impl FromStr for BindFlags {
@@ -37,6 +38,7 @@ impl FromStr for BindFlags {
                 's' => flags.separate = true,
                 'd' => flags.has_description = true,
                 'p' => flags.bypass = true,
+                'u' => flags.submap_universal = true,
                 _ => {}
             }
         }
@@ -85,6 +87,9 @@ impl Display for BindFlags {
         }
         if self.bypass {
             flags.push('p');
+        }
+        if self.submap_universal {
+            flags.push('u');
         }
         write!(f, "{}", flags)
     }

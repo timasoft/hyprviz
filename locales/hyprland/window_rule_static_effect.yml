@@ -1,0 +1,101 @@
+_version: 2
+hyprland.window_rule_static_effect.center_off:
+  en: "Center Off"
+  ru: "Центрирование выкл"
+  zh-CN: "居中关闭"
+hyprland.window_rule_static_effect.center_on:
+  en: "Center On"
+  ru: "Центрирование вкл"
+  zh-CN: "居中开启"
+hyprland.window_rule_static_effect.content:
+  en: "Content"
+  ru: "Содержимое"
+  zh-CN: "内容"
+hyprland.window_rule_static_effect.float_off:
+  en: "Float Off"
+  ru: "Плавающий режим выкл"
+  zh-CN: "浮动关闭"
+hyprland.window_rule_static_effect.float_on:
+  en: "Float On"
+  ru: "Плавающий режим вкл"
+  zh-CN: "浮动开启"
+hyprland.window_rule_static_effect.fullscreen_off:
+  en: "Fullscreen Off"
+  ru: "Полноэкранный режим выкл"
+  zh-CN: "全屏关闭"
+hyprland.window_rule_static_effect.fullscreen_on:
+  en: "Fullscreen On"
+  ru: "Полноэкранный режим вкл"
+  zh-CN: "全屏开启"
+hyprland.window_rule_static_effect.fullscreen_state:
+  en: "Fullscreen State"
+  ru: "Состояние полноэкранного режима"
+  zh-CN: "全屏状态"
+hyprland.window_rule_static_effect.group:
+  en: "Group"
+  ru: "Группа"
+  zh-CN: "组"
+hyprland.window_rule_static_effect.maximize_off:
+  en: "Maximize Off"
+  ru: "Развернуть выкл"
+  zh-CN: "最大化关闭"
+hyprland.window_rule_static_effect.maximize_on:
+  en: "Maximize On"
+  ru: "Развернуть вкл"
+  zh-CN: "最大化开启"
+hyprland.window_rule_static_effect.monitor:
+  en: "Monitor"
+  ru: "Монитор"
+  zh-CN: "显示器"
+hyprland.window_rule_static_effect.move:
+  en: "Move"
+  ru: "Переместить"
+  zh-CN: "移动"
+hyprland.window_rule_static_effect.no_close_for:
+  en: "No Close For"
+  ru: "Не закрывать для"
+  zh-CN: "不关闭对象"
+hyprland.window_rule_static_effect.no_initial_focus_off:
+  en: "No Initial Focus Off"
+  ru: "Начальный фокус выкл"
+  zh-CN: "初始焦点关闭"
+hyprland.window_rule_static_effect.no_initial_focus_on:
+  en: "No Initial Focus On"
+  ru: "Начальный фокус вкл"
+  zh-CN: "初始焦点开启"
+hyprland.window_rule_static_effect.pin_off:
+  en: "Pin Off"
+  ru: "Закрепление выкл"
+  zh-CN: "固定关闭"
+hyprland.window_rule_static_effect.pin_on:
+  en: "Pin On"
+  ru: "Закрепление вкл"
+  zh-CN: "固定开启"
+hyprland.window_rule_static_effect.pseudo_off:
+  en: "Pseudo Off"
+  ru: "Псевдо режим выкл"
+  zh-CN: "伪模式关闭"
+hyprland.window_rule_static_effect.pseudo_on:
+  en: "Pseudo On"
+  ru: "Псевдо режим вкл"
+  zh-CN: "伪模式开启"
+hyprland.window_rule_static_effect.size:
+  en: "Size"
+  ru: "Размер"
+  zh-CN: "尺寸"
+hyprland.window_rule_static_effect.suppress_event:
+  en: "Suppress Event"
+  ru: "Подавить событие"
+  zh-CN: "抑制事件"
+hyprland.window_rule_static_effect.tile_off:
+  en: "Tile Off"
+  ru: "Плитка выкл"
+  zh-CN: "平铺关闭"
+hyprland.window_rule_static_effect.tile_on:
+  en: "Tile On"
+  ru: "Плитка вкл"
+  zh-CN: "平铺开启"
+hyprland.window_rule_static_effect.workspace:
+  en: "Workspace"
+  ru: "Рабочее пространство"
+  zh-CN: "工作区"

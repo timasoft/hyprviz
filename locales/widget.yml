@@ -148,14 +148,6 @@ widget.general_category.border_size_description:
   en: "Size of the border around windows"
   ru: "Размер границы вокруг окон"
   zh-CN: "窗口周围的边框尺寸"
-widget.general_category.no_border_on_floating_label:
-  en: "No Border on Floating"
-  ru: "Без границы для плавающих окон"
-  zh-CN: "浮动窗口无边框"
-widget.general_category.no_border_on_floating_description:
-  en: "Disable borders for floating windows"
-  ru: "Отключить границы для плавающих окон"
-  zh-CN: "禁用浮动窗口的边框"
 widget.general_category.resize_on_border_label:
   en: "Resize on Border"
   ru: "Изменение размера за границу"
@@ -290,6 +282,14 @@ widget.general_category.modal_parent_blocking_description:
   en: "If true, parent windows of modals will not be interactive."
   ru: "При включении родительские окна модальных диалогов становятся неинтерактивными."
   zh-CN: "启用后，模态窗口的父窗口将无法交互。"
+widget.general_category.locale_label:
+  en: "Locale"
+  ru: "Локаль"
+  zh-CN: "区域设置"
+widget.general_category.locale_description:
+  en: "Overrides the system locale."
+  ru: "Переопределяет системную локаль."
+  zh-CN: "覆盖系统区域设置。"
 
 widget.general_category.colors_section_title:
   en: "Colors"
@@ -1764,6 +1764,14 @@ widget.group_category.groupbar.keep_upper_gap_description:
   en: "Add or remove upper gap"
   ru: "Добавить или удалить верхний отступ"
   zh-CN: "添加或移除顶部间距"
+widget.group_category.groupbar.blur_label:
+  en: "Blur"
+  ru: "Размытие"
+  zh-CN: "模糊"
+widget.group_category.groupbar.blur_description:
+  en: "Enable background blur for groupbars."
+  ru: "Включает размытие фона для группбара."
+  zh-CN: "为组栏启用背景模糊。"
 
 widget.misc_category.miscellaneous_settings_section_title:
   en: "Miscellaneous Settings"
@@ -1989,23 +1997,23 @@ widget.misc_category.close_special_on_empty_description:
   en: "Close the special workspace if the last window is removed"
   ru: "Закрыть специальное рабочее пространство, если последнее окно удалено"
   zh-CN: "如果最后一个窗口被移除，则关闭特殊工作区"
-widget.misc_category.new_window_takes_over_fullscreen_label:
+widget.misc_category.on_focus_under_fullscreen_label:
   en: "New Window Takes Over Fullscreen"
   ru: "Новое окно заменяет полноэкранное"
   zh-CN: "新窗口接管全屏"
-widget.misc_category.new_window_takes_over_fullscreen_description:
-  en: "If there is a fullscreen or maximized window, decide whether a new tiled window opened should replace it, stay behind or disable the fullscreen/maximized state."
-  ru: "Если есть полноэкранное или развернутое окно, решите, должно ли новое тайловое окно заменить его, остаться позади или отключить полноэкранный/развернутый режим."
-  zh-CN: "如果存在全屏或最大化窗口，请决定打开的新平铺窗口是替换它、留在其后还是禁用全屏/最大化状态。"
-widget.misc_category.new_window_takes_over_fullscreen_behind:
-  en: "Behind"
-  ru: "Позади"
-  zh-CN: "后面"
-widget.misc_category.new_window_takes_over_fullscreen_takes_over:
+widget.misc_category.on_focus_under_fullscreen_description:
+  en: "If there is a fullscreen or maximized window, decide whether a tiled window requested to focus should replace it, stay behind or disable the fullscreen/maximized state."
+  ru: "Если открыто полноэкранное или развернутое окно, определяет, должно ли тайловое окно, запросившее фокус, заменить его, остаться на заднем плане или отключить полноэкранный/развернутый режим."
+  zh-CN: "当存在全屏或最大化窗口时，决定请求聚焦的平铺窗口是替换它、留在其后还是禁用全屏/最大化状态。"
+widget.misc_category.on_focus_under_fullscreen_ignore_focus_request:
+  en: "Ignore Focus Request"
+  ru: "Игнорировать запрос фокуса"
+  zh-CN: "忽略焦点请求"
+widget.misc_category.on_focus_under_fullscreen_takes_over:
   en: "Take Over"
   ru: "Захватить"
   zh-CN: "接管"
-widget.misc_category.new_window_takes_over_fullscreen_unfullscreen/unmaximize:
+widget.misc_category.on_focus_under_fullscreen_unfullscreen/unmaximize:
   en: "Unfullscreen/Unmaximize"
   ru: "Выйти из полноэкранного/развернутого"
   zh-CN: "退出全屏/取消最大化"
@@ -2069,6 +2077,14 @@ widget.misc_category.disable_hyprland_guiutils_check_description:
   en: "Disable the warning if hyprland-guiutils is not installed"
   ru: "Отключить предупреждение, если hyprland-guiutils не установлен"
   zh-CN: "如果未安装 hyprland-guiutils，则禁用警告"
+widget.misc_category.disable_watchdog_warning_label:
+  en: "Disable Watchdog Warning"
+  ru: "Отключить предупреждение Watchdog"
+  zh-CN: "禁用 Watchdog 警告"
+widget.misc_category.disable_watchdog_warning_description:
+  en: "Whether to disable the warning about not using start-hyprland."
+  ru: "Отключает предупреждение о том, что сеанс запущен не через start-hyprland."
+  zh-CN: "禁用未通过 start-hyprland 启动会话时的警告。"
 widget.misc_category.lockdead_screen_delay_label:
   en: "Lock Dead Screen Delay"
   ru: "Задержка мёртвого экрана блокировки"
@@ -2466,10 +2482,10 @@ widget.render_category.cm_sdr_eotf_description:
   en: "Default transfer function for displaying SDR apps."
   ru: "Функция преобразования яркости по умолчанию для отображения приложений в SDR."
   zh-CN: "显示 SDR 应用程序的默认亮度转换函数。"
-widget.render_category.cm_sdr_eotf_srgb:
-  en: "Treat unspecified as sRGB"
-  ru: "Считать неуказанные как sRGB"
-  zh-CN: "将未指定的视为 sRGB"
+widget.render_category.cm_sdr_eotf_default:
+  en: "Use default value (Gamma 2.2)"
+  ru: "Использовать значение по умолчанию (Gamma 2.2)"
+  zh-CN: "使用默认值 (Gamma 2.2)"
 widget.render_category.cm_sdr_eotf_gamma22:
   en: "Treat unspecified as Gamma 2.2"
   ru: "Считать неуказанные как Gamma 2.2"
@@ -2478,6 +2494,10 @@ widget.render_category.cm_sdr_eotf_gamma22force:
   en: "Treat unspecified and sRGB as Gamma 2.2"
   ru: "Считать неуказанные и sRGB как Gamma 2.2"
   zh-CN: "将未指定的和 sRGB 均视为 Gamma 2.2"
+widget.render_category.cm_sdr_eotf_srgb:
+  en: "Treat unspecified as sRGB"
+  ru: "Считать неуказанные как sRGB"
+  zh-CN: "将未指定的视为 sRGB"
 
 widget.cursor_category.cursor_settings_section_title:
   en: "Cursor Settings"
@@ -2655,6 +2675,14 @@ widget.cursor_category.zoom_disable_aa_description:
   en: "If enabled, when zooming, no antialiasing will be used (zoom will be pixelated)."
   ru: "При включении при увеличении масштаба не будет применяться сглаживание (изображение станет пикселизованным)."
   zh-CN: "启用后，放大时将不使用抗锯齿（放大效果将呈现像素化）。"
+widget.cursor_category.zoom_detached_camera_label:
+  en: "Detached Camera"
+  ru: "Отвязанная камера"
+  zh-CN: "分离相机"
+widget.cursor_category.zoom_detached_camera_description:
+  en: "Detaches the camera from the mouse when zoomed in, only ever moving to keep the mouse in view."
+  ru: "Отвязывает камеру от курсора при увеличении, перемещая её только для того, чтобы курсор оставался в поле зрения."
+  zh-CN: "放大时使相机与光标分离，仅在需要保持光标可见时才移动视角。"
 widget.cursor_category.enable_hyprcursor_label:
   en: "Enable Hyprcursor"
   ru: "Включить Hyprcursor"
@@ -2679,6 +2707,14 @@ widget.cursor_category.hide_on_touch_description:
   en: "Hides the cursor when the last input was a touch input until a mouse input is done."
   ru: "Скрывает курсор, когда последним вводом был сенсорный ввод, пока не будет выполнен ввод мышью."
   zh-CN: "当最后输入为触摸输入时隐藏光标，直到完成鼠标输入。"
+widget.cursor_category.hide_on_tablet_label:
+  en: "Hide on Tablet"
+  ru: "Скрывать курсор на планшете"
+  zh-CN: "平板上隐藏光标"
+widget.cursor_category.hide_on_tablet_description:
+  en: "Hides the cursor when the last input was a tablet input until a mouse input is done."
+  ru: "Скрывает курсор, если последним событием ввода был планшет, до момента активности мыши."
+  zh-CN: "当最后输入事件来自平板时隐藏光标，直至检测到鼠标输入。"
 widget.cursor_category.use_cpu_buffer_label:
   en: "Use CPU Buffer"
   ru: "Использовать буфер ЦП"
@@ -2741,22 +2777,34 @@ widget.ecosystem_category.enforce_permissions_description:
   ru: "Включать ли контроль разрешений Hyprland."
   zh-CN: "是否启用 Hyprland 的权限控制。"
 
-widget.experimental_category.experimental_settings_section_title:
-  en: "Experimental Settings"
-  ru: "Экспериментальные настройки"
-  zh-CN: "实验性设置"
-widget.experimental_category.experimental_settings_section_description:
-  en: "Configure experimental behavior."
-  ru: "Настройка экспериментального поведения."
-  zh-CN: "配置实验性行为。"
-widget.experimental_category.xx_color_management_v4_label:
-  en: "XX Color Management v4"
-  ru: "XX Управление цветом v4"
-  zh-CN: "XX 颜色管理 v4"
-widget.experimental_category.xx_color_management_v4_description:
-  en: "Enable color management protocol"
-  ru: "Включить протокол управления цветом"
-  zh-CN: "启用颜色管理协议"
+widget.quirks_category.quirks_settings_section_title:
+  en: "Quirks"
+  ru: "Особенности"
+  zh-CN: "特殊设置"
+widget.quirks_category.quirks_settings_section_description:
+  en: "Configure quirks behavior."
+  ru: "Настройка поведения особенностей."
+  zh-CN: "配置特殊设置的行为。"
+widget.quirks_category.prefer_hdr_label:
+  en: "Prefer HDR"
+  ru: "Предпочтение HDR"
+  zh-CN: "优先 HDR"
+widget.quirks_category.prefer_hdr_description:
+  en: "Prefer HDR mode"
+  ru: "Включает приоритет режима HDR."
+  zh-CN: "优先启用 HDR 模式。"
+widget.quirks_category.prefer_hdr_off:
+  en: "Off"
+  ru: "Выкл."
+  zh-CN: "关闭"
+widget.quirks_category.prefer_hdr_always:
+  en: "Always"
+  ru: "Всегда"
+  zh-CN: "始终"
+widget.quirks_category.prefer_hdr_gamescope_only:
+  en: "Gamescope Only"
+  ru: "Только Gamescope"
+  zh-CN: "仅 Gamescope"
 
 widget.debug_category.debug_settings_section_title:
   en: "Debug Settings"
@@ -3113,14 +3161,6 @@ widget.layouts_category.master.orientation_description:
   en: "Default placement of the master area"
   ru: "Размещение области мастера по умолчанию"
   zh-CN: "主区域的默认放置"
-widget.layouts_category.master.inherit_fullscreen_label:
-  en: "Inherit Fullscreen"
-  ru: "Наследовать полноэкранный режим"
-  zh-CN: "继承全屏"
-widget.layouts_category.master.inherit_fullscreen_description:
-  en: "Inherit fullscreen status when cycling/swapping to another window"
-  ru: "Наследовать статус полноэкранного режима при циклическом переключении/обмене на другое окно"
-  zh-CN: "在循环/交换到另一个窗口时继承全屏状态"
 widget.layouts_category.master.slave_count_for_center_master_label:
   en: "Slave Count for Center Master"
   ru: "Количество ведомых для центра мастера"

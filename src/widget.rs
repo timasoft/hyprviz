@@ -1287,14 +1287,6 @@ impl ConfigWidget {
                 add_bool_option(
                     &container,
                     &mut options,
-                    "no_border_on_floating",
-                    &t!("widget.general_category.no_border_on_floating_label"),
-                    &t!("widget.general_category.no_border_on_floating_description"),
-                    "false",
-                );
-                add_bool_option(
-                    &container,
-                    &mut options,
                     "resize_on_border",
                     &t!("widget.general_category.resize_on_border_label"),
                     &t!("widget.general_category.resize_on_border_description"),
@@ -1411,6 +1403,14 @@ impl ConfigWidget {
                     &t!("widget.general_category.modal_parent_blocking_label"),
                     &t!("widget.general_category.modal_parent_blocking_description"),
                     "true",
+                );
+                add_string_option(
+                    &container,
+                    &mut options,
+                    "locale",
+                    &t!("widget.general_category.locale_label"),
+                    &t!("widget.general_category.locale_description"),
+                    "",
                 );
 
                 add_section(
@@ -2848,6 +2848,14 @@ impl ConfigWidget {
                     &t!("widget.group_category.groupbar.keep_upper_gap_description"),
                     "true",
                 );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "groupbar:blur",
+                    &t!("widget.group_category.groupbar.blur_label"),
+                    &t!("widget.group_category.groupbar.blur_description"),
+                    "false",
+                );
             }
             "misc" => {
                 add_section(
@@ -3066,17 +3074,17 @@ impl ConfigWidget {
                 add_dropdown_option(
                     &container,
                     &mut options,
-                    "new_window_takes_over_fullscreen",
-                    &t!("widget.misc_category.new_window_takes_over_fullscreen_label"),
-                    &t!("widget.misc_category.new_window_takes_over_fullscreen_description"),
+                    "on_focus_under_fullscreen",
+                    &t!("widget.misc_category.on_focus_under_fullscreen_label"),
+                    &t!("widget.misc_category.on_focus_under_fullscreen_description"),
                     &[
-                        &t!("widget.misc_category.new_window_takes_over_fullscreen_behind"),
-                        &t!("widget.misc_category.new_window_takes_over_fullscreen_takes_over"),
+                        &t!("widget.misc_category.on_focus_under_fullscreen_ignore_focus_request"),
+                        &t!("widget.misc_category.on_focus_under_fullscreen_takes_over"),
                         &t!(
-                            "widget.misc_category.new_window_takes_over_fullscreen_unfullscreen/unmaximize"
+                            "widget.misc_category.on_focus_under_fullscreen_unfullscreen/unmaximize"
                         ),
                     ],
-                    "0",
+                    "2",
                 );
                 add_bool_option(
                     &container,
@@ -3130,6 +3138,14 @@ impl ConfigWidget {
                     "disable_hyprland_guiutils_check",
                     &t!("widget.misc_category.disable_hyprland_guiutils_check_label"),
                     &t!("widget.misc_category.disable_hyprland_guiutils_check_description"),
+                    "false",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "disable_watchdog_warning",
+                    &t!("widget.misc_category.disable_watchdog_warning_label"),
+                    &t!("widget.misc_category.disable_watchdog_warning_description"),
                     "false",
                 );
                 add_int_option(
@@ -3485,9 +3501,10 @@ impl ConfigWidget {
                     &t!("widget.render_category.cm_sdr_eotf_label"),
                     &t!("widget.render_category.cm_sdr_eotf_description"),
                     &[
-                        &t!("widget.render_category.cm_sdr_eotf_srgb"),
+                        &t!("widget.render_category.cm_sdr_eotf_default"),
                         &t!("widget.render_category.cm_sdr_eotf_gamma22"),
                         &t!("widget.render_category.cm_sdr_eotf_gamma22force"),
+                        &t!("widget.render_category.cm_sdr_eotf_srgb"),
                     ],
                     "0",
                 );
@@ -3646,6 +3663,14 @@ impl ConfigWidget {
                 add_bool_option(
                     &container,
                     &mut options,
+                    "zoom_detached_camera",
+                    &t!("widget.cursor_category.zoom_detached_camera_label"),
+                    &t!("widget.cursor_category.zoom_detached_camera_description"),
+                    "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
                     "enable_hyprcursor",
                     &t!("widget.cursor_category.enable_hyprcursor_label"),
                     &t!("widget.cursor_category.enable_hyprcursor_description"),
@@ -3665,6 +3690,14 @@ impl ConfigWidget {
                     "hide_on_touch",
                     &t!("widget.cursor_category.hide_on_touch_label"),
                     &t!("widget.cursor_category.hide_on_touch_description"),
+                    "true",
+                );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "hide_on_tablet",
+                    &t!("widget.cursor_category.hide_on_tablet_label"),
+                    &t!("widget.cursor_category.hide_on_tablet_description"),
                     "true",
                 );
                 add_dropdown_option(
@@ -3721,22 +3754,43 @@ impl ConfigWidget {
                     "false",
                 );
             }
-            "experimental" => {
+            "quirks" => {
                 add_section(
                     &container,
-                    &t!("widget.experimental_category.experimental_settings_section_title"),
-                    &t!("widget.experimental_category.experimental_settings_section_description"),
+                    &t!("widget.quirks_category.quirks_settings_section_title"),
+                    &t!("widget.quirks_category.quirks_settings_section_description"),
                     first_section.clone(),
                 );
-                add_bool_option(
+                add_dropdown_option(
                     &container,
                     &mut options,
-                    "xx_color_management_v4",
-                    &t!("widget.experimental_category.xx_color_management_v4_label"),
-                    &t!("widget.experimental_category.xx_color_management_v4_description"),
-                    "false",
+                    "prefer_hdr",
+                    &t!("widget.quirks_category.prefer_hdr_label"),
+                    &t!("widget.quirks_category.prefer_hdr_description"),
+                    &[
+                        &t!("widget.quirks_category.prefer_hdr_off"),
+                        &t!("widget.quirks_category.prefer_hdr_always"),
+                        &t!("widget.quirks_category.prefer_hdr_gamescope_only"),
+                    ],
+                    "0",
                 );
             }
+            // "experimental" => {
+            //     add_section(
+            //         &container,
+            //         &t!("widget.experimental_category.experimental_settings_section_title"),
+            //         &t!("widget.experimental_category.experimental_settings_section_description"),
+            //         first_section.clone(),
+            //     );
+            //     add_bool_option(
+            //         &container,
+            //         &mut options,
+            //         "xx_color_management_v4",
+            //         &t!("widget.experimental_category.xx_color_management_v4_label"),
+            //         &t!("widget.experimental_category.xx_color_management_v4_description"),
+            //         "false",
+            //     );
+            // }
             "debug" => {
                 add_section(
                     &container,
@@ -4077,14 +4131,6 @@ impl ConfigWidget {
                     &t!("widget.layouts_category.master.orientation_description"),
                     &["left", "right", "top", "bottom", "center"],
                     "left",
-                );
-                add_bool_option(
-                    &container,
-                    &mut options,
-                    "master:inherit_fullscreen",
-                    &t!("widget.layouts_category.master.inherit_fullscreen_label"),
-                    &t!("widget.layouts_category.master.inherit_fullscreen_description"),
-                    "true",
                 );
                 add_int_option(
                     &container,

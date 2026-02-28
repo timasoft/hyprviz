@@ -44,6 +44,10 @@ advanced_editors.type:
   en: "Type"
   ru: "Тип"
   zh-CN: "类型"
+advanced_editors.bypass:
+  en: "Bypass"
+  ru: "Обход"
+  zh-CN: "绕过"
 advanced_editors.side:
   en: "Side"
   ru: "Сторона"
