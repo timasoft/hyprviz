@@ -1,0 +1,13 @@
+_version: 2
+hyprland.hypr_permission.keyboard:
+  en: "Keyboard"
+  ru: "Клавиатура"
+  zh-CN: "键盘"
+hyprland.hypr_permission.plugin:
+  en: "Plugin"
+  ru: "Плагин"
+  zh-CN: "插件"
+hyprland.hypr_permission.screencopy:
+  en: "Screencopy"
+  ru: "Копирование экрана"
+  zh-CN: "屏幕复制"

@@ -1,4 +1,4 @@
-use super::{Dispatcher, GestureFloating, GestureFullscreen};
+use super::{CursorZoom, Dispatcher, GestureFloating, GestureFullscreen};
 use crate::{
     gtk_converters::{
         EnumConfigForGtk, ToGtkBoxWithSeparatorAndNames, ToGtkBoxWithSeparatorAndNamesBuilder,
@@ -23,6 +23,7 @@ pub enum GestureAction {
     Close,
     Fullscreen(GestureFullscreen),
     Float(GestureFloating),
+    CursorZoom(CursorZoom),
 }
 
 impl HasDiscriminant for GestureAction {
@@ -46,6 +47,9 @@ impl HasDiscriminant for GestureAction {
                 GestureAction::Fullscreen(GestureFullscreen::Fullscreen)
             }
             GestureActionDiscriminant::Float => GestureAction::Float(GestureFloating::default()),
+            GestureActionDiscriminant::CursorZoom => {
+                GestureAction::CursorZoom(CursorZoom::default())
+            }
         }
     }
 
@@ -65,6 +69,9 @@ impl HasDiscriminant for GestureAction {
             GestureActionDiscriminant::Float => {
                 GestureAction::Float(GestureFloating::from_str(str).unwrap_or_default())
             }
+            GestureActionDiscriminant::CursorZoom => {
+                GestureAction::CursorZoom(CursorZoom::from_str(str).unwrap_or_default())
+            }
         }
     }
 
@@ -78,6 +85,7 @@ impl HasDiscriminant for GestureAction {
             GestureAction::Close => None,
             GestureAction::Fullscreen(fullscreen) => Some(fullscreen.to_string()),
             GestureAction::Float(floating) => Some(floating.to_string()),
+            GestureAction::CursorZoom(cursor_zoom) => Some(cursor_zoom.to_string()),
         }
     }
 }
@@ -111,6 +119,9 @@ impl FromStr for GestureAction {
             "float" => Ok(GestureAction::Float(
                 GestureFloating::from_str(arguments).unwrap_or_default(),
             )),
+            "cursorZoom" => Ok(GestureAction::CursorZoom(
+                CursorZoom::from_str(arguments).unwrap_or_default(),
+            )),
             _ => Err(()),
         }
     }
@@ -127,6 +138,7 @@ impl Display for GestureAction {
             GestureAction::Close => write!(f, "close"),
             GestureAction::Fullscreen(fullscreen) => write!(f, "fullscreen, {}", fullscreen),
             GestureAction::Float(floating) => write!(f, "float, {}", floating),
+            GestureAction::CursorZoom(cursor_zoom) => write!(f, "cursorZoom, {}", cursor_zoom),
         }
     }
 }
@@ -142,6 +154,7 @@ impl EnumConfigForGtk for GestureAction {
             &t!("hyprland.gesture_action.close"),
             &t!("hyprland.gesture_action.fullscreen"),
             &t!("hyprland.gesture_action.float"),
+            &t!("hyprland.gesture_action.cursor_zoom"),
         ])
     }
 
@@ -157,9 +170,15 @@ impl EnumConfigForGtk for GestureAction {
             GestureAction::Close => None,
             GestureAction::Fullscreen(_fullscreen) => Some(<(GestureFullscreen,)>::to_gtk_box),
             GestureAction::Float(_floating) => Some(<(GestureFloating,)>::to_gtk_box),
+            GestureAction::CursorZoom(_cursor_zoom) => Some(<(CursorZoom,)>::to_gtk_box),
         }
     }
 }
 
 register_togtkbox!(GestureAction);
-register_togtkbox_with_separator_names!((Dispatcher,), (GestureFullscreen,), (GestureFloating,));
+register_togtkbox_with_separator_names!(
+    (Dispatcher,),
+    (GestureFullscreen,),
+    (GestureFloating,),
+    (CursorZoom,)
+);

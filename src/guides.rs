@@ -78,6 +78,16 @@ fn get_content(name: &str) -> Vec<ContentBlock> {
             "zh-CN" => include_str!("../guides/zh-CN/Master-Layout.md"),
             _ => include_str!("../guides/en/Master-Layout.md"),
         },
+        "Scrolling-Layout" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Scrolling-Layout.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Scrolling-Layout.md"),
+            _ => include_str!("../guides/en/Scrolling-Layout.md"),
+        },
+        "Monocle-Layout" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Monocle-Layout.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Monocle-Layout.md"),
+            _ => include_str!("../guides/en/Monocle-Layout.md"),
+        },
         "Monitors" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Monitors.md"),
             "zh-CN" => include_str!("../guides/zh-CN/Monitors.md"),
@@ -117,6 +127,11 @@ fn get_content(name: &str) -> Vec<ContentBlock> {
             "ru" => include_str!("../guides/ru/Execs.md"),
             "zh-CN" => include_str!("../guides/zh-CN/Execs.md"),
             _ => include_str!("../guides/en/Execs.md"),
+        },
+        "Permissions" => match current_locale.as_str() {
+            "ru" => include_str!("../guides/ru/Permissions.md"),
+            "zh-CN" => include_str!("../guides/zh-CN/Permissions.md"),
+            _ => include_str!("../guides/en/Permissions.md"),
         },
         "Environment-variables" => match current_locale.as_str() {
             "ru" => include_str!("../guides/ru/Environment-variables.md"),

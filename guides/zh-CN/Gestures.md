@@ -51,13 +51,14 @@ gesture = 3, left, scale: 1.5, float
 | `action` | 描述 | 参数 |
 | -- | -- | -- |
 | `dispatcher` | 最 基本，执行 一个 调度 器 一旦 手势 结束 | `dispatcher, params` |
-| `workspace` | 工作 区 滑动 手势，用于 切换 工作 区 | |
+| `workspace` | 工作 区 滑动 手势，用于 切换 工作 区 | 无 |
 | `move` | 移动 活动 窗口 | 无 |
 | `resize` | 调整 活动 窗口 大小 | 无 |
 | `special` | 切换 一个 特殊 工作 区 | 特殊 工作 区 名称 不含 `special:` 前缀，例如 `mySpecialWorkspace` |
 | `close` | 关闭 活动 窗口 | 无 |
 | `fullscreen` | 将 活动 窗口 全屏 | 无 表示 全屏，`maximize` 表示 最大化 |
 | `float` | 将 活动 窗口 浮动 | 无 表示 切换，`float` 或 `tile` 表示 单向 操作 |
+| `cursorZoom` | 缩放 到 光标 | 缩放 因子，默认 切换，添加 `mult` 以 使用 乘数 代替 |
 
 ### 标志
 

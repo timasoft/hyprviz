@@ -1,0 +1,9 @@
+_version: 2
+hyprland.cursor_zoom.toggle:
+  en: "Toggle"
+  ru: "Переключение"
+  zh-CN: "切换"
+hyprland.cursor_zoom.mult:
+  en: "Mult"
+  ru: "Множитель"
+  zh-CN: "倍数"

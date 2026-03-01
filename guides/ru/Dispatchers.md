@@ -62,7 +62,6 @@ title: Диспетчеры
 | tagwindow | применяет тег к текущему или первому подходящему окну | `tag [window]`, например `+code ^(foot)$`, `music` |
 | focuswindow | фокусируется на первом подходящем окне | window |
 | focusmonitor | фокусируется на мониторе | monitor |
-| splitratio | изменяет соотношение разделения | floatvalue |
 | movecursortocorner | перемещает курсор в угол активного окна | direction, 0–3: нижний левый — 0, нижний правый — 1, верхний правый — 2, верхний левый — 3 |
 | movecursor | перемещает курсор в указанную позицию | `x y` |
 | renameworkspace | переименовывает рабочее пространство | `id имя`, например `2 work` |
@@ -211,6 +210,10 @@ address:0x13371337 immediate unset
 address:0x13371337 border_size relative -2
 address:0x13371337 rounding_power relative 0.1
 ```
+
+Некоторые свойства расширяются из своих родительских правил окон, которые принимают несколько аргументов:
+- `border_color` -> `active_border_color`, `inactive_border_color`
+- `opacity` -> `opacity`, `opacity_inactive`, `opacity_fullscreen`, `opacity_override`, `opacity_inactive_override`, `opacity_fullscreen_override`
 
 ### Fullscreenstate
 

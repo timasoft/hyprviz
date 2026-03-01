@@ -1,4 +1,4 @@
-use super::Orientation;
+use super::{Direction, HyprLayout, Orientation};
 use crate::utils::{parse_bool, parse_int};
 use std::{fmt::Display, str::FromStr};
 
@@ -16,7 +16,9 @@ pub struct WorkspaceRules {
     pub persistent: Option<bool>,
     pub on_created_empty: Option<String>,
     pub default_name: Option<String>,
+    pub layout: Option<HyprLayout>,
     pub layoutopt_orientation: Option<Orientation>,
+    pub layoutopt_direction: Option<Direction>,
 }
 
 impl Display for WorkspaceRules {
@@ -59,8 +61,14 @@ impl Display for WorkspaceRules {
         if let Some(default_name) = &self.default_name {
             rules.push(format!("defaultName:{}", default_name));
         }
+        if let Some(layout) = &self.layout {
+            rules.push(format!("layout:{}", layout));
+        }
         if let Some(layoutopt_orientation) = &self.layoutopt_orientation {
             rules.push(format!("layoutopt:orientation:{}", layoutopt_orientation));
+        }
+        if let Some(layoutopt_direction) = &self.layoutopt_direction {
+            rules.push(format!("layoutopt:direction:{}", layoutopt_direction));
         }
 
         write!(f, "{}", rules.join(", "))
@@ -70,10 +78,10 @@ impl Display for WorkspaceRules {
 pub fn parse_workspace_rule(input: &str, rules: &mut WorkspaceRules) {
     let input = match input.strip_prefix("layoutopt:") {
         Some(value) => value,
-        None => return,
+        None => input,
     };
-    let parts: Vec<&str> = input.splitn(2, ':').collect();
-    if parts.len() != 2 {
+    let parts: Vec<&str> = input.split(':').collect();
+    if parts.len() < 2 {
         return;
     }
 
@@ -92,10 +100,14 @@ pub fn parse_workspace_rule(input: &str, rules: &mut WorkspaceRules) {
         "decorate" => rules.decorate = parse_bool(rule_value),
         "persistent" => rules.persistent = parse_bool(rule_value),
         "on-created-empty" => rules.on_created_empty = Some(rule_value.to_string()),
+        "layout" => rules.layout = Some(HyprLayout::from_str(rule_value).unwrap_or_default()),
         "defaultName" => rules.default_name = Some(rule_value.to_string()),
         "orientation" => {
             rules.layoutopt_orientation =
-                Some(Orientation::from_str(rule_value).expect("Invalid orientation"))
+                Some(Orientation::from_str(rule_value).unwrap_or_default())
+        }
+        "direction" => {
+            rules.layoutopt_direction = Some(Direction::from_str(rule_value).unwrap_or_default())
         }
         _ => {}
     }

@@ -1,0 +1,13 @@
+_version: 2
+hyprland.permission.mode:
+  en: "Mode"
+  ru: "Режим"
+  zh-CN: "模式"
+hyprland.permission.permission:
+  en: "Permission"
+  ru: "Разрешение"
+  zh-CN: "权限"
+hyprland.permission.regex:
+  en: "Regex"
+  ru: "Регулярное выражение"
+  zh-CN: "正则表达式"

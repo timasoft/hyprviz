@@ -1,7 +1,7 @@
 > [!NOTE]
 > 翻译自英文版，使用 Qwen3.5-Plus
 
-## Layer 规则
+## 层 规则
 
 有些 元素 在 Wayland 中 不是 窗口，但 是 层。那 包括，例如：
 应用程序 启动器、状态 栏 或 壁纸。
@@ -29,3 +29,14 @@
 | order | [n] | 设置 相对 于 其他 层 的 顺序。较高 的 `n` 值 表示 更 靠近 显示器 边缘。可以 为 负数。如果 未 指定，则 `n = 0`。 |
 | above_lock | [0/1/2] | 如果 非零，当 会话 锁定 时，将 该 层 渲染 在 锁屏 上方。如果 设置 为 `2`，您 可以 在 锁屏 上 与 该 层 交互，否则 它 只会 渲染 在 锁屏 上方。 |
 | no_screen_share | [on] | 通过 在 其 上方 绘制 黑色 矩形 来 使 该 层 在 屏幕 共享 中 隐藏。 |
+
+### 示例
+```
+layerrule = blur on, match:namespace waybar
+
+layerrule {
+  name = no_anim_for_selection
+  no_anim = on
+  match:namespace = selection
+}
+```
