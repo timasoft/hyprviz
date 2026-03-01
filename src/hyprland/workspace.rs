@@ -26,7 +26,9 @@ impl Display for Workspace {
             || rules.persistent.is_some()
             || rules.on_created_empty.is_some()
             || rules.default_name.is_some()
+            || rules.layout.is_some()
             || rules.layoutopt_orientation.is_some()
+            || rules.layoutopt_direction.is_some()
         {
             write!(f, "{}, {}", workspace_type, rules)
         } else {

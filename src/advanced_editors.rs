@@ -2,11 +2,11 @@ use crate::{
     gtk_converters::{FieldLabel, ToGtkBox, ToGtkBoxWithSeparator, ToGtkBoxWithSeparatorAndNames},
     hyprland::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
-        BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleEffectOrProp,
-        Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Permission, Position, Scale,
-        Side, UnbindRight, WindowRuleEffectOrProp, Workspace, WorkspaceSelector, WorkspaceType,
-        animation::parse_animation, bezier_curve::parse_bezier, bind_right::parse_bind_right,
-        monitor::parse_monitor, workspace::parse_workspace,
+        BindFlagsEnum, BindLeft, Cm, Direction, Dispatcher, ExecWithRules, Gesture, HyprLayout,
+        LayerRuleEffectOrProp, Modifier, Monitor, MonitorSelector, MonitorState, Orientation,
+        Permission, Position, Scale, Side, UnbindRight, WindowRuleEffectOrProp, Workspace,
+        WorkspaceSelector, WorkspaceType, animation::parse_animation, bezier_curve::parse_bezier,
+        bind_right::parse_bind_right, monitor::parse_monitor, workspace::parse_workspace,
     },
     utils::{
         MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, after_second_comma,
@@ -2612,6 +2612,49 @@ fn fill_fancy_value_entry(
 
             let is_updating_clone = is_updating.clone();
             let value_entry_clone = value_entry.clone();
+            let workspace_selector_type_dropdown_clone = workspace_selector_type_dropdown.clone();
+            workspace_selector_name_entry.connect_changed(move |entry| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+                let value = value_entry_clone.text().to_string();
+                let mut workspace = parse_workspace(&value);
+                let current_type = workspace_selector_type_dropdown_clone.selected();
+
+                workspace.workspace_type = match current_type {
+                    0 => WorkspaceType::Named(entry.text().to_string()),
+                    1 => WorkspaceType::Special(entry.text().to_string()),
+                    _ => workspace.workspace_type,
+                };
+
+                value_entry_clone.set_text(&workspace.to_string());
+                is_updating_clone.set(false);
+            });
+
+            let is_updating_clone = is_updating.clone();
+            let value_entry_clone = value_entry.clone();
+            let workspace_selector_type_dropdown_clone = workspace_selector_type_dropdown.clone();
+            workspace_selector_number_spin.connect_value_changed(move |spin| {
+                if is_updating_clone.get() {
+                    return;
+                }
+                is_updating_clone.set(true);
+                let value = value_entry_clone.text().to_string();
+                let mut workspace = parse_workspace(&value);
+                let current_type = workspace_selector_type_dropdown_clone.selected();
+
+                workspace.workspace_type = match current_type {
+                    2 => WorkspaceType::Numbered(spin.value() as u32),
+                    _ => workspace.workspace_type,
+                };
+
+                value_entry_clone.set_text(&workspace.to_string());
+                is_updating_clone.set(false);
+            });
+
+            let is_updating_clone = is_updating.clone();
+            let value_entry_clone = value_entry.clone();
             selectors_entry.connect_changed(move |entry| {
                 if is_updating_clone.get() {
                     return;
@@ -2767,6 +2810,17 @@ fn fill_fancy_value_entry(
             default_name_box.append(&default_name_entry);
             workspace_rules_box.append(&default_name_box);
 
+            let layout_box = Box::new(GtkOrientation::Horizontal, 5);
+            layout_box.append(&Label::new(Some(&t!("advanced_editors.layout"))));
+            let layout_onoff_switch = create_switch();
+            layout_box.append(&layout_onoff_switch);
+            let orientation_string_list =
+                StringList::new(&["Dwindle", "Master", "Scrolling", "Monocle"]);
+            let layout_dropdown = create_dropdown(&orientation_string_list);
+            layout_dropdown.set_visible(false);
+            layout_box.append(&layout_dropdown);
+            workspace_rules_box.append(&layout_box);
+
             let layoutopt_orientation_box = Box::new(GtkOrientation::Horizontal, 5);
             layoutopt_orientation_box.append(&Label::new(Some(&t!(
                 "advanced_editors.layoutopt_orientation"
@@ -2784,6 +2838,23 @@ fn fill_fancy_value_entry(
             layoutopt_orientation_dropdown.set_visible(false);
             layoutopt_orientation_box.append(&layoutopt_orientation_dropdown);
             workspace_rules_box.append(&layoutopt_orientation_box);
+
+            let layoutopt_direction_box = Box::new(GtkOrientation::Horizontal, 5);
+            layoutopt_direction_box.append(&Label::new(Some(&t!(
+                "advanced_editors.layoutopt_direction"
+            ))));
+            let layoutopt_direction_onoff_switch = create_switch();
+            layoutopt_direction_box.append(&layoutopt_direction_onoff_switch);
+            let direction_string_list = StringList::new(&[
+                &t!("advanced_editors.left"),
+                &t!("advanced_editors.right"),
+                &t!("advanced_editors.up"),
+                &t!("advanced_editors.down"),
+            ]);
+            let layoutopt_direction_dropdown = create_dropdown(&direction_string_list);
+            layoutopt_direction_dropdown.set_visible(false);
+            layoutopt_direction_box.append(&layoutopt_direction_dropdown);
+            workspace_rules_box.append(&layoutopt_direction_box);
 
             let is_updating = Rc::new(Cell::new(false));
 
@@ -3079,6 +3150,35 @@ fn fill_fancy_value_entry(
             optional_widget_connector!(
                 is_updating,
                 value_entry,
+                layout_onoff_switch,
+                layout_dropdown,
+                connect_selected_notify,
+                dropdown,
+                match dropdown.selected() {
+                    0 => HyprLayout::Dwindle,
+                    1 => HyprLayout::Master,
+                    2 => HyprLayout::Scrolling,
+                    3 => HyprLayout::Monocle,
+                    _ => HyprLayout::Dwindle,
+                },
+                parse_workspace,
+                |mut workspace: Workspace, layout_onoff: bool, layout_value: HyprLayout| {
+                    if layout_onoff {
+                        workspace.rules.layout = Some(layout_value);
+                    } else {
+                        workspace.rules.layout = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, layout_value: HyprLayout| {
+                    workspace.rules.layout = Some(layout_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
                 layoutopt_orientation_onoff_switch,
                 layoutopt_orientation_dropdown,
                 connect_selected_notify,
@@ -3103,6 +3203,37 @@ fn fill_fancy_value_entry(
                 },
                 |mut workspace: Workspace, layoutopt_orientation_value: Orientation| {
                     workspace.rules.layoutopt_orientation = Some(layoutopt_orientation_value);
+                    workspace.to_string()
+                }
+            );
+
+            optional_widget_connector!(
+                is_updating,
+                value_entry,
+                layoutopt_direction_onoff_switch,
+                layoutopt_direction_dropdown,
+                connect_selected_notify,
+                dropdown,
+                match dropdown.selected() {
+                    0 => Direction::Left,
+                    1 => Direction::Right,
+                    2 => Direction::Up,
+                    3 => Direction::Down,
+                    _ => Direction::Left,
+                },
+                parse_workspace,
+                |mut workspace: Workspace,
+                 layoutopt_direction_onoff: bool,
+                 layoutopt_direction_value: Direction| {
+                    if layoutopt_direction_onoff {
+                        workspace.rules.layoutopt_direction = Some(layoutopt_direction_value);
+                    } else {
+                        workspace.rules.layoutopt_direction = None;
+                    }
+                    workspace.to_string()
+                },
+                |mut workspace: Workspace, layoutopt_direction_value: Direction| {
+                    workspace.rules.layoutopt_direction = Some(layoutopt_direction_value);
                     workspace.to_string()
                 }
             );
@@ -3231,6 +3362,21 @@ fn fill_fancy_value_entry(
                     default_name_entry.set_visible(false);
                 }
 
+                if let Some(layout) = &workspace.rules.layout {
+                    layout_onoff_switch.set_active(true);
+                    layout_dropdown.set_visible(true);
+                    let index = match layout {
+                        HyprLayout::Dwindle => 0,
+                        HyprLayout::Master => 1,
+                        HyprLayout::Scrolling => 2,
+                        HyprLayout::Monocle => 3,
+                    };
+                    layout_dropdown.set_selected(index);
+                } else {
+                    layout_onoff_switch.set_active(false);
+                    layout_dropdown.set_visible(false);
+                }
+
                 if let Some(layoutopt_orientation) = &workspace.rules.layoutopt_orientation {
                     layoutopt_orientation_onoff_switch.set_active(true);
                     layoutopt_orientation_dropdown.set_visible(true);
@@ -3245,6 +3391,21 @@ fn fill_fancy_value_entry(
                 } else {
                     layoutopt_orientation_onoff_switch.set_active(false);
                     layoutopt_orientation_dropdown.set_visible(false);
+                }
+
+                if let Some(layoutopt_direction) = &workspace.rules.layoutopt_direction {
+                    layoutopt_direction_onoff_switch.set_active(true);
+                    layoutopt_direction_dropdown.set_visible(true);
+                    let index = match layoutopt_direction {
+                        Direction::Left => 0,
+                        Direction::Right => 1,
+                        Direction::Up => 2,
+                        Direction::Down => 3,
+                    };
+                    layoutopt_direction_dropdown.set_selected(index);
+                } else {
+                    layoutopt_direction_onoff_switch.set_active(false);
+                    layoutopt_direction_dropdown.set_visible(false);
                 }
 
                 is_updating.set(false);

@@ -116,6 +116,14 @@ advanced_editors.right:
   en: "Right"
   ru: "Справа"
   zh-CN: "右边"
+advanced_editors.up:
+  en: "Up"
+  ru: "Сверху"
+  zh-CN: "上边"
+advanced_editors.down:
+  en: "Down"
+  ru: "Снизу"
+  zh-CN: "下边"
 
 advanced_editors.normal:
   en: "Normal"
@@ -197,10 +205,18 @@ advanced_editors.default_workspace_name:
   en: "Default Workspace Name"
   ru: "Имя рабочего пространства по умолчанию"
   zh-CN: "默认工作区名称"
+advanced_editors.layout:
+  en: "Layout"
+  ru: "Лейаут"
+  zh-CN: "布局"
 advanced_editors.layoutopt_orientation:
   en: "Layoutopt Orientation"
   ru: "Ориентация в мастер-лейауте"
-  zh-CN: "布局选项方向"
+  zh-CN: "主布局方向"
+advanced_editors.layoutopt_direction:
+  en: "Layoutopt Direction"
+  ru: "Направление в лайауте Scrolling"
+  zh-CN: "滚动布局方向"
 advanced_editors.onoff:
   en: "On/Off"
   ru: "Вкл./Выкл."
