@@ -219,7 +219,7 @@ where
                 dropdown_clone.set_selected(variant_index as u32);
             }
 
-            if let Some(_separator) = T::SEPARATOR {
+            if let Some(separator) = T::SEPARATOR {
                 if let Some((builder, labels, custom_split)) =
                     variant_builders_clone.get(variant_index)
                 {
@@ -228,7 +228,7 @@ where
                         if let Some(builder_fn) = builder {
                             let param_entry = variant_entries_clone.get(variant_index).unwrap();
                             let variant_box =
-                                builder_fn(param_entry, _separator, labels, *custom_split);
+                                builder_fn(param_entry, separator, labels, *custom_split);
                             if let Some(old_child) =
                                 stack_clone.child_by_name(&format!("v{}", variant_index))
                             {
