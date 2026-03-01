@@ -135,7 +135,7 @@ Dynamic effects are re-evaluated every time a property changes.
 
 | Effect | argument | Description |
 | ---- | ----------- | --- |
-| persistent_size | \[on\] | Allows size persistence between application launches for floating windows. |
+| persistent_size | \[on\] | For floating windows, internally store their size. When a new floating window opens with the same class and title, restore the saved size. |
 | no_max_size | \[on\] | Removes max size limitations. Especially useful with windows that report invalid max sizes (e.g. winecfg). |
 | stay_focused | \[on\] | Forces focus on the window as long as it's visible. |
 | animation | \[style\] (\[opt\]) | Forces an animation onto a window, with a selected opt. Opt is optional. |
@@ -283,6 +283,10 @@ windowrule = opacity 0.8 0.8, match:class kitty
 
 Here, all kitty windows will have `opacity 0.8`, even if they are floating.
 The rest of the floating windows will have `opacity 0.5`.
+
+> [!IMPORTANT]
+> Named rules take precedence over anonymous ones. That is, rules are evaluated top
+> to bottom, but all named rules get evaluated first, then all anonymous ones.
 
 > [!NOTE]
 > Opacity is a PRODUCT of all opacities by default. For example, setting
