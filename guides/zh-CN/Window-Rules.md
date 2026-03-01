@@ -71,6 +71,7 @@ _所有_ props 必须全部匹配才能应用规则。
 > 要获取有关窗口的 class、title、XWayland 状态或其
 > 大小的更多信息，您可以使用 `hyprctl clients`。
 
+
 > [!NOTE]
 > 在 `hyprctl clients` 命令的输出中：
 > `fullscreen` 指的是 `fullscreen_state_internal` 和
@@ -136,7 +137,7 @@ Dynamic effects 在每次属性更改时重新评估。
 
 | Effect | argument | Description |
 | ---- | ----------- | --- |
-| persistent_size | \[on\] | 允许浮动窗口在应用程序启动之间保持大小。 |
+| persistent_size | \[on\] | 对于浮动窗口，内部存储其大小。当具有相同 class 和 title 的新浮动窗口打开时，恢复保存的大小。 |
 | no_max_size | \[on\] | 移除最大大小限制。对于报告无效最大大小的窗口特别有用（例如 winecfg）。 |
 | stay_focused | \[on\] | 只要窗口可见，就强制聚焦在该窗口上。 |
 | animation | \[style\] (\[opt\]) | 强制将动画应用于窗口，使用选定的 opt。Opt 是可选的。 |
@@ -154,7 +155,7 @@ Dynamic effects 在每次属性更改时重新评估。
 | decorate | \[on\] | (默认是 _true_) 是否绘制窗口装饰 |
 | focus_on_activate | \[on\] | Hyprland 是否应聚焦请求聚焦的应用程序（`activate` 请求）。 |
 | keep_aspect_ratio | \[on\] | 用鼠标调整窗口大小时强制保持宽高比。 |
-| nearest_neighbor | \[on\] | 强制窗口使用 [最近邻](https://zh.wikipedia.org/wiki/%E6%9C%80%E8%BF%91%E9%82%BB%E6%8F%92%E5%80%BC) 过滤。 |
+| nearest_neighbor | \[on\] | 强制窗口使用 [最近邻](https://zh.wikipedia.org/wiki/%E5%9B%BE%E5%83%8F%E7%BC%A9%E6%94%BE#%E6%9C%80%E8%BF%91%E9%82%BB%E6%8F%92%E5%80%BC) 过滤。 |
 | no_anim | \[on\] | 禁用窗口的动画。 |
 | no_blur | \[on\] |  禁用窗口的模糊效果。 |
 | no_dim | \[on\] |  禁用窗口变暗。 |
@@ -263,6 +264,7 @@ windowrule = match:class (pinentry-)(.*), stay_focused on                       
 例如，如果定义了一个规则，在窗口浮动时更改其 `border_color`，则当设置为浮动时，`border_color` 将更改为请求的颜色，当再次平铺时恢复为默认颜色。
 
 Effects 将从上到下处理，_最后一个_ 匹配将优先。即：
+
 ```ini
 windowrule = opacity 0.8 0.8, match:class kitty
 windowrule = opacity 0.5 0.5, match:float yes
@@ -271,6 +273,7 @@ windowrule = opacity 0.5 0.5, match:float yes
 在这里，所有非全屏的 kitty 窗口将具有 `opacity 0.8`，除非
 它们是浮动的。否则，它们将具有 `opacity 0.5`。其余
 非全屏浮动窗口将具有 `opacity 0.5`。
+
 ```ini
 windowrule = opacity 0.5 0.5, match:float true
 windowrule = opacity 0.8 0.8, match:class kitty
@@ -278,6 +281,9 @@ windowrule = opacity 0.8 0.8, match:class kitty
 
 在这里，所有 kitty 窗口将具有 `opacity 0.8`，即使它们是浮动的。
 其余浮动窗口将具有 `opacity 0.5`。
+
+> [!IMPORTANT]
+> 命名规则优先于匿名规则。也就是说，规则从上到下评估，但所有命名规则先评估，然后是所有匿名规则。
 
 > [!NOTE]
 > 默认情况下，不透明度是所有不透明度的乘积。例如，设置
