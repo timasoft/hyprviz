@@ -947,6 +947,7 @@ fn escape_pango(text: &str) -> String {
     text.replace('&', "&amp;")
         .replace("<br> ", "\n")
         .replace("<br>", "\n")
+        .replace("<br/>", "\n")
         .replace(">>", ">&gt;")
         .replace("<<", "&lt;<")
         // HARDCODED PATTERNS
