@@ -239,10 +239,6 @@ hyprland.dispatcher.signal_window:
   en: "Signal window"
   ru: "Сигнал окну"
   zh-CN: "向窗口发送信号"
-hyprland.dispatcher.split_ratio:
-  en: "Split ratio"
-  ru: "Соотношение разделения"
-  zh-CN: "分割比例"
 hyprland.dispatcher.swap_active_workspaces:
   en: "Swap active workspaces"
   ru: "Поменять местами активные рабочие пространства"
