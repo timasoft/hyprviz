@@ -31,3 +31,7 @@ hyprland.gesture_action.workspace:
   en: "Workspace"
   ru: "Рабочее пространство"
   zh-CN: "工作区"
+hyprland.gesture_action.cursor_zoom:
+  en: "Cursor Zoom"
+  ru: "Зум курсора"
+  zh-CN: "光标缩放"
