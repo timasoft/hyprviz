@@ -1055,8 +1055,8 @@ impl Display for Dispatcher {
                 state,
                 window_target,
             ),
-            Dispatcher::KillActive => write!(f, "killactive"),
-            Dispatcher::ForceKillActive => write!(f, "forcekillactive"),
+            Dispatcher::KillActive => write!(f, "killactive,"),
+            Dispatcher::ForceKillActive => write!(f, "forcekillactive,"),
             Dispatcher::CloseWindow(window_target) => {
                 write!(f, "killwindow, {}", window_target)
             }
@@ -1080,15 +1080,15 @@ impl Display for Dispatcher {
             Dispatcher::MoveToWorkspaceSilent(workspace_target, Some(window_target)) => {
                 write!(f, "movetoworkspace, {} {}", workspace_target, window_target,)
             }
-            Dispatcher::ToggleFloating(None) => write!(f, "togglefloating"),
+            Dispatcher::ToggleFloating(None) => write!(f, "togglefloating,"),
             Dispatcher::ToggleFloating(Some(window_target)) => {
                 write!(f, "togglefloating, {}", window_target,)
             }
-            Dispatcher::SetFloating(None) => write!(f, "setfloating"),
+            Dispatcher::SetFloating(None) => write!(f, "setfloating,"),
             Dispatcher::SetFloating(Some(window_target)) => {
                 write!(f, "setfloating, {}", window_target)
             }
-            Dispatcher::SetTiled(None) => write!(f, "settiled"),
+            Dispatcher::SetTiled(None) => write!(f, "settiled,"),
             Dispatcher::SetTiled(Some(window_target)) => write!(f, "settiled, {}", window_target),
             Dispatcher::Fullscreen(mode, action) => write!(f, "fullscreen, {} {}", mode, action),
             Dispatcher::FullscreenState(internal, client, action) => {
@@ -1103,12 +1103,12 @@ impl Display for Dispatcher {
             Dispatcher::ForceIdle(float) => {
                 write!(f, "forceidle, {}", float.abs())
             }
-            Dispatcher::Pin(None) => write!(f, "pin"),
+            Dispatcher::Pin(None) => write!(f, "pin,"),
             Dispatcher::Pin(Some(window_target)) => write!(f, "pin, {}", window_target),
             Dispatcher::MoveFocus(direction) => write!(f, "movefocus, {}", direction),
             Dispatcher::MoveWindow(move_direction) => write!(f, "movewindow, {}", move_direction),
             Dispatcher::SwapWindow(swap_direction) => write!(f, "swapwindow, {}", swap_direction),
-            Dispatcher::CenterWindow(false) => write!(f, "centerwindow"),
+            Dispatcher::CenterWindow(false) => write!(f, "centerwindow,"),
             Dispatcher::CenterWindow(true) => write!(f, "centerwindow, 1"),
             Dispatcher::ResizeActive(resize_params) => write!(f, "resizeactive, {}", resize_params),
             Dispatcher::MoveActive(resize_params) => write!(f, "moveactive, {}", resize_params),
@@ -1148,8 +1148,8 @@ impl Display for Dispatcher {
             }
             Dispatcher::MoveCursor(x, y) => write!(f, "movecursor, {} {}", x, y),
             Dispatcher::RenameWorkspace(id, name) => write!(f, "renameworkspace, {} {}", id, name),
-            Dispatcher::Exit => write!(f, "exit"),
-            Dispatcher::ForceRendererReload => write!(f, "forcerendererreload"),
+            Dispatcher::Exit => write!(f, "exit,"),
+            Dispatcher::ForceRendererReload => write!(f, "forcerendererreload,"),
             Dispatcher::MoveCurrentWorkspaceToMonitor(monitor_target) => {
                 write!(f, "movecurrentworkspacetomonitor, {}", monitor_target)
             }
@@ -1170,23 +1170,23 @@ impl Display for Dispatcher {
                     first_monitor, second_monitor
                 )
             }
-            Dispatcher::BringActiveToTop => write!(f, "bringactivetotop"),
+            Dispatcher::BringActiveToTop => write!(f, "bringactivetotop,"),
             Dispatcher::AlterZOrder(zheight, None) => {
                 write!(f, "alterzorder, {}", zheight)
             }
             Dispatcher::AlterZOrder(zheight, Some(window_target)) => {
                 write!(f, "alterzorder, {} {}", zheight, window_target)
             }
-            Dispatcher::ToggleSpecialWorkspace(None) => write!(f, "togglespecialworkspace"),
+            Dispatcher::ToggleSpecialWorkspace(None) => write!(f, "togglespecialworkspace,"),
             Dispatcher::ToggleSpecialWorkspace(Some(name)) => {
                 write!(f, "togglespecialworkspace, {}", name)
             }
-            Dispatcher::FocusUrgentOrLast => write!(f, "focusurgentorlast"),
-            Dispatcher::ToggleGroup => write!(f, "togglegroup"),
+            Dispatcher::FocusUrgentOrLast => write!(f, "focusurgentorlast,"),
+            Dispatcher::ToggleGroup => write!(f, "togglegroup,"),
             Dispatcher::ChangeGroupActive(change_group_active) => {
                 write!(f, "changegroupactive, {}", change_group_active)
             }
-            Dispatcher::FocusCurrentOrLast => write!(f, "focuscurrentorlast"),
+            Dispatcher::FocusCurrentOrLast => write!(f, "focuscurrentorlast,"),
             Dispatcher::LockGroups(group_lock_action) => {
                 write!(f, "lockgroups, {}", group_lock_action)
             }
@@ -1197,7 +1197,7 @@ impl Display for Dispatcher {
                 write!(f, "moveintogroup, {}", direction)
             }
             Dispatcher::MoveOutOfGroup(None) => {
-                write!(f, "moveoutofgroup")
+                write!(f, "moveoutofgroup,")
             }
             Dispatcher::MoveOutOfGroup(Some(window_target)) => {
                 write!(f, "moveoutofgroup, {}", window_target)
@@ -1222,7 +1222,7 @@ impl Display for Dispatcher {
             Dispatcher::SetProp(target, dynamic_effect) => {
                 write!(f, "setprop, {} {}", target, dynamic_effect)
             }
-            Dispatcher::ToggleSwallow => write!(f, "toggleswallow"),
+            Dispatcher::ToggleSwallow => write!(f, "toggleswallow,"),
         }
     }
 }
