@@ -3,8 +3,8 @@ use crate::{
     hyprland::{
         Animation, AnimationName, AnimationStyle, BezierCurve as HyprBezierCurve, BindFlags,
         BindFlagsEnum, BindLeft, Cm, Dispatcher, ExecWithRules, Gesture, LayerRuleEffectOrProp,
-        Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Position, Scale, Side,
-        UnbindRight, WindowRuleEffectOrProp, Workspace, WorkspaceSelector, WorkspaceType,
+        Modifier, Monitor, MonitorSelector, MonitorState, Orientation, Permission, Position, Scale,
+        Side, UnbindRight, WindowRuleEffectOrProp, Workspace, WorkspaceSelector, WorkspaceType,
         animation::parse_animation, bezier_curve::parse_bezier, bind_right::parse_bind_right,
         monitor::parse_monitor, workspace::parse_workspace,
     },
@@ -805,6 +805,16 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                 }
             });
             fancy_name_entry.append(&dropdown);
+        }
+        "permission" => {
+            let label = Label::new(Some("permission"));
+            label.set_width_request(100);
+            label.set_selectable(true);
+            fancy_name_entry.append(&label);
+            name_entry.set_text("permission");
+            name_entry.connect_changed(move |entry| {
+                label.set_text(&entry.text());
+            });
         }
         "env" => {
             let env_content_box = Box::new(GtkOrientation::Horizontal, 5);
@@ -4060,6 +4070,10 @@ fn fill_fancy_value_entry(
                 fancy_value_entry.append(&exec_box);
             }
         },
+        "permission" => {
+            let permission_box = Permission::to_gtk_box(value_entry);
+            fancy_value_entry.append(&permission_box);
+        }
         "env" => {
             let env_box = <(String, String)>::to_gtk_box(
                 value_entry,

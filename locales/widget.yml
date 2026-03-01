@@ -3452,6 +3452,15 @@ widget.exec_category.execs_section_description:
   ru: "Настройка выполнений."
   zh-CN: "配置执行。"
 
+widget.permission_category.permissions_section_title:
+  en: "Permissions"
+  ru: "Разрешения"
+  zh-CN: "权限"
+widget.permission_category.permissions_section_description:
+  en: "Configure permissions."
+  ru: "Настройка разрешений."
+  zh-CN: "配置权限。"
+
 widget.env_category.envs_section_title:
   en: "Envs"
   ru: "Переменные окружения"

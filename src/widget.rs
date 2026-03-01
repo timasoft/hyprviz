@@ -4768,6 +4768,15 @@ impl ConfigWidget {
                         );
                         add_guide(&container, "Execs", false);
                     }
+                    "permission" => {
+                        add_section(
+                            &container,
+                            &t!("widget.permission_category.permissions_section_title"),
+                            &t!("widget.permission_category.permissions_section_description"),
+                            first_section.clone(),
+                        );
+                        add_guide(&container, "Permissions", true);
+                    }
                     "env" => {
                         add_section(
                             &container,

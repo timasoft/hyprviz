@@ -1050,6 +1050,7 @@ along with this program; if not, see
             (t!("gui.window_rules").to_string(), "windowrule"),
             (t!("gui.layer_rules").to_string(), "layerrule"),
             (t!("gui.execs").to_string(), "exec"),
+            (t!("gui.permissions").to_string(), "permission"),
             (t!("gui.envs").to_string(), "env"),
             (t!("gui.all_top_level").to_string(), "top_level"),
             (t!("gui.system_info").to_string(), "systeminfo"),

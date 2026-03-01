@@ -371,6 +371,10 @@ gui.execs:
   en: "Execs"
   ru: "Команды"
   zh-CN: "执行命令"
+gui.permissions:
+  en: "Permissions"
+  ru: "Разрешения"
+  zh-CN: "权限"
 gui.envs:
   en: "Envs"
   ru: "Переменные окружения"

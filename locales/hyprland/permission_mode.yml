@@ -1,0 +1,13 @@
+_version: 2
+hyprland.permission_mode.allow:
+  en: "Allow"
+  ru: "Разрешить"
+  zh-CN: "允许"
+hyprland.permission_mode.ask:
+  en: "Ask"
+  ru: "Спрашивать"
+  zh-CN: "询问"
+hyprland.permission_mode.deny:
+  en: "Deny"
+  ru: "Запретить"
+  zh-CN: "拒绝"
