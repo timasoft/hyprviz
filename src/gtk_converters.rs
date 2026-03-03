@@ -5,8 +5,8 @@ use crate::{
     utils::HasDiscriminant,
 };
 use gtk::{
-    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, Stack, StringList, StringObject,
-    prelude::*,
+    Box as GtkBox, Entry, Label, Orientation as GtkOrientation, PolicyType, ScrolledWindow, Stack,
+    StringList, StringObject, prelude::*,
 };
 use rust_i18n::t;
 use std::{
@@ -370,22 +370,55 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
         let join_separator = separator.to_string();
+        let min_width = {
+            let temp_sub_entry = create_entry();
+            let temp_sub_box = T::to_gtk_box(&temp_sub_entry);
+            let temp_item_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+            let temp_remove_button = create_button(&t!("gtk_converters.remove"));
+            temp_item_box.append(&temp_remove_button);
+            temp_item_box.append(&temp_sub_box);
+
+            let (min_width, _natural, _min_baseline, _natural_baseline) =
+                temp_item_box.measure(GtkOrientation::Horizontal, -1);
+
+            min_width
+        };
 
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         let add_button = create_button(&t!("gtk_converters.add"));
 
-        let mother_box_clone = mother_box.clone();
-        let add_button_clone = add_button.clone();
+        let items_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let scrolled_window = ScrolledWindow::new();
+        scrolled_window.set_hscrollbar_policy(PolicyType::Automatic);
+        scrolled_window.set_vscrollbar_policy(PolicyType::Never);
+        scrolled_window.set_child(Some(&items_box));
+
+        let frame = gtk::Frame::new(None);
+        scrolled_window.set_margin_start(5);
+        scrolled_window.set_margin_end(5);
+        scrolled_window.set_margin_top(5);
+        scrolled_window.set_margin_bottom(5);
+        frame.set_child(Some(&scrolled_window));
+
+        mother_box.append(&frame);
+        mother_box.append(&add_button);
+
         let entry_clone = entry.clone();
         let is_updating_clone = is_updating.clone();
         let join_separator_clone = join_separator.clone();
+        let items_box_clone = items_box.clone();
         let rebuild_ui = move |text: &str| {
-            while let Some(child) = mother_box_clone.first_child() {
-                mother_box_clone.remove(&child);
+            while let Some(child) = items_box_clone.first_child() {
+                items_box_clone.remove(&child);
             }
 
             let mut remove_buttons = Vec::new();
-            let parts: Vec<&str> = text.split(separator).collect();
+
+            let parts: Vec<&str> = if text.is_empty() {
+                Vec::new()
+            } else {
+                text.split(separator).collect()
+            };
 
             for (i, part) in parts.iter().enumerate() {
                 let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
@@ -427,10 +460,22 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
                     is_updating_clone_clone.set(false);
                 });
 
-                mother_box_clone.append(&part_box);
+                items_box_clone.append(&part_box);
             }
 
-            mother_box_clone.append(&add_button_clone);
+            if !parts.is_empty() {
+                let width_request = if parts.len() == 1 {
+                    min_width
+                } else if parts.len() == 2 {
+                    (min_width + 5) * 2
+                } else {
+                    (min_width * 5) / 2
+                };
+                scrolled_window.set_width_request(width_request);
+            } else {
+                scrolled_window.set_width_request(1);
+            }
+
             remove_buttons
         };
 
@@ -438,10 +483,14 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         let join_separator_add = join_separator.clone();
         add_button.connect_clicked(move |_| {
             let current_text = entry_clone_add.text().to_string();
-            let parts: Vec<String> = current_text
-                .split(separator)
-                .map(|s| s.to_string())
-                .collect();
+            let parts: Vec<String> = if current_text.is_empty() {
+                Vec::new()
+            } else {
+                current_text
+                    .split(separator)
+                    .map(|s| s.to_string())
+                    .collect()
+            };
 
             let mut new_parts = parts;
             new_parts.push(T::default().to_string());
@@ -497,39 +546,67 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
         let join_separator = separator.to_string();
+        let min_width = {
+            let temp_sub_entry = create_entry();
+            let temp_sub_box = T::to_gtk_box(&temp_sub_entry);
+            let temp_item_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+            let temp_remove_button = create_button(&t!("gtk_converters.remove"));
+            temp_item_box.append(&temp_remove_button);
+            temp_item_box.append(&temp_sub_box);
+
+            let (min_width, _natural, _min_baseline, _natural_baseline) =
+                temp_item_box.measure(GtkOrientation::Horizontal, -1);
+
+            min_width
+        };
 
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let add_button = create_button(&t!("gtk_converters.add"));
 
-        let mother_box_clone = mother_box.clone();
-        let add_button_clone = add_button.clone();
+        let items_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let scrolled_window = ScrolledWindow::new();
+        scrolled_window.set_hscrollbar_policy(PolicyType::Never);
+        scrolled_window.set_vscrollbar_policy(PolicyType::Automatic);
+        scrolled_window.set_child(Some(&items_box));
+
+        let frame = gtk::Frame::new(None);
+        scrolled_window.set_margin_start(5);
+        scrolled_window.set_margin_end(5);
+        scrolled_window.set_margin_top(5);
+        scrolled_window.set_margin_bottom(5);
+        frame.set_child(Some(&scrolled_window));
+
+        mother_box.append(&frame);
+        mother_box.append(&add_button);
+
         let entry_clone = entry.clone();
         let is_updating_clone = is_updating.clone();
         let join_separator_clone = join_separator.clone();
+        let items_box_clone = items_box.clone();
         let rebuild_ui = move |text: &str| {
-            while let Some(child) = mother_box_clone.first_child() {
-                mother_box_clone.remove(&child);
+            while let Some(child) = items_box_clone.first_child() {
+                items_box_clone.remove(&child);
             }
 
             let mut remove_buttons = Vec::new();
-            let parts: Vec<&str> = text
-                .split(&join_separator_clone)
-                .filter(|s| !s.is_empty())
-                .collect();
+
+            let parts: Vec<&str> = if text.is_empty() {
+                Vec::new()
+            } else {
+                text.split(&join_separator_clone)
+                    .filter(|s| !s.is_empty())
+                    .collect()
+            };
 
             let mut displayed_values = HashSet::new();
 
-            for part in parts {
+            for part in &parts {
                 let value: T = part.parse().unwrap_or_default();
                 if !displayed_values.insert(value.clone()) {
                     continue;
                 }
 
                 let item_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-                item_box.set_margin_start(5);
-                item_box.set_margin_end(5);
-                item_box.set_margin_top(2);
-                item_box.set_margin_bottom(2);
 
                 let remove_button = create_button(&t!("gtk_converters.remove"));
                 item_box.append(&remove_button);
@@ -557,11 +634,15 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
                     prev_text_clone.replace(new_text.clone());
 
                     let current_text = entry_clone_clone.text().to_string();
-                    let mut current_set: HashSet<T> = current_text
-                        .split(&join_separator_clone_clone)
-                        .filter(|s| !s.is_empty())
-                        .map(|s| s.parse().unwrap_or_default())
-                        .collect();
+                    let mut current_set: HashSet<T> = if current_text.is_empty() {
+                        HashSet::new()
+                    } else {
+                        current_text
+                            .split(&join_separator_clone_clone)
+                            .filter(|s| !s.is_empty())
+                            .map(|s| s.parse().unwrap_or_default())
+                            .collect()
+                    };
 
                     if !old_text.is_empty()
                         && let Ok(old_value) = old_text.parse::<T>()
@@ -585,23 +666,39 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
                     is_updating_clone_clone.set(false);
                 });
 
-                mother_box_clone.append(&item_box);
+                items_box_clone.append(&item_box);
                 remove_buttons.push((value, remove_button));
             }
 
-            mother_box_clone.append(&add_button_clone);
+            if !parts.is_empty() {
+                let width_request = if parts.len() == 1 {
+                    min_width
+                } else if parts.len() == 2 {
+                    (min_width + 5) * 2
+                } else {
+                    (min_width * 5) / 2
+                };
+                scrolled_window.set_width_request(width_request);
+            } else {
+                scrolled_window.set_width_request(1);
+            }
+
             remove_buttons
         };
 
-        let entry_clone = entry.clone();
-        let join_separator_clone = join_separator.clone();
+        let entry_clone_add = entry.clone();
+        let join_separator_add = join_separator.clone();
         add_button.connect_clicked(move |_| {
-            let current_text = entry_clone.text().to_string();
-            let mut set: HashSet<T> = current_text
-                .split(&join_separator_clone)
-                .filter(|s| !s.is_empty())
-                .map(|s| s.parse().unwrap_or_default())
-                .collect();
+            let current_text = entry_clone_add.text().to_string();
+            let mut set: HashSet<T> = if current_text.is_empty() {
+                HashSet::new()
+            } else {
+                current_text
+                    .split(&join_separator_add)
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.parse().unwrap_or_default())
+                    .collect()
+            };
 
             set.insert(T::default());
 
@@ -609,8 +706,8 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
                 .iter()
                 .map(|v| v.to_string())
                 .collect::<Vec<_>>()
-                .join(&join_separator_clone);
-            entry_clone.set_text(&updated_text);
+                .join(&join_separator_add);
+            entry_clone_add.set_text(&updated_text);
         });
 
         let rebuild_ui_with_remove_buttons = {
@@ -623,11 +720,15 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
                     let value_clone = value.clone();
                     remove_button.connect_clicked(move |_| {
                         let current_text = entry_clone.text().to_string();
-                        let mut set: HashSet<T> = current_text
-                            .split(&join_separator_clone_clone)
-                            .filter(|s| !s.is_empty())
-                            .map(|s| s.parse().unwrap_or_default())
-                            .collect();
+                        let mut set: HashSet<T> = if current_text.is_empty() {
+                            HashSet::new()
+                        } else {
+                            current_text
+                                .split(&join_separator_clone_clone)
+                                .filter(|s| !s.is_empty())
+                                .map(|s| s.parse().unwrap_or_default())
+                                .collect()
+                        };
 
                         set.remove(&value_clone);
                         let updated_text = set
