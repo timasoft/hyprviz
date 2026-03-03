@@ -629,7 +629,16 @@ fn parse_env_var_line(line: &str) -> Option<(String, String)> {
 }
 
 /// Substitute occurrences of `$var` in `line` with values from `env_vars`.
+/// Recursively expands nested variables with cycle detection.
 fn substitute_env_vars(line: &str, env_vars: &HashMap<String, String>) -> String {
+    substitute_env_vars_recursive(line, env_vars, &mut HashSet::new())
+}
+
+fn substitute_env_vars_recursive(
+    line: &str,
+    env_vars: &HashMap<String, String>,
+    expanding: &mut HashSet<String>,
+) -> String {
     let mut out = String::with_capacity(line.len());
     let mut chars = line.chars().peekable();
 
@@ -646,7 +655,18 @@ fn substitute_env_vars(line: &str, env_vars: &HashMap<String, String>) -> String
 
             if !var_name.is_empty() {
                 if let Some(val) = env_vars.get(&var_name) {
-                    out.push_str(val);
+                    // Cycle detection
+                    if expanding.contains(&var_name) {
+                        out.push('$');
+                        out.push_str(&var_name);
+                        continue;
+                    }
+
+                    expanding.insert(var_name.clone());
+                    let expanded = substitute_env_vars_recursive(val, env_vars, expanding);
+                    expanding.remove(&var_name);
+
+                    out.push_str(&expanded);
                     continue;
                 } else {
                     out.push('$');
