@@ -24,7 +24,7 @@ use crate::{
         ToGtkBoxWithSeparatorAndNamesImplementation, ToGtkBoxWithSeparatorImplementation,
     },
     guides::create_guide,
-    hyprland::{FontWeight, HyprGradient, PosFloat0_01, Vec2},
+    hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
         get_latest_version, parse_top_level_options,
@@ -867,6 +867,17 @@ fn add_gradient_option(
     add_to_gtk_box_option::<HyprGradient>(container, options, name, label, description, default);
 }
 
+fn add_css_gaps_option(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+) {
+    add_to_gtk_box_option::<CssGaps>(container, options, name, label, description, default);
+}
+
 fn add_font_weight_option(
     container: &Box,
     options: &mut HashMap<String, WidgetData>,
@@ -1336,32 +1347,29 @@ impl ConfigWidget {
                     &t!("widget.general_category.gaps_section_description"),
                     first_section.clone(),
                 );
-                add_int_option(
+                add_css_gaps_option(
                     &container,
                     &mut options,
                     "gaps_in",
                     &t!("widget.general_category.gaps_in_label"),
                     &t!("widget.general_category.gaps_in_description"),
                     "5",
-                    (0.0, 500.0, 1.0),
                 );
-                add_int_option(
+                add_css_gaps_option(
                     &container,
                     &mut options,
                     "gaps_out",
                     &t!("widget.general_category.gaps_out_label"),
                     &t!("widget.general_category.gaps_out_description"),
                     "20",
-                    (0.0, 500.0, 1.0),
                 );
-                add_int_option(
+                add_css_gaps_option(
                     &container,
                     &mut options,
                     "float_gaps",
                     &t!("widget.general_category.float_gaps_label"),
                     &t!("widget.general_category.float_gaps_description"),
                     "0",
-                    (0.0, 500.0, 1.0),
                 );
                 add_int_option(
                     &container,

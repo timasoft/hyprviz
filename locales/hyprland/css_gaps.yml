@@ -1,0 +1,17 @@
+_version: 2
+hyprland.css_gaps.all:
+  en: "All Sides"
+  ru: "Все стороны"
+  zh-CN: "所有边"
+hyprland.css_gaps.vertical_horizontal:
+  en: "Vertical & Horizontal"
+  ru: "Вертикаль и горизонталь"
+  zh-CN: "垂直与水平"
+hyprland.css_gaps.top_sides_bottom:
+  en: "Top, Sides, Bottom"
+  ru: "Верх, бока, низ"
+  zh-CN: "上、侧、下"
+hyprland.css_gaps.top_right_bottom_left:
+  en: "Top, Right, Bottom, Left"
+  ru: "Верх, право, низ, лево"
+  zh-CN: "上、右、下、左"
