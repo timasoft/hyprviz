@@ -202,7 +202,7 @@ fn color_builder(entry: &Entry, has_alpha: bool) -> GtkBox {
     mother_box.append(&color_button);
 
     let hex_entry = Entry::new();
-    hex_entry.set_width_chars(8);
+    hex_entry.set_width_chars(9);
     hex_entry.set_max_width_chars(9);
     match has_alpha {
         true => hex_entry.set_placeholder_text(Some("#RRGGBBAA")),
