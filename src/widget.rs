@@ -20,11 +20,11 @@ use crate::{
         create_bind_editor, create_curve_editor, create_entry, create_fancy_boxline,
     },
     gtk_converters::{
-        FieldLabel, ToGtkBox, ToGtkBoxImplementation, ToGtkBoxWithSeparatorAndNamesImplementation,
-        ToGtkBoxWithSeparatorImplementation,
+        FieldLabel, ToGtkBox, ToGtkBoxImplementation, ToGtkBoxWithSeparator,
+        ToGtkBoxWithSeparatorAndNamesImplementation, ToGtkBoxWithSeparatorImplementation,
     },
     guides::create_guide,
-    hyprland::{CssGaps, FontWeight, HyprGradient, Vec2},
+    hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
         get_latest_version, parse_top_level_options,
@@ -898,6 +898,110 @@ fn add_vec2_option(
     default: &str,
 ) {
     add_to_gtk_box_option::<Vec2>(container, options, name, label, description, default);
+}
+
+fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+    separator: char,
+) {
+    let hbox = Box::new(Orientation::Horizontal, 10);
+    hbox.set_margin_start(10);
+    hbox.set_margin_end(10);
+    hbox.set_margin_top(5);
+    hbox.set_margin_bottom(5);
+
+    let label_box = Box::new(Orientation::Horizontal, 5);
+    label_box.set_hexpand(true);
+
+    let label_widget = Label::new(None);
+    label_widget.set_halign(gtk::Align::Start);
+    let formatted_text = format!(
+        "{}\n<span foreground=\"gray\">({})</span>",
+        glib::markup_escape_text(label),
+        glib::markup_escape_text(name)
+    );
+    label_widget.set_markup(&formatted_text);
+    label_widget.set_use_markup(true);
+
+    let popover = Popover::new();
+    let description_label = Label::new(Some(description));
+    description_label.set_wrap(true);
+    description_label.set_width_chars(40);
+    description_label.set_max_width_chars(60);
+    description_label.set_justify(Justification::Fill);
+    description_label.set_xalign(0.0);
+    description_label.set_margin_top(5);
+    description_label.set_margin_bottom(5);
+    description_label.set_margin_start(5);
+    description_label.set_margin_end(5);
+    popover.set_child(Some(&description_label));
+    popover.set_position(gtk::PositionType::Right);
+
+    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    tooltip_button.set_has_frame(false);
+    tooltip_button.connect_clicked(move |button| {
+        popover.set_parent(button);
+        popover.popup();
+    });
+
+    label_box.append(&label_widget);
+    label_box.append(&tooltip_button);
+
+    let entry = Entry::new();
+    let gradient_box = T::to_gtk_box(&entry, separator);
+    gradient_box.set_halign(gtk::Align::End);
+    gradient_box.set_width_request(100);
+
+    let reset_button = Button::from_icon_name("view-refresh-symbolic");
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_valign(gtk::Align::Center);
+    reset_button.set_has_frame(false);
+
+    let entry_clone = entry.clone();
+    let default_string = default.to_string();
+
+    reset_button.connect_clicked(move |_| {
+        entry_clone.set_text(&default_string);
+    });
+
+    hbox.append(&label_box);
+    hbox.append(&gradient_box);
+    hbox.append(&reset_button);
+
+    container.append(&hbox);
+
+    options.insert(
+        name.to_string(),
+        WidgetData {
+            widget: entry.upcast(),
+            default: default.to_string(),
+        },
+    );
+}
+
+fn add_pos_float_vec_option(
+    container: &Box,
+    options: &mut HashMap<String, WidgetData>,
+    name: &str,
+    label: &str,
+    description: &str,
+    default: &str,
+    separator: char,
+) {
+    add_vec_to_gtk_box_option::<Vec<PosFloat0_01>>(
+        container,
+        options,
+        name,
+        label,
+        description,
+        default,
+        separator,
+    );
 }
 
 fn append_option_row(
@@ -4284,13 +4388,14 @@ impl ConfigWidget {
                     "0.4",
                     (0.0, 1.0, 0.01),
                 );
-                add_string_option(
+                add_pos_float_vec_option(
                     &container,
                     &mut options,
                     "scrolling:explicit_column_widths",
                     &t!("widget.layouts_category.scrolling.explicit_column_widths_label"),
                     &t!("widget.layouts_category.scrolling.explicit_column_widths_description"),
                     "0.333, 0.5, 0.667, 1.0",
+                    ',',
                 );
                 add_dropdown_option(
                     &container,
