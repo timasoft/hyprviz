@@ -499,25 +499,31 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             label.set_width_request(100);
             label.set_selectable(true);
             fancy_name_entry.append(&label);
-            name_entry.set_text("monitor");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("monitor");
+            }
             name_entry.connect_changed(move |entry| {
                 label.set_text(&entry.text());
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "workspace" => {
             let label = Label::new(Some("workspace"));
             label.set_width_request(100);
             label.set_selectable(true);
             fancy_name_entry.append(&label);
-            name_entry.set_text("workspace");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("workspace");
+            }
             name_entry.connect_changed(move |entry| {
                 label.set_text(&entry.text());
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "animation" => {
             let string_list = StringList::new(&["animation", "bezier"]);
             let dropdown = create_dropdown(&string_list);
-            dropdown.set_width_request(100);
+            fancy_name_entry.append(&dropdown);
 
             let name_entry_clone = name_entry.clone();
             dropdown.connect_selected_notify(move |dd| {
@@ -529,7 +535,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                 }
             });
             let dropdown_clone = dropdown.clone();
-            name_entry.set_text("animation");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("animation");
+            }
             name_entry.connect_changed(move |entry| {
                 let new_name = entry.text().to_string();
 
@@ -544,7 +552,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                     }
                 }
             });
-            fancy_name_entry.append(&dropdown);
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "bind" => {
             let bind_left_box = Box::new(GtkOrientation::Horizontal, 5);
@@ -591,7 +599,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                 name_entry_clone.set_text(new_text);
                 is_updating_clone.set(false);
             });
-            name_entry.set_text("bind");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("bind");
+            }
 
             let switches_clone = switches.clone();
             for (flag_name, switch) in switches_clone {
@@ -684,13 +694,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
 
                 is_updating_clone.set(false);
             });
-
-            if let Ok(bind_left) = BindLeft::from_str(&name_entry.text()) {
-                match bind_left {
-                    BindLeft::Bind(_) => bind_type_dropdown.set_selected(0),
-                    BindLeft::Unbind => bind_type_dropdown.set_selected(1),
-                }
-            }
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "gesture" => {
             let gesture_content_box = Box::new(GtkOrientation::Horizontal, 5);
@@ -711,7 +715,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             gesture_content_box.append(&bypass_switch_box);
             fancy_name_entry.append(&gesture_content_box);
 
-            name_entry.set_text("gesture");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("gesture");
+            }
 
             let name_entry_clone = name_entry.clone();
             let is_updating_clone = is_updating.clone();
@@ -752,26 +758,33 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
 
                 is_updating_clone.set(false);
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "windowrule" => {
             let label = Label::new(Some("windowrule"));
             label.set_width_request(100);
             label.set_selectable(true);
             fancy_name_entry.append(&label);
-            name_entry.set_text("windowrule");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("windowrule");
+            }
             name_entry.connect_changed(move |entry| {
                 label.set_text(&entry.text());
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "layerrule" => {
             let label = Label::new(Some("layerrule"));
             label.set_width_request(100);
             label.set_selectable(true);
             fancy_name_entry.append(&label);
-            name_entry.set_text("layerrule");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("layerrule");
+            }
             name_entry.connect_changed(move |entry| {
                 label.set_text(&entry.text());
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "exec" => {
             let string_list =
@@ -789,7 +802,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                 }
             });
             let dropdown_clone = dropdown.clone();
-            name_entry.set_text("exec-once");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("exec-once");
+            }
             name_entry.connect_changed(move |entry| {
                 let new_name = entry.text().to_string();
 
@@ -805,16 +820,20 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
                 }
             });
             fancy_name_entry.append(&dropdown);
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "permission" => {
             let label = Label::new(Some("permission"));
             label.set_width_request(100);
             label.set_selectable(true);
             fancy_name_entry.append(&label);
-            name_entry.set_text("permission");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("permission");
+            }
             name_entry.connect_changed(move |entry| {
                 label.set_text(&entry.text());
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "env" => {
             let env_content_box = Box::new(GtkOrientation::Horizontal, 5);
@@ -835,7 +854,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             env_content_box.append(&dbus_switch_box);
             fancy_name_entry.append(&env_content_box);
 
-            name_entry.set_text("env");
+            if name_entry.text().is_empty() {
+                name_entry.set_text("env");
+            }
 
             let name_entry_clone = name_entry.clone();
             let is_updating_clone = is_updating.clone();
@@ -876,6 +897,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
 
                 is_updating_clone.set(false);
             });
+            name_entry.emit_by_name::<()>("changed", &[]);
         }
         "top_level" => {
             // maybe in future i will implement this
