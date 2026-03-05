@@ -26,8 +26,8 @@ use crate::{
     guides::create_guide,
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
-        MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str, get_config_path,
-        get_latest_version, parse_top_level_options,
+        MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str,
+        get_available_monitors, get_config_path, get_latest_version, parse_top_level_options,
     },
 };
 
@@ -1316,6 +1316,9 @@ impl ConfigWidget {
 
         let first_section = Rc::new(RefCell::new(true));
 
+        let monitors_set = get_available_monitors(true);
+        let monitors: Vec<&str> = monitors_set.iter().map(|s| s.as_str()).collect();
+
         match category {
             "general" => {
                 add_section(
@@ -2063,12 +2066,13 @@ impl ConfigWidget {
                     &t!("widget.input_category.left_handed_description"),
                     "false",
                 );
-                add_string_option(
+                add_dropdown_option(
                     &container,
                     &mut options,
                     "scroll_method",
                     &t!("widget.input_category.scroll_method_label"),
                     &t!("widget.input_category.scroll_method_description"),
+                    &["2fg", "edge", "on_button_down", "no_scroll"],
                     "",
                 );
                 add_int_option(
@@ -2224,13 +2228,14 @@ impl ConfigWidget {
                     &t!("widget.input_category.touchpad.middle_button_emulation_description"),
                     "false",
                 );
-                add_string_option(
+                add_dropdown_option(
                     &container,
                     &mut options,
                     "touchpad:tap_button_map",
                     &t!("widget.input_category.touchpad.tap_button_map_label"),
                     &t!("widget.input_category.touchpad.tap_button_map_description"),
-                    "lrm",
+                    &["lrm", "lmr"],
+                    "",
                 );
                 add_bool_option(
                     &container,
@@ -3751,13 +3756,14 @@ impl ConfigWidget {
                     ],
                     "0",
                 );
-                add_string_option(
+                add_dropdown_option(
                     &container,
                     &mut options,
                     "default_monitor",
                     &t!("widget.cursor_category.default_monitor_label"),
                     &t!("widget.cursor_category.default_monitor_description"),
-                    "[[EMPTY]]",
+                    &monitors,
+                    "",
                 );
                 add_float_option(
                     &container,
@@ -5012,10 +5018,10 @@ impl ConfigWidget {
                     changes.insert((category.clone(), name.clone()), new_value);
                 });
             } else if let Some(dropdown) = widget.downcast_ref::<DropDown>() {
-                let is_numeric = value.parse::<u32>().is_ok();
+                let is_numeric = default_value.parse::<u32>().is_ok() && !default_value.is_empty();
 
                 if is_numeric {
-                    let index: u32 = value.parse().unwrap();
+                    let index: u32 = value.parse().unwrap_or(0);
                     dropdown.set_selected(index);
                 } else {
                     let model = dropdown.model().unwrap();
