@@ -3637,6 +3637,14 @@ impl ConfigWidget {
                     &t!("widget.render_category.commit_timing_enabled_description"),
                     "true",
                 );
+                add_bool_option(
+                    &container,
+                    &mut options,
+                    "icc_vcgt_enabled",
+                    &t!("widget.render_category.icc_vcgt_enabled_label"),
+                    &t!("widget.render_category.icc_vcgt_enabled_description"),
+                    "true",
+                );
             }
             "cursor" => {
                 add_section(
