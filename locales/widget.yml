@@ -2498,6 +2498,15 @@ widget.render_category.commit_timing_enabled_description:
   en: "Enable commit timing proto. Requires restart."
   ru: "Включить протокол Commit Timing. Требуется перезапуск."
   zh-CN: "启用 Commit Timing 协议。需要重启。"
+widget.render_category.icc_vcgt_enabled_label:
+  en: "ICC VCGT Enabled"
+  ru: "Включить ICC VCGT"
+  zh-CN: "启用 ICC VCGT"
+widget.render_category.icc_vcgt_enabled_description:
+  en: "Enable sending VCGT ramps to KMS with ICC profiles."
+  ru: "Включить передачу VCGT ramps в KMS вместе с ICC профилями."
+  zh-CN: "启用向 KMS 发送 VCGT ramps 以及 ICC 配置文件。"
+
 widget.cursor_category.cursor_settings_section_title:
   en: "Cursor Settings"
   ru: "Настройки курсора"
