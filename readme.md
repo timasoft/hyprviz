@@ -5,7 +5,7 @@
 
 [![Rust CI](https://img.shields.io/github/actions/workflow/status/timasoft/hyprviz/rust.yml?branch=main&label=Rust%20CI)](https://github.com/timasoft/hyprviz/actions)
 [![Spellcheck](https://img.shields.io/github/actions/workflow/status/timasoft/hyprviz/typos.yml?branch=main&label=Spellcheck)](https://github.com/timasoft/hyprviz/actions)
-[![Hyprland Version](https://img.shields.io/badge/Hyprland-v0.54.0-blue?logo=hyprland)](https://github.com/hyprwm/Hyprland)
+[![Hyprland Version](https://img.shields.io/badge/Hyprland-v0.54.2-blue?logo=hyprland)](https://github.com/hyprwm/Hyprland)
 ![Repo size](https://img.shields.io/github/repo-size/timasoft/hyprviz?color=gray)
 
 **Fork** of [HyprGUI](https://github.com/MarkusVolk/hyprgui) — an unofficial GUI for configuring Hyprland, built with GTK4 and Rust. 🚀🦀<br>
