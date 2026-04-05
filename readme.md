@@ -124,12 +124,12 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - ~~Add monitor layuot editor~~
 - [x] Add fancy editors for all options
 - [x] Add symlink support
-- ~~[ ] Replace hyprparser with [hyprlang-rs](https://github.com/spinualexandru/hyprlang-rs)~~
 - [ ] Add CTRL-Z/CTRL-Y support
 - [ ] Add confirmation dialog for editing main hyprland.conf
 - [ ] Add row actions (discard/remove) for individual options
 - [ ] Add support for waybar, swaync, hyprlock...
 - [ ] Improve GUI
+- [ ] Replace hyprparser with [hyprlang-rs](https://github.com/spinualexandru/hyprlang-rs)
 
 ## Credits:
 - [Nyx](https://github.com/nnyyxxxx) - Implementing the parser, rest of the main GUI, and maintaining the hyprgui project
