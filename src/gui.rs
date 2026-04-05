@@ -1,7 +1,7 @@
 use crate::{
     utils::{
-        BACKUP_SUFFIX, HYPRVIZ_PROFILES_PATH, atomic_write, expand_source, find_all_profiles,
-        get_config_path, is_development_mode, mute_stdout, reload_hyprland,
+        atomic_write, expand_source, find_all_profiles, get_config_path, is_development_mode,
+        mute_stdout, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -25,12 +25,10 @@ pub struct ConfigGUI {
     config_widgets: HashMap<String, ConfigWidget>,
     title_label: Label,
     save_button: Button,
-    undo_button: Button,
     pub profile_dropdown: DropDown,
     current_profile_label: Label,
     create_profile_button: Button,
     delete_profile_button: Button,
-    clear_backups_button: Button,
     save_config_button: Button,
     load_config_button: Button,
     copy_button: Button,
@@ -80,14 +78,12 @@ impl ConfigGUI {
 
         let create_profile_button = Button::with_label(&t!("gui.create_profile"));
         let delete_profile_button = Button::with_label(&t!("gui.delete_profile"));
-        let clear_backups_button = Button::with_label(&t!("gui.clear_backups_files"));
         let load_config_button = Button::with_label(&t!("gui.load_hyprviz_config"));
         let save_config_button = Button::with_label(&t!("gui.save_hyprviz_config"));
         let copy_button = Button::with_label(&t!("gui.copyright"));
 
         gear_menu_box.append(&create_profile_button);
         gear_menu_box.append(&delete_profile_button);
-        gear_menu_box.append(&clear_backups_button);
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
         gear_menu_box.append(&copy_button);
@@ -141,7 +137,6 @@ impl ConfigGUI {
         header_bar.pack_start(&locale_dropdown);
 
         let save_button = Button::with_label(&t!("gui.save"));
-        let undo_button = Button::with_label(&t!("gui.undo"));
 
         let profiles = if let Some(mut profiles) = find_all_profiles() {
             if profiles.contains(&"Default".to_string()) {
@@ -162,7 +157,6 @@ impl ConfigGUI {
         let current_profile_label = Label::new(Some(&t!("gui.profile")));
 
         header_bar.pack_end(&save_button);
-        header_bar.pack_end(&undo_button);
         header_bar.pack_end(&profile_dropdown);
         header_bar.pack_end(&current_profile_label);
 
@@ -188,12 +182,10 @@ impl ConfigGUI {
             config_widgets,
             title_label,
             save_button,
-            undo_button,
             profile_dropdown,
             current_profile_label,
             create_profile_button,
             delete_profile_button,
-            clear_backups_button,
             save_config_button,
             load_config_button,
             copy_button,
@@ -429,129 +421,6 @@ impl ConfigGUI {
             });
 
         let gui_clone = Rc::clone(&gui);
-        gui.borrow().clear_backups_button.connect_clicked(move |_| {
-            let gui = Rc::clone(&gui_clone);
-
-            let none_config = get_config_path(true, "None");
-
-            let config_dir = none_config
-                .parent()
-                .unwrap_or_else(|| Path::new(HYPRVIZ_PROFILES_PATH));
-
-            let mut backup_files = Vec::new();
-            if let Ok(entries) = fs::read_dir(config_dir) {
-                for entry in entries.flatten() {
-                    let file_name = entry.file_name();
-                    if let Some(name) = file_name.to_str()
-                        && name.ends_with(BACKUP_SUFFIX)
-                    {
-                        backup_files.push(entry.path());
-                    }
-                }
-            }
-
-            if backup_files.is_empty() {
-                gui.borrow().custom_info_popup(
-                    &t!("gui.no_backup_files"),
-                    &t!("gui.no_backup_files_found_to_delete"),
-                );
-                return;
-            }
-
-            let dialog_window = Window::builder()
-                .title(t!("gui.clear_backups_files"))
-                .modal(true)
-                .transient_for(&gui.borrow().window)
-                .destroy_with_parent(true)
-                .default_width(300)
-                .build();
-
-            let dialog_box = Box::new(Orientation::Vertical, 10);
-            dialog_box.set_margin_top(10);
-            dialog_box.set_margin_bottom(10);
-            dialog_box.set_margin_start(10);
-            dialog_box.set_margin_end(10);
-
-            let label = Label::new(Some(&format!(
-                "{}\n{}.",
-                &t!(
-                    "gui.are_you_sure_you_want_to_delete__backup_files",
-                    n = backup_files.len()
-                ),
-                &t!("gui.this_operation_cannot_be_undone"),
-            )));
-            label.set_wrap(true);
-            label.set_width_chars(50);
-            label.set_max_width_chars(60);
-            label.set_halign(gtk::Align::Center);
-
-            dialog_box.append(&label);
-
-            let buttons_box = Box::new(Orientation::Horizontal, 5);
-            buttons_box.set_halign(gtk::Align::End);
-
-            let cancel_button = Button::with_label(&t!("gui.cancel"));
-            let clear_button = Button::with_label(&t!("gui.clear"));
-
-            buttons_box.append(&cancel_button);
-            buttons_box.append(&clear_button);
-
-            dialog_box.append(&buttons_box);
-            dialog_window.set_child(Some(&dialog_box));
-
-            let dialog_window_clone = dialog_window.clone();
-            cancel_button.connect_clicked(move |_| {
-                dialog_window_clone.close();
-            });
-
-            let dialog_window_clone = dialog_window.clone();
-            let gui_clone = Rc::clone(&gui);
-            let backup_files_clone = backup_files.clone();
-            clear_button.connect_clicked(move |_| {
-                let mut deleted_count = 0;
-                let mut error_message = String::new();
-
-                for file_path in &backup_files_clone {
-                    match fs::remove_file(file_path) {
-                        Ok(_) => deleted_count += 1,
-                        Err(e) => {
-                            error_message.push_str(&t!(
-                                "gui.failed_to_delete__",
-                                file = file_path.display(),
-                                error = e
-                            ));
-                            error_message.push('\n');
-                        }
-                    }
-                }
-
-                dialog_window_clone.close();
-
-                if !error_message.is_empty() {
-                    gui_clone.borrow().custom_error_popup(
-                        &t!("gui.partial_success"),
-                        &format!(
-                            "{}.\n{}",
-                            &t!(
-                                "gui.deleted__of__backup_files",
-                                n = deleted_count,
-                                all = backup_files_clone.len()
-                            ),
-                            &t!("gui.errors_", errors = error_message),
-                        ),
-                    );
-                } else {
-                    gui_clone.borrow().custom_info_popup(
-                        &t!("gui.success"),
-                        &t!("gui.successfully_deleted__backup_files", n = deleted_count),
-                    );
-                }
-            });
-
-            dialog_window.present();
-        });
-
-        let gui_clone = Rc::clone(&gui);
         gui.borrow().load_config_button.connect_clicked(move |_| {
             let gui = Rc::clone(&gui_clone);
 
@@ -640,11 +509,6 @@ along with this program; if not, see
         gui.borrow()
             .save_button
             .connect_clicked(move |_| gui_clone.borrow().save_config_file());
-
-        let gui_clone = Rc::clone(&gui);
-        gui.borrow()
-            .undo_button
-            .connect_clicked(move |_| gui_clone.borrow_mut().undo_changes());
     }
 
     fn load_hyprviz_config(&self, path: &PathBuf) {
@@ -779,11 +643,6 @@ along with this program; if not, see
             }
         };
         let path = get_config_path(true, &profile_name);
-        let backup_path = path.with_file_name(format!(
-            "{}{}",
-            path.file_name().unwrap().to_str().unwrap(),
-            BACKUP_SUFFIX
-        ));
 
         if !path.exists()
             && let Err(e) = fs::File::create(&path)
@@ -809,13 +668,6 @@ along with this program; if not, see
         let changes = self.changed_options.clone();
 
         if !changes.borrow().is_empty() {
-            if let Err(e) = fs::copy(&path, &backup_path) {
-                self.custom_error_popup(
-                    &t!("gui.backup_failed"),
-                    &t!("gui.failed_to_create_backup_", error = e),
-                );
-            }
-
             self.apply_changes(&mut parsed_config);
 
             let updated_config_str = parsed_config.to_string();
@@ -862,73 +714,6 @@ along with this program; if not, see
             }
         } else {
             self.custom_error_popup(&t!("gui.saving_failed"), &t!("gui.no_changes_to_save"));
-        }
-    }
-
-    fn undo_changes(&mut self) {
-        let profile_name = {
-            let selected_index = self.profile_dropdown.selected();
-            let model = self.profile_dropdown.model().unwrap();
-
-            if let Some(item) = model.item(selected_index)
-                && let Some(string_object) = item.downcast_ref::<StringObject>()
-            {
-                string_object.string().as_str().to_string()
-            } else {
-                "Default".to_string()
-            }
-        };
-        let path = get_config_path(true, &profile_name);
-        let path_for_read = get_config_path(false, "Default");
-        let backup_path = path.with_file_name(format!(
-            "{}{}",
-            path.file_name().unwrap().to_str().unwrap(),
-            BACKUP_SUFFIX
-        ));
-
-        if backup_path.exists() {
-            match fs::read_to_string(&backup_path) {
-                Ok(backup_content) => match atomic_write(&path, &backup_content) {
-                    Ok(_) => {
-                        if let Err(e) = fs::remove_file(&backup_path) {
-                            self.custom_error_popup(
-                                &t!("gui.warning"),
-                                &t!("gui.backup_file_not_deleted_", error = e),
-                            );
-                        }
-
-                        println!("{}", &t!("gui.configuration_restored_from_backup"));
-                        reload_hyprland();
-                        if let Ok(config_str) = expand_source(&path_for_read) {
-                            let parsed_config = mute_stdout(|| parse_config(&config_str));
-                            self.load_config(&parsed_config, &profile_name);
-                            self.changed_options.clone().borrow_mut().clear();
-                        } else {
-                            self.custom_error_popup(
-                                &t!("gui.reload_failed"),
-                                &t!("gui.failed_to_reload_the_configuration_after_undo"),
-                            );
-                        }
-                    }
-                    Err(e) => {
-                        self.custom_error_popup(
-                            &t!("gui.undo_failed"),
-                            &t!("gui.failed_to_restore_from_backup_", error = e),
-                        );
-                    }
-                },
-                Err(e) => {
-                    self.custom_error_popup(
-                        &t!("gui.undo_failed"),
-                        &t!("gui.failed_to_read_backup_file_", error = e),
-                    );
-                }
-            }
-        } else {
-            self.custom_error_popup(
-                &t!("gui.undo_failed"),
-                &t!("gui.no_backup_file_found_save_changes_to_create_a_backup"),
-            );
         }
     }
 
@@ -1265,15 +1050,12 @@ along with this program; if not, see
         self.title_label
             .set_label(&t!("gui.hyprland_configuration"));
         self.current_profile_label.set_label(&t!("gui.profile"));
-        self.undo_button.set_label(&t!("gui.undo"));
         self.save_button.set_label(&t!("gui.save"));
 
         self.create_profile_button
             .set_label(&t!("gui.create_profile"));
         self.delete_profile_button
             .set_label(&t!("gui.delete_profile"));
-        self.clear_backups_button
-            .set_label(&t!("gui.clear_backups_files"));
         self.load_config_button
             .set_label(&t!("gui.load_hyprviz_config"));
         self.save_config_button

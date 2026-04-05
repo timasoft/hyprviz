@@ -1474,7 +1474,6 @@ impl<T: IntoEnumIterator + Eq + Copy> HasDiscriminant for T {
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";
-pub const BACKUP_SUFFIX: &str = "-bak";
 
 /// 1 / 255
 pub const ONE_OVER_255: f64 = 1.0 / 255.0;
