@@ -1,7 +1,7 @@
 use crate::{
     utils::{
-        atomic_write, expand_source, find_all_profiles, get_config_path, is_development_mode,
-        mute_stdout, reload_hyprland,
+        HistoryManager, atomic_write, expand_source, find_all_profiles, get_config_path,
+        is_development_mode, mute_stdout, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -34,7 +34,7 @@ pub struct ConfigGUI {
     copy_button: Button,
     search_entry: SearchEntry,
     locale_dropdown: DropDown,
-    changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
+    history: Rc<RefCell<HistoryManager>>,
     content_box: Box,
     stack: Stack,
     sidebar: StackSidebar,
@@ -192,7 +192,7 @@ impl ConfigGUI {
             search_entry,
             locale_dropdown,
             content_box,
-            changed_options: Rc::new(RefCell::new(HashMap::new())),
+            history: Rc::new(RefCell::new(HistoryManager::new(u16::MAX as usize, 1 << 9))),
             stack,
             sidebar,
         }
@@ -526,9 +526,11 @@ along with this program; if not, see
                                 let actual_widget = &option_widget.widget;
 
                                 self.set_widget_value(actual_widget, &value);
-                                self.changed_options
-                                    .borrow_mut()
-                                    .insert((category, name), value.to_string());
+                                self.history.borrow_mut().record_change(
+                                    category,
+                                    name,
+                                    value.to_string(),
+                                );
                             }
                         }
                     }
@@ -554,8 +556,9 @@ along with this program; if not, see
 
     fn save_hyprviz_config(&self, path: &Path) {
         let config: HashMap<String, String> = self
-            .changed_options
+            .history
             .borrow()
+            .get_current_state()
             .iter()
             .map(|((category, name), value)| (format!("{category}:{name}"), value.clone()))
             .collect();
@@ -665,9 +668,9 @@ along with this program; if not, see
         };
 
         let mut parsed_config = mute_stdout(|| parse_config(&config_str));
-        let changes = self.changed_options.clone();
+        let history = self.history.clone();
 
-        if !changes.borrow().is_empty() {
+        if !history.borrow().get_current_state().is_empty() {
             self.apply_changes(&mut parsed_config);
 
             let updated_config_str = parsed_config.to_string();
@@ -689,12 +692,12 @@ along with this program; if not, see
                             &parsed_config,
                             &profile_name,
                             category,
-                            self.changed_options.clone(),
+                            self.history.clone(),
                         );
                     }
                 }
             }
-            self.changed_options.clone().borrow_mut().clear();
+            self.history.clone().borrow_mut().clear();
 
             match result {
                 Ok(()) => {
@@ -859,16 +862,17 @@ along with this program; if not, see
                     config,
                     profile_name,
                     category,
-                    self.changed_options.clone(),
+                    self.history.clone(),
                 );
             }
         }
 
-        self.changed_options.borrow_mut().clear();
+        self.history.borrow_mut().clear();
     }
 
     pub fn apply_changes(&self, config: &mut HyprlandConfig) {
-        let changes = self.changed_options.borrow();
+        let history = self.history.borrow();
+        let changes = history.get_current_state();
         for (category, widget) in &self.config_widgets {
             for (name, widget_data) in &widget.options {
                 let widget = &widget_data.widget;

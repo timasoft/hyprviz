@@ -4,16 +4,16 @@ use serde_json::Value;
 use std::{
     borrow::Cow,
     cmp::Ordering,
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     env,
     error::Error,
-    fs,
-    fs::File,
+    fs::{self, File},
     io::{self, Write},
     os::unix::io::AsRawFd,
     path::{Path, PathBuf},
     process::Command,
     sync::{LazyLock, OnceLock},
+    time::Instant,
 };
 use strum::IntoEnumIterator;
 
@@ -1468,6 +1468,136 @@ impl<T: IntoEnumIterator + Eq + Copy> HasDiscriminant for T {
 
     fn from_discriminant_and_str(discriminant: Self::Discriminant, _str: &str) -> Self {
         discriminant
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ConfigChange {
+    pub category: String,
+    pub key: String,
+    pub old_value: Option<String>,
+    pub new_value: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct HistoryManager {
+    undo_stack: VecDeque<ConfigChange>,
+    redo_stack: VecDeque<ConfigChange>,
+    current_state: HashMap<(String, String), String>,
+    max_history: usize,
+    last_change_key: Option<(String, String)>,
+    last_change_time: Instant,
+    coalesce_threshold_ms: u128,
+}
+
+impl HistoryManager {
+    pub fn new(max_history: usize, coalesce_threshold_ms: u128) -> Self {
+        Self {
+            undo_stack: VecDeque::with_capacity(max_history),
+            redo_stack: VecDeque::new(),
+            current_state: HashMap::new(),
+            max_history,
+            last_change_key: None,
+            last_change_time: Instant::now(),
+            coalesce_threshold_ms,
+        }
+    }
+
+    pub fn record_change(&mut self, category: String, key: String, new_value: String) {
+        let change_key = (category.clone(), key.clone());
+        let old_value = self.current_state.get(&change_key).cloned();
+
+        if old_value.as_deref() == Some(&new_value) {
+            return;
+        }
+
+        let now = Instant::now();
+
+        if self.last_change_key == Some(change_key.clone())
+            && now.duration_since(self.last_change_time).as_millis() < self.coalesce_threshold_ms
+            && let Some(last) = self.undo_stack.back_mut()
+        {
+            last.new_value = Some(new_value.clone());
+            self.last_change_time = now;
+            self.current_state.insert(change_key, new_value);
+            return;
+        }
+
+        self.current_state
+            .insert(change_key.clone(), new_value.clone());
+        self.redo_stack.clear();
+        self.undo_stack.push_back(ConfigChange {
+            category,
+            key,
+            old_value,
+            new_value: Some(new_value),
+        });
+        self.last_change_key = Some(change_key);
+        self.last_change_time = now;
+
+        if self.undo_stack.len() > self.max_history {
+            self.undo_stack.pop_front();
+        }
+    }
+
+    pub fn record_removal(&mut self, category: String, key: String) {
+        let change_key = (category.clone(), key.clone());
+        let old_value = self.current_state.remove(&change_key);
+
+        self.redo_stack.clear();
+        self.undo_stack.push_back(ConfigChange {
+            category,
+            key,
+            old_value,
+            new_value: None,
+        });
+        self.last_change_key = None;
+        self.last_change_time = Instant::now();
+
+        if self.undo_stack.len() > self.max_history {
+            self.undo_stack.pop_front();
+        }
+    }
+
+    pub fn undo(&mut self) -> Option<ConfigChange> {
+        if let Some(change) = self.undo_stack.pop_back() {
+            let key = (change.category.clone(), change.key.clone());
+            if let Some(old) = &change.old_value {
+                self.current_state.insert(key, old.clone());
+            } else {
+                self.current_state.remove(&key);
+            }
+            self.redo_stack.push_back(change.clone());
+            Some(change)
+        } else {
+            None
+        }
+    }
+
+    pub fn redo(&mut self) -> Option<ConfigChange> {
+        if let Some(change) = self.redo_stack.pop_back() {
+            let key = (change.category.clone(), change.key.clone());
+            if let Some(new) = &change.new_value {
+                self.current_state.insert(key, new.clone());
+            } else {
+                self.current_state.remove(&key);
+            }
+            self.undo_stack.push_back(change.clone());
+            Some(change)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_current_state(&self) -> &HashMap<(String, String), String> {
+        &self.current_state
+    }
+
+    pub fn clear(&mut self) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        self.current_state.clear();
+        self.last_change_key = None;
     }
 }
 

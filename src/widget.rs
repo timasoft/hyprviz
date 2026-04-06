@@ -26,7 +26,7 @@ use crate::{
     guides::create_guide,
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
-        MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str,
+        HistoryManager, MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str,
         get_available_monitors, get_config_path, get_latest_version, parse_top_level_options,
     },
 };
@@ -1010,7 +1010,7 @@ fn append_option_row(
     raw: String,
     name: String,
     value: String,
-    changed_options: &Rc<RefCell<HashMap<(String, String), String>>>,
+    history: &Rc<RefCell<HistoryManager>>,
     category: &str,
 ) {
     let vbox = gtk::Box::new(gtk::Orientation::Vertical, 10);
@@ -1057,16 +1057,17 @@ fn append_option_row(
     name_entry.set_margin_start(5);
     name_entry.set_margin_end(5);
 
-    let changed_options_clone = changed_options.clone();
+    let history_clone = history.clone();
     let raw_clone = raw.clone();
     let editor_box_clone = editor_box.clone();
     let show_button_clone = show_button.clone();
     let category_str = category.to_string();
     name_entry.connect_changed(move |entry| {
-        let mut changes = changed_options_clone.borrow_mut();
+        let mut history = history_clone.borrow_mut();
         let new_name = entry.text().to_string();
-        changes.insert(
-            (category_str.clone(), format!("{}_name", raw_clone)),
+        history.record_change(
+            category_str.clone(),
+            format!("{}_name", raw_clone),
             new_name.clone(),
         );
 
@@ -1091,15 +1092,16 @@ fn append_option_row(
     value_entry.set_margin_end(5);
     value_entry.set_hexpand(true);
 
-    let changed_options_clone = changed_options.clone();
+    let history_clone = history.clone();
     let raw_clone = raw.clone();
     let category_str = category.to_string();
 
     value_entry.connect_changed(move |entry| {
-        let mut changes = changed_options_clone.borrow_mut();
+        let mut history = history_clone.borrow_mut();
         let new_value = entry.text().to_string();
-        changes.insert(
-            (category_str.clone(), format!("{}_value", raw_clone)),
+        history.record_change(
+            category_str.clone(),
+            format!("{}_value", raw_clone),
             new_value,
         );
     });
@@ -1113,19 +1115,20 @@ fn append_option_row(
 
     let gtkbox_clone = gtkbox.clone();
     let category_str = category.to_string();
-    let changed_options_clone = changed_options.clone();
+    let history_clone = history.clone();
     let vbox_clone = vbox.clone();
 
     delete_button.connect_clicked(move |_| {
         gtkbox_clone.remove(&vbox_clone);
 
-        let mut changes = changed_options_clone.borrow_mut();
+        let mut history = history_clone.borrow_mut();
 
-        changes.remove(&(category_str.clone(), format!("{}_name", raw)));
-        changes.remove(&(category_str.clone(), format!("{}_value", raw)));
+        history.record_removal(category_str.clone(), format!("{}_name", raw));
+        history.record_removal(category_str.clone(), format!("{}_value", raw));
 
-        changes.insert(
-            (category_str.clone(), format!("{}_delete", raw)),
+        history.record_change(
+            category_str.clone(),
+            format!("{}_delete", raw),
             "DELETE".to_string(),
         );
     });
@@ -4961,7 +4964,7 @@ impl ConfigWidget {
         config: &HyprlandConfig,
         profile: &str,
         category: &str,
-        changed_options: Rc<RefCell<HashMap<(String, String), String>>>,
+        history: Rc<RefCell<HistoryManager>>,
     ) {
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
@@ -4972,21 +4975,21 @@ impl ConfigWidget {
                 spin_button.set_value(float_value);
                 let category = category.to_string();
                 let name = name.to_string();
-                let changed_options = changed_options.clone();
+                let history = history.clone();
                 spin_button.connect_value_changed(move |sb| {
-                    let mut changes = changed_options.borrow_mut();
+                    let mut history = history.borrow_mut();
                     let new_value = sb.value().to_string();
-                    changes.insert((category.clone(), name.clone()), new_value);
+                    history.record_change(category.clone(), name.clone(), new_value);
                 });
             } else if let Some(entry) = widget.downcast_ref::<Entry>() {
                 entry.set_text(&value);
                 let category = category.to_string();
                 let name = name.to_string();
-                let changed_options = changed_options.clone();
+                let history = history.clone();
                 entry.connect_changed(move |entry| {
-                    let mut changes = changed_options.borrow_mut();
+                    let mut history = history.borrow_mut();
                     let new_value = entry.text().to_string();
-                    changes.insert((category.clone(), name.clone()), new_value);
+                    history.record_change(category.clone(), name.clone(), new_value);
                 });
             } else if let Some(switch) = widget.downcast_ref::<Switch>() {
                 switch.set_active(
@@ -5000,11 +5003,11 @@ impl ConfigWidget {
                 );
                 let category = category.to_string();
                 let name = name.to_string();
-                let changed_options = changed_options.clone();
+                let history = history.clone();
                 switch.connect_active_notify(move |sw| {
-                    let mut changes = changed_options.borrow_mut();
+                    let mut history = history.borrow_mut();
                     let new_value = sw.is_active().to_string();
-                    changes.insert((category.clone(), name.clone()), new_value);
+                    history.record_change(category.clone(), name.clone(), new_value);
                 });
             } else if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
                 if let Some((red, green, blue, alpha)) = config.parse_color(&value) {
@@ -5012,9 +5015,9 @@ impl ConfigWidget {
                 }
                 let category = category.to_string();
                 let name = name.to_string();
-                let changed_options = changed_options.clone();
+                let history = history.clone();
                 color_button.connect_rgba_notify(move |cb| {
-                    let mut changes = changed_options.borrow_mut();
+                    let mut history = history.borrow_mut();
                     let new_color = cb.rgba();
                     let new_value = format!(
                         "rgba({:02X}{:02X}{:02X}{:02X})",
@@ -5023,7 +5026,7 @@ impl ConfigWidget {
                         (new_color.blue() * 255.0) as u8,
                         (new_color.alpha() * 255.0) as u8
                     );
-                    changes.insert((category.clone(), name.clone()), new_value);
+                    history.record_change(category.clone(), name.clone(), new_value);
                 });
             } else if let Some(dropdown) = widget.downcast_ref::<DropDown>() {
                 let is_numeric = default_value.parse::<u32>().is_ok() && !default_value.is_empty();
@@ -5046,20 +5049,23 @@ impl ConfigWidget {
 
                 let category = category.to_string();
                 let name = name.to_string();
-                let changed_options = changed_options.clone();
+                let history = history.clone();
 
                 dropdown.connect_selected_notify(move |dd| {
-                    let mut changes = changed_options.borrow_mut();
+                    let mut history = history.borrow_mut();
 
                     if is_numeric {
                         let selected_index = dd.selected();
-                        changes
-                            .insert((category.clone(), name.clone()), selected_index.to_string());
+                        history.record_change(
+                            category.clone(),
+                            name.clone(),
+                            selected_index.to_string(),
+                        );
                     } else if let Some(selected) = dd.selected_item()
                         && let Some(string_object) = selected.downcast_ref::<StringObject>()
                     {
                         let new_value = string_object.string().to_string();
-                        changes.insert((category.clone(), name.clone()), new_value);
+                        history.record_change(category.clone(), name.clone(), new_value);
                     }
                 });
             } else if let Some(gtkbox) = widget.downcast_ref::<Box>() {
@@ -5255,7 +5261,7 @@ impl ConfigWidget {
                 let window_clone = window.clone();
                 let gtkbox_clone = gtkbox.clone();
 
-                let changed_options_clone = changed_options.clone();
+                let history_clone = history.clone();
 
                 let category_string = category.to_string();
 
@@ -5267,7 +5273,7 @@ impl ConfigWidget {
                         id.to_string(),
                         "".to_string(),
                         "".to_string(),
-                        &changed_options_clone,
+                        &history_clone,
                         &category_string,
                     );
                     *id += 1;
@@ -5283,30 +5289,14 @@ impl ConfigWidget {
                     .zip(parsed_headless_options)
                 {
                     if name.starts_with(category) || category == "top_level" {
-                        append_option_row(
-                            window,
-                            gtkbox,
-                            raw,
-                            name,
-                            value,
-                            &changed_options,
-                            category,
-                        );
+                        append_option_row(window, gtkbox, raw, name, value, &history, category);
                         continue;
                     }
 
                     if (category == "bind" && (name.starts_with("unbind")))
                         || (category == "animation" && (name.starts_with("bezier")))
                     {
-                        append_option_row(
-                            window,
-                            gtkbox,
-                            raw,
-                            name,
-                            value,
-                            &changed_options,
-                            category,
-                        );
+                        append_option_row(window, gtkbox, raw, name, value, &history, category);
                     }
                     continue;
                 }
