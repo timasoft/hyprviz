@@ -1,7 +1,7 @@
 use crate::{
     utils::{
-        HistoryManager, atomic_write, expand_source, find_all_profiles, get_config_path,
-        is_development_mode, mute_stdout, reload_hyprland,
+        ConfigChange, HistoryManager, atomic_write, expand_source, extract_value,
+        find_all_profiles, get_config_path, is_development_mode, mute_stdout, reload_hyprland,
     },
     widget::ConfigWidget,
 };
@@ -199,6 +199,34 @@ impl ConfigGUI {
     }
 
     pub fn setup_ui_events(gui: Rc<RefCell<ConfigGUI>>) {
+        let history_clone = Rc::clone(&gui.borrow().history);
+        let gui_clone = Rc::clone(&gui);
+        let key_controller = gtk::EventControllerKey::new();
+        key_controller.set_propagation_phase(gtk::PropagationPhase::Capture);
+        key_controller.connect_key_pressed(move |_, keyval, _keycode, state| {
+            let ctrl = state.contains(gdk::ModifierType::CONTROL_MASK);
+            let shift = state.contains(gdk::ModifierType::SHIFT_MASK);
+            let mut history = history_clone.borrow_mut();
+            match (keyval, ctrl, shift) {
+                // Ctrl+Z - Undo
+                (gdk::Key::z, true, false) => {
+                    if let Some(change) = history.undo() {
+                        gui_clone.borrow().apply_undo_to_ui(&change);
+                    }
+                    glib::Propagation::Stop
+                }
+                // Ctrl+Y or Ctrl+Shift+Z - Redo
+                (gdk::Key::y, true, false) | (gdk::Key::z, true, true) => {
+                    if let Some(change) = history.redo() {
+                        gui_clone.borrow().apply_redo_to_ui(&change);
+                    }
+                    glib::Propagation::Stop
+                }
+                _ => glib::Propagation::Proceed,
+            }
+        });
+        gui.borrow().window.add_controller(key_controller);
+
         let gui_clone = Rc::clone(&gui);
         gui.borrow()
             .create_profile_button
@@ -509,6 +537,32 @@ along with this program; if not, see
         gui.borrow()
             .save_button
             .connect_clicked(move |_| gui_clone.borrow().save_config_file());
+    }
+
+    fn apply_undo_to_ui(&self, change: &ConfigChange) {
+        if let Some(category_widget) = self.config_widgets.get(&change.category)
+            && let Some(widget_data) = category_widget.options.get(&change.key)
+        {
+            let widget = &widget_data.widget;
+            let value_to_apply = change.old_value.as_ref().unwrap_or(&widget_data.default);
+
+            category_widget.is_programmatic_update.set(true);
+            self.set_widget_value(widget, value_to_apply);
+            category_widget.is_programmatic_update.set(false);
+        }
+    }
+
+    fn apply_redo_to_ui(&self, change: &ConfigChange) {
+        if let Some(category_widget) = self.config_widgets.get(&change.category)
+            && let Some(widget_data) = category_widget.options.get(&change.key)
+        {
+            let widget = &widget_data.widget;
+            let value_to_apply = change.new_value.as_ref().unwrap_or(&widget_data.default);
+
+            category_widget.is_programmatic_update.set(true);
+            self.set_widget_value(widget, value_to_apply);
+            category_widget.is_programmatic_update.set(false);
+        }
     }
 
     fn load_hyprviz_config(&self, path: &PathBuf) {
@@ -827,7 +881,6 @@ along with this program; if not, see
             (t!("gui.render").to_string(), "render"),
             (t!("gui.cursor").to_string(), "cursor"),
             (t!("gui.ecosystem").to_string(), "ecosystem"),
-            // (t!("gui.experimental").to_string(), "experimental"),
             (t!("gui.quirks").to_string(), "quirks"),
             (t!("gui.debug").to_string(), "debug"),
             (t!("gui.monitors").to_string(), "monitor"),
@@ -867,7 +920,23 @@ along with this program; if not, see
             }
         }
 
-        self.history.borrow_mut().clear();
+        let mut initial_state = HashMap::new();
+
+        for (category, widget) in &self.config_widgets {
+            for (name, widget_data) in &widget.options {
+                if widget_data.widget.downcast_ref::<Box>().is_some() {
+                    continue;
+                }
+
+                let value = extract_value(config, category, name, &widget_data.default);
+
+                initial_state.insert((category.clone(), name.clone()), value);
+            }
+        }
+
+        self.history
+            .borrow_mut()
+            .update_initial_state_and_clear(initial_state);
     }
 
     pub fn apply_changes(&self, config: &mut HyprlandConfig) {

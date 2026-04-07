@@ -1,4 +1,5 @@
 use crate::hyprland::MonitorSelector;
+use hyprparser::HyprlandConfig;
 use rust_i18n::t;
 use serde_json::Value;
 use std::{
@@ -56,6 +57,64 @@ pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
     } else {
         base_path.join(CONFIG_PATH)
     }
+}
+
+/// Transform from general{snap{enabled = true}} to general:snap:enabled = true
+fn transform_config(input: String) -> String {
+    let mut result = Vec::new();
+    let mut path = VecDeque::new();
+
+    for line in input.lines() {
+        let line = line.split('#').next().unwrap_or_default().trim();
+        if line.ends_with('{') {
+            // start of the block
+            let key = line.trim_end_matches('{').trim();
+            path.push_back(key.to_string());
+        } else if line == "}" {
+            // end of the block
+            path.pop_back();
+        } else if line.contains('=') {
+            let mut parts = line.splitn(2, '=');
+            let key = parts.next().unwrap().trim();
+            let value = parts.next().unwrap().trim();
+            let prefix = path.iter().cloned().collect::<Vec<_>>().join(":");
+            let full_key = if !prefix.is_empty() {
+                format!("{prefix}:{key}")
+            } else {
+                key.to_string()
+            };
+            result.push(format!("{full_key} = {value}"));
+        }
+    }
+
+    result.join("\n")
+}
+
+/// Extract value from config
+pub fn extract_value(config: &HyprlandConfig, category: &str, name: &str, default: &str) -> String {
+    let config_str = transform_config(config.to_string());
+    if category == "layouts" {
+        for line in config_str.lines().rev() {
+            if line.trim().starts_with(&format!("{name} = ")) {
+                return line
+                    .split('=')
+                    .nth(1)
+                    .map(|s| s.trim().to_string())
+                    .unwrap_or_default();
+            }
+        }
+    } else {
+        for line in config_str.lines().rev() {
+            if line.trim().starts_with(&format!("{category}:{name} = ")) {
+                return line
+                    .split('=')
+                    .nth(1)
+                    .map(|s| s.trim().to_string())
+                    .unwrap_or_default();
+            }
+        }
+    }
+    default.to_string()
 }
 
 pub fn reload_hyprland() {
@@ -1483,6 +1542,7 @@ pub struct ConfigChange {
 pub struct HistoryManager {
     undo_stack: VecDeque<ConfigChange>,
     redo_stack: VecDeque<ConfigChange>,
+    initial_state: HashMap<(String, String), String>,
     current_state: HashMap<(String, String), String>,
     max_history: usize,
     last_change_key: Option<(String, String)>,
@@ -1495,6 +1555,7 @@ impl HistoryManager {
         Self {
             undo_stack: VecDeque::with_capacity(max_history),
             redo_stack: VecDeque::new(),
+            initial_state: HashMap::new(),
             current_state: HashMap::new(),
             max_history,
             last_change_key: None,
@@ -1505,7 +1566,10 @@ impl HistoryManager {
 
     pub fn record_change(&mut self, category: String, key: String, new_value: String) {
         let change_key = (category.clone(), key.clone());
-        let old_value = self.current_state.get(&change_key).cloned();
+        let old_value = match self.current_state.get(&change_key) {
+            Some(current_value) => Some(current_value.clone()),
+            None => self.initial_state.get(&change_key).cloned(),
+        };
 
         if old_value.as_deref() == Some(&new_value) {
             return;
@@ -1542,7 +1606,10 @@ impl HistoryManager {
 
     pub fn record_removal(&mut self, category: String, key: String) {
         let change_key = (category.clone(), key.clone());
-        let old_value = self.current_state.remove(&change_key);
+        let old_value = match self.current_state.remove(&change_key) {
+            Some(current_value) => Some(current_value),
+            None => self.initial_state.get(&change_key).cloned(),
+        };
 
         self.redo_stack.clear();
         self.undo_stack.push_back(ConfigChange {
@@ -1591,6 +1658,17 @@ impl HistoryManager {
 
     pub fn get_current_state(&self) -> &HashMap<(String, String), String> {
         &self.current_state
+    }
+
+    pub fn update_initial_state_and_clear(
+        &mut self,
+        initial_state: HashMap<(String, String), String>,
+    ) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
+        self.initial_state = initial_state;
+        self.current_state.clear();
+        self.last_change_key = None;
     }
 
     pub fn clear(&mut self) {

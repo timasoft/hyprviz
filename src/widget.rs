@@ -6,9 +6,9 @@ use gtk::{
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     cmp::Ordering,
-    collections::{HashMap, VecDeque},
+    collections::HashMap,
     fmt::Display,
     fs,
     rc::Rc,
@@ -27,7 +27,8 @@ use crate::{
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         HistoryManager, MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str,
-        get_available_monitors, get_config_path, get_latest_version, parse_top_level_options,
+        extract_value, get_available_monitors, get_config_path, get_latest_version,
+        parse_top_level_options,
     },
 };
 
@@ -40,6 +41,7 @@ pub struct WidgetData {
 pub struct ConfigWidget {
     pub options: HashMap<String, WidgetData>,
     pub scrolled_window: ScrolledWindow,
+    pub is_programmatic_update: Rc<Cell<bool>>,
 }
 
 fn add_section(container: &Box, title: &str, description: &str, first_section: Rc<RefCell<bool>>) {
@@ -1242,63 +1244,6 @@ fn update_version_label(label: &Label, repo: &str, version: &str) {
         }
     };
     label.set_label(&version_str);
-}
-
-// transform from general{snap{enabled = true}} to general:snap:enabled = true
-fn transform_config(input: String) -> String {
-    let mut result = Vec::new();
-    let mut path = VecDeque::new();
-
-    for line in input.lines() {
-        let line = line.split('#').next().unwrap_or_default().trim();
-        if line.ends_with('{') {
-            // start of the block
-            let key = line.trim_end_matches('{').trim();
-            path.push_back(key.to_string());
-        } else if line == "}" {
-            // end of the block
-            path.pop_back();
-        } else if line.contains('=') {
-            let mut parts = line.splitn(2, '=');
-            let key = parts.next().unwrap().trim();
-            let value = parts.next().unwrap().trim();
-            let prefix = path.iter().cloned().collect::<Vec<_>>().join(":");
-            let full_key = if !prefix.is_empty() {
-                format!("{prefix}:{key}")
-            } else {
-                key.to_string()
-            };
-            result.push(format!("{full_key} = {value}"));
-        }
-    }
-
-    result.join("\n")
-}
-
-fn extract_value(config: &HyprlandConfig, category: &str, name: &str, default: &str) -> String {
-    let config_str = transform_config(config.to_string());
-    if category == "layouts" {
-        for line in config_str.lines().rev() {
-            if line.trim().starts_with(&format!("{name} = ")) {
-                return line
-                    .split('=')
-                    .nth(1)
-                    .map(|s| s.trim().to_string())
-                    .unwrap_or_default();
-            }
-        }
-    } else {
-        for line in config_str.lines().rev() {
-            if line.trim().starts_with(&format!("{category}:{name} = ")) {
-                return line
-                    .split('=')
-                    .nth(1)
-                    .map(|s| s.trim().to_string())
-                    .unwrap_or_default();
-            }
-        }
-    }
-    default.to_string()
 }
 
 impl ConfigWidget {
@@ -4955,6 +4900,7 @@ impl ConfigWidget {
         ConfigWidget {
             options,
             scrolled_window,
+            is_programmatic_update: Rc::new(Cell::new(false)),
         }
     }
 
@@ -4976,7 +4922,12 @@ impl ConfigWidget {
                 let category = category.to_string();
                 let name = name.to_string();
                 let history = history.clone();
+                let is_prog_update = self.is_programmatic_update.clone();
                 spin_button.connect_value_changed(move |sb| {
+                    if is_prog_update.get() {
+                        return;
+                    }
+
                     let mut history = history.borrow_mut();
                     let new_value = sb.value().to_string();
                     history.record_change(category.clone(), name.clone(), new_value);
@@ -4986,7 +4937,12 @@ impl ConfigWidget {
                 let category = category.to_string();
                 let name = name.to_string();
                 let history = history.clone();
+                let is_prog_update = self.is_programmatic_update.clone();
                 entry.connect_changed(move |entry| {
+                    if is_prog_update.get() {
+                        return;
+                    }
+
                     let mut history = history.borrow_mut();
                     let new_value = entry.text().to_string();
                     history.record_change(category.clone(), name.clone(), new_value);
@@ -5004,7 +4960,12 @@ impl ConfigWidget {
                 let category = category.to_string();
                 let name = name.to_string();
                 let history = history.clone();
+                let is_prog_update = self.is_programmatic_update.clone();
                 switch.connect_active_notify(move |sw| {
+                    if is_prog_update.get() {
+                        return;
+                    }
+
                     let mut history = history.borrow_mut();
                     let new_value = sw.is_active().to_string();
                     history.record_change(category.clone(), name.clone(), new_value);
@@ -5016,7 +4977,12 @@ impl ConfigWidget {
                 let category = category.to_string();
                 let name = name.to_string();
                 let history = history.clone();
+                let is_prog_update = self.is_programmatic_update.clone();
                 color_button.connect_rgba_notify(move |cb| {
+                    if is_prog_update.get() {
+                        return;
+                    }
+
                     let mut history = history.borrow_mut();
                     let new_color = cb.rgba();
                     let new_value = format!(
@@ -5050,8 +5016,13 @@ impl ConfigWidget {
                 let category = category.to_string();
                 let name = name.to_string();
                 let history = history.clone();
+                let is_prog_update = self.is_programmatic_update.clone();
 
                 dropdown.connect_selected_notify(move |dd| {
+                    if is_prog_update.get() {
+                        return;
+                    }
+
                     let mut history = history.borrow_mut();
 
                     if is_numeric {
