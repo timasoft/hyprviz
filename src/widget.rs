@@ -1014,6 +1014,7 @@ fn add_pos_float_vec_option(
     );
 }
 
+#[allow(clippy::too_many_arguments)]
 fn append_option_row(
     window: &ApplicationWindow,
     gtkbox: &Box,
