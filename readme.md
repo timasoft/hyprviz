@@ -124,7 +124,7 @@ If you manage your NixOS configuration with flakes, add hyprviz as an input in y
 - ~~Add monitor layuot editor~~
 - [x] Add fancy editors for all options
 - [x] Add symlink support
-- [ ] Add CTRL-Z/CTRL-Y support
+- [x] Add CTRL-Z/CTRL-Y support
 - [ ] Add confirmation dialog for editing main hyprland.conf
 - [ ] Add row actions (discard/remove) for individual options
 - [ ] Add support for waybar, swaync, hyprlock...
