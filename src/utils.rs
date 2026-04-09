@@ -1660,17 +1660,21 @@ impl HistoryManager {
         &self.current_state
     }
 
-    pub fn update_initial_state_and_clear(
-        &mut self,
-        initial_state: HashMap<(String, String), String>,
-    ) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
-        self.initial_state = initial_state;
-        self.current_state.clear();
-        self.last_change_key = None;
+    pub fn clear_initial_state(&mut self) {
+        self.initial_state.clear();
     }
 
+    pub fn insert_to_initial_state(
+        &mut self,
+        category: String,
+        key: String,
+        value: String,
+    ) -> Option<String> {
+        let change_key = (category.clone(), key.clone());
+        self.initial_state.insert(change_key, value)
+    }
+
+    /// Clears everything expect initial_state, max_history, last_change_time and coalesce_threshold_ms
     pub fn clear(&mut self) {
         self.undo_stack.clear();
         self.redo_stack.clear();

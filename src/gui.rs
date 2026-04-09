@@ -1,9 +1,9 @@
 use crate::{
     utils::{
-        ConfigChange, HistoryManager, atomic_write, expand_source, extract_value,
-        find_all_profiles, get_config_path, is_development_mode, mute_stdout, reload_hyprland,
+        ConfigChange, HistoryManager, atomic_write, expand_source, find_all_profiles,
+        get_config_path, is_development_mode, mute_stdout, reload_hyprland,
     },
-    widget::ConfigWidget,
+    widget::{ConfigWidget, DynamicTopLevelRow},
 };
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
@@ -23,6 +23,7 @@ use std::{
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
     config_widgets: HashMap<String, ConfigWidget>,
+    top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
     title_label: Label,
     save_button: Button,
     pub profile_dropdown: DropDown,
@@ -180,6 +181,7 @@ impl ConfigGUI {
         ConfigGUI {
             window,
             config_widgets,
+            top_level_rows: Rc::new(RefCell::new(HashMap::new())),
             title_label,
             save_button,
             profile_dropdown,
@@ -540,7 +542,40 @@ along with this program; if not, see
     }
 
     fn apply_undo_to_ui(&self, change: &ConfigChange) {
-        if let Some(category_widget) = self.config_widgets.get(&change.category)
+        if let Some(raw) = change.key.strip_suffix("_name")
+            && let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            && let Some(val) = &change.old_value
+        {
+            row.is_programmatic_update.set(true);
+            row.name_entry.set_text(val);
+            row.is_programmatic_update.set(false);
+        } else if let Some(raw) = change.key.strip_suffix("_value")
+            && let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            && let Some(val) = &change.old_value
+        {
+            row.is_programmatic_update.set(true);
+            row.value_entry.set_text(val);
+            row.is_programmatic_update.set(false);
+        } else if let Some(raw) = change.key.strip_suffix("_delete")
+            && change.new_value.as_deref() == Some("DELETE")
+            && let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            && let Some(cat_widget) = self.config_widgets.get(&change.category)
+            && let Some(wd) = cat_widget.options.get(&change.category)
+            && let Some(gtkbox) = wd.widget.downcast_ref::<gtk::Box>()
+        {
+            cat_widget.is_programmatic_update.set(true);
+            gtkbox.append(&row.vbox);
+            cat_widget.is_programmatic_update.set(false);
+        } else if let Some(category_widget) = self.config_widgets.get(&change.category)
             && let Some(widget_data) = category_widget.options.get(&change.key)
         {
             let widget = &widget_data.widget;
@@ -553,7 +588,40 @@ along with this program; if not, see
     }
 
     fn apply_redo_to_ui(&self, change: &ConfigChange) {
-        if let Some(category_widget) = self.config_widgets.get(&change.category)
+        if let Some(raw) = change.key.strip_suffix("_name")
+            && let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            && let Some(val) = &change.new_value
+        {
+            row.is_programmatic_update.set(true);
+            row.name_entry.set_text(val);
+            row.is_programmatic_update.set(false);
+        } else if let Some(raw) = change.key.strip_suffix("_value")
+            && let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            && let Some(val) = &change.new_value
+        {
+            row.is_programmatic_update.set(true);
+            row.value_entry.set_text(val);
+            row.is_programmatic_update.set(false);
+        } else if let Some(raw) = change.key.strip_suffix("_delete")
+            && change.new_value.as_deref() == Some("DELETE")
+            && let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            && let Some(cat_widget) = self.config_widgets.get(&change.category)
+            && let Some(wd) = cat_widget.options.get(&change.category)
+            && let Some(gtkbox) = wd.widget.downcast_ref::<gtk::Box>()
+        {
+            cat_widget.is_programmatic_update.set(true);
+            gtkbox.remove(&row.vbox);
+            cat_widget.is_programmatic_update.set(false);
+        } else if let Some(category_widget) = self.config_widgets.get(&change.category)
             && let Some(widget_data) = category_widget.options.get(&change.key)
         {
             let widget = &widget_data.widget;
@@ -747,6 +815,7 @@ along with this program; if not, see
                             &profile_name,
                             category,
                             self.history.clone(),
+                            self.top_level_rows.clone(),
                         );
                     }
                 }
@@ -908,6 +977,8 @@ along with this program; if not, see
             self.config_widgets.insert(category.to_string(), widget);
         }
 
+        self.history.borrow_mut().clear_initial_state();
+
         for (_, category) in &categories {
             if let Some(widget) = self.config_widgets.get(*category) {
                 widget.load_config(
@@ -916,27 +987,12 @@ along with this program; if not, see
                     profile_name,
                     category,
                     self.history.clone(),
+                    self.top_level_rows.clone(),
                 );
             }
         }
 
-        let mut initial_state = HashMap::new();
-
-        for (category, widget) in &self.config_widgets {
-            for (name, widget_data) in &widget.options {
-                if widget_data.widget.downcast_ref::<Box>().is_some() {
-                    continue;
-                }
-
-                let value = extract_value(config, category, name, &widget_data.default);
-
-                initial_state.insert((category.clone(), name.clone()), value);
-            }
-        }
-
-        self.history
-            .borrow_mut()
-            .update_initial_state_and_clear(initial_state);
+        self.history.borrow_mut().clear();
     }
 
     pub fn apply_changes(&self, config: &mut HyprlandConfig) {

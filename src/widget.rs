@@ -34,6 +34,14 @@ use crate::{
 
 use crate::system_info::*;
 
+#[derive(Clone)]
+pub struct DynamicTopLevelRow {
+    pub vbox: Box,
+    pub name_entry: Entry,
+    pub value_entry: Entry,
+    pub is_programmatic_update: Rc<Cell<bool>>,
+}
+
 pub struct WidgetData {
     pub widget: Widget,
     pub default: String,
@@ -1014,7 +1022,20 @@ fn append_option_row(
     value: String,
     history: &Rc<RefCell<HistoryManager>>,
     category: &str,
+    top_level_rows: &Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
+    is_programmatic_update: &Rc<Cell<bool>>,
 ) {
+    history.borrow_mut().insert_to_initial_state(
+        category.to_string(),
+        format!("{}_name", raw),
+        name.clone(),
+    );
+    history.borrow_mut().insert_to_initial_state(
+        category.to_string(),
+        format!("{}_value", raw),
+        value.clone(),
+    );
+
     let vbox = gtk::Box::new(gtk::Orientation::Vertical, 10);
     vbox.set_margin_top(5);
     vbox.set_margin_bottom(5);
@@ -1064,7 +1085,13 @@ fn append_option_row(
     let editor_box_clone = editor_box.clone();
     let show_button_clone = show_button.clone();
     let category_str = category.to_string();
+    let is_prog_update = is_programmatic_update.clone();
+
     name_entry.connect_changed(move |entry| {
+        if is_prog_update.get() {
+            return;
+        }
+
         let mut history = history_clone.borrow_mut();
         let new_name = entry.text().to_string();
         history.record_change(
@@ -1083,6 +1110,18 @@ fn append_option_row(
 
     boxline.append(&name_entry);
 
+    {
+        let row = DynamicTopLevelRow {
+            vbox: vbox.clone(),
+            name_entry: name_entry.clone(),
+            value_entry: value_entry.clone(),
+            is_programmatic_update: is_programmatic_update.clone(),
+        };
+        top_level_rows
+            .borrow_mut()
+            .insert((category.to_string(), raw.clone()), row);
+    }
+
     let equals_label = Label::new(Some("="));
     equals_label.set_xalign(0.5);
     boxline.append(&equals_label);
@@ -1097,8 +1136,13 @@ fn append_option_row(
     let history_clone = history.clone();
     let raw_clone = raw.clone();
     let category_str = category.to_string();
+    let is_prog_update = is_programmatic_update.clone();
 
     value_entry.connect_changed(move |entry| {
+        if is_prog_update.get() {
+            return;
+        }
+
         let mut history = history_clone.borrow_mut();
         let new_value = entry.text().to_string();
         history.record_change(
@@ -4911,11 +4955,21 @@ impl ConfigWidget {
         profile: &str,
         category: &str,
         history: Rc<RefCell<HistoryManager>>,
+        top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
     ) {
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
             let default_value = &widget_data.default;
             let value = extract_value(config, category, name, default_value);
+
+            if widget_data.widget.downcast_ref::<Box>().is_none() {
+                history.borrow_mut().insert_to_initial_state(
+                    category.to_string(),
+                    name.clone(),
+                    value.clone(),
+                );
+            }
+
             if let Some(spin_button) = widget.downcast_ref::<SpinButton>() {
                 let float_value = value.parse::<f64>().unwrap_or(0.0);
                 spin_button.set_value(float_value);
@@ -5233,6 +5287,8 @@ impl ConfigWidget {
                 let gtkbox_clone = gtkbox.clone();
 
                 let history_clone = history.clone();
+                let top_level_rows_clone = top_level_rows.clone();
+                let is_programmatic_update_clone = self.is_programmatic_update.clone();
 
                 let category_string = category.to_string();
 
@@ -5246,6 +5302,8 @@ impl ConfigWidget {
                         "".to_string(),
                         &history_clone,
                         &category_string,
+                        &top_level_rows_clone,
+                        &is_programmatic_update_clone,
                     );
                     *id += 1;
                 });
@@ -5260,14 +5318,34 @@ impl ConfigWidget {
                     .zip(parsed_headless_options)
                 {
                     if name.starts_with(category) || category == "top_level" {
-                        append_option_row(window, gtkbox, raw, name, value, &history, category);
+                        append_option_row(
+                            window,
+                            gtkbox,
+                            raw,
+                            name,
+                            value,
+                            &history,
+                            category,
+                            &top_level_rows,
+                            &self.is_programmatic_update,
+                        );
                         continue;
                     }
 
                     if (category == "bind" && (name.starts_with("unbind")))
                         || (category == "animation" && (name.starts_with("bezier")))
                     {
-                        append_option_row(window, gtkbox, raw, name, value, &history, category);
+                        append_option_row(
+                            window,
+                            gtkbox,
+                            raw,
+                            name,
+                            value,
+                            &history,
+                            category,
+                            &top_level_rows,
+                            &self.is_programmatic_update,
+                        );
                     }
                     continue;
                 }
