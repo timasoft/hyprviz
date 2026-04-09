@@ -11,10 +11,6 @@ gui.delete_profile:
   en: "Delete Profile"
   ru: "Удалить профиль"
   zh-CN: "删除配置文件"
-gui.clear_backups_files:
-  en: "Clear Backup Files"
-  ru: "Очистить резервные копии"
-  zh-CN: "清除备份文件"
 gui.save_hyprviz_config:
   en: "Save HyprViz Config"
   ru: "Сохранить конфигурацию HyprViz"
@@ -31,10 +27,6 @@ gui.save:
   en: "Save"
   ru: "Сохранить"
   zh-CN: "保存"
-gui.undo:
-  en: "Undo"
-  ru: "Отменить"
-  zh-CN: "撤销"
 gui.profile:
   en: "Profile:"
   ru: "Профиль:"
@@ -55,10 +47,6 @@ gui.cancel:
   en: "Cancel"
   ru: "Отмена"
   zh-CN: "取消"
-gui.clear:
-  en: "Clear"
-  ru: "Очистить"
-  zh-CN: "清除"
 gui.create:
   en: "Create"
   ru: "Создать"
@@ -119,46 +107,6 @@ gui.failed_to_delete_profile_file_:
   en: "Failed to delete profile file: %{error}"
   ru: "Не удалось удалить файл профиля: %{error}"
   zh-CN: "删除配置文件失败：%{error}"
-gui.no_backup_files:
-  en: "No backup files"
-  ru: "Нет файлов резервных копий"
-  zh-CN: "没有备份文件"
-gui.no_backup_files_found_to_delete:
-  en: "No backup files found to delete"
-  ru: "Файлы резервных копий для удаления не найдены"
-  zh-CN: "未找到要删除的备份文件"
-gui.are_you_sure_you_want_to_delete__backup_files:
-  en: "Are you sure you want to delete %{n} backup file(s)?"
-  ru: "Вы уверены, что хотите удалить %{n} файл(ов) резервных копий?"
-  zh-CN: "您确定要删除 %{n} 个备份文件吗？"
-gui.this_operation_cannot_be_undone:
-  en: "This operation cannot be undone"
-  ru: "Эта операция не может быть отменена"
-  zh-CN: "此操作无法撤销"
-gui.failed_to_delete__:
-  en: "Failed to delete %{file}: %{error}"
-  ru: "Не удалось удалить %{file}: %{error}"
-  zh-CN: "删除 %{file} 失败：%{error}"
-gui.partial_success:
-  en: "Partial Success"
-  ru: "Частичный успех"
-  zh-CN: "部分成功"
-gui.deleted__of__backup_files:
-  en: "Deleted %{n} of %{all} backup files"
-  ru: "Удалено %{n} из %{all} файлов резервных копий"
-  zh-CN: "已删除 %{all} 个备份文件中的 %{n} 个"
-gui.errors_:
-  en: "Errors:\n%{errors}"
-  ru: "Ошибки:\n%{errors}"
-  zh-CN: "错误：\n%{errors}"
-gui.success:
-  en: "Success"
-  ru: "Успех"
-  zh-CN: "成功"
-gui.successfully_deleted__backup_files:
-  en: "Successfully deleted %{n} backup file(s)"
-  ru: "Успешно удалено %{n} файл(ов) резервных копий"
-  zh-CN: "成功删除了 %{n} 个备份文件"
 gui.open:
   en: "Open"
   ru: "Открыть"
@@ -231,14 +179,6 @@ gui.failed_to_create_hyprviz_config_file_:
   en: "Failed to create hyprviz config file: %{error}"
   ru: "Не удалось создать файл конфигурации hyprviz: %{error}"
   zh-CN: "创建 hyprviz 配置文件失败：%{error}"
-gui.backup_failed:
-  en: "Backup Failed"
-  ru: "Резервное копирование не удалось"
-  zh-CN: "备份失败"
-gui.failed_to_create_backup_:
-  en: "Failed to create backup: %{error}"
-  ru: "Не удалось создать резервную копию: %{error}"
-  zh-CN: "创建备份失败：%{error}"
 gui.failed_to_save_the_configuration_automatically_:
   en: "Failed to save the configuration automatically: %{error}"
   ru: "Не удалось автоматически сохранить конфигурацию: %{error}"
@@ -247,42 +187,6 @@ gui.no_changes_to_save:
   en: "No changes to save"
   ru: "Нет изменений для сохранения"
   zh-CN: "没有需要保存的更改"
-gui.warning:
-  en: "Warning"
-  ru: "Предупреждение"
-  zh-CN: "警告"
-gui.backup_file_not_deleted_:
-  en: "Backup file was not deleted: %{error}"
-  ru: "Файл резервной копии не был удалён: %{error}"
-  zh-CN: "备份文件未删除：%{error}"
-gui.configuration_restored_from_backup:
-  en: "Configuration restored from backup"
-  ru: "Конфигурация восстановлена из резервной копии"
-  zh-CN: "配置已从备份恢复"
-gui.reload_failed:
-  en: "Reload Failed"
-  ru: "Перезагрузка не удалась"
-  zh-CN: "重新加载失败"
-gui.failed_to_reload_the_configuration_after_undo:
-  en: "Failed to reload the configuration after undo."
-  ru: "Не удалось перезагрузить конфигурацию после отмены."
-  zh-CN: "撤销后重新加载配置失败。"
-gui.undo_failed:
-  en: "Undo Failed"
-  ru: "Отмена не удалась"
-  zh-CN: "撤销失败"
-gui.failed_to_restore_from_backup_:
-  en: "Failed to restore from backup: %{error}"
-  ru: "Не удалось восстановить из резервной копии: %{error}"
-  zh-CN: "从备份恢复失败：%{error}"
-gui.failed_to_read_backup_file_:
-  en: "Failed to read backup file: %{error}"
-  ru: "Не удалось прочитать файл резервной копии: %{error}"
-  zh-CN: "读取备份文件失败：%{error}"
-gui.no_backup_file_found_save_changes_to_create_a_backup:
-  en: "No backup file found. Save changes to create a backup."
-  ru: "Файл резервной копии не найден. Сохраните изменения, чтобы создать резервную копию."
-  zh-CN: "未找到备份文件。保存更改以创建备份。"
 gui.general:
   en: "General"
   ru: "Основные"
