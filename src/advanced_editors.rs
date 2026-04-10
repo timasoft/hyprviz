@@ -14,7 +14,7 @@ use crate::{
         is_modifier, join_with_separator, keycode_to_en_key, parse_coordinates,
     },
 };
-use gio::glib::SignalHandlerId;
+use gio::glib::{self, SignalHandlerId};
 use gtk::{
     Align, ApplicationWindow, Box, Button, DrawingArea, DropDown, Entry, EventControllerKey,
     EventControllerMotion, GestureClick, Label, Orientation as GtkOrientation, Separator,
@@ -168,21 +168,37 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
 
     let bezier_clone = bezier.clone();
     drawing_area.set_draw_func(move |widget, cr, _width, _height| {
-        cr.set_source_rgb(1.0, 1.0, 1.0);
-        cr.paint().unwrap();
+        let get_theme_color = |name: &str, default: (f64, f64, f64, f64)| {
+            gtk::gdk::RGBA::parse(name)
+                .ok()
+                .map(|rgba| {
+                    (
+                        rgba.red() as f64,
+                        rgba.green() as f64,
+                        rgba.blue() as f64,
+                        rgba.alpha() as f64,
+                    )
+                })
+                .unwrap_or(default)
+        };
+
+        let (bg_r, bg_g, bg_b, bg_a) = get_theme_color("@theme_bg_color", (0.18, 0.18, 0.2, 1.0));
+        let (fg_r, fg_g, fg_b, _) = get_theme_color("@theme_fg_color", (0.9, 0.9, 0.9, 1.0));
+        let (accent_r, accent_g, accent_b, _) =
+            get_theme_color("@theme_selected_bg_color", (0.2, 0.5, 1.0, 1.0));
+        let (p0_r, p0_g, p0_b, _) = get_theme_color("@success_color", (0.0, 0.8, 0.0, 1.0));
+        let (p1_r, p1_g, p1_b, _) = get_theme_color("@warning_color", (1.0, 0.3, 0.3, 1.0));
 
         let scale_factor = widget.scale_factor() as f64;
         cr.scale(scale_factor, scale_factor);
 
-        cr.set_source_rgb(0.0, 0.0, 0.0);
-        cr.set_line_width(2.0 / scale_factor);
-        cr.move_to(0.0, SIZE / 3.0);
-        cr.line_to(SIZE, SIZE / 3.0);
-        cr.move_to(0.0, SIZE / 3.0 * 4.0);
-        cr.line_to(SIZE, SIZE / 3.0 * 4.0);
-        cr.stroke().unwrap();
+        cr.set_source_rgba(bg_r, bg_g, bg_b, bg_a);
+        if let Err(e) = cr.paint() {
+            glib::g_warning!("hyprviz", "Cairo paint error: {}", e);
+            return;
+        }
 
-        cr.set_source_rgba(0.8, 0.8, 0.8, 0.6);
+        cr.set_source_rgba(fg_r, fg_g, fg_b, 0.15);
         cr.set_line_width(1.0 / scale_factor);
 
         let grid_step = SIZE / 8.0;
@@ -198,19 +214,30 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
             cr.move_to(0.0, y);
             cr.line_to(SIZE, y);
         }
-
-        cr.stroke().unwrap();
+        cr.move_to(0.0, SIZE / 3.0);
+        cr.line_to(SIZE, SIZE / 3.0);
+        cr.move_to(0.0, SIZE / 3.0 * 4.0);
+        cr.line_to(SIZE, SIZE / 3.0 * 4.0);
+        if let Err(e) = cr.stroke() {
+            glib::g_warning!("hyprviz", "Cairo stroke error (grid): {}", e);
+            return;
+        }
 
         let bez = bezier_clone.borrow();
 
-        cr.set_source_rgba(0.7, 0.7, 0.7, 0.5);
+        cr.set_source_rgba(fg_r, fg_g, fg_b, 0.4);
+        cr.set_line_width(1.0 / scale_factor);
         cr.move_to(bez.point_at(0).x, bez.point_at(0).y);
         cr.line_to(bez.point_at(1).x, bez.point_at(1).y);
         cr.move_to(bez.point_at(2).x, bez.point_at(2).y);
         cr.line_to(bez.point_at(3).x, bez.point_at(3).y);
-        cr.stroke().unwrap();
+        if let Err(e) = cr.stroke() {
+            glib::g_warning!("hyprviz", "Cairo stroke error (control lines): {}", e);
+            return;
+        }
 
-        cr.set_source_rgb(0.15, 0.15, 0.99);
+        cr.set_source_rgba(accent_r, accent_g, accent_b, 1.0);
+        cr.set_line_width(2.0 / scale_factor);
         cr.move_to(bez.point_at(0).x, bez.point_at(0).y);
         cr.curve_to(
             bez.point_at(1).x,
@@ -220,17 +247,22 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
             bez.point_at(3).x,
             bez.point_at(3).y,
         );
-        cr.set_line_width(2.0 / scale_factor);
-        cr.stroke().unwrap();
+        if let Err(e) = cr.stroke() {
+            glib::g_warning!("hyprviz", "Cairo stroke error (bezier): {}", e);
+            return;
+        }
 
         for (i, p) in bez.points.iter().enumerate() {
             match i {
-                0 | 3 => cr.set_source_rgb(0.0, 1.0, 0.0),
-                1 | 2 => cr.set_source_rgb(1.0, 0.0, 0.0),
+                0 | 3 => cr.set_source_rgba(p1_r, p1_g, p1_b, 1.0),
+                1 | 2 => cr.set_source_rgba(p0_r, p0_g, p0_b, 1.0),
                 _ => {}
             }
             cr.arc(p.x, p.y, 6.0 / scale_factor, 0.0, 2.0 * f64::consts::PI);
-            cr.fill().unwrap();
+            if let Err(e) = cr.fill() {
+                glib::g_warning!("hyprviz", "Cairo fill error (point {}): {}", i, e);
+                return;
+            }
         }
     });
 
