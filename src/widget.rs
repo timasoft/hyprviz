@@ -1,7 +1,7 @@
 use gtk::{
-    ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry, Expander,
-    Frame, Grid, Justification, Label, Orientation, PolicyType, Popover, ScrolledWindow,
-    SpinButton, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
+    Align, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry,
+    Expander, IconSize, Image, Label, Orientation, PolicyType, Popover, PositionType,
+    ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
@@ -34,6 +34,8 @@ use crate::{
 
 use crate::system_info::*;
 
+const MARGIN_NORMAL: i32 = 12;
+
 #[derive(Clone)]
 pub struct DynamicTopLevelRow {
     pub vbox: Box,
@@ -53,55 +55,73 @@ pub struct ConfigWidget {
 }
 
 fn add_section(container: &Box, title: &str, description: &str, first_section: Rc<RefCell<bool>>) {
-    let section_box = Box::new(Orientation::Vertical, 5);
-    section_box.set_margin_top(15);
-    section_box.set_margin_bottom(10);
+    let section_box = Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(6)
+        .margin_top(MARGIN_NORMAL * 2)
+        .margin_bottom(MARGIN_NORMAL)
+        .build();
 
     let title_label = Label::new(Some(title));
+    title_label.set_use_markup(true);
+    title_label.set_halign(Align::Start);
+    title_label.set_margin_start(MARGIN_NORMAL);
+    title_label.set_margin_end(MARGIN_NORMAL);
+    title_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+    title_label.set_margin_bottom(MARGIN_NORMAL / 3);
+
     let desc_label = Label::new(Some(description));
     desc_label.set_wrap(true);
+    desc_label.set_halign(Align::Start);
+    desc_label.set_margin_start(MARGIN_NORMAL);
+    desc_label.set_margin_end(MARGIN_NORMAL);
+    desc_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
 
     if *first_section.borrow() {
-        title_label.set_halign(gtk::Align::Center);
-        desc_label.set_halign(gtk::Align::Center);
+        title_label.set_halign(Align::Center);
+        desc_label.set_halign(Align::Center);
         title_label.set_hexpand(true);
         desc_label.set_hexpand(true);
         *first_section.borrow_mut() = false;
+        title_label.add_css_class("title-1");
+        desc_label.add_css_class("body");
     } else {
-        title_label.set_halign(gtk::Align::Start);
-        desc_label.set_halign(gtk::Align::Start);
+        title_label.set_halign(Align::Start);
+        desc_label.set_halign(Align::Start);
+        title_label.add_css_class("title-2");
+        desc_label.add_css_class("subtitle");
     }
 
-    title_label.set_markup(&format!("<b>{title}</b>"));
     section_box.append(&title_label);
-
-    desc_label.set_opacity(0.7);
     section_box.append(&desc_label);
-
-    let frame = Frame::new(None);
-    frame.set_margin_top(10);
-    section_box.append(&frame);
-
     container.append(&section_box);
 }
 
 pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button) {
-    let row = Box::new(Orientation::Horizontal, 10);
-    row.set_margin_start(10);
-    row.set_margin_end(10);
-    row.set_margin_top(5);
-    row.set_margin_bottom(5);
+    let row = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    row.add_css_class("card");
 
     let label_widget = Label::new(Some(label));
     label_widget.set_xalign(0.0);
     label_widget.add_css_class("heading");
     label_widget.set_hexpand(false);
+    label_widget.set_margin_start(MARGIN_NORMAL);
+    label_widget.set_margin_top(MARGIN_NORMAL);
+    label_widget.set_margin_bottom(MARGIN_NORMAL);
 
     let value_widget = Label::new(Some(value));
     value_widget.set_xalign(0.0);
     value_widget.set_selectable(true);
     value_widget.set_hexpand(true);
     value_widget.set_wrap(true);
+    value_widget.set_margin_start(MARGIN_NORMAL / 2);
+    value_widget.set_margin_end(MARGIN_NORMAL / 2);
+    value_widget.set_margin_top(MARGIN_NORMAL);
+    value_widget.set_margin_bottom(MARGIN_NORMAL);
 
     let refresh_button = Button::from_icon_name("view-refresh-symbolic");
     if label.to_lowercase().contains("version") {
@@ -111,14 +131,17 @@ pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button
     } else {
         refresh_button.set_tooltip_text(Some(&t!("widget.refresh")));
     }
-    refresh_button.set_valign(gtk::Align::Center);
+    refresh_button.set_valign(Align::Center);
+    refresh_button.add_css_class("flat");
     refresh_button.set_has_frame(false);
+    refresh_button.set_margin_end(MARGIN_NORMAL);
+    refresh_button.set_margin_top(MARGIN_NORMAL);
+    refresh_button.set_margin_bottom(MARGIN_NORMAL);
 
     row.append(&label_widget);
     row.append(&value_widget);
     row.append(&refresh_button);
     container.append(&row);
-
     (value_widget, refresh_button)
 }
 
@@ -131,41 +154,50 @@ fn add_dropdown_option(
     items: &[&str],
     default: &str,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
+
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -176,24 +208,25 @@ fn add_dropdown_option(
 
     let string_list = StringList::new(items);
     let dropdown = DropDown::new(Some(string_list.clone()), None::<gtk::Expression>);
-    dropdown.set_halign(gtk::Align::End);
-    dropdown.set_width_request(100);
+    dropdown.set_valign(Align::Center);
+    dropdown.set_width_request(150);
+    dropdown.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let dropdown_clone = dropdown.clone();
     let parsed_default: String = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
     reset_button.connect_clicked(move |_| {
         for idx in 0..string_list.n_items() {
             if let Some(item) = string_list.item(idx) {
                 let item_str = item.property::<String>("string");
-
                 if item_str == parsed_default {
                     dropdown_clone.set_selected(idx);
                     break;
@@ -205,7 +238,6 @@ fn add_dropdown_option(
     hbox.append(&label_box);
     hbox.append(&dropdown);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -225,41 +257,49 @@ fn add_bool_option(
     description: &str,
     default: &str,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -269,19 +309,21 @@ fn add_bool_option(
     label_box.append(&tooltip_button);
 
     let switch = Switch::new();
-    switch.set_halign(gtk::Align::End);
-    switch.set_valign(gtk::Align::Center);
+    switch.set_halign(Align::End);
+    switch.set_valign(Align::Center);
+    switch.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let switch_clone = switch.clone();
     let parsed_default: bool = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
     reset_button.connect_clicked(move |_| {
         switch_clone.set_active(parsed_default);
     });
@@ -289,7 +331,6 @@ fn add_bool_option(
     hbox.append(&label_box);
     hbox.append(&switch);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -309,41 +350,49 @@ fn add_bool_int_option(
     description: &str,
     default: &str,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -353,20 +402,21 @@ fn add_bool_int_option(
     label_box.append(&tooltip_button);
 
     let switch = Switch::new();
-    switch.set_halign(gtk::Align::End);
-    switch.set_valign(gtk::Align::Center);
+    switch.set_halign(Align::End);
+    switch.set_valign(Align::Center);
+    switch.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let parsed_default: i32 = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
     switch.set_active(parsed_default == 1);
-
     let switch_clone = switch.clone();
     reset_button.connect_clicked(move |_| {
         switch_clone.set_active(parsed_default == 1);
@@ -375,7 +425,6 @@ fn add_bool_int_option(
     hbox.append(&label_box);
     hbox.append(&switch);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -396,41 +445,49 @@ fn add_int_option(
     default: &str,
     range: (f64, f64, f64),
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -442,19 +499,22 @@ fn add_int_option(
     let (min, max, step) = range;
     let spin_button = SpinButton::with_range(min, max, step);
     spin_button.set_digits(0);
-    spin_button.set_halign(gtk::Align::End);
-    spin_button.set_width_request(100);
+    spin_button.set_halign(Align::End);
+    spin_button.set_width_request(120);
+    spin_button.set_valign(Align::Center);
+    spin_button.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let spin_clone = spin_button.clone();
     let parsed_default: f64 = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
     reset_button.connect_clicked(move |_| {
         spin_clone.set_value(parsed_default);
     });
@@ -462,7 +522,6 @@ fn add_int_option(
     hbox.append(&label_box);
     hbox.append(&spin_button);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -483,41 +542,49 @@ fn add_float_option(
     default: &str,
     range: (f64, f64, f64),
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -529,19 +596,22 @@ fn add_float_option(
     let (min, max, step) = range;
     let spin_button = SpinButton::with_range(min, max, step);
     spin_button.set_digits(2);
-    spin_button.set_halign(gtk::Align::End);
-    spin_button.set_width_request(100);
+    spin_button.set_halign(Align::End);
+    spin_button.set_width_request(120);
+    spin_button.set_valign(Align::Center);
+    spin_button.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let spin_clone = spin_button.clone();
     let parsed_default: f64 = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
     reset_button.connect_clicked(move |_| {
         spin_clone.set_value(parsed_default);
     });
@@ -549,7 +619,6 @@ fn add_float_option(
     hbox.append(&label_box);
     hbox.append(&spin_button);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -569,41 +638,49 @@ fn add_string_option(
     description: &str,
     default: &str,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -613,13 +690,17 @@ fn add_string_option(
     label_box.append(&tooltip_button);
 
     let entry = Entry::new();
-    entry.set_halign(gtk::Align::End);
-    entry.set_width_request(100);
+    entry.set_halign(Align::End);
+    entry.set_width_request(150);
+    entry.set_valign(Align::Center);
+    entry.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let entry_clone = entry.clone();
     let parsed_default: String = default
@@ -653,41 +734,49 @@ fn add_color_option(
     description: &str,
     default: &str,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -699,13 +788,16 @@ fn add_color_option(
     let color_dialog = ColorDialog::new();
     color_dialog.set_with_alpha(true);
     let color_button = ColorDialogButton::new(Some(color_dialog));
-    color_button.set_halign(gtk::Align::End);
+    color_button.set_valign(Align::Center);
+    color_button.set_size_request(120, -1);
+    color_button.set_margin_end(MARGIN_NORMAL / 2);
 
     let entry = Entry::new();
     entry.set_max_length(9);
     entry.set_width_chars(9);
     entry.set_placeholder_text(Some("#RRGGBBAA"));
-    entry.set_halign(gtk::Align::End);
+    entry.set_valign(Align::Center);
+    entry.set_margin_end(MARGIN_NORMAL);
 
     {
         let rgba = color_button.rgba();
@@ -718,9 +810,11 @@ fn add_color_option(
     }
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let entry_clone = entry.clone();
     let parsed_default: String = default
@@ -789,41 +883,49 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     description: &str,
     default: &str,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -834,19 +936,22 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
 
     let entry = Entry::new();
     let gradient_box = T::to_gtk_box(&entry);
-    gradient_box.set_halign(gtk::Align::End);
-    gradient_box.set_width_request(100);
+    gradient_box.set_halign(Align::End);
+    gradient_box.set_valign(Align::Center);
+    gradient_box.set_width_request(150);
+    gradient_box.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let entry_clone = entry.clone();
     let parsed_default: T = default
         .parse()
         .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
     reset_button.connect_clicked(move |_| {
         entry_clone.set_text(&parsed_default.to_string());
     });
@@ -854,7 +959,6 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     hbox.append(&label_box);
     hbox.append(&gradient_box);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -919,41 +1023,49 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
     default: &str,
     separator: char,
 ) {
-    let hbox = Box::new(Orientation::Horizontal, 10);
-    hbox.set_margin_start(10);
-    hbox.set_margin_end(10);
-    hbox.set_margin_top(5);
-    hbox.set_margin_bottom(5);
+    let hbox = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    hbox.add_css_class("card");
 
-    let label_box = Box::new(Orientation::Horizontal, 5);
-    label_box.set_hexpand(true);
+    let label_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
+    label_box.set_margin_start(MARGIN_NORMAL);
+    label_box.set_margin_top(MARGIN_NORMAL);
+    label_box.set_margin_bottom(MARGIN_NORMAL);
 
     let label_widget = Label::new(None);
-    label_widget.set_halign(gtk::Align::Start);
+    label_widget.set_halign(Align::Start);
+    label_widget.set_use_markup(true);
     let formatted_text = format!(
-        "{}\n<span foreground=\"gray\">({})</span>",
+        "{}\n<span alpha='50%'><small>{}</small></span>",
         glib::markup_escape_text(label),
         glib::markup_escape_text(name)
     );
     label_widget.set_markup(&formatted_text);
-    label_widget.set_use_markup(true);
 
-    let popover = Popover::new();
+    let popover = Popover::builder().build();
     let description_label = Label::new(Some(description));
     description_label.set_wrap(true);
     description_label.set_width_chars(40);
     description_label.set_max_width_chars(60);
-    description_label.set_justify(Justification::Fill);
-    description_label.set_xalign(0.0);
-    description_label.set_margin_top(5);
-    description_label.set_margin_bottom(5);
-    description_label.set_margin_start(5);
-    description_label.set_margin_end(5);
+    description_label.set_margin_top(MARGIN_NORMAL / 2);
+    description_label.set_margin_bottom(MARGIN_NORMAL / 2);
+    description_label.set_margin_start(MARGIN_NORMAL * 2 / 3);
+    description_label.set_margin_end(MARGIN_NORMAL * 2 / 3);
     popover.set_child(Some(&description_label));
-    popover.set_position(gtk::PositionType::Right);
+    popover.set_position(PositionType::Bottom);
 
-    let tooltip_button = Button::from_icon_name("dialog-question-symbolic");
+    let tooltip_button = Button::from_icon_name("dialog-information-symbolic");
+    tooltip_button.add_css_class("flat");
     tooltip_button.set_has_frame(false);
+    tooltip_button.set_valign(Align::Center);
+    tooltip_button.set_margin_start(MARGIN_NORMAL / 3);
     tooltip_button.connect_clicked(move |button| {
         popover.set_parent(button);
         popover.popup();
@@ -964,17 +1076,20 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
 
     let entry = Entry::new();
     let gradient_box = T::to_gtk_box(&entry, separator);
-    gradient_box.set_halign(gtk::Align::End);
-    gradient_box.set_width_request(100);
+    gradient_box.set_halign(Align::End);
+    gradient_box.set_valign(Align::Center);
+    gradient_box.set_width_request(150);
+    gradient_box.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_valign(gtk::Align::Center);
+    reset_button.add_css_class("flat");
     reset_button.set_has_frame(false);
+    reset_button.set_valign(Align::Center);
+    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
+    reset_button.set_margin_end(MARGIN_NORMAL);
 
     let entry_clone = entry.clone();
     let default_string = default.to_string();
-
     reset_button.connect_clicked(move |_| {
         entry_clone.set_text(&default_string);
     });
@@ -982,7 +1097,6 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
     hbox.append(&label_box);
     hbox.append(&gradient_box);
     hbox.append(&reset_button);
-
     container.append(&hbox);
 
     options.insert(
@@ -1037,27 +1151,30 @@ fn append_option_row(
         value.clone(),
     );
 
-    let vbox = gtk::Box::new(gtk::Orientation::Vertical, 10);
-    vbox.set_margin_top(5);
-    vbox.set_margin_bottom(5);
-    vbox.set_margin_start(5);
-    vbox.set_margin_end(5);
+    let vbox = Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(8)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
+    vbox.add_css_class("card");
 
     let scrolled_window = ScrolledWindow::new();
     scrolled_window.set_vscrollbar_policy(PolicyType::Never);
+    scrolled_window.set_margin_start(MARGIN_NORMAL);
+    scrolled_window.set_margin_end(MARGIN_NORMAL);
+    scrolled_window.set_margin_top(MARGIN_NORMAL * 2 / 3);
+    scrolled_window.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
 
-    let main_box = Box::new(Orientation::Horizontal, 5);
-    main_box.set_margin_top(5);
-    main_box.set_margin_bottom(5);
-    main_box.set_margin_start(5);
-    main_box.set_margin_end(5);
+    let main_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(12)
+        .build();
 
-    let boxline = Box::new(Orientation::Horizontal, 5);
-    boxline.set_hexpand(true);
-    boxline.set_margin_top(5);
-    boxline.set_margin_bottom(5);
-    boxline.set_margin_start(5);
-    boxline.set_margin_end(5);
+    let boxline = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .hexpand(true)
+        .build();
 
     let value_entry = Entry::new();
     let (editor_box, show_button) = match category {
@@ -1065,21 +1182,21 @@ fn append_option_row(
         "bind" => create_bind_editor(window, &value_entry),
         _ => (Box::new(Orientation::Vertical, 5), Button::new()),
     };
-    show_button.set_margin_top(5);
-    show_button.set_margin_bottom(5);
-    show_button.set_margin_start(5);
-    show_button.set_margin_end(5);
+    show_button.add_css_class("flat");
+    show_button.set_has_frame(false);
+    show_button.set_margin_start(MARGIN_NORMAL / 2);
+    show_button.set_margin_end(MARGIN_NORMAL / 2);
 
     if category != "bind" {
-        show_button.set_visible(false)
+        show_button.set_visible(false);
     }
 
     let name_entry = Entry::new();
     name_entry.set_text(&name);
-    name_entry.set_margin_top(5);
-    name_entry.set_margin_bottom(5);
-    name_entry.set_margin_start(5);
-    name_entry.set_margin_end(5);
+    name_entry.set_margin_start(MARGIN_NORMAL);
+    name_entry.set_margin_end(MARGIN_NORMAL / 2);
+    name_entry.set_margin_top(MARGIN_NORMAL * 2 / 3);
+    name_entry.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
 
     let history_clone = history.clone();
     let raw_clone = raw.clone();
@@ -1125,14 +1242,19 @@ fn append_option_row(
 
     let equals_label = Label::new(Some("="));
     equals_label.set_xalign(0.5);
+    equals_label.add_css_class("heading");
+    equals_label.set_margin_start(MARGIN_NORMAL / 2);
+    equals_label.set_margin_end(MARGIN_NORMAL / 2);
+    equals_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+    equals_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
     boxline.append(&equals_label);
 
     value_entry.set_text(&value);
-    value_entry.set_margin_top(5);
-    value_entry.set_margin_bottom(5);
-    value_entry.set_margin_start(5);
-    value_entry.set_margin_end(5);
     value_entry.set_hexpand(true);
+    value_entry.set_margin_start(MARGIN_NORMAL / 2);
+    value_entry.set_margin_end(MARGIN_NORMAL);
+    value_entry.set_margin_top(MARGIN_NORMAL * 2 / 3);
+    value_entry.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
 
     let history_clone = history.clone();
     let raw_clone = raw.clone();
@@ -1157,8 +1279,10 @@ fn append_option_row(
 
     let delete_button = Button::from_icon_name("edit-delete-symbolic");
     delete_button.set_tooltip_text(Some(&t!("widget.delete_this_option")));
-    delete_button.set_valign(gtk::Align::Center);
+    delete_button.set_valign(Align::Center);
+    delete_button.add_css_class("flat");
     delete_button.set_has_frame(false);
+    delete_button.set_margin_end(MARGIN_NORMAL);
 
     let gtkbox_clone = gtkbox.clone();
     let category_str = category.to_string();
@@ -1184,10 +1308,6 @@ fn append_option_row(
 
     let fancy_boxline = create_fancy_boxline(category, &name_entry, &value_entry);
     fancy_boxline.set_hexpand(true);
-    fancy_boxline.set_margin_top(5);
-    fancy_boxline.set_margin_bottom(5);
-    fancy_boxline.set_margin_start(5);
-    fancy_boxline.set_margin_end(5);
     fancy_boxline.set_visible(false);
 
     main_box.append(&fancy_boxline);
@@ -1195,10 +1315,9 @@ fn append_option_row(
     main_box.append(&show_button);
 
     let toggle_fancy_input_button = Button::with_label(&t!("widget.show_fancy_input"));
-    toggle_fancy_input_button.set_margin_top(10);
-    toggle_fancy_input_button.set_margin_bottom(10);
-    toggle_fancy_input_button.set_margin_start(5);
-    toggle_fancy_input_button.set_margin_end(5);
+    toggle_fancy_input_button.add_css_class("flat");
+    toggle_fancy_input_button.set_has_frame(false);
+    toggle_fancy_input_button.set_margin_end(MARGIN_NORMAL);
 
     let boxline_clone = boxline.clone();
     let fancy_boxline_clone = fancy_boxline.clone();
@@ -1229,27 +1348,51 @@ fn append_option_row(
 }
 
 fn add_guide(container: &Box, name: &str, default_collapsed: bool) {
-    let expander = Expander::new(None);
-    expander.set_margin_top(5);
-    expander.set_margin_bottom(10);
+    let guide_header_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .margin_start(MARGIN_NORMAL)
+        .margin_end(MARGIN_NORMAL)
+        .margin_top(MARGIN_NORMAL * 4 / 3)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
+        .build();
 
-    let title_label = Label::new(None);
-    title_label.set_halign(gtk::Align::Start);
+    let guide_icon = Image::from_icon_name("dialog-information-symbolic");
+    guide_icon.set_icon_size(IconSize::Large);
+    guide_header_box.append(&guide_icon);
+
+    let title_label = Label::new(Some(&t!("widget.guide")));
+    title_label.set_halign(Align::Start);
     title_label.add_css_class("heading");
-    title_label.set_markup(&t!("widget.guide"));
+    title_label.add_css_class("title-2");
+    guide_header_box.append(&title_label);
 
-    expander.set_label_widget(Some(&title_label));
+    container.append(&guide_header_box);
 
-    expander.set_expanded(!default_collapsed);
+    let expander_content_box = Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(6)
+        .margin_start(0)
+        .margin_end(MARGIN_NORMAL)
+        .margin_bottom(MARGIN_NORMAL * 4 / 3)
+        .build();
+    expander_content_box.add_css_class("card");
 
     let guide_box = create_guide(name);
-    expander.set_child(Some(&guide_box));
+    guide_box.set_margin_start(MARGIN_NORMAL);
+    guide_box.set_margin_end(MARGIN_NORMAL);
+    guide_box.set_margin_top(MARGIN_NORMAL);
+    guide_box.set_margin_bottom(MARGIN_NORMAL);
+
+    expander_content_box.append(&guide_box);
+
+    let expander = Expander::new(None);
+    expander.set_margin_start(MARGIN_NORMAL * 2);
+    expander.set_margin_end(0);
+    expander.set_expanded(!default_collapsed);
+    expander.set_child(Some(&expander_content_box));
 
     container.append(&expander);
-
-    let frame = Frame::new(None);
-    frame.set_margin_bottom(10);
-    container.append(&frame);
 }
 
 fn update_version_label(label: &Label, repo: &str, version: &str) {
@@ -1298,10 +1441,10 @@ impl ConfigWidget {
         scrolled_window.set_propagate_natural_height(true);
 
         let container = Box::new(Orientation::Vertical, 0);
-        container.set_margin_start(20);
-        container.set_margin_end(20);
-        container.set_margin_top(20);
-        container.set_margin_bottom(20);
+        container.set_margin_start(MARGIN_NORMAL * 5 / 3);
+        container.set_margin_end(MARGIN_NORMAL * 5 / 3);
+        container.set_margin_top(MARGIN_NORMAL * 5 / 3);
+        container.set_margin_bottom(MARGIN_NORMAL * 5 / 3);
 
         scrolled_window.set_child(Some(&container));
 
@@ -4431,21 +4574,21 @@ impl ConfigWidget {
                 );
 
                 let info_box = Box::new(Orientation::Vertical, 10);
-                info_box.set_margin_top(10);
-                info_box.set_margin_bottom(10);
-                info_box.set_margin_start(15);
-                info_box.set_margin_end(15);
+                info_box.set_margin_top(MARGIN_NORMAL * 5 / 6);
+                info_box.set_margin_bottom(MARGIN_NORMAL * 5 / 6);
+                info_box.set_margin_start(MARGIN_NORMAL * 5 / 4);
+                info_box.set_margin_end(MARGIN_NORMAL * 5 / 4);
 
                 let os_info_box = Box::new(Orientation::Horizontal, 5);
-                os_info_box.set_margin_top(10);
-                os_info_box.set_margin_bottom(10);
+                os_info_box.set_margin_top(MARGIN_NORMAL * 5 / 6);
+                os_info_box.set_margin_bottom(MARGIN_NORMAL * 5 / 6);
 
                 if let Some(path) = get_distro_logo_path() {
                     let picture = gtk::Picture::for_filename(&path);
                     picture.set_vexpand(true);
                     picture.set_valign(gtk::Align::Fill);
                     picture.set_content_fit(gtk::ContentFit::ScaleDown);
-                    picture.set_margin_end(10);
+                    picture.set_margin_end(MARGIN_NORMAL * 5 / 6);
                     os_info_box.append(&picture);
                 }
 
@@ -4569,7 +4712,7 @@ impl ConfigWidget {
                     search_entry.set_placeholder_text(Some(&t!(
                         "widget.togtkbox_test_category.search_placeholder"
                     )));
-                    search_entry.set_margin_bottom(10);
+                    search_entry.set_margin_bottom(MARGIN_NORMAL * 5 / 6);
                     container.prepend(&search_entry);
 
                     let titles_lower: Vec<String> = test_boxes
@@ -5099,21 +5242,27 @@ impl ConfigWidget {
                     "widget.this_is_a_read_only__from_main_config",
                     category_name = name
                 );
-
                 let read_only_label = Label::new(Some(read_only_str));
-                read_only_label.set_halign(gtk::Align::Start);
-                read_only_label.set_markup(&format!("<b>{read_only_str}</b>"));
-
+                read_only_label.set_halign(Align::Start);
+                read_only_label.set_margin_start(MARGIN_NORMAL);
+                read_only_label.set_margin_top(MARGIN_NORMAL * 4 / 3);
+                read_only_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                read_only_label.add_css_class("heading");
+                read_only_label.add_css_class("title-2");
                 gtkbox.append(&read_only_label);
 
-                let frame = Frame::new(None);
-                frame.set_margin_top(10);
-
-                gtkbox.append(&frame);
+                let read_only_container = Box::builder()
+                    .orientation(Orientation::Vertical)
+                    .spacing(6)
+                    .margin_start(MARGIN_NORMAL)
+                    .margin_end(MARGIN_NORMAL)
+                    .margin_top(MARGIN_NORMAL * 2 / 3)
+                    .margin_bottom(MARGIN_NORMAL * 4 / 3)
+                    .build();
+                read_only_container.add_css_class("card");
 
                 let read_only_path = get_config_path(false, profile);
                 let rw_path = get_config_path(true, profile);
-
                 let profile_path = if profile == "Default" {
                     "./hyprviz.conf".to_string()
                 } else {
@@ -5150,15 +5299,12 @@ impl ConfigWidget {
                             "widget.error_reading_",
                             path = read_only_path.to_string_lossy()
                         )));
-
-                        error_label.set_markup("<span foreground=\"red\">{read_only_path}</span>");
-                        error_label.set_margin_top(5);
-                        error_label.set_margin_bottom(5);
-                        error_label.set_margin_start(5);
-                        error_label.set_margin_end(5);
-
-                        gtkbox.append(&error_label);
-
+                        error_label.add_css_class("error");
+                        error_label.set_margin_start(MARGIN_NORMAL);
+                        error_label.set_margin_end(MARGIN_NORMAL);
+                        error_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                        error_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                        read_only_container.append(&error_label);
                         String::new()
                     }
                 };
@@ -5171,16 +5317,12 @@ impl ConfigWidget {
                                 "widget.error_reading_",
                                 path = read_only_path.to_string_lossy()
                             )));
-
-                            error_label
-                                .set_markup("<span foreground=\"red\">{read_only_path}</span>");
-                            error_label.set_margin_top(5);
-                            error_label.set_margin_bottom(5);
-                            error_label.set_margin_start(5);
-                            error_label.set_margin_end(5);
-
-                            gtkbox.append(&error_label);
-
+                            error_label.add_css_class("error");
+                            error_label.set_margin_start(MARGIN_NORMAL);
+                            error_label.set_margin_end(MARGIN_NORMAL);
+                            error_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                            error_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                            read_only_container.append(&error_label);
                             String::new()
                         }
                     };
@@ -5188,16 +5330,16 @@ impl ConfigWidget {
                 let parsed_headless_readonly_options =
                     parse_top_level_options(&read_only_config, false);
 
-                let options_grid = Grid::new();
-                options_grid.set_column_spacing(10);
-                options_grid.set_row_spacing(5);
-                options_grid.set_margin_top(10);
-                options_grid.set_margin_bottom(10);
-                options_grid.set_margin_start(5);
-                options_grid.set_margin_end(5);
+                let options_list = Box::builder()
+                    .orientation(Orientation::Vertical)
+                    .spacing(4)
+                    .margin_start(MARGIN_NORMAL)
+                    .margin_end(MARGIN_NORMAL)
+                    .margin_top(MARGIN_NORMAL * 2 / 3)
+                    .margin_bottom(MARGIN_NORMAL)
+                    .build();
 
-                for (row_num, (name, value)) in parsed_headless_readonly_options.iter().enumerate()
-                {
+                for (name, value) in parsed_headless_readonly_options.iter() {
                     if !name.starts_with(category)
                         && category != "top_level"
                         && !((category == "bind" && name.starts_with("unbind"))
@@ -5206,98 +5348,96 @@ impl ConfigWidget {
                         continue;
                     }
 
+                    let option_row = Box::builder()
+                        .orientation(Orientation::Horizontal)
+                        .spacing(12)
+                        .build();
+                    option_row.add_css_class("row");
+
                     let name_label = Label::new(Some(name));
                     name_label.set_xalign(0.0);
-                    name_label.set_size_request(name_label.width(), 1);
                     name_label.set_selectable(true);
+                    name_label.set_margin_start(MARGIN_NORMAL);
+                    name_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                    name_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                    name_label.add_css_class("monospace");
 
                     let equals_label = Label::new(Some("="));
                     equals_label.set_xalign(0.5);
-                    equals_label.set_markup("<b>=</b>");
+                    equals_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                    equals_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
 
                     let value_label = Label::new(Some(value));
                     value_label.set_xalign(0.0);
                     value_label.set_selectable(true);
                     value_label.set_wrap(true);
+                    value_label.set_margin_end(MARGIN_NORMAL);
+                    value_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                    value_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                    value_label.add_css_class("monospace");
 
-                    let row_num = row_num as i32;
-
-                    options_grid.attach(&name_label, 0, row_num, 1, 1);
-                    options_grid.attach(&equals_label, 1, row_num, 1, 1);
-                    options_grid.attach(&value_label, 2, row_num, 1, 1);
+                    option_row.append(&name_label);
+                    option_row.append(&equals_label);
+                    option_row.append(&value_label);
+                    options_list.append(&option_row);
                 }
 
                 let expander = Expander::new(Some(&t!("widget.show_read_only_options")));
-                expander.set_margin_top(10);
-                expander.set_margin_bottom(10);
-                expander.set_margin_start(5);
-                expander.set_margin_end(5);
+                expander.set_margin_start(MARGIN_NORMAL);
+                expander.set_margin_end(MARGIN_NORMAL);
+                expander.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                expander.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                expander.set_expanded(false);
+                expander.add_css_class("card");
+                expander.set_child(Some(&options_list));
+                read_only_container.append(&expander);
 
-                expander.set_child(Some(&options_grid));
-
-                gtkbox.append(&expander);
+                gtkbox.append(&read_only_container);
 
                 let rw_str = &t!(
                     "widget.this_is_a_read_write__from_your_profile",
                     category_name = name
                 );
-
                 let rw_label = Label::new(Some(rw_str));
-                rw_label.set_halign(gtk::Align::Start);
-                rw_label.set_margin_top(10);
-                rw_label.set_markup(&format!("<b>{rw_str}</b>"));
-
+                rw_label.set_halign(Align::Start);
+                rw_label.set_margin_start(MARGIN_NORMAL);
+                rw_label.set_margin_top(MARGIN_NORMAL * 4 / 3);
+                rw_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                rw_label.add_css_class("heading");
+                rw_label.add_css_class("title-2");
                 gtkbox.append(&rw_label);
 
-                let frame = Frame::new(None);
-                frame.set_margin_top(10);
-
-                gtkbox.append(&frame);
-
-                let rw_config = match expand_source(&rw_path) {
-                    Ok(rw_config) => rw_config,
-                    Err(_) => {
-                        let error_label = Label::new(Some(&t!(
-                            "widget.error_reading_",
-                            path = rw_path.to_string_lossy()
-                        )));
-
-                        error_label.set_markup("<span foreground=\"red\">{rw_path}</span>");
-                        error_label.set_margin_top(5);
-                        error_label.set_margin_bottom(5);
-                        error_label.set_margin_start(5);
-                        error_label.set_margin_end(5);
-
-                        gtkbox.append(&error_label);
-
-                        String::new()
-                    }
-                };
+                let rw_container = Box::builder()
+                    .orientation(Orientation::Vertical)
+                    .spacing(8)
+                    .margin_start(MARGIN_NORMAL)
+                    .margin_end(MARGIN_NORMAL)
+                    .margin_top(MARGIN_NORMAL * 2 / 3)
+                    .margin_bottom(MARGIN_NORMAL * 4 / 3)
+                    .build();
+                rw_container.add_css_class("card");
 
                 let create_button = Button::with_label(&t!("widget.create"));
-
-                create_button.set_margin_top(10);
-                create_button.set_margin_bottom(10);
-                create_button.set_margin_start(5);
-                create_button.set_margin_end(5);
-                create_button.set_width_request(256);
+                create_button.add_css_class("suggested-action");
+                create_button.set_margin_start(MARGIN_NORMAL);
+                create_button.set_margin_end(MARGIN_NORMAL);
+                create_button.set_margin_top(MARGIN_NORMAL);
+                create_button.set_margin_bottom(MARGIN_NORMAL);
+                create_button.set_halign(Align::Fill);
+                rw_container.append(&create_button);
 
                 let id_new = Rc::new(RefCell::new(0));
-
                 let window_clone = window.clone();
-                let gtkbox_clone = gtkbox.clone();
-
+                let rw_container_clone = rw_container.clone();
                 let history_clone = history.clone();
                 let top_level_rows_clone = top_level_rows.clone();
                 let is_programmatic_update_clone = self.is_programmatic_update.clone();
-
                 let category_string = category.to_string();
-
                 create_button.connect_clicked(move |_| {
                     let mut id = id_new.borrow_mut();
                     append_option_row(
                         &window_clone,
-                        &gtkbox_clone,
+                        &rw_container_clone,
                         id.to_string(),
                         "".to_string(),
                         "".to_string(),
@@ -5309,11 +5449,25 @@ impl ConfigWidget {
                     *id += 1;
                 });
 
-                gtkbox.append(&create_button);
+                let rw_config = match expand_source(&rw_path) {
+                    Ok(rw_config) => rw_config,
+                    Err(_) => {
+                        let error_label = Label::new(Some(&t!(
+                            "widget.error_reading_",
+                            path = rw_path.to_string_lossy()
+                        )));
+                        error_label.add_css_class("error");
+                        error_label.set_margin_start(MARGIN_NORMAL);
+                        error_label.set_margin_end(MARGIN_NORMAL);
+                        error_label.set_margin_top(MARGIN_NORMAL * 2 / 3);
+                        error_label.set_margin_bottom(MARGIN_NORMAL * 2 / 3);
+                        rw_container.append(&error_label);
+                        String::new()
+                    }
+                };
 
                 let parsed_headless_options_raw = parse_top_level_options(&rw_config, true);
                 let parsed_headless_options = parse_top_level_options(&rw_config, false);
-
                 for ((raw, _), (name, value)) in parsed_headless_options_raw
                     .into_iter()
                     .zip(parsed_headless_options)
@@ -5321,7 +5475,7 @@ impl ConfigWidget {
                     if name.starts_with(category) || category == "top_level" {
                         append_option_row(
                             window,
-                            gtkbox,
+                            &rw_container,
                             raw,
                             name,
                             value,
@@ -5332,13 +5486,12 @@ impl ConfigWidget {
                         );
                         continue;
                     }
-
                     if (category == "bind" && (name.starts_with("unbind")))
                         || (category == "animation" && (name.starts_with("bezier")))
                     {
                         append_option_row(
                             window,
-                            gtkbox,
+                            &rw_container,
                             raw,
                             name,
                             value,
@@ -5350,6 +5503,8 @@ impl ConfigWidget {
                     }
                     continue;
                 }
+
+                gtkbox.append(&rw_container);
             }
         }
     }
