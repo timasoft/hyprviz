@@ -1,7 +1,7 @@
 use crate::{
     utils::{
-        ConfigChange, HistoryManager, atomic_write, expand_source, find_all_profiles,
-        get_config_path, is_development_mode, mute_stdout, reload_hyprland,
+        ConfigChange, HistoryManager, MARGIN_NORMAL, atomic_write, expand_source,
+        find_all_profiles, get_config_path, is_development_mode, mute_stdout, reload_hyprland,
     },
     widget::{ConfigWidget, DynamicTopLevelRow},
 };
@@ -63,10 +63,10 @@ impl ConfigGUI {
         gear_menu.borrow().set_parent(&gear_button);
 
         let gear_menu_box = Box::new(Orientation::Vertical, 5);
-        gear_menu_box.set_margin_top(5);
-        gear_menu_box.set_margin_bottom(5);
-        gear_menu_box.set_margin_start(5);
-        gear_menu_box.set_margin_end(5);
+        gear_menu_box.set_margin_top(MARGIN_NORMAL / 2);
+        gear_menu_box.set_margin_bottom(MARGIN_NORMAL / 2);
+        gear_menu_box.set_margin_start(MARGIN_NORMAL / 2);
+        gear_menu_box.set_margin_end(MARGIN_NORMAL / 2);
 
         let search_button = Button::from_icon_name("system-search-symbolic");
         let search_entry = SearchEntry::new();
@@ -138,6 +138,7 @@ impl ConfigGUI {
         header_bar.pack_start(&locale_dropdown);
 
         let save_button = Button::with_label(&t!("gui.save"));
+        save_button.add_css_class("suggested-action");
 
         let profiles = if let Some(mut profiles) = find_all_profiles() {
             if profiles.contains(&"Default".to_string()) {
@@ -244,12 +245,13 @@ impl ConfigGUI {
                     .build();
 
                 let dialog_box = Box::new(Orientation::Vertical, 10);
-                dialog_box.set_margin_top(10);
-                dialog_box.set_margin_bottom(10);
-                dialog_box.set_margin_start(10);
-                dialog_box.set_margin_end(10);
+                dialog_box.set_margin_top(MARGIN_NORMAL);
+                dialog_box.set_margin_bottom(MARGIN_NORMAL);
+                dialog_box.set_margin_start(MARGIN_NORMAL);
+                dialog_box.set_margin_end(MARGIN_NORMAL);
 
                 let label = Label::new(Some(&t!("gui.enter_profile_name")));
+                label.add_css_class("body");
                 let entry = Entry::new();
                 entry.set_placeholder_text(Some(&t!("gui.new_profile")));
 
@@ -261,6 +263,7 @@ impl ConfigGUI {
 
                 let cancel_button = Button::with_label(&t!("gui.cancel"));
                 let create_button = Button::with_label(&t!("gui.create"));
+                create_button.add_css_class("suggested-action");
 
                 buttons_box.append(&cancel_button);
                 buttons_box.append(&create_button);
@@ -377,15 +380,16 @@ impl ConfigGUI {
                     .build();
 
                 let dialog_box = Box::new(Orientation::Vertical, 10);
-                dialog_box.set_margin_top(10);
-                dialog_box.set_margin_bottom(10);
-                dialog_box.set_margin_start(10);
-                dialog_box.set_margin_end(10);
+                dialog_box.set_margin_top(MARGIN_NORMAL);
+                dialog_box.set_margin_bottom(MARGIN_NORMAL);
+                dialog_box.set_margin_start(MARGIN_NORMAL);
+                dialog_box.set_margin_end(MARGIN_NORMAL);
 
                 let label = Label::new(Some(&t!(
                     "gui.are_you_sure_you_want_to_delete_the_profile_",
                     name = profile_name
                 )));
+                label.add_css_class("body");
                 label.set_wrap(true);
                 label.set_width_chars(45);
                 label.set_max_width_chars(60);
@@ -398,6 +402,7 @@ impl ConfigGUI {
 
                 let cancel_button = Button::with_label(&t!("gui.cancel"));
                 let delete_button = Button::with_label(&t!("gui.delete"));
+                delete_button.add_css_class("destructive-action");
 
                 buttons_box.append(&cancel_button);
                 buttons_box.append(&delete_button);
