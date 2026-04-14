@@ -9,9 +9,10 @@ use crate::{
         bind_right::parse_bind_right, monitor::parse_monitor, workspace::parse_workspace,
     },
     utils::{
-        MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, after_second_comma,
-        cow_to_static_str, get_available_monitors, get_available_resolutions_for_monitor,
-        is_modifier, join_with_separator, keycode_to_en_key, parse_coordinates,
+        MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64,
+        after_second_comma, cow_to_static_str, get_available_monitors,
+        get_available_resolutions_for_monitor, is_modifier, join_with_separator, keycode_to_en_key,
+        parse_coordinates,
     },
 };
 use gio::glib::{self, SignalHandlerId};
@@ -120,14 +121,15 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
     let vbox = Box::builder()
         .orientation(GtkOrientation::Vertical)
         .spacing(10)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(10)
-        .margin_bottom(10)
+        .margin_start(MARGIN_NORMAL)
+        .margin_end(MARGIN_NORMAL)
+        .margin_top(MARGIN_NORMAL)
+        .margin_bottom(MARGIN_NORMAL)
         .visible(false)
         .build();
 
     let toggle_button = Button::with_label(&t!("advanced_editors.show_editor"));
+    toggle_button.add_css_class("text-button");
 
     let vbox_clone = vbox.clone();
     let button_clone = toggle_button.clone();
@@ -595,7 +597,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             bind_left_box.append(&bind_type_dropdown);
 
             let flags_box = Box::new(GtkOrientation::Vertical, 5);
-            flags_box.set_margin_start(10);
+            flags_box.set_margin_start(MARGIN_NORMAL);
 
             let flag_names = BindFlagsEnum::get_all();
 
@@ -603,7 +605,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             for flag_name in flag_names {
                 let flag_box = Box::new(GtkOrientation::Horizontal, 5);
                 let switch = create_switch();
-                flag_box.append(&Label::new(Some(&flag_name.to_fancy_string())));
+                let label = Label::new(Some(&flag_name.to_fancy_string()));
+                label.add_css_class("body");
+                flag_box.append(&label);
                 flag_box.append(&switch);
                 flags_box.append(&flag_box);
                 switches.push((flag_name, switch));
@@ -736,10 +740,11 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             label.set_selectable(true);
 
             let bypass_switch_label = Label::new(Some(&t!("advanced_editors.bypass")));
+            bypass_switch_label.add_css_class("body");
             let bypass_switch = create_switch();
 
             let bypass_switch_box = Box::new(GtkOrientation::Horizontal, 5);
-            bypass_switch_box.set_margin_start(10);
+            bypass_switch_box.set_margin_start(MARGIN_NORMAL);
             bypass_switch_box.append(&bypass_switch_label);
             bypass_switch_box.append(&bypass_switch);
 
@@ -875,10 +880,11 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             label.set_selectable(true);
 
             let dbus_switch_label = Label::new(Some("D-Bus"));
+            dbus_switch_label.add_css_class("body");
             let dbus_switch = create_switch();
 
             let dbus_switch_box = Box::new(GtkOrientation::Horizontal, 5);
-            dbus_switch_box.set_margin_start(10);
+            dbus_switch_box.set_margin_start(MARGIN_NORMAL);
             dbus_switch_box.append(&dbus_switch_label);
             dbus_switch_box.append(&dbus_switch);
 
@@ -1129,8 +1135,8 @@ pub fn create_entry() -> Entry {
         .width_request(100)
         .hexpand(true)
         .halign(Align::Fill)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
         .vexpand(false)
         .valign(Align::Center)
         .build()
@@ -1141,8 +1147,8 @@ pub fn create_spin_button(min: f64, max: f64, step: f64) -> SpinButton {
     spin_button.set_width_request(100);
     spin_button.set_hexpand(true);
     spin_button.set_halign(Align::Fill);
-    spin_button.set_margin_top(5);
-    spin_button.set_margin_bottom(5);
+    spin_button.set_margin_top(MARGIN_NORMAL / 2);
+    spin_button.set_margin_bottom(MARGIN_NORMAL / 2);
     spin_button.set_vexpand(false);
     spin_button.set_valign(Align::Center);
     spin_button
@@ -1153,8 +1159,8 @@ pub fn create_dropdown(string_list: &StringList) -> DropDown {
     dropdown.set_width_request(100);
     dropdown.set_hexpand(true);
     dropdown.set_halign(Align::Fill);
-    dropdown.set_margin_top(5);
-    dropdown.set_margin_bottom(5);
+    dropdown.set_margin_top(MARGIN_NORMAL / 2);
+    dropdown.set_margin_bottom(MARGIN_NORMAL / 2);
     dropdown.set_vexpand(false);
     dropdown.set_valign(Align::Center);
     dropdown
@@ -1165,8 +1171,8 @@ pub fn create_switch() -> Switch {
         .width_request(50)
         .hexpand(false)
         .halign(Align::Center)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
         .vexpand(false)
         .valign(Align::Center)
         .build()
@@ -1177,8 +1183,8 @@ pub fn create_button(text: &str) -> Button {
         .width_request(100)
         .hexpand(true)
         .halign(Align::Fill)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
         .vexpand(false)
         .valign(Align::Center)
         .label(text)
@@ -2723,20 +2729,21 @@ fn fill_fancy_value_entry(
             });
 
             let workspace_rules_box = Box::new(GtkOrientation::Vertical, 5);
-            workspace_rules_box.set_margin_top(10);
+            workspace_rules_box.set_margin_top(MARGIN_NORMAL);
             fancy_value_entry.append(&workspace_rules_box);
 
             let workspace_rules_label = Label::new(Some(&t!("advanced_editors.workspace_rules")));
+            workspace_rules_label.add_css_class("heading");
             workspace_rules_label.set_markup(&format!(
                 "<b>{}</b>",
                 t!("advanced_editors.workspace_rules")
             ));
             workspace_rules_label.set_halign(gtk::Align::Start);
-            workspace_rules_label.set_margin_bottom(5);
+            workspace_rules_label.set_margin_bottom(MARGIN_NORMAL / 2);
             workspace_rules_box.append(&workspace_rules_label);
 
             let separator = Separator::new(GtkOrientation::Horizontal);
-            separator.set_margin_bottom(10);
+            separator.set_margin_bottom(MARGIN_NORMAL);
             workspace_rules_box.append(&separator);
 
             let monitor_box = Box::new(GtkOrientation::Horizontal, 5);
@@ -3638,7 +3645,7 @@ fn fill_fancy_value_entry(
                 animation_style_box.append(&animation_style_dropdown);
 
                 let style_params_box = Box::new(GtkOrientation::Vertical, 5);
-                style_params_box.set_margin_start(20);
+                style_params_box.set_margin_start(MARGIN_NORMAL * 5 / 3);
 
                 let side_label = Label::new(Some(&t!("advanced_editors.side")));
                 side_label.set_halign(Align::Start);
