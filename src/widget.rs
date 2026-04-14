@@ -26,15 +26,13 @@ use crate::{
     guides::create_guide,
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
-        HistoryManager, MAX_SAFE_INTEGER_F64, compare_versions, expand_source, expand_source_str,
-        extract_value, get_available_monitors, get_config_path, get_latest_version,
-        parse_top_level_options,
+        HistoryManager, MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, compare_versions, expand_source,
+        expand_source_str, extract_value, get_available_monitors, get_config_path,
+        get_latest_version, parse_top_level_options,
     },
 };
 
 use crate::system_info::*;
-
-const MARGIN_NORMAL: i32 = 12;
 
 #[derive(Clone)]
 pub struct DynamicTopLevelRow {
