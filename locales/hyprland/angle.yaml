@@ -1,0 +1,5 @@
+_version: 2
+hyprland.angle.degrees:
+  en: "Degrees"
+  ru: "Градусы"
+  zh-CN: "角度"
