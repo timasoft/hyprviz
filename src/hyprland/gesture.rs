@@ -4,9 +4,9 @@ use crate::{
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     hyprland::modifier::parse_modifiers,
     register_togtkbox,
-    utils::{MAX_SAFE_STEP_0_01_F64, join_with_separator},
+    utils::{MARGIN_NORMAL, MAX_SAFE_STEP_0_01_F64, join_with_separator},
 };
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, collections::HashSet, fmt::Display, rc::Rc, str::FromStr};
 
@@ -116,56 +116,81 @@ impl Display for Gesture {
 impl ToGtkBox for Gesture {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-        let finger_count_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        finger_count_box.append(&Label::new(Some(&t!("hyprland.gesture.finger_count"))));
+        let finger_count_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let finger_count_label = Label::new(Some(&t!("hyprland.gesture.finger_count")));
+        finger_count_label.set_halign(Align::Center);
+        finger_count_label.set_xalign(0.5);
+        finger_count_box.append(&finger_count_label);
         let finger_count_spin = create_spin_button(1.0, i32::MAX as f64, 1.0);
         finger_count_box.append(&finger_count_spin);
+        finger_count_box.set_hexpand(true);
         mother_box.append(&finger_count_box);
 
-        let direction_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        direction_box.append(&Label::new(Some(&t!("hyprland.gesture.direction"))));
+        let direction_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let dir_label = Label::new(Some(&t!("hyprland.gesture.direction")));
+        dir_label.set_halign(Align::Center);
+        dir_label.set_xalign(0.5);
+        direction_box.append(&dir_label);
         let direction_entry = create_entry();
         let direction_ui = GestureDirection::to_gtk_box(&direction_entry);
         direction_box.append(&direction_ui);
+        direction_box.set_hexpand(true);
         mother_box.append(&direction_box);
 
-        let action_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        action_box.append(&Label::new(Some(&t!("hyprland.gesture.action"))));
+        let action_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let act_label = Label::new(Some(&t!("hyprland.gesture.action")));
+        act_label.set_halign(Align::Center);
+        act_label.set_xalign(0.5);
+        action_box.append(&act_label);
         let action_entry = create_entry();
         let action_ui = GestureAction::to_gtk_box(&action_entry);
         action_box.append(&action_ui);
+        action_box.set_hexpand(true);
         mother_box.append(&action_box);
 
-        let anim_speed_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        let anim_speed_switch_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        anim_speed_switch_box.append(&Label::new(Some(&t!("hyprland.gesture.animation_speed"))));
+        let anim_speed_mother_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let anim_speed_switch_box = GtkBox::new(GtkOrientation::Horizontal, 4);
+        let anim_speed_label = Label::new(Some(&t!("hyprland.gesture.animation_speed")));
+        anim_speed_label.set_xalign(0.5);
+        anim_speed_switch_box.append(&anim_speed_label);
         let anim_speed_switch = create_switch();
         anim_speed_switch_box.append(&anim_speed_switch);
         anim_speed_mother_box.append(&anim_speed_switch_box);
 
-        let anim_speed_value_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let anim_speed_value_box = GtkBox::new(GtkOrientation::Horizontal, 4);
         let anim_speed_spin = create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
         anim_speed_spin.set_value(1.0);
+        anim_speed_spin.set_halign(Align::Center);
         anim_speed_value_box.append(&anim_speed_spin);
         anim_speed_value_box.set_visible(false);
         anim_speed_mother_box.append(&anim_speed_value_box);
+        anim_speed_mother_box.set_hexpand(true);
         mother_box.append(&anim_speed_mother_box);
 
-        let mods_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        let mods_switch_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        mods_switch_box.append(&Label::new(Some(&t!("hyprland.gesture.modifiers"))));
+        let mods_mother_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let mods_switch_box = GtkBox::new(GtkOrientation::Horizontal, 4);
+        let mods_label = Label::new(Some(&t!("hyprland.gesture.modifiers")));
+        mods_label.set_halign(Align::Center);
+        mods_label.set_xalign(0.5);
+        mods_switch_box.append(&mods_label);
         let mods_switch = create_switch();
         mods_switch_box.append(&mods_switch);
         mods_mother_box.append(&mods_switch_box);
 
-        let mods_value_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let mods_value_box = GtkBox::new(GtkOrientation::Vertical, 4);
         let mods_entry = create_entry();
         let mods_ui = HashSet::<Modifier>::to_gtk_box(&mods_entry, '_');
+        mods_ui.set_hexpand(true);
         mods_value_box.append(&mods_ui);
         mods_value_box.set_visible(false);
         mods_mother_box.append(&mods_value_box);
+        mods_mother_box.set_hexpand(true);
         mother_box.append(&mods_mother_box);
 
         let finger_count_spin_clone = finger_count_spin.clone();
