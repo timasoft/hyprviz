@@ -13,9 +13,12 @@ use crate::{
         create_spin_button_builder,
     },
     register_togtkbox, register_togtkbox_with_separator, register_togtkbox_with_separator_names,
-    utils::{HasDiscriminant, MAX_SAFE_STEP_0_01_F64, cow_to_static_str, join_with_separator},
+    utils::{
+        HasDiscriminant, MARGIN_NORMAL, MAX_SAFE_STEP_0_01_F64, cow_to_static_str,
+        join_with_separator,
+    },
 };
-use gtk::{Box as GtkBox, Label, Orientation as GtkOrientation, StringList, prelude::*};
+use gtk::{Align, Box as GtkBox, Label, Orientation as GtkOrientation, StringList, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, collections::HashSet, fmt::Display, rc::Rc, str::FromStr};
 use strum::{EnumDiscriminants, EnumIter};
@@ -1296,14 +1299,21 @@ impl EnumConfigForGtk for Dispatcher {
         match self {
             Self::Exec(_window_rules, _command) => Some(|entry, separator, _names, _| {
                 let is_updating = Rc::new(Cell::new(false));
-                let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-                let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                window_rules_mother_box
-                    .append(&Label::new(Some(&t!("hyprland.dispatcher.window_rules"))));
+                let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let window_rule_label = Label::new(Some(&t!("hyprland.dispatcher.window_rules")));
+                window_rule_label.set_halign(Align::Center);
+                window_rule_label.set_xalign(0.5);
+                window_rules_mother_box.append(&window_rule_label);
                 let window_rules_entry = create_entry();
                 let window_rules_box =
                     Vec::<WindowRuleEffect>::to_gtk_box(&window_rules_entry, ';');
+                window_rules_box.set_hexpand(true);
                 window_rules_mother_box.append(&window_rules_box);
                 mother_box.append(&window_rules_mother_box);
 
@@ -1390,21 +1400,30 @@ impl EnumConfigForGtk for Dispatcher {
             Self::SendShortcut(_modifiers, _key, _window_target) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let modifiers_entry = create_entry();
                     let modifiers_box = HashSet::<Modifier>::to_gtk_box(&modifiers_entry, '_');
+                    modifiers_box.set_hexpand(true);
                     mother_box.append(&modifiers_box);
 
                     let key_entry = create_entry();
                     mother_box.append(&key_entry);
 
-                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box
-                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
+                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let window_target_label =
+                        Label::new(Some(&t!("hyprland.dispatcher.window_target")));
+                    window_target_label.set_halign(Align::Center);
+                    window_target_label.set_xalign(0.5);
+                    window_target_box.append(&window_target_label);
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
+                    optional_window_target_box.set_halign(Align::Center);
                     window_target_box.append(&optional_window_target_box);
                     mother_box.append(&window_target_box);
 
@@ -1418,11 +1437,8 @@ impl EnumConfigForGtk for Dispatcher {
                     )| {
                         modifiers_entry_clone.set_text(&join_with_separator(&modifiers, "_"));
                         key_entry_clone.set_text(&key);
-                        let window_target_str = match window_target {
-                            Some(window_target) => window_target.to_string(),
-                            None => String::new(),
-                        };
-                        optional_window_target_entry_clone.set_text(&window_target_str);
+                        optional_window_target_entry_clone
+                            .set_text(&window_target.map(|w| w.to_string()).unwrap_or_default());
                     };
 
                     let parse_value = |str: &str| {
@@ -1476,14 +1492,12 @@ impl EnumConfigForGtk for Dispatcher {
                         }
                         is_updating_clone.set(true);
                         let new_text = match optional_window_target_entry_clone.text().as_str() {
-                            "" => {
-                                format!(
-                                    "{}{}{}",
-                                    modifiers_entry_clone.text(),
-                                    separator,
-                                    entry.text()
-                                )
-                            }
+                            "" => format!(
+                                "{}{}{}",
+                                modifiers_entry_clone.text(),
+                                separator,
+                                entry.text()
+                            ),
                             window_target_str => format!(
                                 "{}{}{}{}{}",
                                 modifiers_entry_clone.text(),
@@ -1507,14 +1521,12 @@ impl EnumConfigForGtk for Dispatcher {
                         }
                         is_updating_clone.set(true);
                         let new_text = match entry.text().as_str() {
-                            "" => {
-                                format!(
-                                    "{}{}{}",
-                                    modifiers_entry_clone.text(),
-                                    separator,
-                                    key_entry_clone.text()
-                                )
-                            }
+                            "" => format!(
+                                "{}{}{}",
+                                modifiers_entry_clone.text(),
+                                separator,
+                                key_entry_clone.text()
+                            ),
                             window_target_str => format!(
                                 "{}{}{}{}{}",
                                 modifiers_entry_clone.text(),
@@ -1545,10 +1557,15 @@ impl EnumConfigForGtk for Dispatcher {
             Self::SendKeyState(_modifiers, _key, _state, _window_target) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let modifiers_entry = create_entry();
                     let modifiers_box = HashSet::<Modifier>::to_gtk_box(&modifiers_entry, '_');
+                    modifiers_box.set_hexpand(true);
                     mother_box.append(&modifiers_box);
 
                     let key_entry = create_entry();
@@ -1717,18 +1734,27 @@ impl EnumConfigForGtk for Dispatcher {
             Self::MoveToWorkspace(_workspace_target, _optional_window_target) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let workspace_target_entry = create_entry();
                     let workspace_target_box = WorkspaceTarget::to_gtk_box(&workspace_target_entry);
+                    workspace_target_box.set_hexpand(true);
                     mother_box.append(&workspace_target_box);
 
-                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box
-                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
+                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let window_target_label =
+                        Label::new(Some(&t!("hyprland.dispatcher.window_target")));
+                    window_target_label.set_halign(Align::Center);
+                    window_target_label.set_xalign(0.5);
+                    window_target_box.append(&window_target_label);
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
+                    optional_window_target_box.set_halign(Align::Center);
                     window_target_box.append(&optional_window_target_box);
                     mother_box.append(&window_target_box);
 
@@ -1739,11 +1765,11 @@ impl EnumConfigForGtk for Dispatcher {
                         Option<WindowTarget>,
                     )| {
                         workspace_target_entry_clone.set_text(&workspace_target.to_string());
-                        let window_target_str = match optional_window_target {
-                            Some(window_target) => window_target.to_string(),
-                            None => String::new(),
-                        };
-                        optional_window_target_entry_clone.set_text(&window_target_str);
+                        optional_window_target_entry_clone.set_text(
+                            &optional_window_target
+                                .map(|w| w.to_string())
+                                .unwrap_or_default(),
+                        );
                     };
 
                     let parse_value = |str: &str| {
@@ -1789,14 +1815,12 @@ impl EnumConfigForGtk for Dispatcher {
                         is_updating_clone.set(true);
                         let new_text = match entry.text().as_str() {
                             "" => workspace_target_entry_clone.text().to_string(),
-                            window_target => {
-                                format!(
-                                    "{}{}{}",
-                                    workspace_target_entry_clone.text(),
-                                    separator,
-                                    window_target
-                                )
-                            }
+                            window_target => format!(
+                                "{}{}{}",
+                                workspace_target_entry_clone.text(),
+                                separator,
+                                window_target
+                            ),
                         };
                         entry_clone.set_text(&new_text);
                         is_updating_clone.set(false);
@@ -1820,18 +1844,27 @@ impl EnumConfigForGtk for Dispatcher {
             Self::MoveToWorkspaceSilent(_workspace_target, _optional_window_target) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let workspace_target_entry = create_entry();
                     let workspace_target_box = WorkspaceTarget::to_gtk_box(&workspace_target_entry);
+                    workspace_target_box.set_hexpand(true);
                     mother_box.append(&workspace_target_box);
 
-                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box
-                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
+                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let window_target_label =
+                        Label::new(Some(&t!("hyprland.dispatcher.window_target")));
+                    window_target_label.set_halign(Align::Center);
+                    window_target_label.set_xalign(0.5);
+                    window_target_box.append(&window_target_label);
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
+                    optional_window_target_box.set_halign(Align::Center);
                     window_target_box.append(&optional_window_target_box);
                     mother_box.append(&window_target_box);
 
@@ -1842,11 +1875,11 @@ impl EnumConfigForGtk for Dispatcher {
                         Option<WindowTarget>,
                     )| {
                         workspace_target_entry_clone.set_text(&workspace_target.to_string());
-                        let window_target_str = match optional_window_target {
-                            Some(window_target) => window_target.to_string(),
-                            None => String::new(),
-                        };
-                        optional_window_target_entry_clone.set_text(&window_target_str);
+                        optional_window_target_entry_clone.set_text(
+                            &optional_window_target
+                                .map(|w| w.to_string())
+                                .unwrap_or_default(),
+                        );
                     };
 
                     let parse_value = |str: &str| {
@@ -1892,14 +1925,12 @@ impl EnumConfigForGtk for Dispatcher {
                         is_updating_clone.set(true);
                         let new_text = match entry.text().as_str() {
                             "" => workspace_target_entry_clone.text().to_string(),
-                            window_target => {
-                                format!(
-                                    "{}{}{}",
-                                    workspace_target_entry_clone.text(),
-                                    separator,
-                                    window_target
-                                )
-                            }
+                            window_target => format!(
+                                "{}{}{}",
+                                workspace_target_entry_clone.text(),
+                                separator,
+                                window_target
+                            ),
                         };
                         entry_clone.set_text(&new_text);
                         is_updating_clone.set(false);
@@ -1940,18 +1971,26 @@ impl EnumConfigForGtk for Dispatcher {
             Self::Dpms(_toggle_state, _optional_monitor_name) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let toggle_state_entry = create_entry();
                     let toggle_state_box = ToggleState::to_gtk_box(&toggle_state_entry);
+                    toggle_state_box.set_hexpand(true);
                     mother_box.append(&toggle_state_box);
 
-                    let monitor_name_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    monitor_name_box
-                        .append(&Label::new(Some(&t!("hyprland.dispatcher.monitor_name"))));
+                    let monitor_name_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let mn_label = Label::new(Some(&t!("hyprland.dispatcher.monitor_name")));
+                    mn_label.set_halign(Align::Center);
+                    mn_label.set_xalign(0.5);
+                    monitor_name_box.append(&mn_label);
                     let optional_monitor_name_entry = create_entry();
                     let optional_monitor_name_box =
                         Option::<String>::to_gtk_box(&optional_monitor_name_entry);
+                    optional_monitor_name_box.set_halign(Align::Center);
                     monitor_name_box.append(&optional_monitor_name_box);
                     mother_box.append(&monitor_name_box);
 
@@ -1960,8 +1999,8 @@ impl EnumConfigForGtk for Dispatcher {
                     let update_ui =
                         move |(toggle_state, monitor_name): (ToggleState, Option<String>)| {
                             toggle_state_entry_clone.set_text(&toggle_state.to_string());
-                            let monitor_name_str = monitor_name.unwrap_or_default();
-                            optional_monitor_name_entry_clone.set_text(&monitor_name_str);
+                            optional_monitor_name_entry_clone
+                                .set_text(&monitor_name.unwrap_or_default());
                         };
 
                     let parse_value = |str: &str| {
@@ -2005,14 +2044,12 @@ impl EnumConfigForGtk for Dispatcher {
                         is_updating_clone.set(true);
                         let new_text = match entry.text().as_str() {
                             "" => toggle_state_entry_clone.text().to_string(),
-                            monitor_name => {
-                                format!(
-                                    "{}{}{}",
-                                    toggle_state_entry_clone.text(),
-                                    separator,
-                                    monitor_name
-                                )
-                            }
+                            monitor_name => format!(
+                                "{}{}{}",
+                                toggle_state_entry_clone.text(),
+                                separator,
+                                monitor_name
+                            ),
                         };
                         entry_clone.set_text(&new_text);
                         is_updating_clone.set(false);
@@ -2056,21 +2093,30 @@ impl EnumConfigForGtk for Dispatcher {
             Self::TagWindow(_tag_toggle_state, _tag, _optional_window_target) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let tag_toggle_state_entry = create_entry();
                     let tag_toggle_state_box = TagToggleState::to_gtk_box(&tag_toggle_state_entry);
+                    tag_toggle_state_box.set_hexpand(true);
                     mother_box.append(&tag_toggle_state_box);
 
                     let tag_entry = create_entry();
                     mother_box.append(&tag_entry);
 
-                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box
-                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
+                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let window_target_label =
+                        Label::new(Some(&t!("hyprland.dispatcher.window_target")));
+                    window_target_label.set_halign(Align::Center);
+                    window_target_label.set_xalign(0.5);
+                    window_target_box.append(&window_target_label);
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
+                    optional_window_target_box.set_halign(Align::Center);
                     window_target_box.append(&optional_window_target_box);
                     mother_box.append(&window_target_box);
 
@@ -2084,11 +2130,11 @@ impl EnumConfigForGtk for Dispatcher {
                     )| {
                         tag_toggle_state_entry_clone.set_text(&tag_toggle_state.to_string());
                         tag_entry_clone.set_text(&tag);
-                        let window_target_str = match optional_window_target {
-                            Some(window_target) => window_target.to_string(),
-                            None => String::new(),
-                        };
-                        optional_window_target_entry_clone.set_text(&window_target_str);
+                        optional_window_target_entry_clone.set_text(
+                            &optional_window_target
+                                .map(|w| w.to_string())
+                                .unwrap_or_default(),
+                        );
                     };
 
                     let parse_value = |str: &str| {
@@ -2140,24 +2186,20 @@ impl EnumConfigForGtk for Dispatcher {
                         }
                         is_updating_clone.set(true);
                         let new_text = match optional_window_target_entry_clone.text().as_str() {
-                            "" => {
-                                format!(
-                                    "{}{}{}",
-                                    tag_toggle_state_entry_clone.text(),
-                                    separator,
-                                    entry.text()
-                                )
-                            }
-                            window_target => {
-                                format!(
-                                    "{}{}{}{}{}",
-                                    tag_toggle_state_entry_clone.text(),
-                                    separator,
-                                    entry.text(),
-                                    separator,
-                                    window_target
-                                )
-                            }
+                            "" => format!(
+                                "{}{}{}",
+                                tag_toggle_state_entry_clone.text(),
+                                separator,
+                                entry.text()
+                            ),
+                            window_target => format!(
+                                "{}{}{}{}{}",
+                                tag_toggle_state_entry_clone.text(),
+                                separator,
+                                entry.text(),
+                                separator,
+                                window_target
+                            ),
                         };
                         entry_clone.set_text(&new_text);
                         is_updating_clone.set(false);
@@ -2173,24 +2215,20 @@ impl EnumConfigForGtk for Dispatcher {
                         }
                         is_updating_clone.set(true);
                         let new_text = match entry.text().as_str() {
-                            "" => {
-                                format!(
-                                    "{}{}{}",
-                                    tag_toggle_state_entry_clone.text(),
-                                    separator,
-                                    tag_entry_clone.text()
-                                )
-                            }
-                            window_target => {
-                                format!(
-                                    "{}{}{}{}{}",
-                                    tag_toggle_state_entry_clone.text(),
-                                    separator,
-                                    tag_entry_clone.text(),
-                                    separator,
-                                    window_target
-                                )
-                            }
+                            "" => format!(
+                                "{}{}{}",
+                                tag_toggle_state_entry_clone.text(),
+                                separator,
+                                tag_entry_clone.text()
+                            ),
+                            window_target => format!(
+                                "{}{}{}{}{}",
+                                tag_toggle_state_entry_clone.text(),
+                                separator,
+                                tag_entry_clone.text(),
+                                separator,
+                                window_target
+                            ),
                         };
                         entry_clone.set_text(&new_text);
                         is_updating_clone.set(false);
@@ -2234,18 +2272,27 @@ impl EnumConfigForGtk for Dispatcher {
             Self::AlterZOrder(_z_height, _optional_window_target) => {
                 Some(|entry, separator, _names, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                     let z_height_entry = create_entry();
                     let z_height_box = ZHeight::to_gtk_box(&z_height_entry);
+                    z_height_box.set_hexpand(true);
                     mother_box.append(&z_height_box);
 
-                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    window_target_box
-                        .append(&Label::new(Some(&t!("hyprland.dispatcher.window_target"))));
+                    let window_target_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let window_target_label =
+                        Label::new(Some(&t!("hyprland.dispatcher.window_target")));
+                    window_target_label.set_halign(Align::Center);
+                    window_target_label.set_xalign(0.5);
+                    window_target_box.append(&window_target_label);
                     let optional_window_target_entry = create_entry();
                     let optional_window_target_box =
                         Option::<WindowTarget>::to_gtk_box(&optional_window_target_entry);
+                    optional_window_target_box.set_halign(Align::Center);
                     window_target_box.append(&optional_window_target_box);
                     mother_box.append(&window_target_box);
 
@@ -2256,11 +2303,11 @@ impl EnumConfigForGtk for Dispatcher {
                         Option<WindowTarget>,
                     )| {
                         z_height_entry_clone.set_text(&z_height.to_string());
-                        let window_target_str = match optional_window_target {
-                            Some(window_target) => window_target.to_string(),
-                            None => String::new(),
-                        };
-                        optional_window_target_entry_clone.set_text(&window_target_str);
+                        optional_window_target_entry_clone.set_text(
+                            &optional_window_target
+                                .map(|w| w.to_string())
+                                .unwrap_or_default(),
+                        );
                     };
 
                     let parse_value = |str: &str| {
@@ -2306,14 +2353,12 @@ impl EnumConfigForGtk for Dispatcher {
                         is_updating_clone.set(true);
                         let new_text = match entry.text().as_str() {
                             "" => z_height_entry_clone.text().to_string(),
-                            window_target => {
-                                format!(
-                                    "{}{}{}",
-                                    z_height_entry_clone.text(),
-                                    separator,
-                                    window_target
-                                )
-                            }
+                            window_target => format!(
+                                "{}{}{}",
+                                z_height_entry_clone.text(),
+                                separator,
+                                window_target
+                            ),
                         };
                         entry_clone.set_text(&new_text);
                         is_updating_clone.set(false);

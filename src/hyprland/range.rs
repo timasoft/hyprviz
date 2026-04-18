@@ -1,5 +1,8 @@
-use crate::{advanced_editors::create_spin_button, gtk_converters::ToGtkBox, register_togtkbox};
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use crate::{
+    advanced_editors::create_spin_button, gtk_converters::ToGtkBox, register_togtkbox,
+    utils::MARGIN_NORMAL,
+};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
@@ -37,16 +40,26 @@ impl ToGtkBox for Range {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-        let start_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        start_box_box.append(&Label::new(Some(&t!("hyprland.range.start"))));
+        let start_box_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let start_label = Label::new(Some(&t!("hyprland.range.start")));
+        start_label.set_halign(Align::Center);
+        start_label.set_xalign(0.5);
+        start_box_box.append(&start_label);
         let start_spin_button = create_spin_button(1.0, i32::MAX as f64, 1.0);
         start_box_box.append(&start_spin_button);
         mother_box.append(&start_box_box);
 
-        let end_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        end_box_box.append(&Label::new(Some(&t!("hyprland.range.end"))));
+        let end_box_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let end_label = Label::new(Some(&t!("hyprland.range.end")));
+        end_label.set_halign(Align::Center);
+        end_label.set_xalign(0.5);
+        end_box_box.append(&end_label);
         let end_spin_button = create_spin_button(1.0, i32::MAX as f64, 1.0);
         end_box_box.append(&end_spin_button);
         mother_box.append(&end_box_box);

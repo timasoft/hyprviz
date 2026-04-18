@@ -2,7 +2,7 @@ use crate::{
     advanced_editors::{
         create_button, create_dropdown, create_entry, create_spin_button, create_switch,
     },
-    utils::HasDiscriminant,
+    utils::{HasDiscriminant, MARGIN_NORMAL},
 };
 use gtk::{
     Box as GtkBox, Entry, Label, Orientation as GtkOrientation, PolicyType, ScrolledWindow, Stack,
@@ -160,7 +160,9 @@ where
             let label = if let Some(item) = string_list.item(0)
                 && let Some(string_object) = item.downcast_ref::<StringObject>()
             {
-                Label::new(Some(&string_object.string()))
+                let label = Label::new(Some(&string_object.string()));
+                label.add_css_class("heading");
+                label
             } else {
                 Label::new(None)
             };
@@ -386,6 +388,7 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
 
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         let add_button = create_button(&t!("gtk_converters.add"));
+        add_button.add_css_class("suggested-action");
 
         let items_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         let scrolled_window = ScrolledWindow::new();
@@ -394,10 +397,11 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
         scrolled_window.set_child(Some(&items_box));
 
         let frame = gtk::Frame::new(None);
-        scrolled_window.set_margin_start(5);
-        scrolled_window.set_margin_end(5);
-        scrolled_window.set_margin_top(5);
-        scrolled_window.set_margin_bottom(5);
+        frame.add_css_class("card");
+        scrolled_window.set_margin_start(MARGIN_NORMAL / 2);
+        scrolled_window.set_margin_end(MARGIN_NORMAL / 2);
+        scrolled_window.set_margin_top(MARGIN_NORMAL / 2);
+        scrolled_window.set_margin_bottom(MARGIN_NORMAL / 2);
         frame.set_child(Some(&scrolled_window));
 
         mother_box.append(&frame);
@@ -424,6 +428,7 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparator for Vec<T> {
                 let part_box = GtkBox::new(GtkOrientation::Vertical, 5);
 
                 let remove_button = create_button(&t!("gtk_converters.remove"));
+                remove_button.add_css_class("destructive-action");
                 part_box.append(&remove_button);
                 remove_buttons.push(remove_button.clone());
 
@@ -562,6 +567,7 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
 
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let add_button = create_button(&t!("gtk_converters.add"));
+        add_button.add_css_class("suggested-action");
 
         let items_box = GtkBox::new(GtkOrientation::Vertical, 5);
         let scrolled_window = ScrolledWindow::new();
@@ -570,10 +576,11 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
         scrolled_window.set_child(Some(&items_box));
 
         let frame = gtk::Frame::new(None);
-        scrolled_window.set_margin_start(5);
-        scrolled_window.set_margin_end(5);
-        scrolled_window.set_margin_top(5);
-        scrolled_window.set_margin_bottom(5);
+        frame.add_css_class("card");
+        scrolled_window.set_margin_start(MARGIN_NORMAL / 2);
+        scrolled_window.set_margin_end(MARGIN_NORMAL / 2);
+        scrolled_window.set_margin_top(MARGIN_NORMAL / 2);
+        scrolled_window.set_margin_bottom(MARGIN_NORMAL / 2);
         frame.set_child(Some(&scrolled_window));
 
         mother_box.append(&frame);
@@ -609,6 +616,7 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
                 let item_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
                 let remove_button = create_button(&t!("gtk_converters.remove"));
+                remove_button.add_css_class("destructive-action");
                 item_box.append(&remove_button);
 
                 let sub_entry = create_entry();
@@ -767,7 +775,9 @@ impl<T: ToGtkBox + Default + Display> ToGtkBoxWithSeparatorAndNames for (T,) {
     ) -> GtkBox {
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
         if let Some(FieldLabel::Named(name)) = names.first() {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let t_box = T::to_gtk_box(entry);
         mother_box.append(&t_box);
@@ -789,14 +799,18 @@ impl<T: ToGtkBox + Default + Display, N: ToGtkBox + Default + Display> ToGtkBoxW
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         if let Some(FieldLabel::Named(name)) = names.first() {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let t_entry = create_entry();
         let t_box = T::to_gtk_box(&t_entry);
         mother_box.append(&t_box);
 
         if let Some(FieldLabel::Named(name)) = names.get(1) {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let n_entry = create_entry();
         let n_box = N::to_gtk_box(&n_entry);
@@ -884,21 +898,27 @@ impl<
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         if let Some(FieldLabel::Named(name)) = names.first() {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let t_entry = create_entry();
         let t_box = T::to_gtk_box(&t_entry);
         mother_box.append(&t_box);
 
         if let Some(FieldLabel::Named(name)) = names.get(1) {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let n_entry = create_entry();
         let n_box = N::to_gtk_box(&n_entry);
         mother_box.append(&n_box);
 
         if let Some(FieldLabel::Named(name)) = names.get(2) {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let m_entry = create_entry();
         let m_box = M::to_gtk_box(&m_entry);
@@ -1008,28 +1028,36 @@ impl<
         let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
 
         if let Some(FieldLabel::Named(name)) = names.first() {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let t_entry = create_entry();
         let t_box = T::to_gtk_box(&t_entry);
         mother_box.append(&t_box);
 
         if let Some(FieldLabel::Named(name)) = names.get(1) {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let n_entry = create_entry();
         let n_box = N::to_gtk_box(&n_entry);
         mother_box.append(&n_box);
 
         if let Some(FieldLabel::Named(name)) = names.get(2) {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let m_entry = create_entry();
         let m_box = M::to_gtk_box(&m_entry);
         mother_box.append(&m_box);
 
         if let Some(FieldLabel::Named(name)) = names.get(3) {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let b_entry = create_entry();
         let b_box = B::to_gtk_box(&b_entry);
@@ -1160,12 +1188,16 @@ pub fn create_spin_button_builder(
         if let FieldLabel::Named(name) = name
             && name != &"%"
         {
-            mother_box.append(&Label::new(Some(name)));
+            let label = Label::new(Some(name));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
         let spin_button = create_spin_button(min, max, step);
         mother_box.append(&spin_button);
         if let FieldLabel::Named("%") = name {
-            mother_box.append(&Label::new(Some("%")));
+            let label = Label::new(Some("%"));
+            label.add_css_class("body");
+            mother_box.append(&label);
         }
 
         let spin_button_clone = spin_button.clone();

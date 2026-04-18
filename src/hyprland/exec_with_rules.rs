@@ -3,9 +3,9 @@ use crate::{
     advanced_editors::create_entry,
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     register_togtkbox,
-    utils::join_with_separator,
+    utils::{MARGIN_NORMAL, join_with_separator},
 };
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
@@ -78,19 +78,28 @@ impl Display for ExecWithRules {
 impl ToGtkBox for ExecWithRules {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-        let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        window_rules_mother_box.append(&Label::new(Some(&t!(
-            "hyprland.exec_with_rules.window_rules"
-        ))));
+        let window_rules_mother_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let wr_label = Label::new(Some(&t!("hyprland.exec_with_rules.window_rules")));
+        wr_label.set_halign(Align::Center);
+        wr_label.set_xalign(0.5);
+        window_rules_mother_box.append(&wr_label);
         let window_rules_entry = create_entry();
         let window_rules_box = Vec::<WindowRuleEffect>::to_gtk_box(&window_rules_entry, ';');
+        window_rules_box.set_hexpand(true);
         window_rules_mother_box.append(&window_rules_box);
         mother_box.append(&window_rules_mother_box);
 
-        let command_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        command_box.append(&Label::new(Some(&t!("hyprland.exec_with_rules.command"))));
+        let command_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let cmd_label = Label::new(Some(&t!("hyprland.exec_with_rules.command")));
+        cmd_label.set_halign(Align::Center);
+        cmd_label.set_xalign(0.5);
+        command_box.append(&cmd_label);
         let command_entry = create_entry();
         command_box.append(&command_entry);
         mother_box.append(&command_box);

@@ -1,5 +1,7 @@
-use crate::utils::markdown_to_pango;
-use gtk::{Align, Box, Frame, Grid, Label, Orientation, pango::WrapMode, prelude::*};
+use crate::utils::{MARGIN_NORMAL, markdown_to_pango};
+use gtk::{
+    Align, Box, Frame, Grid, IconSize, Image, Label, Orientation, pango::WrapMode, prelude::*,
+};
 use rust_i18n::{locale, t};
 
 #[derive(Debug)]
@@ -23,10 +25,10 @@ pub fn create_guide(name: &str) -> Box {
     let main_box = Box::builder()
         .orientation(Orientation::Vertical)
         .spacing(10)
-        .margin_start(15)
-        .margin_end(15)
-        .margin_top(10)
-        .margin_bottom(10)
+        .margin_start(MARGIN_NORMAL * 5 / 4)
+        .margin_end(MARGIN_NORMAL * 5 / 4)
+        .margin_top(MARGIN_NORMAL)
+        .margin_bottom(MARGIN_NORMAL)
         .build();
 
     for block in get_content(name) {
@@ -34,10 +36,6 @@ pub fn create_guide(name: &str) -> Box {
             ContentBlock::Text(text) => {
                 let text_label = create_text_label(&text);
                 main_box.append(&text_label);
-                if text.contains("<span size=\"large\" weight=\"bold\">") {
-                    let frame = Frame::builder().build();
-                    main_box.append(&frame);
-                }
             }
             ContentBlock::Code { language, content } => {
                 let code_frame = create_code_frame(&language, &content);
@@ -341,6 +339,12 @@ fn create_text_label(text: &str) -> Label {
 
     label.set_markup(text);
 
+    if text.contains("<span size=\"large\" weight=\"bold\">") {
+        label.add_css_class("title-2");
+    } else {
+        label.add_css_class("body");
+    }
+
     label
 }
 
@@ -354,11 +358,12 @@ fn create_code_frame(language: &str, content: &str) -> Frame {
         .label(language)
         .selectable(true)
         .halign(Align::Start)
-        .margin_start(30)
-        .margin_end(25)
-        .margin_top(2)
+        .margin_start(MARGIN_NORMAL * 5 / 2)
+        .margin_end(MARGIN_NORMAL * 2)
+        .margin_top(MARGIN_NORMAL / 6)
         .margin_bottom(0)
         .build();
+    header.add_css_class("caption");
 
     vbox.append(&header);
 
@@ -368,10 +373,10 @@ fn create_code_frame(language: &str, content: &str) -> Frame {
     let code_box = Box::builder()
         .orientation(Orientation::Vertical)
         .spacing(0)
-        .margin_start(20)
-        .margin_end(20)
-        .margin_top(5)
-        .margin_bottom(20)
+        .margin_start(MARGIN_NORMAL * 5 / 3)
+        .margin_end(MARGIN_NORMAL * 5 / 3)
+        .margin_top(MARGIN_NORMAL * 2 / 3)
+        .margin_bottom(MARGIN_NORMAL * 5 / 3)
         .build();
 
     let code_label = Label::builder()
@@ -383,11 +388,15 @@ fn create_code_frame(language: &str, content: &str) -> Frame {
         .valign(Align::Center)
         .xalign(0.0)
         .build();
+    code_label.add_css_class("monospace");
     code_box.append(&code_label);
 
     vbox.append(&code_box);
 
-    let frame = Frame::builder().margin_start(15).margin_end(15).build();
+    let frame = Frame::builder()
+        .margin_start(MARGIN_NORMAL * 5 / 4)
+        .margin_end(MARGIN_NORMAL * 5 / 4)
+        .build();
     frame.set_child(Some(&vbox));
 
     frame
@@ -397,10 +406,10 @@ fn create_table_grid(headers: &[String], rows: &[Vec<String>]) -> Grid {
     let grid = Grid::builder()
         .row_spacing(2)
         .column_spacing(2)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_start(MARGIN_NORMAL)
+        .margin_end(MARGIN_NORMAL)
+        .margin_top(MARGIN_NORMAL * 2 / 3)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
         .build();
 
     for (col, header) in headers.iter().enumerate() {
@@ -412,11 +421,12 @@ fn create_table_grid(headers: &[String], rows: &[Vec<String>]) -> Grid {
             .selectable(true)
             .halign(Align::Center)
             .valign(Align::Center)
-            .margin_start(5)
-            .margin_end(5)
-            .margin_top(3)
-            .margin_bottom(3)
+            .margin_start(MARGIN_NORMAL * 2 / 3)
+            .margin_end(MARGIN_NORMAL * 2 / 3)
+            .margin_top(MARGIN_NORMAL / 4)
+            .margin_bottom(MARGIN_NORMAL / 4)
             .build();
+        label.add_css_class("heading");
 
         grid.attach(&label, col as i32, 0, 1, 1);
     }
@@ -432,11 +442,12 @@ fn create_table_grid(headers: &[String], rows: &[Vec<String>]) -> Grid {
                 .halign(Align::Start)
                 .valign(Align::Center)
                 .xalign(0.0)
-                .margin_start(5)
-                .margin_end(5)
-                .margin_top(3)
-                .margin_bottom(3)
+                .margin_start(MARGIN_NORMAL * 2 / 3)
+                .margin_end(MARGIN_NORMAL * 2 / 3)
+                .margin_top(MARGIN_NORMAL / 4)
+                .margin_bottom(MARGIN_NORMAL / 4)
                 .build();
+            label.add_css_class("body");
 
             if col_idx == 0 {
                 label.set_max_width_chars(15);
@@ -457,15 +468,18 @@ fn create_table_frame(headers: &[String], rows: &[Vec<String>]) -> Frame {
     let inner_box = Box::builder()
         .orientation(Orientation::Vertical)
         .spacing(0)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_start(MARGIN_NORMAL)
+        .margin_end(MARGIN_NORMAL)
+        .margin_top(MARGIN_NORMAL * 2 / 3)
+        .margin_bottom(MARGIN_NORMAL * 2 / 3)
         .build();
 
     inner_box.append(&grid);
 
-    let frame = Frame::builder().margin_start(15).margin_end(15).build();
+    let frame = Frame::builder()
+        .margin_start(MARGIN_NORMAL * 5 / 4)
+        .margin_end(MARGIN_NORMAL * 5 / 4)
+        .build();
 
     frame.set_child(Some(&inner_box));
 
@@ -476,45 +490,63 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
     let vbox = Box::builder()
         .orientation(Orientation::Vertical)
         .spacing(5)
-        .margin_start(20)
-        .margin_end(20)
-        .margin_top(5)
-        .margin_bottom(20)
+        .margin_start(MARGIN_NORMAL * 5 / 3)
+        .margin_end(MARGIN_NORMAL * 5 / 3)
+        .margin_top(MARGIN_NORMAL * 2 / 3)
+        .margin_bottom(MARGIN_NORMAL * 5 / 3)
         .build();
 
-    let (title, style_class) = match callout_type.to_lowercase().as_str() {
-        "info" | "note" | "tip" | "important" => {
-            (&format!("<b>{}</b>", t!("guides.information")), "info")
-        }
-        "warning" | "caution" => (&format!("<b>{}</b>", t!("guides.warning")), "warning"),
-        "error" | "danger" => (&format!("<b>{}</b>", t!("guides.error")), "error"),
-        _ => (&format!("<b>{}</b>", callout_type), "card"),
+    let (title, style_class, icon_name) = match callout_type.to_lowercase().as_str() {
+        "info" | "note" | "tip" | "important" => (
+            t!("guides.information").to_string(),
+            "info",
+            "dialog-information-symbolic",
+        ),
+        "warning" | "caution" => (
+            t!("guides.warning").to_string(),
+            "warning",
+            "dialog-warning-symbolic",
+        ),
+        "error" | "danger" => (
+            t!("guides.error").to_string(),
+            "error",
+            "dialog-error-symbolic",
+        ),
+        _ => (
+            callout_type.to_string(),
+            "card",
+            "dialog-information-symbolic",
+        ),
     };
+
+    let header_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .spacing(8)
+        .build();
+
+    let icon = Image::from_icon_name(icon_name);
+    icon.set_icon_size(IconSize::Normal);
+    header_box.append(&icon);
 
     let header = Label::builder()
         .use_markup(true)
         .selectable(true)
         .halign(Align::Start)
-        .margin_start(10)
-        .margin_end(25)
-        .margin_top(2)
+        .margin_start(MARGIN_NORMAL / 3)
+        .margin_end(MARGIN_NORMAL * 2)
+        .margin_top(MARGIN_NORMAL / 6)
         .margin_bottom(0)
         .build();
-    header.set_markup(title);
+    header.set_markup(&format!("<b>{title}</b>"));
+    header_box.append(&header);
 
-    if !title.is_empty() {
-        vbox.append(&header);
-    }
+    vbox.append(&header_box);
 
     for block in content_blocks {
         match block {
             ContentBlock::Text(text) => {
                 let text_label = create_text_label(text);
                 vbox.append(&text_label);
-                if text.contains("<span size=\"large\" weight=\"bold\">") {
-                    let frame = Frame::builder().build();
-                    vbox.append(&frame);
-                }
             }
             ContentBlock::Code { language, content } => {
                 let code_frame = create_code_frame(language, content);
@@ -534,7 +566,10 @@ fn create_callout_frame(callout_type: &str, content_blocks: &[ContentBlock]) -> 
         }
     }
 
-    let frame = Frame::builder().margin_start(15).margin_end(15).build();
+    let frame = Frame::builder()
+        .margin_start(MARGIN_NORMAL * 5 / 4)
+        .margin_end(MARGIN_NORMAL * 5 / 4)
+        .build();
 
     frame.add_css_class(style_class);
 

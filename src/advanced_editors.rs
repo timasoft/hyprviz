@@ -9,12 +9,13 @@ use crate::{
         bind_right::parse_bind_right, monitor::parse_monitor, workspace::parse_workspace,
     },
     utils::{
-        MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64, after_second_comma,
-        cow_to_static_str, get_available_monitors, get_available_resolutions_for_monitor,
-        is_modifier, join_with_separator, keycode_to_en_key, parse_coordinates,
+        MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_INTEGER_F64,
+        after_second_comma, cow_to_static_str, get_available_monitors,
+        get_available_resolutions_for_monitor, is_modifier, join_with_separator, keycode_to_en_key,
+        parse_coordinates,
     },
 };
-use gio::glib::SignalHandlerId;
+use gio::glib::{self, SignalHandlerId};
 use gtk::{
     Align, ApplicationWindow, Box, Button, DrawingArea, DropDown, Entry, EventControllerKey,
     EventControllerMotion, GestureClick, Label, Orientation as GtkOrientation, Separator,
@@ -120,14 +121,15 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
     let vbox = Box::builder()
         .orientation(GtkOrientation::Vertical)
         .spacing(10)
-        .margin_start(10)
-        .margin_end(10)
-        .margin_top(10)
-        .margin_bottom(10)
+        .margin_start(MARGIN_NORMAL)
+        .margin_end(MARGIN_NORMAL)
+        .margin_top(MARGIN_NORMAL)
+        .margin_bottom(MARGIN_NORMAL)
         .visible(false)
         .build();
 
     let toggle_button = Button::with_label(&t!("advanced_editors.show_editor"));
+    toggle_button.add_css_class("text-button");
 
     let vbox_clone = vbox.clone();
     let button_clone = toggle_button.clone();
@@ -168,21 +170,37 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
 
     let bezier_clone = bezier.clone();
     drawing_area.set_draw_func(move |widget, cr, _width, _height| {
-        cr.set_source_rgb(1.0, 1.0, 1.0);
-        cr.paint().unwrap();
+        let get_theme_color = |name: &str, default: (f64, f64, f64, f64)| {
+            gtk::gdk::RGBA::parse(name)
+                .ok()
+                .map(|rgba| {
+                    (
+                        rgba.red() as f64,
+                        rgba.green() as f64,
+                        rgba.blue() as f64,
+                        rgba.alpha() as f64,
+                    )
+                })
+                .unwrap_or(default)
+        };
+
+        let (bg_r, bg_g, bg_b, bg_a) = get_theme_color("@theme_bg_color", (0.18, 0.18, 0.2, 1.0));
+        let (fg_r, fg_g, fg_b, _) = get_theme_color("@theme_fg_color", (0.9, 0.9, 0.9, 1.0));
+        let (accent_r, accent_g, accent_b, _) =
+            get_theme_color("@theme_selected_bg_color", (0.2, 0.5, 1.0, 1.0));
+        let (p0_r, p0_g, p0_b, _) = get_theme_color("@success_color", (0.0, 0.8, 0.0, 1.0));
+        let (p1_r, p1_g, p1_b, _) = get_theme_color("@warning_color", (1.0, 0.3, 0.3, 1.0));
 
         let scale_factor = widget.scale_factor() as f64;
         cr.scale(scale_factor, scale_factor);
 
-        cr.set_source_rgb(0.0, 0.0, 0.0);
-        cr.set_line_width(2.0 / scale_factor);
-        cr.move_to(0.0, SIZE / 3.0);
-        cr.line_to(SIZE, SIZE / 3.0);
-        cr.move_to(0.0, SIZE / 3.0 * 4.0);
-        cr.line_to(SIZE, SIZE / 3.0 * 4.0);
-        cr.stroke().unwrap();
+        cr.set_source_rgba(bg_r, bg_g, bg_b, bg_a);
+        if let Err(e) = cr.paint() {
+            glib::g_warning!("hyprviz", "Cairo paint error: {}", e);
+            return;
+        }
 
-        cr.set_source_rgba(0.8, 0.8, 0.8, 0.6);
+        cr.set_source_rgba(fg_r, fg_g, fg_b, 0.15);
         cr.set_line_width(1.0 / scale_factor);
 
         let grid_step = SIZE / 8.0;
@@ -198,19 +216,30 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
             cr.move_to(0.0, y);
             cr.line_to(SIZE, y);
         }
-
-        cr.stroke().unwrap();
+        cr.move_to(0.0, SIZE / 3.0);
+        cr.line_to(SIZE, SIZE / 3.0);
+        cr.move_to(0.0, SIZE / 3.0 * 4.0);
+        cr.line_to(SIZE, SIZE / 3.0 * 4.0);
+        if let Err(e) = cr.stroke() {
+            glib::g_warning!("hyprviz", "Cairo stroke error (grid): {}", e);
+            return;
+        }
 
         let bez = bezier_clone.borrow();
 
-        cr.set_source_rgba(0.7, 0.7, 0.7, 0.5);
+        cr.set_source_rgba(fg_r, fg_g, fg_b, 0.4);
+        cr.set_line_width(1.0 / scale_factor);
         cr.move_to(bez.point_at(0).x, bez.point_at(0).y);
         cr.line_to(bez.point_at(1).x, bez.point_at(1).y);
         cr.move_to(bez.point_at(2).x, bez.point_at(2).y);
         cr.line_to(bez.point_at(3).x, bez.point_at(3).y);
-        cr.stroke().unwrap();
+        if let Err(e) = cr.stroke() {
+            glib::g_warning!("hyprviz", "Cairo stroke error (control lines): {}", e);
+            return;
+        }
 
-        cr.set_source_rgb(0.15, 0.15, 0.99);
+        cr.set_source_rgba(accent_r, accent_g, accent_b, 1.0);
+        cr.set_line_width(2.0 / scale_factor);
         cr.move_to(bez.point_at(0).x, bez.point_at(0).y);
         cr.curve_to(
             bez.point_at(1).x,
@@ -220,17 +249,22 @@ pub fn create_curve_editor(value_entry: &Entry) -> (Box, Button) {
             bez.point_at(3).x,
             bez.point_at(3).y,
         );
-        cr.set_line_width(2.0 / scale_factor);
-        cr.stroke().unwrap();
+        if let Err(e) = cr.stroke() {
+            glib::g_warning!("hyprviz", "Cairo stroke error (bezier): {}", e);
+            return;
+        }
 
         for (i, p) in bez.points.iter().enumerate() {
             match i {
-                0 | 3 => cr.set_source_rgb(0.0, 1.0, 0.0),
-                1 | 2 => cr.set_source_rgb(1.0, 0.0, 0.0),
+                0 | 3 => cr.set_source_rgba(p1_r, p1_g, p1_b, 1.0),
+                1 | 2 => cr.set_source_rgba(p0_r, p0_g, p0_b, 1.0),
                 _ => {}
             }
             cr.arc(p.x, p.y, 6.0 / scale_factor, 0.0, 2.0 * f64::consts::PI);
-            cr.fill().unwrap();
+            if let Err(e) = cr.fill() {
+                glib::g_warning!("hyprviz", "Cairo fill error (point {}): {}", i, e);
+                return;
+            }
         }
     });
 
@@ -563,7 +597,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             bind_left_box.append(&bind_type_dropdown);
 
             let flags_box = Box::new(GtkOrientation::Vertical, 5);
-            flags_box.set_margin_start(10);
+            flags_box.set_margin_start(MARGIN_NORMAL);
 
             let flag_names = BindFlagsEnum::get_all();
 
@@ -571,7 +605,9 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             for flag_name in flag_names {
                 let flag_box = Box::new(GtkOrientation::Horizontal, 5);
                 let switch = create_switch();
-                flag_box.append(&Label::new(Some(&flag_name.to_fancy_string())));
+                let label = Label::new(Some(&flag_name.to_fancy_string()));
+                label.add_css_class("body");
+                flag_box.append(&label);
                 flag_box.append(&switch);
                 flags_box.append(&flag_box);
                 switches.push((flag_name, switch));
@@ -704,10 +740,11 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             label.set_selectable(true);
 
             let bypass_switch_label = Label::new(Some(&t!("advanced_editors.bypass")));
+            bypass_switch_label.add_css_class("body");
             let bypass_switch = create_switch();
 
             let bypass_switch_box = Box::new(GtkOrientation::Horizontal, 5);
-            bypass_switch_box.set_margin_start(10);
+            bypass_switch_box.set_margin_start(MARGIN_NORMAL);
             bypass_switch_box.append(&bypass_switch_label);
             bypass_switch_box.append(&bypass_switch);
 
@@ -843,10 +880,11 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
             label.set_selectable(true);
 
             let dbus_switch_label = Label::new(Some("D-Bus"));
+            dbus_switch_label.add_css_class("body");
             let dbus_switch = create_switch();
 
             let dbus_switch_box = Box::new(GtkOrientation::Horizontal, 5);
-            dbus_switch_box.set_margin_start(10);
+            dbus_switch_box.set_margin_start(MARGIN_NORMAL);
             dbus_switch_box.append(&dbus_switch_label);
             dbus_switch_box.append(&dbus_switch);
 
@@ -1097,8 +1135,8 @@ pub fn create_entry() -> Entry {
         .width_request(100)
         .hexpand(true)
         .halign(Align::Fill)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
         .vexpand(false)
         .valign(Align::Center)
         .build()
@@ -1109,8 +1147,8 @@ pub fn create_spin_button(min: f64, max: f64, step: f64) -> SpinButton {
     spin_button.set_width_request(100);
     spin_button.set_hexpand(true);
     spin_button.set_halign(Align::Fill);
-    spin_button.set_margin_top(5);
-    spin_button.set_margin_bottom(5);
+    spin_button.set_margin_top(MARGIN_NORMAL / 2);
+    spin_button.set_margin_bottom(MARGIN_NORMAL / 2);
     spin_button.set_vexpand(false);
     spin_button.set_valign(Align::Center);
     spin_button
@@ -1121,8 +1159,8 @@ pub fn create_dropdown(string_list: &StringList) -> DropDown {
     dropdown.set_width_request(100);
     dropdown.set_hexpand(true);
     dropdown.set_halign(Align::Fill);
-    dropdown.set_margin_top(5);
-    dropdown.set_margin_bottom(5);
+    dropdown.set_margin_top(MARGIN_NORMAL / 2);
+    dropdown.set_margin_bottom(MARGIN_NORMAL / 2);
     dropdown.set_vexpand(false);
     dropdown.set_valign(Align::Center);
     dropdown
@@ -1133,8 +1171,8 @@ pub fn create_switch() -> Switch {
         .width_request(50)
         .hexpand(false)
         .halign(Align::Center)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
         .vexpand(false)
         .valign(Align::Center)
         .build()
@@ -1145,8 +1183,8 @@ pub fn create_button(text: &str) -> Button {
         .width_request(100)
         .hexpand(true)
         .halign(Align::Fill)
-        .margin_top(5)
-        .margin_bottom(5)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
         .vexpand(false)
         .valign(Align::Center)
         .label(text)
@@ -2691,20 +2729,21 @@ fn fill_fancy_value_entry(
             });
 
             let workspace_rules_box = Box::new(GtkOrientation::Vertical, 5);
-            workspace_rules_box.set_margin_top(10);
+            workspace_rules_box.set_margin_top(MARGIN_NORMAL);
             fancy_value_entry.append(&workspace_rules_box);
 
             let workspace_rules_label = Label::new(Some(&t!("advanced_editors.workspace_rules")));
+            workspace_rules_label.add_css_class("heading");
             workspace_rules_label.set_markup(&format!(
                 "<b>{}</b>",
                 t!("advanced_editors.workspace_rules")
             ));
             workspace_rules_label.set_halign(gtk::Align::Start);
-            workspace_rules_label.set_margin_bottom(5);
+            workspace_rules_label.set_margin_bottom(MARGIN_NORMAL / 2);
             workspace_rules_box.append(&workspace_rules_label);
 
             let separator = Separator::new(GtkOrientation::Horizontal);
-            separator.set_margin_bottom(10);
+            separator.set_margin_bottom(MARGIN_NORMAL);
             workspace_rules_box.append(&separator);
 
             let monitor_box = Box::new(GtkOrientation::Horizontal, 5);
@@ -3606,7 +3645,7 @@ fn fill_fancy_value_entry(
                 animation_style_box.append(&animation_style_dropdown);
 
                 let style_params_box = Box::new(GtkOrientation::Vertical, 5);
-                style_params_box.set_margin_start(20);
+                style_params_box.set_margin_start(MARGIN_NORMAL * 5 / 3);
 
                 let side_label = Label::new(Some(&t!("advanced_editors.side")));
                 side_label.set_halign(Align::Start);

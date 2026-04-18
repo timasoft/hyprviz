@@ -1,5 +1,9 @@
-use crate::{advanced_editors::create_spin_button, gtk_converters::ToGtkBox, register_togtkbox};
-use gtk::{Box as GtkBox, Entry, Orientation as GtkOrientation, prelude::*};
+use crate::{
+    advanced_editors::create_spin_button, gtk_converters::ToGtkBox, register_togtkbox,
+    utils::MARGIN_NORMAL,
+};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -43,8 +47,23 @@ impl ToGtkBox for Angle {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        let degrees_spin_button = create_spin_button(0.0, 360.0, 1.0);
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 3);
+        mother_box.set_margin_end(MARGIN_NORMAL / 3);
+        mother_box.set_margin_top(MARGIN_NORMAL / 3);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 3);
+
+        let label = Label::new(Some(&t!("hyprland.angle.degrees")));
+        label.add_css_class("body");
+        label.set_halign(Align::Start);
+        label.set_hexpand(true);
+        label.set_xalign(0.0);
+        label.set_valign(Align::Center);
+        mother_box.append(&label);
+
+        let degrees_spin_button = create_spin_button(0.0, 359.0, 1.0);
+        degrees_spin_button.set_halign(Align::End);
+        degrees_spin_button.set_valign(Align::Center);
         mother_box.append(&degrees_spin_button);
 
         let degrees_spin_button_clone = degrees_spin_button.clone();

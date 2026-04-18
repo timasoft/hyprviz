@@ -3,9 +3,11 @@ use crate::{
     advanced_editors::{create_dropdown, create_entry},
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     register_togtkbox, register_togtkbox_with_separator,
-    utils::join_with_separator,
+    utils::{MARGIN_NORMAL, join_with_separator},
 };
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, StringList, prelude::*};
+use gtk::{
+    Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, StringList, prelude::*,
+};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
@@ -148,7 +150,12 @@ impl ToGtkBox for BorderColor {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
+
         let border_color_string_list = StringList::new(&[
             &t!("hyprland.border_color.active_border_color"),
             &t!("hyprland.border_color.active_border_gradient"),
@@ -161,49 +168,83 @@ impl ToGtkBox for BorderColor {
 
         let hypr_color_entry = create_entry();
         let hypr_color_box = HyprColor::to_gtk_box(&hypr_color_entry);
+        hypr_color_box.set_margin_start(MARGIN_NORMAL * 2 / 3);
         hypr_color_box.set_visible(false);
         mother_box.append(&hypr_color_box);
 
         let second_hypr_color_entry = create_entry();
         let second_hypr_color_box = HyprColor::to_gtk_box(&second_hypr_color_entry);
+        second_hypr_color_box.set_margin_start(MARGIN_NORMAL * 2 / 3);
         second_hypr_color_box.set_visible(false);
         mother_box.append(&second_hypr_color_box);
 
-        let gradient_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let gradient_box = GtkBox::new(GtkOrientation::Vertical, 6);
+        gradient_box.set_margin_start(MARGIN_NORMAL * 2 / 3);
+        gradient_box.set_visible(false);
+
         let vec_hypr_color_entry = create_entry();
         let vec_hypr_color_box =
             Vec::<HyprColor>::to_gtk_box(&vec_hypr_color_entry, Self::SEPARATOR);
+        vec_hypr_color_box.set_hexpand(true);
         gradient_box.append(&vec_hypr_color_box);
+
+        let angle_row = GtkBox::new(GtkOrientation::Horizontal, 8);
+        angle_row.set_margin_start(MARGIN_NORMAL / 3);
+        let angle_label = Label::new(Some(&t!("hyprland.border_color.angle")));
+        angle_label.add_css_class("body");
+        angle_label.set_halign(Align::Start);
+        angle_label.set_hexpand(true);
+        angle_label.set_xalign(0.0);
+        angle_label.set_valign(Align::Center);
+        angle_row.append(&angle_label);
+
         let angle_entry = create_entry();
         let angle_box = Angle::to_gtk_box(&angle_entry);
-        angle_box.prepend(&Label::new(Some(&t!("hyprland.border_color.angle"))));
-        gradient_box.append(&angle_box);
+        angle_box.set_halign(Align::End);
+        angle_row.append(&angle_box);
+        gradient_box.append(&angle_row);
+
         mother_box.append(&gradient_box);
 
-        let second_gradient_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let second_gradient_box = GtkBox::new(GtkOrientation::Vertical, 6);
+        second_gradient_box.set_margin_start(MARGIN_NORMAL * 2 / 3);
+        second_gradient_box.set_visible(false);
+
         let second_vec_hypr_color_entry = create_entry();
         let second_vec_hypr_color_box =
             Vec::<HyprColor>::to_gtk_box(&second_vec_hypr_color_entry, Self::SEPARATOR);
+        second_vec_hypr_color_box.set_hexpand(true);
         second_gradient_box.append(&second_vec_hypr_color_box);
+
+        let opt_angle_row = GtkBox::new(GtkOrientation::Horizontal, 8);
+        opt_angle_row.set_margin_start(MARGIN_NORMAL / 3);
+        let opt_angle_label = Label::new(Some(&t!("hyprland.border_color.angle")));
+        opt_angle_label.add_css_class("body");
+        opt_angle_label.set_halign(Align::Start);
+        opt_angle_label.set_hexpand(true);
+        opt_angle_label.set_xalign(0.0);
+        opt_angle_label.set_valign(Align::Center);
+        opt_angle_row.append(&opt_angle_label);
+
         let opt_angle_entry = create_entry();
         let opt_angle_box = Option::<Angle>::to_gtk_box(&opt_angle_entry);
-        opt_angle_box.prepend(&Label::new(Some(&t!("hyprland.border_color.angle"))));
-        second_gradient_box.append(&opt_angle_box);
+        opt_angle_box.set_halign(Align::End);
+        opt_angle_row.append(&opt_angle_box);
+        second_gradient_box.append(&opt_angle_row);
+
         mother_box.append(&second_gradient_box);
 
         let border_color_dropdown_clone = border_color_dropdown.clone();
-        let hypr_color_entry_clone = hypr_color_entry.clone();
         let hypr_color_box_clone = hypr_color_box.clone();
-        let second_hypr_color_entry_clone = second_hypr_color_entry.clone();
         let second_hypr_color_box_clone = second_hypr_color_box.clone();
+        let gradient_box_clone = gradient_box.clone();
+        let second_gradient_box_clone = second_gradient_box.clone();
+        let hypr_color_entry_clone = hypr_color_entry.clone();
+        let second_hypr_color_entry_clone = second_hypr_color_entry.clone();
         let vec_hypr_color_entry_clone = vec_hypr_color_entry.clone();
-        let vec_hypr_color_box_clone = vec_hypr_color_box.clone();
-        let angle_entry_clone = angle_entry.clone();
-        let angle_box_clone = angle_box.clone();
         let second_vec_hypr_color_entry_clone = second_vec_hypr_color_entry.clone();
-        let second_vec_hypr_color_box_clone = second_vec_hypr_color_box.clone();
+        let angle_entry_clone = angle_entry.clone();
         let opt_angle_entry_clone = opt_angle_entry.clone();
-        let opt_angle_box_clone = opt_angle_box.clone();
         let update_ui = move |border_color: BorderColor| match border_color {
             BorderColor::Color(color) => {
                 border_color_dropdown_clone.set_selected(0);
@@ -211,10 +252,8 @@ impl ToGtkBox for BorderColor {
 
                 hypr_color_box_clone.set_visible(true);
                 second_hypr_color_box_clone.set_visible(false);
-                vec_hypr_color_box_clone.set_visible(false);
-                second_vec_hypr_color_box_clone.set_visible(false);
-                angle_box_clone.set_visible(false);
-                opt_angle_box_clone.set_visible(false);
+                gradient_box_clone.set_visible(false);
+                second_gradient_box_clone.set_visible(false);
             }
             BorderColor::Gradient(colors, angle) => {
                 border_color_dropdown_clone.set_selected(1);
@@ -224,10 +263,8 @@ impl ToGtkBox for BorderColor {
 
                 hypr_color_box_clone.set_visible(false);
                 second_hypr_color_box_clone.set_visible(false);
-                vec_hypr_color_box_clone.set_visible(true);
-                second_vec_hypr_color_box_clone.set_visible(false);
-                angle_box_clone.set_visible(true);
-                opt_angle_box_clone.set_visible(false);
+                gradient_box_clone.set_visible(true);
+                second_gradient_box_clone.set_visible(false);
             }
             BorderColor::DoubleColor(color1, color2) => {
                 border_color_dropdown_clone.set_selected(2);
@@ -236,10 +273,8 @@ impl ToGtkBox for BorderColor {
 
                 hypr_color_box_clone.set_visible(true);
                 second_hypr_color_box_clone.set_visible(true);
-                vec_hypr_color_box_clone.set_visible(false);
-                second_vec_hypr_color_box_clone.set_visible(false);
-                angle_box_clone.set_visible(false);
-                opt_angle_box_clone.set_visible(false);
+                gradient_box_clone.set_visible(false);
+                second_gradient_box_clone.set_visible(false);
             }
             BorderColor::DoubleGradient(colors1, angle1, colors2, angle2) => {
                 border_color_dropdown_clone.set_selected(3);
@@ -252,10 +287,8 @@ impl ToGtkBox for BorderColor {
 
                 hypr_color_box_clone.set_visible(false);
                 second_hypr_color_box_clone.set_visible(false);
-                vec_hypr_color_box_clone.set_visible(true);
-                second_vec_hypr_color_box_clone.set_visible(true);
-                angle_box_clone.set_visible(true);
-                opt_angle_box_clone.set_visible(true);
+                gradient_box_clone.set_visible(true);
+                second_gradient_box_clone.set_visible(true);
             }
         };
 

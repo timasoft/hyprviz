@@ -3,9 +3,9 @@ use crate::{
     advanced_editors::create_entry,
     gtk_converters::{ToGtkBox, ToGtkBoxWithSeparator},
     register_togtkbox,
-    utils::join_with_separator,
+    utils::{MARGIN_NORMAL, join_with_separator},
 };
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
@@ -72,26 +72,34 @@ impl Display for HyprGradient {
 impl ToGtkBox for HyprGradient {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
-        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-        let colors_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        colors_box.append(&Label::new(Some(&t!(
-            "hyprland.hypr_gradient.gradient_colors"
-        ))));
+        let colors_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let colors_label = Label::new(Some(&t!("hyprland.hypr_gradient.gradient_colors")));
+        colors_label.set_halign(Align::Center);
+        colors_label.set_xalign(0.5);
+        colors_box.append(&colors_label);
 
         let colors_entry = create_entry();
         let colors_separator = ' ';
         let colors_ui_box = Vec::<HyprColor>::to_gtk_box(&colors_entry, colors_separator);
+        colors_ui_box.set_hexpand(true);
         colors_box.append(&colors_ui_box);
         mother_box.append(&colors_box);
 
-        let angle_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        angle_box.append(&Label::new(Some(&t!(
-            "hyprland.hypr_gradient.gradient_angle"
-        ))));
+        let angle_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let angle_label = Label::new(Some(&t!("hyprland.hypr_gradient.gradient_angle")));
+        angle_label.set_halign(Align::Center);
+        angle_label.set_xalign(0.5);
+        angle_box.append(&angle_label);
 
         let angle_entry = create_entry();
         let angle_ui_box = Option::<Angle>::to_gtk_box(&angle_entry);
+        angle_ui_box.set_halign(Align::Center);
         angle_box.append(&angle_ui_box);
         mother_box.append(&angle_box);
 
