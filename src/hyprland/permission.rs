@@ -1,6 +1,9 @@
 use super::{HyprPermission, PermissionMode};
-use crate::{advanced_editors::create_entry, gtk_converters::ToGtkBox, register_togtkbox};
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use crate::{
+    advanced_editors::create_entry, gtk_converters::ToGtkBox, register_togtkbox,
+    utils::MARGIN_NORMAL,
+};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
@@ -50,23 +53,37 @@ impl ToGtkBox for Permission {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-        let regex_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        regex_box.append(&Label::new(Some(&t!("hyprland.permission.regex"))));
+        let regex_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let regex_label = Label::new(Some(&t!("hyprland.permission.regex")));
+        regex_label.set_halign(Align::Center);
+        regex_label.set_xalign(0.5);
+        regex_box.append(&regex_label);
         let regex_entry = create_entry();
+        regex_entry.set_hexpand(true);
         regex_box.append(&regex_entry);
         mother_box.append(&regex_box);
 
-        let permission_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        permission_box_box.append(&Label::new(Some(&t!("hyprland.permission.permission"))));
+        let permission_box_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let permission_label = Label::new(Some(&t!("hyprland.permission.permission")));
+        permission_label.set_halign(Align::Center);
+        permission_label.set_xalign(0.5);
+        permission_box_box.append(&permission_label);
         let permission_entry = create_entry();
         let permission_box = HyprPermission::to_gtk_box(&permission_entry);
         permission_box_box.append(&permission_box);
         mother_box.append(&permission_box_box);
 
-        let mode_box_box = GtkBox::new(GtkOrientation::Vertical, 5);
-        mode_box_box.append(&Label::new(Some(&t!("hyprland.permission.mode"))));
+        let mode_box_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let mode_label = Label::new(Some(&t!("hyprland.permission.mode")));
+        mode_label.set_halign(Align::Center);
+        mode_label.set_xalign(0.5);
+        mode_box_box.append(&mode_label);
         let mode_entry = create_entry();
         let mode_box = PermissionMode::to_gtk_box(&mode_entry);
         mode_box_box.append(&mode_box);
