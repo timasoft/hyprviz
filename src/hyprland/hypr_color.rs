@@ -1,11 +1,13 @@
 use crate::{
     gtk_converters::{EnumConfigForGtk, ToGtkBoxWithSeparatorAndNamesBuilder},
     register_togtkbox,
-    utils::{HasDiscriminant, ONE_OVER_255},
+    utils::{HasDiscriminant, MARGIN_NORMAL, ONE_OVER_255},
 };
 use gtk::{
-    Box as GtkBox, ColorDialog, ColorDialogButton, Entry, StringList, gdk::RGBA, prelude::*,
+    Align, Box as GtkBox, ColorDialog, ColorDialogButton, Entry, Label, Orientation, StringList,
+    gdk::RGBA, prelude::*,
 };
+use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 use strum::{EnumDiscriminants, EnumIter};
 
@@ -194,21 +196,44 @@ impl Display for HyprColor {
 fn color_builder(entry: &Entry, has_alpha: bool) -> GtkBox {
     let is_updating = Rc::new(Cell::new(false));
 
-    let mother_box = GtkBox::new(gtk::Orientation::Horizontal, 5);
+    let mother_box = GtkBox::new(Orientation::Horizontal, 8);
+    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
+
+    let color_label_box = GtkBox::new(Orientation::Vertical, 4);
+    let color_label = Label::new(Some(&t!("hyprland.hypr_color.color")));
+    color_label.set_halign(Align::Center);
+    color_label.set_xalign(0.5);
+    color_label_box.append(&color_label);
 
     let color_dialog = ColorDialog::new();
     color_dialog.set_with_alpha(has_alpha);
     let color_button = ColorDialogButton::new(Some(color_dialog));
-    mother_box.append(&color_button);
+    color_button.set_halign(Align::Center);
+    color_button.set_width_request(60);
+    color_button.set_valign(Align::Center);
+    color_label_box.append(&color_button);
+    mother_box.append(&color_label_box);
+
+    let hex_entry_box = GtkBox::new(Orientation::Vertical, 4);
+    let hex_label = Label::new(Some("HEX"));
+    hex_label.set_halign(Align::Center);
+    hex_label.set_xalign(0.5);
+    hex_entry_box.append(&hex_label);
 
     let hex_entry = Entry::new();
-    hex_entry.set_width_chars(9);
-    hex_entry.set_max_width_chars(9);
+    hex_entry.set_width_chars(11);
+    hex_entry.set_max_width_chars(11);
+    hex_entry.set_halign(Align::Center);
+    hex_entry.set_valign(Align::Center);
     match has_alpha {
         true => hex_entry.set_placeholder_text(Some("#RRGGBBAA")),
         false => hex_entry.set_placeholder_text(Some("#RRGGBB")),
     }
-    mother_box.append(&hex_entry);
+    hex_entry_box.append(&hex_entry);
+    mother_box.append(&hex_entry_box);
 
     if let Ok(hypr_color) = entry.text().parse::<HyprColor>() {
         color_button.set_rgba(&hypr_color.to_gtk_rgba());
