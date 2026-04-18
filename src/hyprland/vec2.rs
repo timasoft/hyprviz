@@ -1,9 +1,10 @@
 use crate::{
     advanced_editors::create_spin_button,
     gtk_converters::ToGtkBox,
-    utils::{MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64},
+    register_togtkbox,
+    utils::{MARGIN_NORMAL, MAX_SAFE_STEP_0_01_F64, MIN_SAFE_STEP_0_01_F64},
 };
-use gtk::{Box as GtkBox, Entry, Orientation as GtkOrientation, prelude::*};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Default)]
@@ -32,15 +33,31 @@ impl Display for Vec2 {
 impl ToGtkBox for Vec2 {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
-        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
+        let part1_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let part1_label = Label::new(Some("X"));
+        part1_label.set_halign(Align::Center);
+        part1_label.set_xalign(0.5);
+        part1_box.append(&part1_label);
         let part1_spin_button =
             create_spin_button(MIN_SAFE_STEP_0_01_F64, MAX_SAFE_STEP_0_01_F64, 0.01);
-        mother_box.append(&part1_spin_button);
+        part1_box.append(&part1_spin_button);
+        mother_box.append(&part1_box);
 
+        let part2_box = GtkBox::new(GtkOrientation::Vertical, 4);
+        let part2_label = Label::new(Some("Y"));
+        part2_label.set_halign(Align::Center);
+        part2_label.set_xalign(0.5);
+        part2_box.append(&part2_label);
         let part2_spin_button =
             create_spin_button(MIN_SAFE_STEP_0_01_F64, MAX_SAFE_STEP_0_01_F64, 0.01);
-        mother_box.append(&part2_spin_button);
+        part2_box.append(&part2_spin_button);
+        mother_box.append(&part2_box);
 
         let part1_spin_button_clone = part1_spin_button.clone();
         let part2_spin_button_clone = part2_spin_button.clone();
@@ -60,7 +77,7 @@ impl ToGtkBox for Vec2 {
             is_updating_clone.set(true);
 
             let vec2: Vec2 = entry_clone.text().parse().unwrap_or_default();
-            let new_value = Vec2(vec2.0, spin_button.value());
+            let new_value = Vec2(spin_button.value(), vec2.1);
             entry_clone.set_text(&new_value.to_string());
 
             is_updating_clone.set(false);
@@ -75,7 +92,7 @@ impl ToGtkBox for Vec2 {
             is_updating_clone.set(true);
 
             let vec2: Vec2 = entry_clone.text().parse().unwrap_or_default();
-            let new_value = Vec2(spin_button.value(), vec2.1);
+            let new_value = Vec2(vec2.0, spin_button.value());
             entry_clone.set_text(&new_value.to_string());
 
             is_updating_clone.set(false);
@@ -97,3 +114,5 @@ impl ToGtkBox for Vec2 {
         mother_box
     }
 }
+
+register_togtkbox!(Vec2);
