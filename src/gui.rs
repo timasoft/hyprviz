@@ -124,8 +124,9 @@ impl ConfigGUI {
 
         header_bar.pack_start(&search_button);
 
-        let locales = available_locales!();
-        let locales_string_list = StringList::new(locales.as_slice());
+        let locales_cow = available_locales!();
+        let locales: Vec<&str> = locales_cow.iter().map(|s| s.as_ref()).collect();
+        let locales_string_list = StringList::new(&locales);
         let locale_dropdown =
             DropDown::new(Some(locales_string_list.clone()), None::<gtk::Expression>);
 
