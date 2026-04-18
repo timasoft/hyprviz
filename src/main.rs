@@ -10,8 +10,8 @@ use std::{
 use utils::{
     CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
     check_last_non_empty_line_contains, expand_source, find_all_profiles, get_config_path,
-    get_current_profile, get_system_locale, initialize_development_mode, mute_stdout,
-    reload_hyprland, update_source_line,
+    get_current_profile, get_system_locale, initialize_development_mode, is_development_mode,
+    mute_stdout, reload_hyprland, update_source_line,
 };
 
 mod advanced_editors;
@@ -43,8 +43,13 @@ fn main() {
         }
     }
 
+    let application_id = match is_development_mode() {
+        false => "io.github.timasoft.hyprviz",
+        true => "io.github.timasoft.hyprviz_dev",
+    };
+
     let app = Application::builder()
-        .application_id("io.github.timasoft.hyprviz")
+        .application_id(application_id)
         .build();
 
     app.connect_activate(build_ui);
