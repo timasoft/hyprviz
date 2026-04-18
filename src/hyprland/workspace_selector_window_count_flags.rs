@@ -1,5 +1,8 @@
-use crate::{advanced_editors::create_switch, gtk_converters::ToGtkBox, register_togtkbox};
-use gtk::{Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
+use crate::{
+    advanced_editors::create_switch, gtk_converters::ToGtkBox, register_togtkbox,
+    utils::MARGIN_NORMAL,
+};
+use gtk::{Align, Box as GtkBox, Entry, Label, Orientation as GtkOrientation, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 
@@ -66,45 +69,74 @@ impl ToGtkBox for WorkspaceSelectorWindowCountFlags {
     fn to_gtk_box(entry: &Entry) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
 
-        let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
+        let mother_box = GtkBox::new(GtkOrientation::Vertical, 6);
+        mother_box.set_margin_start(MARGIN_NORMAL / 2);
+        mother_box.set_margin_end(MARGIN_NORMAL / 2);
+        mother_box.set_margin_top(MARGIN_NORMAL / 2);
+        mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
-        let tiled_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        tiled_box.append(&Label::new(Some(&t!(
+        let tiled_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        let tiled_label = Label::new(Some(&t!(
             "hyprland.workspace_selector_window_count_flags.is_tiled"
-        ))));
+        )));
+        tiled_label.set_halign(Align::Start);
+        tiled_label.set_xalign(0.0);
+        tiled_label.set_hexpand(true);
+        tiled_box.append(&tiled_label);
         let tiled_switch = create_switch();
+        tiled_switch.set_halign(Align::End);
         tiled_box.append(&tiled_switch);
         mother_box.append(&tiled_box);
 
-        let floating_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        floating_box.append(&Label::new(Some(&t!(
+        let floating_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        let floating_label = Label::new(Some(&t!(
             "hyprland.workspace_selector_window_count_flags.is_floating"
-        ))));
+        )));
+        floating_label.set_halign(Align::Start);
+        floating_label.set_xalign(0.0);
+        floating_label.set_hexpand(true);
+        floating_box.append(&floating_label);
         let floating_switch = create_switch();
+        floating_switch.set_halign(Align::End);
         floating_box.append(&floating_switch);
         mother_box.append(&floating_box);
 
-        let groups_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        groups_box.append(&Label::new(Some(&t!(
+        let groups_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        let groups_label = Label::new(Some(&t!(
             "hyprland.workspace_selector_window_count_flags.is_in_group"
-        ))));
+        )));
+        groups_label.set_halign(Align::Start);
+        groups_label.set_xalign(0.0);
+        groups_label.set_hexpand(true);
+        groups_box.append(&groups_label);
         let groups_switch = create_switch();
+        groups_switch.set_halign(Align::End);
         groups_box.append(&groups_switch);
         mother_box.append(&groups_box);
 
-        let visible_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        visible_box.append(&Label::new(Some(&t!(
+        let visible_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        let visible_label = Label::new(Some(&t!(
             "hyprland.workspace_selector_window_count_flags.is_visible"
-        ))));
+        )));
+        visible_label.set_halign(Align::Start);
+        visible_label.set_xalign(0.0);
+        visible_label.set_hexpand(true);
+        visible_box.append(&visible_label);
         let visible_switch = create_switch();
+        visible_switch.set_halign(Align::End);
         visible_box.append(&visible_switch);
         mother_box.append(&visible_box);
 
-        let pinned_box = GtkBox::new(GtkOrientation::Horizontal, 5);
-        pinned_box.append(&Label::new(Some(&t!(
+        let pinned_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+        let pinned_label = Label::new(Some(&t!(
             "hyprland.workspace_selector_window_count_flags.is_pinned"
-        ))));
+        )));
+        pinned_label.set_halign(Align::Start);
+        pinned_label.set_xalign(0.0);
+        pinned_label.set_hexpand(true);
+        pinned_box.append(&pinned_label);
         let pinned_switch = create_switch();
+        pinned_switch.set_halign(Align::End);
         pinned_box.append(&pinned_switch);
         mother_box.append(&pinned_box);
 
