@@ -2,9 +2,9 @@ use crate::{
     advanced_editors::{create_spin_button, create_switch},
     gtk_converters::{EnumConfigForGtk, ToGtkBoxWithSeparatorAndNamesBuilder},
     register_togtkbox,
-    utils::{HasDiscriminant, MAX_SAFE_STEP_0_01_F64},
+    utils::{HasDiscriminant, MARGIN_NORMAL, MAX_SAFE_STEP_0_01_F64},
 };
-use gtk::{Box as GtkBox, Label, Orientation as GtkOrientation, StringList, prelude::*};
+use gtk::{Align, Box as GtkBox, Label, Orientation as GtkOrientation, StringList, prelude::*};
 use rust_i18n::t;
 use std::{cell::Cell, fmt::Display, rc::Rc, str::FromStr};
 use strum::{EnumDiscriminants, EnumIter};
@@ -497,7 +497,7 @@ impl EnumConfigForGtk for HyprOpacity {
         StringList::new(&[
             &t!("hyprland.hypr_opacity.overall"),
             &t!("hyprland.hypr_opacity.active_and_inactive"),
-            &t!("hyprland.hypr_opacity.active_and_inactive_and_fullscreen"),
+            &t!("hyprland.hypr_opacity.active_inactive_and_fullscreen"),
         ])
     }
 
@@ -507,13 +507,20 @@ impl EnumConfigForGtk for HyprOpacity {
         match self {
             HyprOpacity::Overall(_opacity, _override) => Some(|entry, _separator, _labels, _| {
                 let is_updating = Rc::new(Cell::new(false));
-                let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
                 let opacity_spin_button = create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
                 mother_box.append(&opacity_spin_button);
 
-                let override_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
+                let override_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let override_label = Label::new(Some(&t!("hyprland.hypr_opacity.override")));
+                override_label.set_halign(Align::Center);
+                override_label.set_xalign(0.5);
+                override_box.append(&override_label);
                 let override_switch = create_switch();
                 override_box.append(&override_switch);
                 mother_box.append(&override_box);
@@ -588,24 +595,46 @@ impl EnumConfigForGtk for HyprOpacity {
             HyprOpacity::ActiveAndInactive(_opacity1, _override1, _opacity2, _override2) => {
                 Some(|entry, _separator, _labels, _| {
                     let is_updating = Rc::new(Cell::new(false));
-                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                    let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                    mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                    mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
+                    let opacity1_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let opacity1_label = Label::new(Some(&t!("hyprland.hypr_opacity.active")));
+                    opacity1_label.set_halign(Align::Center);
+                    opacity1_label.set_xalign(0.5);
+                    opacity1_box.append(&opacity1_label);
                     let opacity1_spin_button =
                         create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
-                    mother_box.append(&opacity1_spin_button);
+                    opacity1_box.append(&opacity1_spin_button);
+                    mother_box.append(&opacity1_box);
 
-                    let override1_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    override1_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
+                    let override1_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let override1_label = Label::new(Some(&t!("hyprland.hypr_opacity.override")));
+                    override1_label.set_halign(Align::Center);
+                    override1_label.set_xalign(0.5);
+                    override1_box.append(&override1_label);
                     let override1_switch = create_switch();
                     override1_box.append(&override1_switch);
                     mother_box.append(&override1_box);
 
+                    let opacity2_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let opacity2_label = Label::new(Some(&t!("hyprland.hypr_opacity.inactive")));
+                    opacity2_label.set_halign(Align::Center);
+                    opacity2_label.set_xalign(0.5);
+                    opacity2_box.append(&opacity2_label);
                     let opacity2_spin_button =
                         create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
-                    mother_box.append(&opacity2_spin_button);
+                    opacity2_box.append(&opacity2_spin_button);
+                    mother_box.append(&opacity2_box);
 
-                    let override2_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                    override2_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
+                    let override2_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                    let override2_label = Label::new(Some(&t!("hyprland.hypr_opacity.override")));
+                    override2_label.set_halign(Align::Center);
+                    override2_label.set_xalign(0.5);
+                    override2_box.append(&override2_label);
                     let override2_switch = create_switch();
                     override2_box.append(&override2_switch);
                     mother_box.append(&override2_box);
@@ -765,31 +794,62 @@ impl EnumConfigForGtk for HyprOpacity {
                 _override3,
             ) => Some(|entry, _separator, _labels, _| {
                 let is_updating = Rc::new(Cell::new(false));
-                let mother_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+                let mother_box = GtkBox::new(GtkOrientation::Horizontal, 8);
+                mother_box.set_margin_start(MARGIN_NORMAL / 2);
+                mother_box.set_margin_end(MARGIN_NORMAL / 2);
+                mother_box.set_margin_top(MARGIN_NORMAL / 2);
+                mother_box.set_margin_bottom(MARGIN_NORMAL / 2);
 
+                let opacity1_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let opacity1_label = Label::new(Some(&t!("hyprland.hypr_opacity.active")));
+                opacity1_label.set_halign(Align::Center);
+                opacity1_label.set_xalign(0.5);
+                opacity1_box.append(&opacity1_label);
                 let opacity1_spin_button = create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
-                mother_box.append(&opacity1_spin_button);
+                opacity1_box.append(&opacity1_spin_button);
+                mother_box.append(&opacity1_box);
 
-                let override1_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override1_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
+                let override1_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let override1_label = Label::new(Some(&t!("hyprland.hypr_opacity.override")));
+                override1_label.set_halign(Align::Center);
+                override1_label.set_xalign(0.5);
+                override1_box.append(&override1_label);
                 let override1_switch = create_switch();
                 override1_box.append(&override1_switch);
                 mother_box.append(&override1_box);
 
+                let opacity2_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let opacity2_label = Label::new(Some(&t!("hyprland.hypr_opacity.inactive")));
+                opacity2_label.set_halign(Align::Center);
+                opacity2_label.set_xalign(0.5);
+                opacity2_box.append(&opacity2_label);
                 let opacity2_spin_button = create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
-                mother_box.append(&opacity2_spin_button);
+                opacity2_box.append(&opacity2_spin_button);
+                mother_box.append(&opacity2_box);
 
-                let override2_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override2_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
+                let override2_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let override2_label = Label::new(Some(&t!("hyprland.hypr_opacity.override")));
+                override2_label.set_halign(Align::Center);
+                override2_label.set_xalign(0.5);
+                override2_box.append(&override2_label);
                 let override2_switch = create_switch();
                 override2_box.append(&override2_switch);
                 mother_box.append(&override2_box);
 
+                let opacity3_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let opacity3_label = Label::new(Some(&t!("hyprland.hypr_opacity.fullscreen")));
+                opacity3_label.set_halign(Align::Center);
+                opacity3_label.set_xalign(0.5);
+                opacity3_box.append(&opacity3_label);
                 let opacity3_spin_button = create_spin_button(0.0, MAX_SAFE_STEP_0_01_F64, 0.01);
-                mother_box.append(&opacity3_spin_button);
+                opacity3_box.append(&opacity3_spin_button);
+                mother_box.append(&opacity3_box);
 
-                let override3_box = GtkBox::new(GtkOrientation::Vertical, 5);
-                override3_box.append(&Label::new(Some(&t!("hyprland.hypr_opacity.override"))));
+                let override3_box = GtkBox::new(GtkOrientation::Vertical, 4);
+                let override3_label = Label::new(Some(&t!("hyprland.hypr_opacity.override")));
+                override3_label.set_halign(Align::Center);
+                override3_label.set_xalign(0.5);
+                override3_box.append(&override3_label);
                 let override3_switch = create_switch();
                 override3_box.append(&override3_switch);
                 mother_box.append(&override3_box);
