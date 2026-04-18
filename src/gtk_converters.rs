@@ -551,18 +551,18 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
     fn to_gtk_box(entry: &Entry, separator: char) -> GtkBox {
         let is_updating = Rc::new(Cell::new(false));
         let join_separator = separator.to_string();
-        let min_width = {
+        let min_height = {
             let temp_sub_entry = create_entry();
             let temp_sub_box = T::to_gtk_box(&temp_sub_entry);
-            let temp_item_box = GtkBox::new(GtkOrientation::Horizontal, 5);
+            let temp_item_box = GtkBox::new(GtkOrientation::Vertical, 5);
             let temp_remove_button = create_button(&t!("gtk_converters.remove"));
             temp_item_box.append(&temp_remove_button);
             temp_item_box.append(&temp_sub_box);
 
-            let (min_width, _natural, _min_baseline, _natural_baseline) =
-                temp_item_box.measure(GtkOrientation::Horizontal, -1);
+            let (min_height, _natural, _min_baseline, _natural_baseline) =
+                temp_item_box.measure(GtkOrientation::Vertical, -1);
 
-            min_width
+            min_height
         };
 
         let mother_box = GtkBox::new(GtkOrientation::Vertical, 5);
@@ -679,16 +679,16 @@ impl<T: ToGtkBox + Default + Display + FromStr + Clone + Eq + Hash + 'static> To
             }
 
             if !parts.is_empty() {
-                let width_request = if parts.len() == 1 {
-                    min_width
+                let height_request = if parts.len() == 1 {
+                    min_height
                 } else if parts.len() == 2 {
-                    (min_width + 5) * 2
+                    (min_height + 5) * 2
                 } else {
-                    (min_width * 5) / 2
+                    (min_height * 5) / 2
                 };
-                scrolled_window.set_width_request(width_request);
+                scrolled_window.set_height_request(height_request);
             } else {
-                scrolled_window.set_width_request(1);
+                scrolled_window.set_height_request(1);
             }
 
             remove_buttons
