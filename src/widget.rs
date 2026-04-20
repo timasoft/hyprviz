@@ -27,8 +27,8 @@ use crate::{
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         HistoryManager, MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, compare_versions, expand_source,
-        expand_source_str, extract_value, get_available_monitors, get_config_path,
-        get_latest_version, parse_top_level_options,
+        expand_source_str, get_available_monitors, get_config_path, get_latest_version,
+        parse_top_level_options,
     },
 };
 
@@ -5102,7 +5102,9 @@ impl ConfigWidget {
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
             let default_value = &widget_data.default;
-            let value = extract_value(config, category, name, default_value);
+            let value = history
+                .borrow()
+                .extract_value(config, category, name, default_value);
 
             if widget_data.widget.downcast_ref::<Box>().is_none() {
                 history.borrow_mut().insert_to_initial_state(

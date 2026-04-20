@@ -3,9 +3,11 @@ use gui::ConfigGUI;
 use hyprparser::parse_config;
 use rust_i18n::{available_locales, i18n, t};
 use std::{
-    env,
+    cell::RefCell,
+    env, fs,
     path::{Path, PathBuf},
-    {cell::RefCell, fs, rc::Rc},
+    rc::Rc,
+    time::Instant,
 };
 use utils::{
     CONFIG_PATH, HYPRVIZ_CONFIG_PATH, HYPRVIZ_PROFILES_PATH, atomic_write,
@@ -185,7 +187,23 @@ fn build_ui(app: &Application) {
 
         let parsed_config = mute_stdout(|| parse_config(&config_str_for_read));
 
+        gui.borrow_mut()
+            .history
+            .borrow_mut()
+            .init_initial_config(&parsed_config.content);
+        gui.borrow_mut()
+            .history
+            .borrow_mut()
+            .load_old_state_of_ui(&parsed_config.content);
+
+        let time = Instant::now();
         gui.borrow_mut().load_config(&parsed_config, &profile);
+        if is_development_mode() {
+            eprintln!(
+                "Config load time: {:?}",
+                Instant::now().duration_since(time)
+            );
+        }
 
         let profiles = find_all_profiles();
         println!("Available profiles: {:?}", profiles);
@@ -272,7 +290,7 @@ fn build_ui(app: &Application) {
                     let gui = Rc::clone(&gui_clone);
 
                     glib::MainContext::default().spawn_local(async move {
-                        gui.borrow_mut().reload_ui();
+                        gui.borrow_mut().reload_ui(true);
                     });
                 }
             });

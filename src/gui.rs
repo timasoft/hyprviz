@@ -35,7 +35,7 @@ pub struct ConfigGUI {
     copy_button: Button,
     search_entry: SearchEntry,
     locale_dropdown: DropDown,
-    history: Rc<RefCell<HistoryManager>>,
+    pub history: Rc<RefCell<HistoryManager>>,
     content_box: Box,
     stack: Stack,
     sidebar: StackSidebar,
@@ -523,7 +523,7 @@ along with this program; if not, see
                     let new_locale = string_object.string().to_string();
                     set_locale(&new_locale);
 
-                    gui_clone.borrow_mut().reload_ui();
+                    gui_clone.borrow_mut().reload_ui(false);
                     gui_clone.borrow().custom_info_popup(
                         &t!("gui.language_changed"),
                         &t!("gui.language_changed_to_", language = new_locale),
@@ -826,7 +826,7 @@ along with this program; if not, see
                     }
                 }
             }
-            self.history.clone().borrow_mut().clear();
+            self.history.clone().borrow_mut().clear_current_state();
 
             match result {
                 Ok(()) => {
@@ -997,8 +997,6 @@ along with this program; if not, see
                 );
             }
         }
-
-        self.history.borrow_mut().clear();
     }
 
     pub fn apply_changes(&self, config: &mut HyprlandConfig) {
@@ -1145,7 +1143,7 @@ along with this program; if not, see
         *config = new_config;
     }
 
-    pub fn reload_ui(&mut self) {
+    pub fn reload_ui(&mut self, clear_current_state: bool) {
         let current_profile = {
             let selected_index = self.profile_dropdown.selected();
             let model = self.profile_dropdown.model().unwrap();
@@ -1174,6 +1172,9 @@ along with this program; if not, see
         };
 
         let parsed_config = mute_stdout(|| parse_config(&config_str));
+        if clear_current_state {
+            self.history.borrow_mut().clear_current_state();
+        }
         self.load_config(&parsed_config, &current_profile);
 
         if let Some(page) = current_page

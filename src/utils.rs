@@ -1,6 +1,7 @@
 use crate::hyprland::MonitorSelector;
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::{
     borrow::Cow,
@@ -9,6 +10,7 @@ use std::{
     env,
     error::Error,
     fs::{self, File},
+    hash::{Hash, Hasher},
     io::{self, Write},
     os::unix::io::AsRawFd,
     path::{Path, PathBuf},
@@ -17,6 +19,36 @@ use std::{
     time::Instant,
 };
 use strum::IntoEnumIterator;
+use xxhash_rust::xxh3::Xxh3;
+
+mod tuple_map_serde {
+    use super::*;
+    use serde::{Deserializer, Serializer};
+    use std::collections::HashMap;
+
+    pub fn serialize<S>(
+        map: &HashMap<(String, String), String>,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        map.iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect::<Vec<_>>()
+            .serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D>(
+        deserializer: D,
+    ) -> Result<HashMap<(String, String), String>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let vec: Vec<((String, String), String)> = Vec::deserialize(deserializer)?;
+        Ok(vec.into_iter().collect())
+    }
+}
 
 static IS_DEVELOPMENT_MODE: OnceLock<bool> = OnceLock::new();
 
@@ -1489,6 +1521,18 @@ pub fn strip_outer_parens(s: &str) -> Option<&str> {
     }
 }
 
+fn compute_config_hash(content: &[String]) -> u64 {
+    let mut hasher = Xxh3::new();
+
+    content.len().hash(&mut hasher);
+
+    for line in content {
+        line.hash(&mut hasher);
+    }
+
+    hasher.finish()
+}
+
 pub trait HasDiscriminant {
     type Discriminant: IntoEnumIterator + PartialEq + Eq + Clone + Copy;
 
@@ -1530,7 +1574,7 @@ impl<T: IntoEnumIterator + Eq + Copy> HasDiscriminant for T {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConfigChange {
     pub category: String,
     pub key: String,
@@ -1538,16 +1582,24 @@ pub struct ConfigChange {
     pub new_value: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HistoryManager {
     undo_stack: VecDeque<ConfigChange>,
     redo_stack: VecDeque<ConfigChange>,
+    #[serde(with = "tuple_map_serde")]
     initial_state: HashMap<(String, String), String>,
+    #[serde(with = "tuple_map_serde")]
     current_state: HashMap<(String, String), String>,
+    initial_config_hash: u64,
     max_history: usize,
     last_change_key: Option<(String, String)>,
+    #[serde(skip, default = "default_instant")]
     last_change_time: Instant,
     coalesce_threshold_ms: u128,
+}
+
+fn default_instant() -> Instant {
+    Instant::now()
 }
 
 impl HistoryManager {
@@ -1557,11 +1609,96 @@ impl HistoryManager {
             redo_stack: VecDeque::new(),
             initial_state: HashMap::new(),
             current_state: HashMap::new(),
+            initial_config_hash: 0,
             max_history,
             last_change_key: None,
             last_change_time: Instant::now(),
             coalesce_threshold_ms,
         }
+    }
+
+    pub fn save_current_state_of_ui(&self) {
+        let json = match serde_json::to_string_pretty(self) {
+            Ok(j) => j,
+            Err(e) => {
+                eprintln!("[HistoryManager] JSON serialization failed: {}", e);
+                return;
+            }
+        };
+
+        let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let path = PathBuf::from(&home).join(HYPRVIZ_UI_STATE_PATH);
+
+        std::thread::spawn(move || {
+            if let Err(e) = fs::create_dir_all(path.parent().unwrap()) {
+                eprintln!("[HistoryManager] Failed to create state dir: {}", e);
+                return;
+            }
+            if let Err(e) = atomic_write(&path, &json) {
+                eprintln!("[HistoryManager] Failed to save UI state: {}", e);
+            }
+        });
+    }
+
+    pub fn load_current_state_of_ui() -> io::Result<Option<Self>> {
+        let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
+        let path = PathBuf::from(&home).join(HYPRVIZ_UI_STATE_PATH);
+
+        if !path.exists() {
+            return Ok(None);
+        }
+
+        let content = fs::read_to_string(&path)?;
+        serde_json::from_str(&content).map(Some).map_err(|e| {
+            io::Error::new(
+                io::ErrorKind::InvalidData,
+                format!("JSON deserialization failed: {}", e),
+            )
+        })
+    }
+
+    pub fn load_old_state_of_ui(&mut self, new_config_content: &[String]) {
+        if let Ok(Some(old_state)) = Self::load_current_state_of_ui() {
+            let new_hash = compute_config_hash(new_config_content);
+            let old_hash = old_state.initial_config_hash;
+
+            eprintln!(
+                "[HistoryManager] Config hash - New: {}, Old: {}, Match: {}",
+                new_hash,
+                old_hash,
+                new_hash == old_hash
+            );
+
+            if new_hash == old_hash {
+                self.current_state = old_state.current_state;
+                self.initial_state = old_state.initial_state;
+            }
+            self.undo_stack = old_state.undo_stack;
+            self.redo_stack = old_state.redo_stack;
+        }
+    }
+
+    pub fn init_initial_config(&mut self, new_config_content: &[String]) {
+        self.initial_config_hash = compute_config_hash(new_config_content);
+    }
+
+    pub fn extract_value(
+        &self,
+        config: &HyprlandConfig,
+        category: &str,
+        name: &str,
+        default: &str,
+    ) -> String {
+        let change_key = (category.to_string(), name.to_string());
+
+        if let Some(value) = self.current_state.get(&change_key) {
+            return value.clone();
+        }
+        if let Some(value) = self.initial_state.get(&change_key) {
+            return value.clone();
+        }
+
+        extract_value(config, category, name, default)
     }
 
     pub fn record_change(&mut self, category: String, key: String, new_value: String) {
@@ -1584,6 +1721,9 @@ impl HistoryManager {
             last.new_value = Some(new_value.clone());
             self.last_change_time = now;
             self.current_state.insert(change_key, new_value);
+
+            self.save_current_state_of_ui();
+
             return;
         }
 
@@ -1602,6 +1742,8 @@ impl HistoryManager {
         if self.undo_stack.len() > self.max_history {
             self.undo_stack.pop_front();
         }
+
+        self.save_current_state_of_ui();
     }
 
     pub fn record_removal(&mut self, category: String, key: String) {
@@ -1624,6 +1766,8 @@ impl HistoryManager {
         if self.undo_stack.len() > self.max_history {
             self.undo_stack.pop_front();
         }
+
+        self.save_current_state_of_ui();
     }
 
     pub fn undo(&mut self) -> Option<ConfigChange> {
@@ -1635,6 +1779,9 @@ impl HistoryManager {
                 self.current_state.remove(&key);
             }
             self.redo_stack.push_back(change.clone());
+
+            self.save_current_state_of_ui();
+
             Some(change)
         } else {
             None
@@ -1650,6 +1797,9 @@ impl HistoryManager {
                 self.current_state.remove(&key);
             }
             self.undo_stack.push_back(change.clone());
+
+            self.save_current_state_of_ui();
+
             Some(change)
         } else {
             None
@@ -1671,21 +1821,23 @@ impl HistoryManager {
         value: String,
     ) -> Option<String> {
         let change_key = (category.clone(), key.clone());
+
+        self.save_current_state_of_ui();
+
         self.initial_state.insert(change_key, value)
     }
 
-    /// Clears everything expect initial_state, max_history, last_change_time and coalesce_threshold_ms
-    pub fn clear(&mut self) {
-        self.undo_stack.clear();
-        self.redo_stack.clear();
+    pub fn clear_current_state(&mut self) {
         self.current_state.clear();
-        self.last_change_key = None;
+
+        self.save_current_state_of_ui();
     }
 }
 
 pub const CONFIG_PATH: &str = ".config/hypr/hyprland.conf";
 pub const HYPRVIZ_CONFIG_PATH: &str = ".config/hypr/hyprviz.conf";
 pub const HYPRVIZ_PROFILES_PATH: &str = ".config/hypr/hyprviz/";
+pub const HYPRVIZ_UI_STATE_PATH: &str = ".local/share/hyprviz/ui_state.json";
 
 /// 1 / 255
 pub const ONE_OVER_255: f64 = 1.0 / 255.0;
