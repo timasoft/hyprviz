@@ -5472,29 +5472,27 @@ impl ConfigWidget {
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
-                    if name.starts_with(category) || category == "top_level" {
+                    let restored_name =
+                        history
+                            .borrow()
+                            .get_state_value(category, &format!("{}_name", raw), &name);
+                    let restored_value = history.borrow().get_state_value(
+                        category,
+                        &format!("{}_value", raw),
+                        &value,
+                    );
+
+                    let should_append = (name.starts_with(category) || category == "top_level")
+                        || (category == "bind" && name.starts_with("unbind"))
+                        || (category == "animation" && name.starts_with("bezier"));
+
+                    if should_append {
                         append_option_row(
                             window,
                             &rw_container,
                             raw,
-                            name,
-                            value,
-                            &history,
-                            category,
-                            &top_level_rows,
-                            &self.is_programmatic_update,
-                        );
-                        continue;
-                    }
-                    if (category == "bind" && (name.starts_with("unbind")))
-                        || (category == "animation" && (name.starts_with("bezier")))
-                    {
-                        append_option_row(
-                            window,
-                            &rw_container,
-                            raw,
-                            name,
-                            value,
+                            restored_name,
+                            restored_value,
                             &history,
                             category,
                             &top_level_rows,

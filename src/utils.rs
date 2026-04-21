@@ -1714,6 +1714,19 @@ impl HistoryManager {
         extract_value(config, category, name, default)
     }
 
+    pub fn get_state_value(&self, category: &str, key: &str, fallback: &str) -> String {
+        let change_key = (category.to_string(), key.to_string());
+
+        if let Some(value) = self.current_state.get(&change_key) {
+            return value.clone();
+        }
+        if let Some(value) = self.initial_state.get(&change_key) {
+            return value.clone();
+        }
+
+        fallback.to_string()
+    }
+
     pub fn record_change(&mut self, category: String, key: String, new_value: String) {
         let change_key = (category.clone(), key.clone());
         let old_value = match self.current_state.get(&change_key) {
