@@ -826,10 +826,21 @@ along with this program; if not, see
                     }
                 }
             }
+
+            let config_path_full = get_config_path(false, "Default");
+            let expanded_config_str = match expand_source(&config_path_full) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("Failed to expand sources: {}", e);
+                    updated_config_str.clone()
+                }
+            };
+            let expanded_parsed_config = mute_stdout(|| parse_config(&expanded_config_str));
+
             self.history
                 .clone()
                 .borrow_mut()
-                .init_initial_config(&parsed_config.content);
+                .init_initial_config(&expanded_parsed_config.content);
             self.history.clone().borrow_mut().clear_current_state();
 
             match result {
