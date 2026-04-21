@@ -15,8 +15,11 @@ use std::{
     os::unix::io::AsRawFd,
     path::{Path, PathBuf},
     process::Command,
-    sync::{LazyLock, OnceLock},
-    time::Instant,
+    sync::{
+        Arc, LazyLock, OnceLock,
+        atomic::{self, AtomicU64},
+    },
+    time::{Duration, Instant},
 };
 use strum::IntoEnumIterator;
 use xxhash_rust::xxh3::Xxh3;
@@ -1596,6 +1599,8 @@ pub struct HistoryManager {
     #[serde(skip, default = "default_instant")]
     last_change_time: Instant,
     coalesce_threshold_ms: u128,
+    #[serde(skip, default = "Arc::default")]
+    save_generation: Arc<AtomicU64>,
 }
 
 fn default_instant() -> Instant {
@@ -1614,10 +1619,13 @@ impl HistoryManager {
             last_change_key: None,
             last_change_time: Instant::now(),
             coalesce_threshold_ms,
+            save_generation: Arc::default(),
         }
     }
 
-    pub fn save_current_state_of_ui(&self) {
+    pub fn schedule_save(&self) {
+        let generation = self.save_generation.fetch_add(1, atomic::Ordering::Release);
+
         let json = match serde_json::to_string_pretty(self) {
             Ok(j) => j,
             Err(e) => {
@@ -1628,12 +1636,17 @@ impl HistoryManager {
 
         let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
         let path = PathBuf::from(&home).join(HYPRVIZ_UI_STATE_PATH);
+        let gen_counter = Arc::clone(&self.save_generation);
+        let threshold = self.coalesce_threshold_ms as u64;
 
         std::thread::spawn(move || {
-            if let Err(e) = fs::create_dir_all(path.parent().unwrap()) {
-                eprintln!("[HistoryManager] Failed to create state dir: {}", e);
+            std::thread::sleep(Duration::from_millis(threshold));
+
+            if gen_counter.load(atomic::Ordering::Acquire) > generation + 1 {
                 return;
             }
+
+            let _ = std::fs::create_dir_all(path.parent().unwrap());
             if let Err(e) = atomic_write(&path, &json) {
                 eprintln!("[HistoryManager] Failed to save UI state: {}", e);
             }
@@ -1722,7 +1735,7 @@ impl HistoryManager {
             self.last_change_time = now;
             self.current_state.insert(change_key, new_value);
 
-            self.save_current_state_of_ui();
+            self.schedule_save();
 
             return;
         }
@@ -1743,7 +1756,7 @@ impl HistoryManager {
             self.undo_stack.pop_front();
         }
 
-        self.save_current_state_of_ui();
+        self.schedule_save();
     }
 
     pub fn record_removal(&mut self, category: String, key: String) {
@@ -1767,7 +1780,7 @@ impl HistoryManager {
             self.undo_stack.pop_front();
         }
 
-        self.save_current_state_of_ui();
+        self.schedule_save();
     }
 
     pub fn undo(&mut self) -> Option<ConfigChange> {
@@ -1780,7 +1793,7 @@ impl HistoryManager {
             }
             self.redo_stack.push_back(change.clone());
 
-            self.save_current_state_of_ui();
+            self.schedule_save();
 
             Some(change)
         } else {
@@ -1798,7 +1811,7 @@ impl HistoryManager {
             }
             self.undo_stack.push_back(change.clone());
 
-            self.save_current_state_of_ui();
+            self.schedule_save();
 
             Some(change)
         } else {
@@ -1822,7 +1835,7 @@ impl HistoryManager {
     ) -> Option<String> {
         let change_key = (category.clone(), key.clone());
 
-        self.save_current_state_of_ui();
+        self.schedule_save();
 
         self.initial_state.insert(change_key, value)
     }
@@ -1830,7 +1843,7 @@ impl HistoryManager {
     pub fn clear_current_state(&mut self) {
         self.current_state.clear();
 
-        self.save_current_state_of_ui();
+        self.schedule_save();
     }
 }
 
