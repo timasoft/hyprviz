@@ -826,6 +826,10 @@ along with this program; if not, see
                     }
                 }
             }
+            self.history
+                .clone()
+                .borrow_mut()
+                .init_initial_config(&parsed_config.content);
             self.history.clone().borrow_mut().clear_current_state();
 
             match result {
