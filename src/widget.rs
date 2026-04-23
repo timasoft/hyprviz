@@ -27,8 +27,8 @@ use crate::{
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         HistoryManager, MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, compare_versions, expand_source,
-        expand_source_str, extract_value, get_available_monitors, get_config_path,
-        get_latest_version, parse_top_level_options,
+        expand_source_str, get_available_monitors, get_config_path, get_latest_version,
+        parse_top_level_options,
     },
 };
 
@@ -5102,7 +5102,10 @@ impl ConfigWidget {
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
             let default_value = &widget_data.default;
-            let value = extract_value(config, category, name, default_value);
+            let value =
+                history
+                    .borrow()
+                    .resolve_value_with_history(config, category, name, default_value);
 
             if widget_data.widget.downcast_ref::<Box>().is_none() {
                 history.borrow_mut().insert_to_initial_state(
@@ -5470,29 +5473,28 @@ impl ConfigWidget {
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
-                    if name.starts_with(category) || category == "top_level" {
+                    let restored_name = history.borrow().lookup_transient_override(
+                        category,
+                        &format!("{}_name", raw),
+                        &name,
+                    );
+                    let restored_value = history.borrow().lookup_transient_override(
+                        category,
+                        &format!("{}_value", raw),
+                        &value,
+                    );
+
+                    let should_append = (name.starts_with(category) || category == "top_level")
+                        || (category == "bind" && name.starts_with("unbind"))
+                        || (category == "animation" && name.starts_with("bezier"));
+
+                    if should_append {
                         append_option_row(
                             window,
                             &rw_container,
                             raw,
-                            name,
-                            value,
-                            &history,
-                            category,
-                            &top_level_rows,
-                            &self.is_programmatic_update,
-                        );
-                        continue;
-                    }
-                    if (category == "bind" && (name.starts_with("unbind")))
-                        || (category == "animation" && (name.starts_with("bezier")))
-                    {
-                        append_option_row(
-                            window,
-                            &rw_container,
-                            raw,
-                            name,
-                            value,
+                            restored_name,
+                            restored_value,
                             &history,
                             category,
                             &top_level_rows,
