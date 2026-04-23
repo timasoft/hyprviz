@@ -995,7 +995,7 @@ along with this program; if not, see
         button_box.set_hexpand(true);
         button_box.set_homogeneous(true);
 
-        let button_reset_current = Button::with_label(&t!("gui.reset_current_state"));
+        let button_reset_current = Button::with_label(&t!("gui.reset_unsaved_changes"));
         let button_reset_undo = Button::with_label(&t!("gui.reset_undo_stack"));
         let button_reset_redo = Button::with_label(&t!("gui.reset_redo_stack"));
         let button_reset_all = Button::with_label(&t!("gui.reset_all"));

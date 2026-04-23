@@ -315,10 +315,10 @@ gui.redo_stack:
   en: "Redo Stack"
   ru: "Стек повторов (Redo)"
   zh-CN: "重做栈"
-gui.reset_current_state:
-  en: "Reset Current State"
-  ru: "Сбросить текущее состояние"
-  zh-CN: "重置当前状态"
+gui.reset_unsaved_changes:
+  en: "Reset Unsaved Changes"
+  ru: "Сбросить несохранённые изменения"
+  zh-CN: "重置未保存的更改"
 gui.reset_undo_stack:
   en: "Reset Undo Stack"
   ru: "Сбросить стек отмен"
