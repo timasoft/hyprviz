@@ -11,6 +11,10 @@ gui.delete_profile:
   en: "Delete Profile"
   ru: "Удалить профиль"
   zh-CN: "删除配置文件"
+gui.history:
+  en: "History"
+  ru: "История"
+  zh-CN: "历史"
 gui.save_hyprviz_config:
   en: "Save HyprViz Config"
   ru: "Сохранить конфигурацию HyprViz"
@@ -295,3 +299,51 @@ gui.togtkbox_test:
   en: "ToGtkBox Test"
   ru: "Тест ToGtkBox"
   zh-CN: "ToGtkBox 测试"
+gui.history_manager:
+  en: "History Manager"
+  ru: "Менеджер истории"
+  zh-CN: "历史管理器"
+gui.current_state:
+  en: "Current State"
+  ru: "Текущее состояние"
+  zh-CN: "当前状态"
+gui.undo_stack:
+  en: "Undo Stack"
+  ru: "Стек отмен (Undo)"
+  zh-CN: "撤销栈"
+gui.redo_stack:
+  en: "Redo Stack"
+  ru: "Стек повторов (Redo)"
+  zh-CN: "重做栈"
+gui.reset_current_state:
+  en: "Reset Current State"
+  ru: "Сбросить текущее состояние"
+  zh-CN: "重置当前状态"
+gui.reset_undo_stack:
+  en: "Reset Undo Stack"
+  ru: "Сбросить стек отмен"
+  zh-CN: "重置撤销栈"
+gui.reset_all:
+  en: "Reset All"
+  ru: "Сбросить всё"
+  zh-CN: "重置全部"
+gui.reset_redo_stack:
+  en: "Reset Redo Stack"
+  ru: "Сбросить стек повторов"
+  zh-CN: "重置重做栈"
+gui.close:
+  en: "Close"
+  ru: "Закрыть"
+  zh-CN: "关闭"
+gui.empty:
+  en: "Empty"
+  ru: "Пусто"
+  zh-CN: "空"
+gui.old:
+  en: "Old"
+  ru: "Старое"
+  zh-CN: "旧值"
+gui.new:
+  en: "New"
+  ru: "Новое"
+  zh-CN: "新值"

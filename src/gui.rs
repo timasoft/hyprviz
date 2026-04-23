@@ -8,7 +8,8 @@ use crate::{
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
     FileDialog, HeaderBar, Label, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton,
-    Stack, StackSidebar, StringList, StringObject, Switch, Widget, Window, gdk, glib, prelude::*,
+    Stack, StackSidebar, StringList, StringObject, Switch, TextView, Widget, Window, WrapMode, gdk,
+    glib, prelude::*,
 };
 use hyprparser::{HyprlandConfig, parse_config};
 use rust_i18n::{available_locales, locale, set_locale, t};
@@ -30,6 +31,7 @@ pub struct ConfigGUI {
     current_profile_label: Label,
     create_profile_button: Button,
     delete_profile_button: Button,
+    history_button: Button,
     save_config_button: Button,
     load_config_button: Button,
     copy_button: Button,
@@ -79,12 +81,14 @@ impl ConfigGUI {
 
         let create_profile_button = Button::with_label(&t!("gui.create_profile"));
         let delete_profile_button = Button::with_label(&t!("gui.delete_profile"));
+        let history_button = Button::with_label(&t!("gui.history"));
         let load_config_button = Button::with_label(&t!("gui.load_hyprviz_config"));
         let save_config_button = Button::with_label(&t!("gui.save_hyprviz_config"));
         let copy_button = Button::with_label(&t!("gui.copyright"));
 
         gear_menu_box.append(&create_profile_button);
         gear_menu_box.append(&delete_profile_button);
+        gear_menu_box.append(&history_button);
         gear_menu_box.append(&load_config_button);
         gear_menu_box.append(&save_config_button);
         gear_menu_box.append(&copy_button);
@@ -188,6 +192,7 @@ impl ConfigGUI {
             save_button,
             profile_dropdown,
             current_profile_label,
+            history_button,
             create_profile_button,
             delete_profile_button,
             save_config_button,
@@ -455,6 +460,11 @@ impl ConfigGUI {
 
                 dialog_window.present();
             });
+
+        let gui_clone = Rc::clone(&gui);
+        gui.borrow().history_button.connect_clicked(move |_| {
+            Self::show_history_manager(Rc::clone(&gui_clone));
+        });
 
         let gui_clone = Rc::clone(&gui);
         gui.borrow().load_config_button.connect_clicked(move |_| {
@@ -925,6 +935,176 @@ along with this program; if not, see
                 std::process::exit(1);
             },
         );
+    }
+
+    pub fn show_history_manager(gui: Rc<RefCell<ConfigGUI>>) {
+        let window = Window::builder()
+            .title(t!("gui.history_manager"))
+            .transient_for(&gui.borrow().window)
+            .modal(true)
+            .default_width(450)
+            .default_height(750)
+            .build();
+
+        let history = &gui.borrow().history;
+
+        let main_box = Box::new(Orientation::Vertical, 16);
+        main_box.set_margin_start(MARGIN_NORMAL * 2);
+        main_box.set_margin_end(MARGIN_NORMAL * 2);
+        main_box.set_margin_top(MARGIN_NORMAL * 2);
+        main_box.set_margin_bottom(MARGIN_NORMAL * 2);
+
+        let scrolled_window = ScrolledWindow::new();
+        scrolled_window.set_vexpand(true);
+        scrolled_window.set_hexpand(true);
+        scrolled_window.set_min_content_height(400);
+
+        let content_box = Box::new(Orientation::Vertical, 20);
+
+        let create_section = |title: &str| -> (Label, TextView) {
+            let label = Label::new(Some(title));
+            label.set_halign(gtk::Align::Start);
+            label.add_css_class("heading");
+
+            let text_view = TextView::new();
+            text_view.set_editable(false);
+            text_view.set_cursor_visible(false);
+            text_view.set_monospace(true);
+            text_view.set_wrap_mode(WrapMode::WordChar);
+            text_view.set_vexpand(true);
+            text_view.set_hexpand(true);
+
+            (label, text_view)
+        };
+
+        let (label_current, text_view_current) = create_section(&t!("gui.current_state"));
+        let (label_undo, text_view_undo) = create_section(&t!("gui.undo_stack"));
+        let (label_redo, text_view_redo) = create_section(&t!("gui.redo_stack"));
+
+        content_box.append(&label_current);
+        content_box.append(&text_view_current);
+        content_box.append(&label_undo);
+        content_box.append(&text_view_undo);
+        content_box.append(&label_redo);
+        content_box.append(&text_view_redo);
+
+        scrolled_window.set_child(Some(&content_box));
+        main_box.append(&scrolled_window);
+
+        let button_box = Box::new(Orientation::Horizontal, 8);
+        button_box.set_hexpand(true);
+        button_box.set_homogeneous(true);
+
+        let button_reset_current = Button::with_label(&t!("gui.reset_current_state"));
+        let button_reset_undo = Button::with_label(&t!("gui.reset_undo_stack"));
+        let button_reset_redo = Button::with_label(&t!("gui.reset_redo_stack"));
+        let button_reset_all = Button::with_label(&t!("gui.reset_all"));
+        let button_close = Button::with_label(&t!("gui.close"));
+
+        button_reset_all.add_css_class("destructive-action");
+
+        button_box.append(&button_reset_current);
+        button_box.append(&button_reset_undo);
+        button_box.append(&button_reset_redo);
+        button_box.append(&button_reset_all);
+        button_box.append(&button_close);
+        main_box.append(&button_box);
+
+        window.set_child(Some(&main_box));
+
+        let history_clone = Rc::clone(history);
+        let text_view_current_clone = text_view_current.clone();
+        let text_view_undo_clone = text_view_undo.clone();
+        let text_view_redo_clone = text_view_redo.clone();
+        let update_views = Rc::new(move || {
+            let history = history_clone.borrow();
+
+            if history.get_current_state().is_empty() {
+                text_view_current_clone.buffer().set_text(&t!("gui.empty"));
+            } else {
+                let mut state_lines: Vec<String> = history
+                    .get_current_state()
+                    .iter()
+                    .map(|((category, key), value)| format!("{}:{} = {}", category, key, value))
+                    .collect();
+                state_lines.sort();
+                text_view_current_clone
+                    .buffer()
+                    .set_text(&state_lines.join("\n"));
+            }
+
+            let format_change = |change: &ConfigChange| {
+                let format_opt = |v: &Option<String>| v.clone().unwrap_or("—".to_string());
+                format!(
+                    "{}:{}\n{}: {}\n{}: {}",
+                    change.category,
+                    change.key,
+                    t!("gui.old"),
+                    format_opt(&change.old_value),
+                    t!("gui.new"),
+                    format_opt(&change.new_value)
+                )
+            };
+
+            if history.get_undo_stack().is_empty() {
+                text_view_undo_clone.buffer().set_text(&t!("gui.empty"));
+            } else {
+                let undo_lines: Vec<String> =
+                    history.get_undo_stack().iter().map(format_change).collect();
+                text_view_undo_clone
+                    .buffer()
+                    .set_text(&undo_lines.join("\n\n"));
+            }
+
+            if history.get_redo_stack().is_empty() {
+                text_view_redo_clone.buffer().set_text(&t!("gui.empty"));
+            } else {
+                let redo_lines: Vec<String> =
+                    history.get_redo_stack().iter().map(format_change).collect();
+                text_view_redo_clone
+                    .buffer()
+                    .set_text(&redo_lines.join("\n\n"));
+            }
+        });
+
+        update_views();
+
+        let update_views_clone = Rc::clone(&update_views);
+        let gui_clone = Rc::clone(&gui);
+        button_reset_current.connect_clicked(move |_| {
+            gui_clone.borrow_mut().reload_ui(true);
+            update_views_clone();
+        });
+
+        let history_clone = Rc::clone(history);
+        let update_views_clone = Rc::clone(&update_views);
+        button_reset_undo.connect_clicked(move |_| {
+            history_clone.borrow_mut().clear_undo_stack();
+            update_views_clone();
+        });
+
+        let history_clone = Rc::clone(history);
+        let update_views_clone = Rc::clone(&update_views);
+        button_reset_redo.connect_clicked(move |_| {
+            history_clone.borrow_mut().clear_redo_stack();
+            update_views_clone();
+        });
+
+        let history_clone = Rc::clone(history);
+        let gui_clone = Rc::clone(&gui);
+        let update_views_clone = Rc::clone(&update_views);
+        button_reset_all.connect_clicked(move |_| {
+            history_clone.borrow_mut().clear_stacks();
+            gui_clone.borrow_mut().reload_ui(true);
+            update_views_clone();
+        });
+
+        let window_clone = window.clone();
+        button_close.connect_clicked(move |_| {
+            window_clone.close();
+        });
+
+        window.present();
     }
 
     pub fn load_config(&mut self, config: &HyprlandConfig, profile_name: &str) {
