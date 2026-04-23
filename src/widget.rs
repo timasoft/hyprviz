@@ -5102,9 +5102,10 @@ impl ConfigWidget {
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
             let default_value = &widget_data.default;
-            let value = history
-                .borrow()
-                .extract_value(config, category, name, default_value);
+            let value =
+                history
+                    .borrow()
+                    .resolve_value_with_history(config, category, name, default_value);
 
             if widget_data.widget.downcast_ref::<Box>().is_none() {
                 history.borrow_mut().insert_to_initial_state(
@@ -5472,11 +5473,12 @@ impl ConfigWidget {
                     .into_iter()
                     .zip(parsed_headless_options)
                 {
-                    let restored_name =
-                        history
-                            .borrow()
-                            .get_state_value(category, &format!("{}_name", raw), &name);
-                    let restored_value = history.borrow().get_state_value(
+                    let restored_name = history.borrow().lookup_transient_override(
+                        category,
+                        &format!("{}_name", raw),
+                        &name,
+                    );
+                    let restored_value = history.borrow().lookup_transient_override(
                         category,
                         &format!("{}_value", raw),
                         &value,

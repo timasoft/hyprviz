@@ -838,10 +838,9 @@ along with this program; if not, see
             let expanded_parsed_config = mute_stdout(|| parse_config(&expanded_config_str));
 
             self.history
-                .clone()
                 .borrow_mut()
-                .init_initial_config(&expanded_parsed_config.content);
-            self.history.clone().borrow_mut().clear_current_state();
+                .set_initial_config_hash(&expanded_parsed_config.content);
+            self.history.borrow_mut().reset_unsaved_changes();
 
             match result {
                 Ok(()) => {
@@ -1158,7 +1157,7 @@ along with this program; if not, see
         *config = new_config;
     }
 
-    pub fn reload_ui(&mut self, clear_current_state: bool) {
+    pub fn reload_ui(&mut self, reset_unsaved_changes: bool) {
         let current_profile = {
             let selected_index = self.profile_dropdown.selected();
             let model = self.profile_dropdown.model().unwrap();
@@ -1187,8 +1186,8 @@ along with this program; if not, see
         };
 
         let parsed_config = mute_stdout(|| parse_config(&config_str));
-        if clear_current_state {
-            self.history.borrow_mut().clear_current_state();
+        if reset_unsaved_changes {
+            self.history.borrow_mut().reset_unsaved_changes();
         }
         self.load_config(&parsed_config, &current_profile);
 

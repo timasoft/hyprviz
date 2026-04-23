@@ -190,11 +190,11 @@ fn build_ui(app: &Application) {
         gui.borrow_mut()
             .history
             .borrow_mut()
-            .init_initial_config(&parsed_config.content);
+            .set_initial_config_hash(&parsed_config.content);
         gui.borrow_mut()
             .history
             .borrow_mut()
-            .load_old_state_of_ui(&parsed_config.content);
+            .restore_persisted_ui_state(&parsed_config.content);
 
         let time = Instant::now();
         gui.borrow_mut().load_config(&parsed_config, &profile);

@@ -1623,7 +1623,7 @@ impl HistoryManager {
         }
     }
 
-    pub fn schedule_save(&self) {
+    fn schedule_save(&self) {
         let generation = self.save_generation.fetch_add(1, atomic::Ordering::Release);
 
         let json = match serde_json::to_string_pretty(self) {
@@ -1653,7 +1653,7 @@ impl HistoryManager {
         });
     }
 
-    pub fn load_current_state_of_ui() -> io::Result<Option<Self>> {
+    fn load_current_state_of_ui() -> Result<Option<Self>, Box<dyn Error>> {
         let home = env::var("HOME").unwrap_or_else(|_| ".".to_string());
         let path = PathBuf::from(&home).join(HYPRVIZ_UI_STATE_PATH);
 
@@ -1662,15 +1662,11 @@ impl HistoryManager {
         }
 
         let content = fs::read_to_string(&path)?;
-        serde_json::from_str(&content).map(Some).map_err(|e| {
-            io::Error::new(
-                io::ErrorKind::InvalidData,
-                format!("JSON deserialization failed: {}", e),
-            )
-        })
+        let result: Self = serde_json::from_str(&content)?;
+        Ok(Some(result))
     }
 
-    pub fn load_old_state_of_ui(&mut self, new_config_content: &[String]) {
+    pub fn restore_persisted_ui_state(&mut self, new_config_content: &[String]) {
         if let Ok(Some(old_state)) = Self::load_current_state_of_ui() {
             let new_hash = compute_config_hash(new_config_content);
             let old_hash = old_state.initial_config_hash;
@@ -1691,11 +1687,11 @@ impl HistoryManager {
         }
     }
 
-    pub fn init_initial_config(&mut self, new_config_content: &[String]) {
+    pub fn set_initial_config_hash(&mut self, new_config_content: &[String]) {
         self.initial_config_hash = compute_config_hash(new_config_content);
     }
 
-    pub fn extract_value(
+    pub fn resolve_value_with_history(
         &self,
         config: &HyprlandConfig,
         category: &str,
@@ -1714,7 +1710,7 @@ impl HistoryManager {
         extract_value(config, category, name, default)
     }
 
-    pub fn get_state_value(&self, category: &str, key: &str, fallback: &str) -> String {
+    pub fn lookup_transient_override(&self, category: &str, key: &str, fallback: &str) -> String {
         let change_key = (category.to_string(), key.to_string());
 
         if let Some(value) = self.current_state.get(&change_key) {
@@ -1853,7 +1849,7 @@ impl HistoryManager {
         self.initial_state.insert(change_key, value)
     }
 
-    pub fn clear_current_state(&mut self) {
+    pub fn reset_unsaved_changes(&mut self) {
         self.current_state.clear();
 
         self.schedule_save();
