@@ -1832,6 +1832,14 @@ impl HistoryManager {
         &self.current_state
     }
 
+    pub fn get_undo_stack(&self) -> &VecDeque<ConfigChange> {
+        &self.undo_stack
+    }
+
+    pub fn get_redo_stack(&self) -> &VecDeque<ConfigChange> {
+        &self.redo_stack
+    }
+
     pub fn clear_initial_state(&mut self) {
         self.initial_state.clear();
     }
@@ -1851,6 +1859,26 @@ impl HistoryManager {
 
     pub fn reset_unsaved_changes(&mut self) {
         self.current_state.clear();
+
+        self.schedule_save();
+    }
+
+    pub fn clear_undo_stack(&mut self) {
+        self.undo_stack.clear();
+
+        self.schedule_save();
+    }
+
+    pub fn clear_redo_stack(&mut self) {
+        self.redo_stack.clear();
+
+        self.schedule_save();
+    }
+
+    /// Clear undo_stack and redo_stack
+    pub fn clear_stacks(&mut self) {
+        self.undo_stack.clear();
+        self.redo_stack.clear();
 
         self.schedule_save();
     }
