@@ -62,6 +62,9 @@ fn build_ui(app: &Application) {
     let gui = Rc::new(RefCell::new(ConfigGUI::new(app)));
     gui::ConfigGUI::setup_ui_events(Rc::clone(&gui));
 
+    let is_programmatic_switch = Rc::new(std::cell::Cell::new(false));
+    let last_confirmed_index = Rc::new(std::cell::Cell::new(0u32));
+
     let config_path_full = get_config_path(false, "Default");
 
     if !config_path_full.exists() {
@@ -154,22 +157,35 @@ fn build_ui(app: &Application) {
                 }
             }
 
-            match atomic_write(&config_path_full, &updated_config_str) {
-                Ok(_) => {
-                    println!("Added 'source = ./hyprviz.conf' to ~/{}", CONFIG_PATH);
-                    reload_hyprland();
-                }
-                Err(e) => {
-                    gui.borrow().custom_error_popup_critical(
-                        &t!("main.saving_failed"),
-                        &t!(
-                            "main.failed_to_add_source_line_to__",
-                            file = CONFIG_PATH,
-                            error = e
-                        ),
+            let config_path_full_clone = config_path_full.clone();
+            let gui_clone_confirm = Rc::clone(&gui);
+            let gui_clone_cancel = Rc::clone(&gui);
+            gui.borrow().show_confirmation_dialog(
+                &t!("main.confirm_modify_main_config"),
+                &t!("main.confirm_modify_main_config_text"),
+                move || match atomic_write(&config_path_full_clone, &updated_config_str) {
+                    Ok(()) => {
+                        println!("Added 'source = ./hyprviz.conf' to ~/{}", CONFIG_PATH);
+                        reload_hyprland();
+                    }
+                    Err(e) => {
+                        gui_clone_confirm.borrow().custom_error_popup_critical(
+                            &t!("main.saving_failed"),
+                            &t!(
+                                "main.failed_to_add_source_line_to__",
+                                file = CONFIG_PATH,
+                                error = e
+                            ),
+                        );
+                    }
+                },
+                move || {
+                    gui_clone_cancel.borrow().custom_info_popup(
+                        &t!("main.integration_skipped"),
+                        &t!("main.integration_skipped_text"),
                     );
-                }
-            }
+                },
+            );
         }
 
         let profile = get_current_profile(&config_str);
@@ -261,23 +277,56 @@ fn build_ui(app: &Application) {
         }
 
         let gui_clone = Rc::clone(&gui);
+        let is_programmatic_switch_clone = Rc::clone(&is_programmatic_switch);
+        let last_confirmed_index_clone = Rc::clone(&last_confirmed_index);
+        let config_path_full_clone = config_path_full.clone();
         gui.borrow()
             .profile_dropdown
             .connect_selected_notify(move |dropdown| {
-                let selected_index = dropdown.selected();
+                if is_programmatic_switch_clone.get() {
+                    return;
+                }
+
+                let new_index = dropdown.selected();
+                let prev_index = last_confirmed_index_clone.get();
                 let model = dropdown.model().unwrap();
 
-                if let Some(item) = model.item(selected_index)
+                let profile_name = if let Some(item) = model.item(new_index)
                     && let Some(string_object) = item.downcast_ref::<StringObject>()
                 {
-                    let profile_name = string_object.string().as_str().to_string();
-                    match update_source_line(&config_path_full, &profile_name) {
+                    string_object.string().as_str().to_string()
+                } else {
+                    return;
+                };
+
+                let last_confirmed_index_clone_clone = Rc::clone(&last_confirmed_index_clone);
+                let config_path_full_clone_clone = config_path_full_clone.clone();
+                let gui_clone_clone = Rc::clone(&gui_clone);
+                let is_programmatic_switch_clone_clone_confirm =
+                    Rc::clone(&is_programmatic_switch_clone);
+                let dropdown_clone_confirm = dropdown.clone();
+
+                let is_programmatic_switch_clone_clone_cancel =
+                    Rc::clone(&is_programmatic_switch_clone);
+                let dropdown_clone_cancel = dropdown.clone();
+
+                gui_clone.borrow().show_confirmation_dialog(
+                    &t!("main.confirm_modify_main_config"),
+                    &t!("main.confirm_modify_main_config_text"),
+                    move || match update_source_line(&config_path_full_clone_clone, &profile_name) {
                         Ok(_) => {
                             println!("Updated source line to profile: {}", profile_name);
                             reload_hyprland();
+                            last_confirmed_index_clone_clone.set(new_index);
+                            glib::MainContext::default().spawn_local(async move {
+                                gui_clone_clone.borrow_mut().reload_ui(true);
+                            });
                         }
                         Err(e) => {
-                            gui_clone.borrow().custom_error_popup(
+                            is_programmatic_switch_clone_clone_confirm.set(true);
+                            dropdown_clone_confirm.set_selected(prev_index);
+                            is_programmatic_switch_clone_clone_confirm.set(false);
+                            gui_clone_clone.borrow().custom_error_popup(
                                 &t!("main.profile_switch_failed"),
                                 &t!(
                                     "main.failed_to_update_config_for_profile__",
@@ -286,13 +335,13 @@ fn build_ui(app: &Application) {
                                 ),
                             );
                         }
-                    }
-                    let gui = Rc::clone(&gui_clone);
-
-                    glib::MainContext::default().spawn_local(async move {
-                        gui.borrow_mut().reload_ui(true);
-                    });
-                }
+                    },
+                    move || {
+                        is_programmatic_switch_clone_clone_cancel.set(true);
+                        dropdown_clone_cancel.set_selected(prev_index);
+                        is_programmatic_switch_clone_clone_cancel.set(false);
+                    },
+                );
             });
     }
 
