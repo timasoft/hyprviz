@@ -43,6 +43,14 @@ main.failed_to_create__:
   en: "Failed to create %{file}: %{error}"
   ru: "Не удалось создать %{file}: %{error}"
   zh-CN: "无法创建 %{file}: %{error}"
+main.confirm_modify_main_config:
+  en: "Modify Hyprland Config"
+  ru: "Изменить конфигурацию Hyprland"
+  zh-CN: "修改 Hyprland 配置"
+main.confirm_modify_main_config_text:
+  en: "HyprViz needs to add or update a 'source' line in your main hyprland.conf to apply settings. This will reload Hyprland. Proceed?"
+  ru: "HyprViz необходимо добавить или обновить строку 'source' в вашем основном hyprland.conf для применения настроек. Это перезагрузит конфигурацию Hyprland. Продолжить?"
+  zh-CN: "HyprViz 需要在主 hyprland.conf 中添加或更新 'source' 行以应用设置。这将重载 Hyprland 配置。是否继续？"
 main.saving_failed:
   en: "Saving failed"
   ru: "Не удалось сохранить"
@@ -51,6 +59,14 @@ main.failed_to_add_source_line_to__:
   en: "Failed to add 'source = ./hyprviz.conf' to %{file}: %{error}"
   ru: "Не удалось добавить 'source = ./hyprviz.conf' в %{file}: %{error}"
   zh-CN: "无法将 'source = ./hyprviz.conf' 添加到 %{file}: %{error}"
+main.integration_skipped:
+  en: "Integration Skipped"
+  ru: "Интеграция пропущена"
+  zh-CN: "集成已跳过"
+main.integration_skipped_text:
+  en: "The 'source' line was not added to hyprland.conf. HyprViz settings will be saved to hyprviz.conf but will NOT take effect in Hyprland until you manually add 'source = ./hyprviz.conf' or confirm this dialog on next launch."
+  ru: "Строка 'source' не была добавлена в hyprland.conf. Настройки HyprViz будут сохраняться в hyprviz.conf, но НЕ вступят в силу в Hyprland, пока вы вручную не добавите 'source = ./hyprviz.conf' или не подтвердите этот диалог при следующем запуске."
+  zh-CN: "未将 'source' 行添加到 hyprland.conf。HyprViz 设置将保存到 hyprviz.conf，但在您手动添加 'source = ./hyprviz.conf' 或在下次启动时确认此对话框之前，它们不会在 Hyprland 中生效。"
 main.profile_not_found:
   en: "Profile not found"
   ru: "Профиль не найден"
