@@ -520,7 +520,11 @@ fn update_display(
     }
 }
 
-pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &Entry) -> Box {
+pub fn create_fancy_boxline(
+    category: &str,
+    name_entry: &Entry,
+    value_entry: &Entry,
+) -> (Box, Box, Box) {
     let fancy_boxline = Box::new(GtkOrientation::Horizontal, 5);
 
     let fancy_name_entry = Box::new(GtkOrientation::Horizontal, 5);
@@ -989,8 +993,8 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
         };
 
         if update_ui {
-            while let Some(child) = fancy_value_entry.first_child() {
-                fancy_value_entry.remove(&child);
+            while let Some(child) = fancy_value_entry_clone.first_child() {
+                fancy_value_entry_clone.remove(&child);
             }
             fill_fancy_value_entry(
                 &fancy_value_entry_clone,
@@ -1003,7 +1007,7 @@ pub fn create_fancy_boxline(category: &str, name_entry: &Entry, value_entry: &En
         *old_name.borrow_mut() = new_name;
     });
 
-    fancy_boxline
+    (fancy_boxline, fancy_name_entry, fancy_value_entry)
 }
 
 macro_rules! widget_connector {

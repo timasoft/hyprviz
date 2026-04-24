@@ -5,6 +5,7 @@ use crate::{
     },
     widget::{ConfigWidget, DynamicTopLevelRow},
 };
+use gio::glib::SourceId;
 use gtk::{
     AlertDialog, Application, ApplicationWindow, Box, Button, ColorDialogButton, DropDown, Entry,
     FileDialog, HeaderBar, Label, Orientation, Popover, ScrolledWindow, SearchEntry, SpinButton,
@@ -20,6 +21,51 @@ use std::{
     path::{Path, PathBuf},
     rc::Rc,
 };
+
+thread_local! {
+    static ANIM_TRACKER: RefCell<HashMap<usize, (f64, SourceId)>> = RefCell::new(HashMap::new());
+}
+
+pub fn animate_change(widget: &Widget) {
+    let widget_ptr = widget.as_ptr() as usize;
+
+    let base_opacity = ANIM_TRACKER.with(|map| {
+        if let Some((base, old_id)) = map.borrow_mut().remove(&widget_ptr) {
+            old_id.remove();
+            base
+        } else {
+            widget.opacity()
+        }
+    });
+
+    widget.set_opacity(0.4);
+
+    let steps = 12;
+    let mut step = 0;
+    let widget_clone = widget.clone();
+
+    let id = glib::timeout_add_local(std::time::Duration::from_millis(25), move || {
+        step += 1;
+        let progress = step as f64 / steps as f64;
+
+        let current = 0.4 + (base_opacity - 0.4) * progress;
+        widget_clone.set_opacity(current);
+
+        if step >= steps {
+            widget_clone.set_opacity(base_opacity);
+            ANIM_TRACKER.with(|map| {
+                let _ = map.borrow_mut().remove(&widget_ptr);
+            });
+            glib::ControlFlow::Break
+        } else {
+            glib::ControlFlow::Continue
+        }
+    });
+
+    ANIM_TRACKER.with(|map| {
+        map.borrow_mut().insert(widget_ptr, (base_opacity, id));
+    });
+}
 
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
@@ -557,6 +603,143 @@ along with this program; if not, see
             .connect_clicked(move |_| gui_clone.borrow().save_config_file());
     }
 
+    fn find_target_widget(&self, change: &ConfigChange) -> Option<Widget> {
+        if let Some(raw) = change.key.strip_suffix("_name") {
+            if let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            {
+                if row.fancy_name_entry.is_visible() {
+                    return Some(row.fancy_name_entry.clone().upcast::<Widget>());
+                } else {
+                    return Some(row.name_entry.clone().upcast::<Widget>());
+                }
+            }
+        } else if let Some(raw) = change.key.strip_suffix("_value") {
+            if let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+            {
+                if row.fancy_value_entry.is_visible() {
+                    return Some(row.fancy_value_entry.clone().upcast::<Widget>());
+                } else {
+                    return Some(row.value_entry.clone().upcast::<Widget>());
+                }
+            }
+        } else if let Some(raw) = change.key.strip_suffix("_delete") {
+            if let Some(row) = self
+                .top_level_rows
+                .borrow()
+                .get(&(change.category.clone(), raw.to_string()))
+                && row.vbox.parent().is_some()
+            {
+                return Some(row.vbox.clone().upcast::<Widget>());
+            }
+
+            if let Some(cat_widget) = self.config_widgets.get(&change.category)
+                && let Some(wd) = cat_widget.options.get(&change.category)
+            {
+                return Some(wd.widget.clone());
+            }
+        } else {
+            if let Some(category_widget) = self.config_widgets.get(&change.category)
+                && let Some(widget_data) = category_widget.options.get(&change.key)
+            {
+                return Some(
+                    widget_data
+                        .visual_widget
+                        .clone()
+                        .unwrap_or_else(|| widget_data.widget.clone()),
+                );
+            }
+        }
+
+        None
+    }
+
+    fn switch_to_category_tab(&self, category: &str) {
+        if let Some(child) = self.stack.child_by_name(category) {
+            self.stack.set_visible_child(&child);
+        } else {
+            eprintln!(
+                "[ConfigGUI] Stack tab not found for category: '{}'",
+                category
+            );
+        }
+    }
+
+    fn focus_and_scroll_to_widget(&self, widget: &Widget) {
+        let widget_clone = widget.clone();
+
+        glib::idle_add_local(move || {
+            if !widget_clone.is_realized() {
+                return glib::ControlFlow::Break;
+            }
+
+            let mut scrolled_window_option: Option<ScrolledWindow> = None;
+            let mut current: Option<Widget> = Some(widget_clone.clone());
+
+            while let Some(window) = current {
+                if let Some(scrolled_window) = window.downcast_ref::<ScrolledWindow>() {
+                    scrolled_window_option = Some(scrolled_window.clone());
+                    break;
+                }
+                current = window.parent();
+            }
+
+            let Some(scrolled_window) = scrolled_window_option else {
+                return glib::ControlFlow::Break;
+            };
+
+            let Some(bounds) = widget_clone.compute_bounds(&scrolled_window) else {
+                return glib::ControlFlow::Break;
+            };
+
+            let vadjustment = scrolled_window.vadjustment();
+            let page_size = vadjustment.page_size();
+
+            if page_size <= f64::EPSILON {
+                return glib::ControlFlow::Break;
+            }
+
+            let widget_top = bounds.y() as f64;
+            let widget_bottom = widget_top + bounds.height() as f64;
+
+            let margin = (MARGIN_NORMAL * 2) as f64;
+
+            let mut target_scroll = vadjustment.value();
+            let mut should_scroll = false;
+
+            if widget_top < margin {
+                target_scroll = vadjustment.value() + widget_top - margin;
+                should_scroll = true;
+            } else if widget_bottom > page_size - margin {
+                target_scroll = vadjustment.value() + widget_bottom - page_size + margin;
+                should_scroll = true;
+            }
+
+            if should_scroll {
+                let min_scroll = vadjustment.lower();
+                let max_scroll = (vadjustment.upper() - page_size).max(min_scroll);
+                let clamped = target_scroll.clamp(min_scroll, max_scroll);
+
+                let was_kinetic = scrolled_window.is_kinetic_scrolling();
+                scrolled_window.set_kinetic_scrolling(false);
+                vadjustment.set_value(clamped);
+                scrolled_window.set_kinetic_scrolling(was_kinetic);
+                vadjustment.set_value(clamped);
+            }
+
+            if widget_clone.is_focusable() && widget_clone.can_target() {
+                widget_clone.grab_focus();
+            }
+
+            glib::ControlFlow::Break
+        });
+    }
+
     fn apply_undo_to_ui(&self, change: &ConfigChange) {
         if let Some(raw) = change.key.strip_suffix("_name")
             && let Some(row) = self
@@ -600,6 +783,12 @@ along with this program; if not, see
             category_widget.is_programmatic_update.set(true);
             self.set_widget_value(widget, value_to_apply);
             category_widget.is_programmatic_update.set(false);
+        }
+
+        if let Some(target_widget) = self.find_target_widget(change) {
+            self.switch_to_category_tab(&change.category);
+            self.focus_and_scroll_to_widget(&target_widget);
+            animate_change(&target_widget);
         }
     }
 
@@ -646,6 +835,12 @@ along with this program; if not, see
             category_widget.is_programmatic_update.set(true);
             self.set_widget_value(widget, value_to_apply);
             category_widget.is_programmatic_update.set(false);
+        }
+
+        if let Some(target_widget) = self.find_target_widget(change) {
+            self.switch_to_category_tab(&change.category);
+            self.focus_and_scroll_to_widget(&target_widget);
+            animate_change(&target_widget);
         }
     }
 
