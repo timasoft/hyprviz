@@ -943,11 +943,11 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     label_box.append(&tooltip_button);
 
     let entry = Entry::new();
-    let gradient_box = T::to_gtk_box(&entry);
-    gradient_box.set_halign(Align::End);
-    gradient_box.set_valign(Align::Center);
-    gradient_box.set_width_request(150);
-    gradient_box.set_margin_end(MARGIN_NORMAL);
+    let fancy_box = T::to_gtk_box(&entry);
+    fancy_box.set_halign(Align::End);
+    fancy_box.set_valign(Align::Center);
+    fancy_box.set_width_request(150);
+    fancy_box.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.add_css_class("flat");
@@ -965,7 +965,7 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     });
 
     hbox.append(&label_box);
-    hbox.append(&gradient_box);
+    hbox.append(&fancy_box);
     hbox.append(&reset_button);
     container.append(&hbox);
 
@@ -973,7 +973,7 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
         name.to_string(),
         WidgetData {
             widget: entry.upcast(),
-            visual_widget: Some(gradient_box.upcast()),
+            visual_widget: Some(fancy_box.upcast()),
             default: default.to_string(),
         },
     );
@@ -1084,11 +1084,11 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
     label_box.append(&tooltip_button);
 
     let entry = Entry::new();
-    let gradient_box = T::to_gtk_box(&entry, separator);
-    gradient_box.set_halign(Align::End);
-    gradient_box.set_valign(Align::Center);
-    gradient_box.set_width_request(150);
-    gradient_box.set_margin_end(MARGIN_NORMAL);
+    let fancy_box = T::to_gtk_box(&entry, separator);
+    fancy_box.set_halign(Align::End);
+    fancy_box.set_valign(Align::Center);
+    fancy_box.set_width_request(150);
+    fancy_box.set_margin_end(MARGIN_NORMAL);
 
     let reset_button = Button::from_icon_name("view-refresh-symbolic");
     reset_button.add_css_class("flat");
@@ -1104,7 +1104,7 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
     });
 
     hbox.append(&label_box);
-    hbox.append(&gradient_box);
+    hbox.append(&fancy_box);
     hbox.append(&reset_button);
     container.append(&hbox);
 
@@ -1112,7 +1112,7 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
         name.to_string(),
         WidgetData {
             widget: entry.upcast(),
-            visual_widget: Some(gradient_box.upcast()),
+            visual_widget: Some(fancy_box.upcast()),
             default: default.to_string(),
         },
     );
