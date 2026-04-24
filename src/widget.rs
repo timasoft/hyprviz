@@ -38,12 +38,15 @@ use crate::system_info::*;
 pub struct DynamicTopLevelRow {
     pub vbox: Box,
     pub name_entry: Entry,
+    pub fancy_name_entry: Box,
     pub value_entry: Entry,
+    pub fancy_value_entry: Box,
     pub is_programmatic_update: Rc<Cell<bool>>,
 }
 
 pub struct WidgetData {
     pub widget: Widget,
+    pub visual_widget: Option<Widget>,
     pub default: String,
 }
 pub struct ConfigWidget {
@@ -242,6 +245,7 @@ fn add_dropdown_option(
         name.to_string(),
         WidgetData {
             widget: dropdown.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -335,6 +339,7 @@ fn add_bool_option(
         name.to_string(),
         WidgetData {
             widget: switch.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -429,6 +434,7 @@ fn add_bool_int_option(
         name.to_string(),
         WidgetData {
             widget: switch.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -526,6 +532,7 @@ fn add_int_option(
         name.to_string(),
         WidgetData {
             widget: spin_button.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -623,6 +630,7 @@ fn add_float_option(
         name.to_string(),
         WidgetData {
             widget: spin_button.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -719,6 +727,7 @@ fn add_string_option(
         name.to_string(),
         WidgetData {
             widget: entry.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -868,6 +877,7 @@ fn add_color_option(
         name.to_string(),
         WidgetData {
             widget: color_button.upcast(),
+            visual_widget: None,
             default: default.to_string(),
         },
     );
@@ -963,6 +973,7 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
         name.to_string(),
         WidgetData {
             widget: entry.upcast(),
+            visual_widget: Some(gradient_box.upcast()),
             default: default.to_string(),
         },
     );
@@ -1101,6 +1112,7 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
         name.to_string(),
         WidgetData {
             widget: entry.upcast(),
+            visual_widget: Some(gradient_box.upcast()),
             default: default.to_string(),
         },
     );
@@ -1226,18 +1238,6 @@ fn append_option_row(
 
     boxline.append(&name_entry);
 
-    {
-        let row = DynamicTopLevelRow {
-            vbox: vbox.clone(),
-            name_entry: name_entry.clone(),
-            value_entry: value_entry.clone(),
-            is_programmatic_update: is_programmatic_update.clone(),
-        };
-        top_level_rows
-            .borrow_mut()
-            .insert((category.to_string(), raw.clone()), row);
-    }
-
     let equals_label = Label::new(Some("="));
     equals_label.set_xalign(0.5);
     equals_label.add_css_class("heading");
@@ -1286,27 +1286,43 @@ fn append_option_row(
     let category_str = category.to_string();
     let history_clone = history.clone();
     let vbox_clone = vbox.clone();
+    let raw_clone = raw.clone();
 
     delete_button.connect_clicked(move |_| {
         gtkbox_clone.remove(&vbox_clone);
 
         let mut history = history_clone.borrow_mut();
 
-        history.record_removal(category_str.clone(), format!("{}_name", raw));
-        history.record_removal(category_str.clone(), format!("{}_value", raw));
+        history.record_removal(category_str.clone(), format!("{}_name", raw_clone));
+        history.record_removal(category_str.clone(), format!("{}_value", raw_clone));
 
         history.record_change(
             category_str.clone(),
-            format!("{}_delete", raw),
+            format!("{}_delete", raw_clone),
             "DELETE".to_string(),
         );
     });
 
     main_box.append(&boxline);
 
-    let fancy_boxline = create_fancy_boxline(category, &name_entry, &value_entry);
+    let (fancy_boxline, fancy_name_entry, fancy_value_entry) =
+        create_fancy_boxline(category, &name_entry, &value_entry);
     fancy_boxline.set_hexpand(true);
     fancy_boxline.set_visible(false);
+
+    {
+        let row = DynamicTopLevelRow {
+            vbox: vbox.clone(),
+            name_entry: name_entry.clone(),
+            fancy_name_entry,
+            value_entry: value_entry.clone(),
+            fancy_value_entry,
+            is_programmatic_update: is_programmatic_update.clone(),
+        };
+        top_level_rows
+            .borrow_mut()
+            .insert((category.to_string(), raw), row);
+    }
 
     main_box.append(&fancy_boxline);
 
@@ -5077,6 +5093,7 @@ impl ConfigWidget {
                     category.to_string(),
                     WidgetData {
                         widget: gtkbox.upcast(),
+                        visual_widget: None,
                         default: format!("This is a {} as widget", category),
                     },
                 );
