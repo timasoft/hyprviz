@@ -299,6 +299,10 @@ gui.togtkbox_test:
   en: "ToGtkBox Test"
   ru: "Тест ToGtkBox"
   zh-CN: "ToGtkBox 测试"
+gui.confirm:
+  en: "Confirm"
+  ru: "Подтвердить"
+  zh-CN: "确认"
 gui.history_manager:
   en: "History Manager"
   ru: "Менеджер истории"

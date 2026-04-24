@@ -1132,6 +1132,37 @@ along with this program; if not, see
         );
     }
 
+    pub fn show_confirmation_dialog<F, G>(
+        &self,
+        title: &str,
+        text: &str,
+        on_confirm: F,
+        on_cancel: G,
+    ) where
+        F: FnOnce() + 'static,
+        G: FnOnce() + 'static,
+    {
+        let dialog = AlertDialog::builder()
+            .message(title)
+            .detail(text)
+            .buttons([&*t!("gui.cancel"), &*t!("gui.confirm")])
+            .modal(true)
+            .build();
+
+        dialog.choose(
+            Some(&self.window),
+            None::<&gio::Cancellable>,
+            move |res: Result<i32, glib::Error>| {
+                // GTK returns the index of the pressed button: 0 = Cancel, 1 = Confirm
+                if res.ok() == Some(1) {
+                    on_confirm();
+                } else {
+                    on_cancel();
+                }
+            },
+        );
+    }
+
     pub fn show_history_manager(gui: Rc<RefCell<ConfigGUI>>) {
         let window = Window::builder()
             .title(t!("gui.history_manager"))
