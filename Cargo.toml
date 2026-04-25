@@ -48,5 +48,7 @@ depends = [
 ]
 
 files = [
-    ["hyprviz.desktop", "/usr/share/applications/hyprviz.desktop"]
+    ["assets/hyprviz.desktop", "/usr/share/applications/hyprviz.desktop"],
+    ["assets/hyprviz.svg", "/usr/share/icons/hicolor/scalable/apps/hyprviz.svg"],
+    ["assets/hyprviz.png", "/usr/share/icons/hicolor/512x512/apps/hyprviz.png"]
 ]
