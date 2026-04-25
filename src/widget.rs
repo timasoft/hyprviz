@@ -1,8 +1,8 @@
 use gtk::{
     Align, ApplicationWindow, ArrowType, Box, Button, ColorDialog, ColorDialogButton, DropDown,
     Entry, Expander, IconSize, Image, Label, MenuButton, Orientation, PolicyType, Popover,
-    PositionType, ScrolledWindow, Separator, SpinButton, StringList, StringObject, Switch, Widget,
-    gdk, glib, prelude::*,
+    PositionType, ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget, gdk, glib,
+    prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
@@ -24,7 +24,7 @@ use crate::{
         FieldLabel, ToGtkBox, ToGtkBoxImplementation, ToGtkBoxWithSeparator,
         ToGtkBoxWithSeparatorAndNamesImplementation, ToGtkBoxWithSeparatorImplementation,
     },
-    gui::{animate_change, set_widget_value},
+    gui::set_widget_value,
     guides::create_guide,
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
@@ -1086,7 +1086,6 @@ fn add_pos_float_vec_option(
     );
 }
 
-#[allow(clippy::too_many_arguments)]
 fn append_option_row(
     window: &ApplicationWindow,
     gtkbox: &Box,
@@ -5085,19 +5084,19 @@ impl ConfigWidget {
                     .visual_widget
                     .clone()
                     .unwrap_or(widget_data.widget.clone());
-                if let Some(parent) = visual_widget.parent() {
-                    if let Ok(box_container) = parent.downcast::<gtk::Box>() {
-                        let button_box = create_option_actions_menu(
-                            history.clone(),
-                            category,
-                            name,
-                            default_value,
-                            base_value,
-                            widget,
-                            self.is_programmatic_update.clone(),
-                        );
-                        box_container.append(&button_box);
-                    }
+                if let Some(parent) = visual_widget.parent()
+                    && let Ok(box_container) = parent.downcast::<gtk::Box>()
+                {
+                    let button_box = create_option_actions_menu(
+                        history.clone(),
+                        category,
+                        name,
+                        default_value,
+                        base_value,
+                        widget,
+                        self.is_programmatic_update.clone(),
+                    );
+                    box_container.append(&button_box);
                 }
             }
 
