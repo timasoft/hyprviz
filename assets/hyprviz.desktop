@@ -2,7 +2,7 @@
 Name=HyprViz
 Comment=GUI for configuring Hyprland, written in blazingly fast Rust!
 Exec=hyprviz
-Icon=preferences-system
+Icon=hyprviz
 Type=Application
 Terminal=false
 Categories=Utility;

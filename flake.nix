@@ -17,7 +17,9 @@
         buildInputs = with pkgs; [ gtk4 cairo pango graphene ];
         nativeBuildInputs = with pkgs; [ pkg-config wrapGAppsHook4 ];
         postInstall = ''
-          install -Dm644 hyprviz.desktop -t $out/share/applications
+          install -Dm644 assets/hyprviz.desktop -t $out/share/applications
+          install -Dm644 assets/hyprviz.svg -t $out/share/icons/hicolor/scalable/apps/
+          install -Dm644 assets/hyprviz.png     -t $out/share/icons/hicolor/512x512/apps/
         '';
       };
     in {
