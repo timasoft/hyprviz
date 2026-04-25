@@ -186,7 +186,6 @@ fn create_option_actions_menu(
         set_widget_value(&widget_clone, &default_clone);
     });
     menu_box.append(&reset_button);
-    menu_box.append(&Separator::new(Orientation::Horizontal));
 
     let discard_button = Button::with_label(&t!("widget.discard_changes"));
     discard_button.add_css_class("flat");
