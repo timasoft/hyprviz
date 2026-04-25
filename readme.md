@@ -1,5 +1,6 @@
 <div align='center'>
 
+[<img src="assets/hyprviz.svg" alt="HyprViz Logo" width="128">](https://github.com/timasoft/hyprviz)
 
 <h2>HyprViz</h2>
 
