@@ -31,6 +31,14 @@ widget.reset_to_default:
   en: "Reset to default"
   ru: "Сбросить к значениям по умолчанию"
   zh-CN: "重置为默认值"
+widget.discard_changes:
+  en: "Discard Changes"
+  ru: "Отменить изменения"
+  zh-CN: "放弃更改"
+widget.remove_from_profile:
+  en: "Remove from Profile"
+  ru: "Удалить из профиля"
+  zh-CN: "从配置文件中移除"
 widget.show_fancy_input:
   en: "Show fancy input"
   ru: "Показать красивый ввод"

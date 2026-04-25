@@ -1,7 +1,8 @@
 use gtk::{
-    Align, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry,
-    Expander, IconSize, Image, Label, Orientation, PolicyType, Popover, PositionType,
-    ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
+    Align, ApplicationWindow, ArrowType, Box, Button, ColorDialog, ColorDialogButton, DropDown,
+    Entry, Expander, IconSize, Image, Label, MenuButton, Orientation, PolicyType, Popover,
+    PositionType, ScrolledWindow, Separator, SpinButton, StringList, StringObject, Switch, Widget,
+    gdk, glib, prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
@@ -23,12 +24,13 @@ use crate::{
         FieldLabel, ToGtkBox, ToGtkBoxImplementation, ToGtkBoxWithSeparator,
         ToGtkBoxWithSeparatorAndNamesImplementation, ToGtkBoxWithSeparatorImplementation,
     },
+    gui::{animate_change, set_widget_value},
     guides::create_guide,
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         HistoryManager, MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, compare_versions, expand_source,
-        expand_source_str, get_available_monitors, get_config_path, get_latest_version,
-        parse_top_level_options,
+        expand_source_str, extract_value, get_available_monitors, get_config_path,
+        get_latest_version, parse_top_level_options,
     },
 };
 
@@ -144,6 +146,106 @@ pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button
     row.append(&refresh_button);
     container.append(&row);
     (value_widget, refresh_button)
+}
+
+fn create_option_actions_menu(
+    history: Rc<RefCell<HistoryManager>>,
+    category: &str,
+    name: &str,
+    default: &str,
+    base_value: Option<String>,
+    widget: &Widget,
+    is_programmatic_update: Rc<Cell<bool>>,
+) -> MenuButton {
+    let menu_button = MenuButton::new();
+    menu_button.set_icon_name("view-more-symbolic");
+    menu_button.set_direction(ArrowType::Down);
+    menu_button.set_valign(Align::Center);
+    menu_button.add_css_class("flat");
+    menu_button.set_has_frame(false);
+
+    let menu_box = Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(0)
+        .margin_start(MARGIN_NORMAL / 2)
+        .margin_end(MARGIN_NORMAL / 2)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
+        .build();
+
+    let reset_button = Button::with_label(&t!("widget.reset_to_default"));
+    reset_button.add_css_class("flat");
+
+    let widget_clone = widget.clone();
+    let is_prog_update_clone = is_programmatic_update.clone();
+    let default_clone = default.to_string();
+    reset_button.connect_clicked(move |_| {
+        if is_prog_update_clone.get() {
+            return;
+        }
+        set_widget_value(&widget_clone, &default_clone);
+    });
+    menu_box.append(&reset_button);
+    menu_box.append(&Separator::new(Orientation::Horizontal));
+
+    let discard_button = Button::with_label(&t!("widget.discard_changes"));
+    discard_button.add_css_class("flat");
+
+    let history_clone = history.clone();
+    let widget_clone = widget.clone();
+    let is_prog_update_clone = is_programmatic_update.clone();
+    let category_clone = category.to_string();
+    let name_clone = name.to_string();
+    let base_value_clone = base_value.clone();
+    let default_clone = default.to_string();
+    discard_button.connect_clicked(move |_| {
+        if is_prog_update_clone.get() {
+            return;
+        }
+        let mut history = history_clone.borrow_mut();
+        let initial = history.get_initial_value(&category_clone, &name_clone);
+        let ui_target = initial
+            .as_deref()
+            .or(base_value_clone.as_deref())
+            .unwrap_or(&default_clone);
+
+        is_prog_update_clone.set(true);
+        set_widget_value(&widget_clone, ui_target);
+        is_prog_update_clone.set(false);
+        history.discard_change(category_clone.clone(), name_clone.clone());
+    });
+    menu_box.append(&discard_button);
+
+    let remove_button = Button::with_label(&t!("widget.remove_from_profile"));
+    remove_button.add_css_class("flat");
+
+    let is_prog_update_clone = is_programmatic_update.clone();
+    let widget_clone = widget.clone();
+    let base_value_clone = base_value.clone();
+    let default_clone = default.to_string();
+    let category_clone = category.to_string();
+    let name_clone = name.to_string();
+    remove_button.connect_clicked(move |_| {
+        if is_prog_update_clone.get() {
+            return;
+        }
+        let ui_target = base_value_clone.as_deref().unwrap_or(&default_clone);
+
+        is_prog_update_clone.set(true);
+        set_widget_value(&widget_clone, ui_target);
+        is_prog_update_clone.set(false);
+        history
+            .borrow_mut()
+            .record_removal(category_clone.clone(), name_clone.clone());
+    });
+    menu_box.append(&remove_button);
+
+    let popover = Popover::builder().build();
+    popover.set_child(Some(&menu_box));
+    popover.set_position(PositionType::Bottom);
+    menu_button.set_popover(Some(&popover));
+
+    menu_button
 }
 
 fn add_dropdown_option(
@@ -5111,6 +5213,7 @@ impl ConfigWidget {
         &self,
         window: &ApplicationWindow,
         config: &HyprlandConfig,
+        base_config: &HyprlandConfig,
         profile: &str,
         category: &str,
         history: Rc<RefCell<HistoryManager>>,
@@ -5130,6 +5233,26 @@ impl ConfigWidget {
                     name.clone(),
                     value.clone(),
                 );
+                let base_value = extract_value(base_config, category, name);
+
+                let visual_widget = &widget_data
+                    .visual_widget
+                    .clone()
+                    .unwrap_or(widget_data.widget.clone());
+                if let Some(parent) = visual_widget.parent() {
+                    if let Ok(box_container) = parent.downcast::<gtk::Box>() {
+                        let button_box = create_option_actions_menu(
+                            history.clone(),
+                            category,
+                            name,
+                            default_value,
+                            base_value,
+                            widget,
+                            self.is_programmatic_update.clone(),
+                        );
+                        box_container.append(&button_box);
+                    }
+                }
             }
 
             if let Some(spin_button) = widget.downcast_ref::<SpinButton>() {
