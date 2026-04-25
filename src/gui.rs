@@ -1,7 +1,8 @@
 use crate::{
     utils::{
-        ConfigChange, HistoryManager, MARGIN_NORMAL, atomic_write, expand_source,
-        find_all_profiles, get_config_path, is_development_mode, mute_stdout, reload_hyprland,
+        ConfigChange, HistoryManager, MARGIN_NORMAL, atomic_write, expand_base_config,
+        expand_source, find_all_profiles, get_config_path, is_development_mode, mute_stdout,
+        reload_hyprland,
     },
     widget::{ConfigWidget, DynamicTopLevelRow},
 };
@@ -65,6 +66,34 @@ pub fn animate_change(widget: &Widget) {
     ANIM_TRACKER.with(|map| {
         map.borrow_mut().insert(widget_ptr, (base_opacity, id));
     });
+}
+
+pub fn set_widget_value(widget: &Widget, value: &str) {
+    if let Some(spin_button) = widget.downcast_ref::<SpinButton>() {
+        if let Ok(float_value) = value.parse::<f64>() {
+            spin_button.set_value(float_value);
+        }
+    } else if let Some(entry) = widget.downcast_ref::<Entry>() {
+        entry.set_text(value);
+    } else if let Some(switch) = widget.downcast_ref::<Switch>() {
+        switch.set_active(value == "true" || value == "1");
+    } else if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
+        let dummy_config = HyprlandConfig::new();
+        if let Some((red, green, blue, alpha)) = dummy_config.parse_color(value) {
+            color_button.set_rgba(&gdk::RGBA::new(red, green, blue, alpha));
+        }
+    } else if let Some(dropdown) = widget.downcast_ref::<DropDown>() {
+        let model = dropdown.model().unwrap();
+        for i in 0..model.n_items() {
+            if let Some(item) = model.item(i)
+                && let Some(string_object) = item.downcast_ref::<gtk::StringObject>()
+                && string_object.string() == value
+            {
+                dropdown.set_selected(i);
+                break;
+            }
+        }
+    }
 }
 
 pub struct ConfigGUI {
@@ -781,7 +810,7 @@ along with this program; if not, see
             let value_to_apply = change.old_value.as_ref().unwrap_or(&widget_data.default);
 
             category_widget.is_programmatic_update.set(true);
-            self.set_widget_value(widget, value_to_apply);
+            set_widget_value(widget, value_to_apply);
             category_widget.is_programmatic_update.set(false);
         }
 
@@ -833,7 +862,7 @@ along with this program; if not, see
             let value_to_apply = change.new_value.as_ref().unwrap_or(&widget_data.default);
 
             category_widget.is_programmatic_update.set(true);
-            self.set_widget_value(widget, value_to_apply);
+            set_widget_value(widget, value_to_apply);
             category_widget.is_programmatic_update.set(false);
         }
 
@@ -858,7 +887,7 @@ along with this program; if not, see
                             {
                                 let actual_widget = &option_widget.widget;
 
-                                self.set_widget_value(actual_widget, &value);
+                                set_widget_value(actual_widget, &value);
                                 self.history.borrow_mut().record_change(
                                     category,
                                     name,
@@ -1000,7 +1029,19 @@ along with this program; if not, see
             }
         };
 
+        let base_config_str = match expand_base_config() {
+            Ok(s) => s,
+            Err(e) => {
+                self.custom_error_popup_critical(
+                    &t!("gui.reading_failed"),
+                    &t!("gui.failed_to_read_the_configuration_file_", error = e),
+                );
+                return;
+            }
+        };
+
         let mut parsed_config = mute_stdout(|| parse_config(&config_str));
+        let base_config = mute_stdout(|| parse_config(&base_config_str));
         let history = self.history.clone();
 
         if !history.borrow().get_current_state().is_empty() {
@@ -1023,6 +1064,7 @@ along with this program; if not, see
                         category_widget.load_config(
                             &self.window,
                             &parsed_config,
+                            &base_config,
                             &profile_name,
                             category,
                             self.history.clone(),
@@ -1065,34 +1107,6 @@ along with this program; if not, see
             }
         } else {
             self.custom_error_popup(&t!("gui.saving_failed"), &t!("gui.no_changes_to_save"));
-        }
-    }
-
-    fn set_widget_value(&self, widget: &Widget, value: &str) {
-        if let Some(spin_button) = widget.downcast_ref::<SpinButton>() {
-            if let Ok(float_value) = value.parse::<f64>() {
-                spin_button.set_value(float_value);
-            }
-        } else if let Some(entry) = widget.downcast_ref::<Entry>() {
-            entry.set_text(value);
-        } else if let Some(switch) = widget.downcast_ref::<Switch>() {
-            switch.set_active(value == "true" || value == "1");
-        } else if let Some(color_button) = widget.downcast_ref::<ColorDialogButton>() {
-            let dummy_config = HyprlandConfig::new();
-            if let Some((red, green, blue, alpha)) = dummy_config.parse_color(value) {
-                color_button.set_rgba(&gdk::RGBA::new(red, green, blue, alpha));
-            }
-        } else if let Some(dropdown) = widget.downcast_ref::<DropDown>() {
-            let model = dropdown.model().unwrap();
-            for i in 0..model.n_items() {
-                if let Some(item) = model.item(i)
-                    && let Some(string_object) = item.downcast_ref::<gtk::StringObject>()
-                    && string_object.string() == value
-                {
-                    dropdown.set_selected(i);
-                    break;
-                }
-            }
         }
     }
 
@@ -1405,11 +1419,25 @@ along with this program; if not, see
 
         self.history.borrow_mut().clear_initial_state();
 
+        let base_config_str = match expand_base_config() {
+            Ok(s) => s,
+            Err(e) => {
+                self.custom_error_popup_critical(
+                    &t!("gui.reading_failed"),
+                    &t!("gui.failed_to_read_the_configuration_file_", error = e),
+                );
+                return;
+            }
+        };
+
+        let base_config = mute_stdout(|| parse_config(&base_config_str));
+
         for (_, category) in &categories {
             if let Some(widget) = self.config_widgets.get(*category) {
                 widget.load_config(
                     &self.window,
                     config,
+                    &base_config,
                     profile_name,
                     category,
                     self.history.clone(),

@@ -1,7 +1,8 @@
 use gtk::{
-    Align, ApplicationWindow, Box, Button, ColorDialog, ColorDialogButton, DropDown, Entry,
-    Expander, IconSize, Image, Label, Orientation, PolicyType, Popover, PositionType,
-    ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget, gdk, glib, prelude::*,
+    Align, ApplicationWindow, ArrowType, Box, Button, ColorDialog, ColorDialogButton, DropDown,
+    Entry, Expander, IconSize, Image, Label, MenuButton, Orientation, PolicyType, Popover,
+    PositionType, ScrolledWindow, SpinButton, StringList, StringObject, Switch, Widget, gdk, glib,
+    prelude::*,
 };
 use hyprparser::HyprlandConfig;
 use rust_i18n::t;
@@ -23,12 +24,13 @@ use crate::{
         FieldLabel, ToGtkBox, ToGtkBoxImplementation, ToGtkBoxWithSeparator,
         ToGtkBoxWithSeparatorAndNamesImplementation, ToGtkBoxWithSeparatorImplementation,
     },
+    gui::set_widget_value,
     guides::create_guide,
     hyprland::{CssGaps, FontWeight, HyprGradient, PosFloat0_01, Vec2},
     utils::{
         HistoryManager, MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, compare_versions, expand_source,
-        expand_source_str, get_available_monitors, get_config_path, get_latest_version,
-        parse_top_level_options,
+        expand_source_str, extract_value, get_available_monitors, get_config_path,
+        get_latest_version, parse_top_level_options,
     },
 };
 
@@ -146,6 +148,105 @@ pub fn add_info_row(container: &Box, label: &str, value: &str) -> (Label, Button
     (value_widget, refresh_button)
 }
 
+fn create_option_actions_menu(
+    history: Rc<RefCell<HistoryManager>>,
+    category: &str,
+    name: &str,
+    default: &str,
+    base_value: Option<String>,
+    widget: &Widget,
+    is_programmatic_update: Rc<Cell<bool>>,
+) -> MenuButton {
+    let menu_button = MenuButton::new();
+    menu_button.set_icon_name("view-more-symbolic");
+    menu_button.set_direction(ArrowType::Down);
+    menu_button.set_valign(Align::Center);
+    menu_button.add_css_class("flat");
+    menu_button.set_has_frame(false);
+
+    let menu_box = Box::builder()
+        .orientation(Orientation::Vertical)
+        .spacing(0)
+        .margin_start(MARGIN_NORMAL / 2)
+        .margin_end(MARGIN_NORMAL / 2)
+        .margin_top(MARGIN_NORMAL / 2)
+        .margin_bottom(MARGIN_NORMAL / 2)
+        .build();
+
+    let reset_button = Button::with_label(&t!("widget.reset_to_default"));
+    reset_button.add_css_class("flat");
+
+    let widget_clone = widget.clone();
+    let is_prog_update_clone = is_programmatic_update.clone();
+    let default_clone = default.to_string();
+    reset_button.connect_clicked(move |_| {
+        if is_prog_update_clone.get() {
+            return;
+        }
+        set_widget_value(&widget_clone, &default_clone);
+    });
+    menu_box.append(&reset_button);
+
+    let discard_button = Button::with_label(&t!("widget.discard_changes"));
+    discard_button.add_css_class("flat");
+
+    let history_clone = history.clone();
+    let widget_clone = widget.clone();
+    let is_prog_update_clone = is_programmatic_update.clone();
+    let category_clone = category.to_string();
+    let name_clone = name.to_string();
+    let base_value_clone = base_value.clone();
+    let default_clone = default.to_string();
+    discard_button.connect_clicked(move |_| {
+        if is_prog_update_clone.get() {
+            return;
+        }
+        let mut history = history_clone.borrow_mut();
+        let initial = history.get_initial_value(&category_clone, &name_clone);
+        let ui_target = initial
+            .as_deref()
+            .or(base_value_clone.as_deref())
+            .unwrap_or(&default_clone);
+
+        is_prog_update_clone.set(true);
+        set_widget_value(&widget_clone, ui_target);
+        is_prog_update_clone.set(false);
+        history.discard_change(category_clone.clone(), name_clone.clone());
+    });
+    menu_box.append(&discard_button);
+
+    let remove_button = Button::with_label(&t!("widget.remove_from_profile"));
+    remove_button.add_css_class("flat");
+
+    let is_prog_update_clone = is_programmatic_update.clone();
+    let widget_clone = widget.clone();
+    let base_value_clone = base_value.clone();
+    let default_clone = default.to_string();
+    let category_clone = category.to_string();
+    let name_clone = name.to_string();
+    remove_button.connect_clicked(move |_| {
+        if is_prog_update_clone.get() {
+            return;
+        }
+        let ui_target = base_value_clone.as_deref().unwrap_or(&default_clone);
+
+        is_prog_update_clone.set(true);
+        set_widget_value(&widget_clone, ui_target);
+        is_prog_update_clone.set(false);
+        history
+            .borrow_mut()
+            .record_removal(category_clone.clone(), name_clone.clone());
+    });
+    menu_box.append(&remove_button);
+
+    let popover = Popover::builder().build();
+    popover.set_child(Some(&menu_box));
+    popover.set_position(PositionType::Bottom);
+    menu_button.set_popover(Some(&popover));
+
+    menu_button
+}
+
 fn add_dropdown_option(
     container: &Box,
     options: &mut HashMap<String, WidgetData>,
@@ -213,32 +314,8 @@ fn add_dropdown_option(
     dropdown.set_width_request(150);
     dropdown.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let dropdown_clone = dropdown.clone();
-    let parsed_default: String = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        for idx in 0..string_list.n_items() {
-            if let Some(item) = string_list.item(idx) {
-                let item_str = item.property::<String>("string");
-                if item_str == parsed_default {
-                    dropdown_clone.set_selected(idx);
-                    break;
-                }
-            }
-        }
-    });
-
     hbox.append(&label_box);
     hbox.append(&dropdown);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -315,24 +392,8 @@ fn add_bool_option(
     switch.set_valign(Align::Center);
     switch.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let switch_clone = switch.clone();
-    let parsed_default: bool = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        switch_clone.set_active(parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&switch);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -409,25 +470,8 @@ fn add_bool_int_option(
     switch.set_valign(Align::Center);
     switch.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let parsed_default: i32 = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    switch.set_active(parsed_default == 1);
-    let switch_clone = switch.clone();
-    reset_button.connect_clicked(move |_| {
-        switch_clone.set_active(parsed_default == 1);
-    });
-
     hbox.append(&label_box);
     hbox.append(&switch);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -508,24 +552,8 @@ fn add_int_option(
     spin_button.set_valign(Align::Center);
     spin_button.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let spin_clone = spin_button.clone();
-    let parsed_default: f64 = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        spin_clone.set_value(parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&spin_button);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -606,24 +634,8 @@ fn add_float_option(
     spin_button.set_valign(Align::Center);
     spin_button.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let spin_clone = spin_button.clone();
-    let parsed_default: f64 = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        spin_clone.set_value(parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&spin_button);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -701,25 +713,8 @@ fn add_string_option(
     entry.set_valign(Align::Center);
     entry.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let parsed_default: String = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&entry);
-    hbox.append(&reset_button);
 
     container.append(&hbox);
 
@@ -816,26 +811,9 @@ fn add_color_option(
         entry.set_text(&hex);
     }
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let parsed_default: String = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&color_button);
     hbox.append(&entry);
-    hbox.append(&reset_button);
 
     container.append(&hbox);
 
@@ -949,24 +927,8 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     fancy_box.set_width_request(150);
     fancy_box.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let parsed_default: T = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&parsed_default.to_string());
-    });
-
     hbox.append(&label_box);
     hbox.append(&fancy_box);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -1090,22 +1052,8 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
     fancy_box.set_width_request(150);
     fancy_box.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let default_string = default.to_string();
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&default_string);
-    });
-
     hbox.append(&label_box);
     hbox.append(&fancy_box);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -1138,7 +1086,6 @@ fn add_pos_float_vec_option(
     );
 }
 
-#[allow(clippy::too_many_arguments)]
 fn append_option_row(
     window: &ApplicationWindow,
     gtkbox: &Box,
@@ -5111,6 +5058,7 @@ impl ConfigWidget {
         &self,
         window: &ApplicationWindow,
         config: &HyprlandConfig,
+        base_config: &HyprlandConfig,
         profile: &str,
         category: &str,
         history: Rc<RefCell<HistoryManager>>,
@@ -5130,6 +5078,26 @@ impl ConfigWidget {
                     name.clone(),
                     value.clone(),
                 );
+                let base_value = extract_value(base_config, category, name);
+
+                let visual_widget = &widget_data
+                    .visual_widget
+                    .clone()
+                    .unwrap_or(widget_data.widget.clone());
+                if let Some(parent) = visual_widget.parent()
+                    && let Ok(box_container) = parent.downcast::<gtk::Box>()
+                {
+                    let button_box = create_option_actions_menu(
+                        history.clone(),
+                        category,
+                        name,
+                        default_value,
+                        base_value,
+                        widget,
+                        self.is_programmatic_update.clone(),
+                    );
+                    box_container.append(&button_box);
+                }
             }
 
             if let Some(spin_button) = widget.downcast_ref::<SpinButton>() {

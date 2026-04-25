@@ -126,30 +126,32 @@ fn transform_config(input: String) -> String {
 }
 
 /// Extract value from config
-pub fn extract_value(config: &HyprlandConfig, category: &str, name: &str, default: &str) -> String {
+pub fn extract_value(config: &HyprlandConfig, category: &str, name: &str) -> Option<String> {
     let config_str = transform_config(config.to_string());
     if category == "layouts" {
         for line in config_str.lines().rev() {
             if line.trim().starts_with(&format!("{name} = ")) {
-                return line
-                    .split('=')
-                    .nth(1)
-                    .map(|s| s.trim().to_string())
-                    .unwrap_or_default();
+                return Some(
+                    line.split('=')
+                        .nth(1)
+                        .map(|s| s.trim().to_string())
+                        .unwrap_or_default(),
+                );
             }
         }
     } else {
         for line in config_str.lines().rev() {
             if line.trim().starts_with(&format!("{category}:{name} = ")) {
-                return line
-                    .split('=')
-                    .nth(1)
-                    .map(|s| s.trim().to_string())
-                    .unwrap_or_default();
+                return Some(
+                    line.split('=')
+                        .nth(1)
+                        .map(|s| s.trim().to_string())
+                        .unwrap_or_default(),
+                );
             }
         }
     }
-    default.to_string()
+    None
 }
 
 pub fn reload_hyprland() {
@@ -453,6 +455,26 @@ pub fn find_all_profiles() -> Option<Vec<String>> {
     } else {
         Some(profiles)
     }
+}
+
+/// Reads the main Hyprland config, filters out HyprViz profile sources, and expands it.
+pub fn expand_base_config() -> Result<String, Box<dyn Error>> {
+    let config_path = get_config_path(false, "Default");
+    let content = fs::read_to_string(&config_path)?;
+
+    let filtered_content = content
+        .lines()
+        .filter(|line| {
+            let trimmed = line.trim_start();
+            if trimmed.starts_with("source") {
+                return !trimmed.contains("./hyprviz") && !trimmed.contains("hyprviz/");
+            }
+            true
+        })
+        .collect::<Vec<&str>>()
+        .join("\n");
+
+    expand_source_str(&config_path, &filtered_content)
 }
 
 /// Expands all `source = <path>` occurrences in file `entry_path` recursively from str
@@ -1707,7 +1729,7 @@ impl HistoryManager {
             return value.clone();
         }
 
-        extract_value(config, category, name, default)
+        extract_value(config, category, name).unwrap_or(default.to_string())
     }
 
     pub fn lookup_transient_override(&self, category: &str, key: &str, fallback: &str) -> String {
@@ -1879,6 +1901,41 @@ impl HistoryManager {
     pub fn clear_stacks(&mut self) {
         self.undo_stack.clear();
         self.redo_stack.clear();
+
+        self.schedule_save();
+    }
+
+    pub fn get_initial_value(&self, category: &str, key: &str) -> Option<String> {
+        self.initial_state
+            .get(&(category.to_string(), key.to_string()))
+            .cloned()
+    }
+
+    pub fn discard_change(&mut self, category: String, key: String) {
+        let change_key = (category.clone(), key.clone());
+
+        let current_value = self.current_state.get(&change_key).cloned();
+
+        let target_value = self.initial_state.get(&change_key).cloned();
+
+        if current_value == target_value {
+            return;
+        }
+
+        self.undo_stack.push_back(ConfigChange {
+            category,
+            key,
+            old_value: current_value,
+            new_value: target_value.clone(),
+        });
+
+        self.redo_stack.clear();
+
+        if let Some(val) = target_value {
+            self.current_state.insert(change_key, val);
+        } else {
+            self.current_state.remove(&change_key);
+        }
 
         self.schedule_save();
     }
