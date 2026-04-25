@@ -315,32 +315,8 @@ fn add_dropdown_option(
     dropdown.set_width_request(150);
     dropdown.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let dropdown_clone = dropdown.clone();
-    let parsed_default: String = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        for idx in 0..string_list.n_items() {
-            if let Some(item) = string_list.item(idx) {
-                let item_str = item.property::<String>("string");
-                if item_str == parsed_default {
-                    dropdown_clone.set_selected(idx);
-                    break;
-                }
-            }
-        }
-    });
-
     hbox.append(&label_box);
     hbox.append(&dropdown);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -417,24 +393,8 @@ fn add_bool_option(
     switch.set_valign(Align::Center);
     switch.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let switch_clone = switch.clone();
-    let parsed_default: bool = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        switch_clone.set_active(parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&switch);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -511,25 +471,8 @@ fn add_bool_int_option(
     switch.set_valign(Align::Center);
     switch.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let parsed_default: i32 = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    switch.set_active(parsed_default == 1);
-    let switch_clone = switch.clone();
-    reset_button.connect_clicked(move |_| {
-        switch_clone.set_active(parsed_default == 1);
-    });
-
     hbox.append(&label_box);
     hbox.append(&switch);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -610,24 +553,8 @@ fn add_int_option(
     spin_button.set_valign(Align::Center);
     spin_button.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let spin_clone = spin_button.clone();
-    let parsed_default: f64 = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        spin_clone.set_value(parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&spin_button);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -708,24 +635,8 @@ fn add_float_option(
     spin_button.set_valign(Align::Center);
     spin_button.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let spin_clone = spin_button.clone();
-    let parsed_default: f64 = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        spin_clone.set_value(parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&spin_button);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -803,25 +714,8 @@ fn add_string_option(
     entry.set_valign(Align::Center);
     entry.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let parsed_default: String = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&entry);
-    hbox.append(&reset_button);
 
     container.append(&hbox);
 
@@ -918,26 +812,9 @@ fn add_color_option(
         entry.set_text(&hex);
     }
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let parsed_default: String = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&parsed_default);
-    });
-
     hbox.append(&label_box);
     hbox.append(&color_button);
     hbox.append(&entry);
-    hbox.append(&reset_button);
 
     container.append(&hbox);
 
@@ -1051,24 +928,8 @@ fn add_to_gtk_box_option<T: ToGtkBox + FromStr + Display + 'static>(
     fancy_box.set_width_request(150);
     fancy_box.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let parsed_default: T = default
-        .parse()
-        .unwrap_or_else(|_| panic!("Failed to parse the default value for '{}'", name));
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&parsed_default.to_string());
-    });
-
     hbox.append(&label_box);
     hbox.append(&fancy_box);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
@@ -1192,22 +1053,8 @@ fn add_vec_to_gtk_box_option<T: ToGtkBoxWithSeparator + 'static>(
     fancy_box.set_width_request(150);
     fancy_box.set_margin_end(MARGIN_NORMAL);
 
-    let reset_button = Button::from_icon_name("view-refresh-symbolic");
-    reset_button.add_css_class("flat");
-    reset_button.set_has_frame(false);
-    reset_button.set_valign(Align::Center);
-    reset_button.set_tooltip_text(Some(&t!("widget.reset_to_default")));
-    reset_button.set_margin_end(MARGIN_NORMAL);
-
-    let entry_clone = entry.clone();
-    let default_string = default.to_string();
-    reset_button.connect_clicked(move |_| {
-        entry_clone.set_text(&default_string);
-    });
-
     hbox.append(&label_box);
     hbox.append(&fancy_box);
-    hbox.append(&reset_button);
     container.append(&hbox);
 
     options.insert(
