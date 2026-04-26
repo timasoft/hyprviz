@@ -1471,9 +1471,6 @@ impl ConfigWidget {
 
         let first_section = Rc::new(RefCell::new(true));
 
-        let monitors_set = get_available_monitors(true);
-        let monitors: Vec<&str> = monitors_set.iter().map(|s| s.as_str()).collect();
-
         match category {
             "general" => {
                 add_section(
@@ -3919,6 +3916,8 @@ impl ConfigWidget {
                     ],
                     "0",
                 );
+                let monitors_set = get_available_monitors(true);
+                let monitors: Vec<&str> = monitors_set.iter().map(|s| s.as_str()).collect();
                 add_dropdown_option(
                     &container,
                     &mut options,
