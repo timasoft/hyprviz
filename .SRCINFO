@@ -1,0 +1,23 @@
+pkgbase = hyprviz
+	pkgdesc = GUI for configuring Hyprland!
+	pkgver = 0.9.0
+	pkgrel = 1
+	url = https://github.com/timasoft/hyprviz
+	arch = x86_64
+	arch = aarch64
+	license = (GPL-2.0)
+	makedepends = cargo
+	makedepends = rust
+	makedepends = pkgconf
+	makedepends = pkg-config
+	makedepends = clang
+	depends = gtk4
+	depends = glib2
+	depends = desktop-file-utils
+	depends = hyprland
+	provides = hyprviz
+	conflicts = hyprviz-bin
+	source = https://github.com/timasoft/hyprviz/archive/refs/tags/v0.9.0.tar.gz
+	sha256sums = d1817d067b1015d2a7e18712b4a689f9ec351b80189b449684c61762fa461d3b
+
+pkgname = hyprviz
