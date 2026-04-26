@@ -98,7 +98,7 @@ pub fn set_widget_value(widget: &Widget, value: &str) {
 
 pub struct ConfigGUI {
     pub window: ApplicationWindow,
-    config_widgets: HashMap<String, ConfigWidget>,
+    config_widgets: Rc<RefCell<HashMap<String, ConfigWidget>>>,
     top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
     title_label: Label,
     save_button: Button,
@@ -251,7 +251,7 @@ impl ConfigGUI {
 
         window.set_child(Some(&main_box));
 
-        let config_widgets = HashMap::new();
+        let config_widgets = Rc::new(RefCell::new(HashMap::new()));
 
         let stack = Stack::new();
 
@@ -667,13 +667,13 @@ along with this program; if not, see
                 return Some(row.vbox.clone().upcast::<Widget>());
             }
 
-            if let Some(cat_widget) = self.config_widgets.get(&change.category)
+            if let Some(cat_widget) = self.config_widgets.borrow().get(&change.category)
                 && let Some(wd) = cat_widget.options.get(&change.category)
             {
                 return Some(wd.widget.clone());
             }
         } else {
-            if let Some(category_widget) = self.config_widgets.get(&change.category)
+            if let Some(category_widget) = self.config_widgets.borrow().get(&change.category)
                 && let Some(widget_data) = category_widget.options.get(&change.key)
             {
                 return Some(
@@ -796,14 +796,14 @@ along with this program; if not, see
                 .top_level_rows
                 .borrow()
                 .get(&(change.category.clone(), raw.to_string()))
-            && let Some(cat_widget) = self.config_widgets.get(&change.category)
+            && let Some(cat_widget) = self.config_widgets.borrow().get(&change.category)
             && let Some(wd) = cat_widget.options.get(&change.category)
             && let Some(gtkbox) = wd.widget.downcast_ref::<gtk::Box>()
         {
             cat_widget.is_programmatic_update.set(true);
             gtkbox.append(&row.vbox);
             cat_widget.is_programmatic_update.set(false);
-        } else if let Some(category_widget) = self.config_widgets.get(&change.category)
+        } else if let Some(category_widget) = self.config_widgets.borrow().get(&change.category)
             && let Some(widget_data) = category_widget.options.get(&change.key)
         {
             let widget = &widget_data.widget;
@@ -848,14 +848,14 @@ along with this program; if not, see
                 .top_level_rows
                 .borrow()
                 .get(&(change.category.clone(), raw.to_string()))
-            && let Some(cat_widget) = self.config_widgets.get(&change.category)
+            && let Some(cat_widget) = self.config_widgets.borrow().get(&change.category)
             && let Some(wd) = cat_widget.options.get(&change.category)
             && let Some(gtkbox) = wd.widget.downcast_ref::<gtk::Box>()
         {
             cat_widget.is_programmatic_update.set(true);
             gtkbox.remove(&row.vbox);
             cat_widget.is_programmatic_update.set(false);
-        } else if let Some(category_widget) = self.config_widgets.get(&change.category)
+        } else if let Some(category_widget) = self.config_widgets.borrow().get(&change.category)
             && let Some(widget_data) = category_widget.options.get(&change.key)
         {
             let widget = &widget_data.widget;
@@ -882,7 +882,7 @@ along with this program; if not, see
                         if parts.len() >= 2 {
                             let category = parts[0].to_string();
                             let name = parts[1..].join(":");
-                            if let Some(widget) = self.config_widgets.get(&category)
+                            if let Some(widget) = self.config_widgets.borrow().get(&category)
                                 && let Some(option_widget) = widget.options.get(&name)
                             {
                                 let actual_widget = &option_widget.widget;
@@ -954,7 +954,7 @@ along with this program; if not, see
 
         self.sidebar.set_visible(search_text.is_empty());
 
-        for config_widget in self.config_widgets.values() {
+        for config_widget in self.config_widgets.borrow().values() {
             if search_text.is_empty() {
                 config_widget.scrolled_window.set_visible(true);
                 if let Some(scrolled) = config_widget.scrolled_window.child()
@@ -1040,11 +1040,11 @@ along with this program; if not, see
             }
         };
 
-        let mut parsed_config = mute_stdout(|| parse_config(&config_str));
-        let base_config = mute_stdout(|| parse_config(&base_config_str));
         let history = self.history.clone();
 
         if !history.borrow().get_current_state().is_empty() {
+            let mut parsed_config = mute_stdout(|| parse_config(&config_str));
+
             self.apply_changes(&mut parsed_config);
 
             let updated_config_str = parsed_config.to_string();
@@ -1052,7 +1052,13 @@ along with this program; if not, see
 
             let result = atomic_write(&path, &updated_config_str);
 
-            for (category, category_widget) in &self.config_widgets {
+            let mut load_config = false;
+
+            let parsed_config_rc = Rc::new(RefCell::new(parsed_config));
+            let base_config_rc =
+                Rc::new(RefCell::new(mute_stdout(|| parse_config(&base_config_str))));
+
+            for category_widget in self.config_widgets.borrow_mut().values_mut() {
                 for widget_data in category_widget.options.values() {
                     let widget = &widget_data.widget;
 
@@ -1061,16 +1067,20 @@ along with this program; if not, see
                             gtkbox.remove(&child);
                         }
 
-                        category_widget.load_config(
-                            &self.window,
-                            &parsed_config,
-                            &base_config,
-                            &profile_name,
-                            category,
-                            self.history.clone(),
-                            self.top_level_rows.clone(),
-                        );
+                        load_config = true
                     }
+                }
+
+                if load_config {
+                    category_widget.load_config(
+                        self.window.clone(),
+                        parsed_config_rc.clone(),
+                        base_config_rc.clone(),
+                        profile_name.clone(),
+                        self.history.clone(),
+                        self.top_level_rows.clone(),
+                    );
+                    load_config = false;
                 }
             }
 
@@ -1347,8 +1357,8 @@ along with this program; if not, see
         window.present();
     }
 
-    pub fn load_config(&mut self, config: &HyprlandConfig, profile_name: &str) {
-        self.config_widgets.clear();
+    pub fn load_config(&mut self, config: HyprlandConfig, profile_name: &str) {
+        self.config_widgets.borrow_mut().clear();
         self.content_box.set_visible(true);
 
         while let Some(child) = self.stack.first_child() {
@@ -1414,7 +1424,9 @@ along with this program; if not, see
             let widget = ConfigWidget::new(category, display_name);
             self.stack
                 .add_titled(&widget.scrolled_window, Some(category), display_name);
-            self.config_widgets.insert(category.to_string(), widget);
+            self.config_widgets
+                .borrow_mut()
+                .insert(category.to_string(), widget);
         }
 
         self.history.borrow_mut().clear_initial_state();
@@ -1430,27 +1442,45 @@ along with this program; if not, see
             }
         };
 
-        let base_config = mute_stdout(|| parse_config(&base_config_str));
+        let config_rc = Rc::new(RefCell::new(config));
+        let base_config_rc = Rc::new(RefCell::new(mute_stdout(|| parse_config(&base_config_str))));
 
         for (_, category) in &categories {
-            if let Some(widget) = self.config_widgets.get(*category) {
+            if let Some(widget) = self.config_widgets.borrow_mut().get_mut(*category) {
                 widget.load_config(
-                    &self.window,
-                    config,
-                    &base_config,
-                    profile_name,
-                    category,
+                    self.window.clone(),
+                    config_rc.clone(),
+                    base_config_rc.clone(),
+                    profile_name.to_string(),
                     self.history.clone(),
                     self.top_level_rows.clone(),
                 );
             }
+        }
+
+        let widgets = Rc::clone(&self.config_widgets);
+        self.stack.connect_visible_child_notify(move |stack| {
+            if let Some(name) = stack.visible_child_name()
+                && let Some(widget) = widgets.borrow_mut().get_mut(name.as_str())
+            {
+                widget.render();
+            }
+        });
+
+        if let Some(initial_name) = self.stack.visible_child_name()
+            && let Some(widget) = self
+                .config_widgets
+                .borrow_mut()
+                .get_mut(initial_name.as_str())
+        {
+            widget.render();
         }
     }
 
     pub fn apply_changes(&self, config: &mut HyprlandConfig) {
         let history = self.history.borrow();
         let changes = history.get_current_state();
-        for (category, widget) in &self.config_widgets {
+        for (category, widget) in self.config_widgets.borrow().iter() {
             for (name, widget_data) in &widget.options {
                 let widget = &widget_data.widget;
 
@@ -1623,7 +1653,7 @@ along with this program; if not, see
         if reset_unsaved_changes {
             self.history.borrow_mut().reset_unsaved_changes();
         }
-        self.load_config(&parsed_config, &current_profile);
+        self.load_config(parsed_config, &current_profile);
 
         if let Some(page) = current_page
             && let Some(child) = self.stack.child_by_name(&page)
