@@ -213,7 +213,7 @@ fn build_ui(app: &Application) {
             .restore_persisted_ui_state(&parsed_config.content);
 
         let time = Instant::now();
-        gui.borrow_mut().load_config(&parsed_config, &profile);
+        gui.borrow_mut().load_config(parsed_config, &profile);
         if is_development_mode() {
             eprintln!(
                 "Config load time: {:?}",

@@ -51,10 +51,25 @@ pub struct WidgetData {
     pub visual_widget: Option<Widget>,
     pub default: String,
 }
+
+pub struct RenderArgs {
+    pub window: ApplicationWindow,
+    pub config: Rc<RefCell<HyprlandConfig>>,
+    pub base_config: Rc<RefCell<HyprlandConfig>>,
+    pub profile: String,
+    pub history: Rc<RefCell<HistoryManager>>,
+    pub top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
+}
 pub struct ConfigWidget {
     pub options: HashMap<String, WidgetData>,
     pub scrolled_window: ScrolledWindow,
+    pub container: Box,
     pub is_programmatic_update: Rc<Cell<bool>>,
+    // Lazy state
+    pub category: String,
+    pub display_name: String,
+    pub is_rendered: bool,
+    pub render_args: Option<RenderArgs>,
 }
 
 fn add_section(container: &Box, title: &str, description: &str, first_section: Rc<RefCell<bool>>) {
@@ -1406,8 +1421,51 @@ impl ConfigWidget {
         container.set_margin_end(MARGIN_NORMAL * 5 / 3);
         container.set_margin_top(MARGIN_NORMAL * 5 / 3);
         container.set_margin_bottom(MARGIN_NORMAL * 5 / 3);
-
         scrolled_window.set_child(Some(&container));
+
+        Self {
+            options: HashMap::new(),
+            scrolled_window,
+            container,
+            is_programmatic_update: Rc::new(Cell::new(false)),
+            category: category.to_string(),
+            display_name: display_name.to_string(),
+            is_rendered: false,
+            render_args: None,
+        }
+    }
+
+    pub fn render(&mut self) {
+        if self.is_rendered {
+            return;
+        }
+
+        let args = match self.render_args.take() {
+            Some(a) => a,
+            None => {
+                eprintln!("[ConfigWidget] render() called before load_config()");
+                return;
+            }
+        };
+
+        self.options = self.build_ui();
+
+        self.bind_data(
+            &args.window,
+            &args.config.borrow(),
+            &args.base_config.borrow(),
+            &args.profile,
+            args.history,
+            args.top_level_rows,
+        );
+
+        self.is_rendered = true;
+    }
+
+    pub fn build_ui(&self) -> HashMap<String, WidgetData> {
+        let container = self.container.clone();
+        let category = self.category.as_str();
+        let display_name = self.display_name.as_str();
 
         let mut options: HashMap<String, WidgetData> = HashMap::new();
 
@@ -5047,23 +5105,39 @@ impl ConfigWidget {
             }
         }
 
-        ConfigWidget {
-            options,
-            scrolled_window,
-            is_programmatic_update: Rc::new(Cell::new(false)),
-        }
+        options
     }
 
     pub fn load_config(
+        &mut self,
+        window: ApplicationWindow,
+        config: Rc<RefCell<HyprlandConfig>>,
+        base_config: Rc<RefCell<HyprlandConfig>>,
+        profile: String,
+        history: Rc<RefCell<HistoryManager>>,
+        top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
+    ) {
+        self.render_args = Some(RenderArgs {
+            window,
+            config,
+            base_config,
+            profile,
+            history,
+            top_level_rows,
+        });
+        self.is_rendered = false;
+    }
+
+    pub fn bind_data(
         &self,
         window: &ApplicationWindow,
         config: &HyprlandConfig,
         base_config: &HyprlandConfig,
         profile: &str,
-        category: &str,
         history: Rc<RefCell<HistoryManager>>,
         top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
     ) {
+        let category = &self.category;
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
             let default_value = &widget_data.default;
