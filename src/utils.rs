@@ -1,5 +1,4 @@
 use crate::hyprland::MonitorSelector;
-use hyprparser::HyprlandConfig;
 use rust_i18n::t;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -12,6 +11,7 @@ use std::{
     fs::{self, File},
     hash::{Hash, Hasher},
     io::{self, Write},
+    ops::Deref,
     os::unix::io::AsRawFd,
     path::{Path, PathBuf},
     process::Command,
@@ -94,8 +94,24 @@ pub fn get_config_path(write: bool, profile: &str) -> PathBuf {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct TransformedConfig(String);
+
+impl TransformedConfig {
+    pub fn new(s: String) -> Self {
+        Self(s)
+    }
+}
+
+impl Deref for TransformedConfig {
+    type Target = str;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 /// Transform from general{snap{enabled = true}} to general:snap:enabled = true
-fn transform_config(input: String) -> String {
+pub fn transform_config(input: String) -> TransformedConfig {
     let mut result = Vec::new();
     let mut path = VecDeque::new();
 
@@ -122,14 +138,13 @@ fn transform_config(input: String) -> String {
         }
     }
 
-    result.join("\n")
+    TransformedConfig::new(result.join("\n"))
 }
 
 /// Extract value from config
-pub fn extract_value(config: &HyprlandConfig, category: &str, name: &str) -> Option<String> {
-    let config_str = transform_config(config.to_string());
+pub fn extract_value(config: &TransformedConfig, category: &str, name: &str) -> Option<String> {
     if category == "layouts" {
-        for line in config_str.lines().rev() {
+        for line in config.lines().rev() {
             if line.trim().starts_with(&format!("{name} = ")) {
                 return Some(
                     line.split('=')
@@ -140,7 +155,7 @@ pub fn extract_value(config: &HyprlandConfig, category: &str, name: &str) -> Opt
             }
         }
     } else {
-        for line in config_str.lines().rev() {
+        for line in config.lines().rev() {
             if line.trim().starts_with(&format!("{category}:{name} = ")) {
                 return Some(
                     line.split('=')
@@ -1715,7 +1730,7 @@ impl HistoryManager {
 
     pub fn resolve_value_with_history(
         &self,
-        config: &HyprlandConfig,
+        config: &TransformedConfig,
         category: &str,
         name: &str,
         default: &str,

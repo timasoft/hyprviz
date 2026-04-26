@@ -30,7 +30,7 @@ use crate::{
     utils::{
         HistoryManager, MARGIN_NORMAL, MAX_SAFE_INTEGER_F64, compare_versions, expand_source,
         expand_source_str, extract_value, get_available_monitors, get_config_path,
-        get_latest_version, parse_top_level_options,
+        get_latest_version, parse_top_level_options, transform_config,
     },
 };
 
@@ -5138,13 +5138,17 @@ impl ConfigWidget {
         top_level_rows: Rc<RefCell<HashMap<(String, String), DynamicTopLevelRow>>>,
     ) {
         let category = &self.category;
+        let transformed_config = transform_config(config.to_string());
+        let transformed_base_config = transform_config(base_config.to_string());
         for (name, widget_data) in &self.options {
             let widget = &widget_data.widget;
             let default_value = &widget_data.default;
-            let value =
-                history
-                    .borrow()
-                    .resolve_value_with_history(config, category, name, default_value);
+            let value = history.borrow().resolve_value_with_history(
+                &transformed_config,
+                category,
+                name,
+                default_value,
+            );
 
             if widget_data.widget.downcast_ref::<Box>().is_none() {
                 history.borrow_mut().insert_to_initial_state(
@@ -5152,7 +5156,8 @@ impl ConfigWidget {
                     name.clone(),
                     value.clone(),
                 );
-                let base_value = extract_value(base_config, category, name);
+
+                let base_value = extract_value(&transformed_base_config, category, name);
 
                 let visual_widget = &widget_data
                     .visual_widget
