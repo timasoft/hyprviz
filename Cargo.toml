@@ -19,7 +19,7 @@ edition = "2024"
 too_many_arguments = "allow"
 
 [dependencies]
-gio = "0.22.5"
+gio = "0.22.6"
 gtk = { version = "0.11.0", package = "gtk4", features = ["v4_14"] }
 hyprparser = "0.1.6"
 inventory = "0.3.24"
