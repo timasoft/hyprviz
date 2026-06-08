@@ -7,6 +7,9 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v6
@@ -18,7 +21,7 @@ jobs:
             experimental-features = nix-command flakes
 
       - name: Update flake.lock
-        run: nix flake update --commit-lock-file
+        run: nix flake update
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
